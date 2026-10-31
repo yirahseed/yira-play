@@ -99,7 +99,11 @@
                  background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28);
                  border-radius:5px; padding:3px 6px 3px 17px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
   .card .ctype { font-size:10px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
-  .card.sigcard, .bigcard.sigcard { border-width:3px; }
+  .card.sigcard { border-width:4px; padding:4px 5px; box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), 0 0 14px var(--metalDk); }
+  .bigcard.sigcard { border-width:4px; padding:12.5px; box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), 0 0 18px var(--metalDk); }
+  .siggem { position:absolute; top:7px; right:7px; width:13px; height:13px; transform:rotate(45deg); background-image:var(--metal); border:1.5px solid rgba(20,10,2,.55); border-radius:3px; box-shadow:0 1px 3px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.6); z-index:3; }
+  .bigcard .siggem { width:16px; height:16px; top:10px; right:10px; }
+  .emblem-face.sigface { border-width:3px; }
   .draftrow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .draftrow .card { width:100px; height:170px; }
   .card .ctyperow { display:flex; justify-content:space-between; align-items:center; min-height:16px; flex:none; margin-top:1px; gap:4px; flex-wrap:wrap; }
@@ -1962,7 +1966,7 @@ function cardHtml(inst, ownerIdx, opts) {
   if (d.type === 'creature') foot += '<div class="cstats"><span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '');
   return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + sigStyle(d) + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
-    '<div class="cost">' + d.cost + '</div>' +
+    '<div class="cost">' + d.cost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') +
     '<div class="cname">' + esc(d.name) + '</div>' + art +
     '<div class="ctyperow"><span class="ctype">' + d.type + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
     foot + '</div>';
@@ -1973,7 +1977,7 @@ function emblemHtml(inst, ownerIdx, opts) {
   var hpLeft = d.health + inst.permHealth - inst.damage;
   var face = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<img src="' + CARD_ART[inst.cardId] + '" alt="">' : '<span class="emblem-glyph">' + (d.icon || '❓') + '</span>';
   return '<div class="emblem' + (opts.cls || '') + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
-    '<div class="emblem-face"' + (d.signatureFor && HERO_ACCENT[d.signatureFor] ? ' style="background:radial-gradient(circle at 35% 30%, #3a2c52, #241a36 75%) padding-box, ' + HERO_ACCENT[d.signatureFor][0] + ' border-box"' : '') + '>' + face +
+    '<div class="emblem-face' + (d.signatureFor ? ' sigface' : '') + '"' + (d.signatureFor && HERO_ACCENT[d.signatureFor] ? ' style="background:radial-gradient(circle at 35% 30%, #3a2c52, #241a36 75%) padding-box, ' + HERO_ACCENT[d.signatureFor][0] + ' border-box"' : '') + '>' + face +
     '<span class="emblem-pow">' + (d.power + inst.permPower) + '⚔</span>' +
     '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>' +
     '<div class="emblem-name">' + esc(d.name) + '</div>' +
@@ -2075,7 +2079,7 @@ function inspectHtml() {
   var stats = '';
   if (d.type === 'creature') stats = '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
   return '<div class="overlay" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + '"' + sigStyle(d) + '>' +
-    '<div class="cost">' + d.cost + '</div>' + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
+    '<div class="cost">' + d.cost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '') +
     '<div class="ctype">' + d.type + '</div><div class="ctext">' + esc(effectText(d)) + '</div>' +
     '<div>' + badges(inst, owner) + '</div>' + stats +
@@ -2184,7 +2188,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M15.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M15.2 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

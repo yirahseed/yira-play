@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Yira">
 <meta name="theme-color" content="#17102b">
 <link rel="apple-touch-icon" href="yira-icon-180.png">
-<title>Yira</title>
+<title>Yira: Enchanted Coliseum</title>
 <style>
   /* Skins: the whole palette runs on variables; data-theme on <html> swaps them. */
   :root { --bgA:#2b2145; --bgB:#171226; --bgC:#0e0a18; --accent:#6d4fc2; --accentHover:#7f61d4;
@@ -67,6 +67,9 @@
   .card.creature { border-color:#7a5fae; }
   .card.spell { border-color:#4f7fae; } .card.trap { border-color:#ae4f7d; } .card.artifact { border-color:#a68a4f; }
   .card.clickable { cursor:pointer; } .card.clickable:hover { transform:translateY(-3px); border-color:#c9aaff; }
+  #app { user-select:none; -webkit-user-select:none; }
+  .hand.fan .card { cursor:grab; }
+  body.yira-dragging, body.yira-dragging * { cursor:grabbing !important; }
   .card.unaffordable { opacity:.45; }
   .card.ready-dim { opacity:.62; }
   .card.selected-attacker { outline:3px solid #ff5d73; }
@@ -102,14 +105,16 @@
   /* The player's hand as a fan of real cards (M7): at rest a card reads by its
      face — cost gem, art glyph, name, stats. Hover (mouse) or press-and-hold
      (touch) lifts and enlarges it so the full text becomes readable. */
-  .hand.fan { overflow:visible; justify-content:center; align-items:flex-end; padding:74px 2px 10px; }
-  .hand.fan .card { margin-left:-40px; transform-origin:50% 100%; transition:transform .16s ease, box-shadow .16s ease; touch-action:none; }
-  .hand.fan .card:first-child { margin-left:0; }
+  /* M10.1: the fan is retired — hand cards sit side by side in a plain row
+     (scrolls sideways when a big hand needs it), no overlap. Reading a card
+     happens in the big inspect view, so at rest a card only needs its face. */
+  .hand.fan { overflow-x:auto; overflow-y:hidden; justify-content:flex-start; align-items:flex-end; padding:30px 2px 10px; }
+  .hand.fan .card { margin-left:6px; transform-origin:50% 100%; transition:transform .16s ease, box-shadow .16s ease; touch-action:none; }
+  .hand.fan .card:first-child { margin-left:auto; }
+  .hand.fan .card:last-child { margin-right:auto; }
   .hand.fan .card .ctext { display:none; }
   .hand.fan .card .badge { display:none; }
-  .hand.fan .card:hover, .hand.fan .card.zoom { transform:scale(1.9) translateY(-44px); z-index:60; box-shadow:0 18px 44px rgba(0,0,0,.65); }
-  .hand.fan .card:hover .ctext, .hand.fan .card.zoom .ctext { display:block; font-size:7.5px; line-height:1.35; }
-  .hand.fan .card:hover .badge, .hand.fan .card.zoom .badge { display:inline-block; }
+  .hand.fan .card:hover { transform:scale(1.12) translateY(-8px); z-index:60; box-shadow:0 14px 34px rgba(0,0,0,.6); }
   /* Card art (M8): a painted banner on the card face when art exists. */
   .card .cart { height:36px; border-radius:5px; overflow:hidden; margin:1px 0 3px; flex:none; }
   .card .cart img { width:100%; height:100%; object-fit:cover; display:block; }
@@ -1981,10 +1986,11 @@ function render() {
   html += '<div class="hand fan">' + me.hand.map(function (inst) {
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
     var opts = { cls: ' clickable' + (afford && mode === 'main' ? '' : ' unaffordable') };
-    if (mode === 'main') opts.onclick = 'clickHand(' + inst.uid + ')';
+    // No onclick on hand cards since M10: the pointer controller owns the
+    // hand — tap magnifies to read, drag onto the field plays.
     return cardHtml(inst, humanIdx, opts);
   }).join('') + '</div>';
-  if (mode === 'main') html += '<div style="text-align:center;font-size:11.5px;color:#a793d6">Tap a card to play it — Traps arm instead (mana reserved until they fire). Tap any creature on the board to read its full text. Swipe sideways to see a full row.</div>';
+  if (mode === 'main') html += '<div style="text-align:center;font-size:11.5px;color:#a793d6">Drag a card onto the battlefield to play it — Traps arm where you drop them (mana reserved until they fire). Tap a card to read it big; tap anywhere to put it back. Tap any creature on the board to read its full text.</div>';
   html += '</div></div>';
   if (inspectUid !== null) html += inspectHtml();
   if (mode === 'draftPick') html += draftHtml();
@@ -2044,7 +2050,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">a card battler of dreams and dread · playable slice M9.3 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M10.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2427,17 +2433,19 @@ async function runAiTurn() {
 }
 render();
 
-/* Hand pointer play, one controller for three gestures:
-   - tap: play/select via the existing click handlers;
-   - press-and-hold (touch): enlarge the card to read it (mouse uses :hover);
-   - drag: carry the card to the field and release to play it there — onto a
-     creature or hero to strike that target, onto open board to just play it. */
+/* Hand pointer play, one controller, two gestures (Jesse's M10 ruling,
+   reversing M9.3: tap-to-play is GONE — too many accidental plays):
+   - tap/click: open the card BIG to read it (the same inspect view board
+     creatures use) — tap anywhere to put it back. No zoom animation to
+     stutter: the card simply opens, full-size and readable (M10.1).
+   - drag: the ONLY way to play — carry the card to the field and release:
+     onto a creature or hero to strike that target, onto open board to
+     just play it. */
 (function () {
   if (typeof document === 'undefined' || !document.addEventListener) return;
-  var holdTimer = null, zoomedEl = null, pressEl = null, pressUid = null, startX = 0, startY = 0;
+  var pressEl = null, pressUid = null, startX = 0, startY = 0;
   var dragging = false, ghost = null, srcEl = null, dragUid = null, dropEl = null;
   var lastDragEnd = 0, suppressClickUntil = 0;
-  function clearZoom() { if (zoomedEl) { zoomedEl.classList.remove('zoom'); zoomedEl = null; } }
   function clearDrop() { if (dropEl) { dropEl.classList.remove('drop-hover'); dropEl = null; } }
   function endDrag() {
     if (ghost) { ghost.remove(); ghost = null; }
@@ -2465,15 +2473,12 @@ render();
     var card = e.target.closest('.hand.fan .card');
     if (!card) return;
     pressEl = card; pressUid = Number(card.getAttribute('data-uid')); startX = e.clientX; startY = e.clientY;
-    if (e.pointerType !== 'mouse') holdTimer = setTimeout(function () { clearZoom(); card.classList.add('zoom'); zoomedEl = card; }, 600);
   }, true);
   document.addEventListener('pointermove', function (e) {
     if (!pressEl) return;
     var dx = e.clientX - startX, dy = e.clientY - startY;
     if (!dragging && Math.sqrt(dx * dx + dy * dy) > 16) {
       if (typeof mode === 'undefined' || mode !== 'main' || typeof G === 'undefined' || !G) { pressEl = null; return; }
-      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-      clearZoom();
       dragging = true; dragUid = pressUid; srcEl = pressEl;
       srcEl.classList.add('drag-src');
       ghost = srcEl.cloneNode(true);
@@ -2491,12 +2496,12 @@ render();
     }
   }, true);
   document.addEventListener('pointerup', function (e) {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-    if (zoomedEl && !dragging) {
-      // Holding is for reading only (Jesse's call): releasing just puts the
-      // card back and swallows the trailing click. Playing takes a quick
-      // tap or a drag to the field.
-      clearZoom(); suppressClickUntil = Date.now() + 400;
+    if (!dragging && pressEl) {
+      // A tap on a hand card opens it big to read (never plays it), and
+      // its trailing click is swallowed so the tap can't also land on
+      // the inspect overlay and close it in the same breath.
+      if (typeof openInspect === 'function') openInspect(null, pressUid);
+      suppressClickUntil = Date.now() + 400;
     }
     if (dragging) {
       var uid = dragUid;
@@ -2509,7 +2514,7 @@ render();
     }
     pressEl = null;
   }, true);
-  document.addEventListener('pointercancel', function () { if (holdTimer) clearTimeout(holdTimer); clearZoom(); endDrag(); pressEl = null; }, true);
+  document.addEventListener('pointercancel', function () { endDrag(); pressEl = null; }, true);
   document.addEventListener('contextmenu', function (e) {
     // No long-press save-image / selection menus on game pieces.
     if (e.target.closest && e.target.closest('.card, .herobar, .bfig')) e.preventDefault();

@@ -60,7 +60,7 @@
   .board { display:flex; gap:8px; justify-content:flex-start; flex-wrap:nowrap; overflow-x:auto; min-height:106px; padding:10px 4px 6px; align-items:stretch; -webkit-overflow-scrolling:touch; }
   .board-label { text-align:center; font-size:11px; letter-spacing:.2em; color:#8f83ad; margin-top:5px; }
   .empty-board { color:#6f6292; font-size:12.5px; align-self:center; }
-  .card { width:102px; height:166px; flex:none; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
+  .card { width:112px; height:184px; flex:none; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
           background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
           border:2px solid transparent; border-radius:12px; padding:6px 7px; position:relative; cursor:default;
           box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05);
@@ -99,11 +99,13 @@
                  background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28);
                  border-radius:5px; padding:3px 6px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
   .card .ctype { font-size:10px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
-  .card .ctext { font-size:10.5px; color:#33261a; line-height:1.3; flex:1; overflow:hidden; margin-top:3px;
+  .card .ctyperow { display:flex; justify-content:space-between; align-items:center; height:16px; flex:none; margin-top:1px; gap:4px; }
+  .card .ctyperow .cbadges { height:15px; overflow:hidden; text-align:right; }
+  .card .ctext { font-size:10px; color:#33261a; line-height:1.28; flex:1 1 auto; min-height:0; overflow:hidden; margin-top:3px; padding-bottom:12px;
                  background:linear-gradient(180deg, rgba(240,229,199,.95), rgba(224,208,170,.95)); border-radius:6px; padding:3px 5px;
                  box-shadow:inset 0 1px 3px rgba(90,60,20,.35);
                  display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; }
-  .hand .card .ctext { -webkit-line-clamp:5; }
+  .hand .card .ctext { -webkit-line-clamp:4; }
   .bigcard { width:240px; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
              background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
              border:2.5px solid transparent; border-radius:14px; padding:14px; position:relative; text-align:left;
@@ -115,9 +117,7 @@
                     background:linear-gradient(180deg, rgba(240,229,199,.96), rgba(224,208,170,.96)); border-radius:7px; padding:7px 9px;
                     box-shadow:inset 0 1px 3px rgba(90,60,20,.35); }
   .bigcard .stats { display:flex; justify-content:space-between; font-weight:800; font-size:17px; }
-  .card .cbadges { height:15px; overflow:hidden; flex:none; }
-  .card .cfoot { display:flex; align-items:stretch; gap:4px; flex:1; margin-top:3px; }
-  .card .cfoot .ctext { flex:1; margin-top:0; }
+  .card .cstats { display:flex; justify-content:space-between; align-items:center; flex:none; margin-top:-11px; padding:0 3px; position:relative; z-index:1; }
   .card .orb { align-self:flex-end; display:inline-flex; align-items:center; justify-content:center; min-width:25px; height:25px; padding:0 5px; border-radius:50%;
                background:radial-gradient(circle at 35% 30%, #4a3a63, #231831 72%); border:1.5px solid var(--metalDk);
                box-shadow:inset 0 1px 2px rgba(255,255,255,.16), 0 1px 3px rgba(0,0,0,.45); font-weight:800; font-size:12.5px; }
@@ -173,16 +173,16 @@
   .hand.fan .card .badge { display:none; }
   .hand.fan .card:hover { transform:scale(1.12) translateY(-8px); z-index:60; box-shadow:0 14px 34px rgba(0,0,0,.6); }
   /* Card art (M8): a painted banner on the card face when art exists. */
-  .card .cart { height:40px; border-radius:5px; overflow:hidden; margin:1px 0 3px; flex:none; }
+  .card .cart { height:38px; border-radius:5px; overflow:hidden; margin:1px 0 3px; flex:none; }
   .card .cart img { width:100%; height:100%; object-fit:cover; display:block; }
-  .hand.fan .card .cart { height:40px; }
+  .hand.fan .card .cart { height:38px; }
   /* Drag-to-play (M8): the carried card, its dimmed source, and drop targets. */
   .drag-ghost { position:fixed; z-index:120; pointer-events:none; transform:translate(-50%,-62%) scale(1.15); box-shadow:0 22px 50px rgba(0,0,0,.7); margin:0; }
   .hand.fan .card.drag-src { opacity:.3; }
   body.yira-dragging .board { outline:2px dashed rgba(255,217,77,.55); outline-offset:4px; border-radius:12px; }
   .board .card.drop-hover { outline:3px solid #ffd94d; }
   .herobar.drop-hover { outline:3px solid #ffd94d; border-radius:12px; }
-  .hand .card { width:102px; height:166px; }
+  .hand .card { width:112px; height:184px; }
   .actions { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:10px 0; }
   .banner { text-align:center; background:rgba(255,184,77,.13); border:1px solid #ffb84d; color:#ffe1a8;
             border-radius:10px; padding:9px 12px; font-size:14px; margin:8px 0; }
@@ -196,7 +196,7 @@
   .overlay .box { background:var(--box); border:1.5px solid var(--title); border-radius:16px; padding:24px; max-width:440px; width:100%; text-align:center; }
   .overlay h2 { margin:4px 0 8px; color:#e7d9ff; }
   .record { text-align:center; color:#a793d6; font-size:12.5px; margin-top:10px; }
-  @media (max-width:560px){ .card{width:90px; height:150px} .hand .card{width:90px; height:150px} .life{font-size:19px} h1.logo{font-size:27px} .hero-sub{display:none} .herobar{padding:6px 9px} .actions{margin:6px 0} }
+  @media (max-width:560px){ .card{width:102px; height:172px} .hand .card{width:102px; height:172px} .life{font-size:19px} h1.logo{font-size:27px} .hero-sub{display:none} .herobar{padding:6px 9px} .actions{margin:6px 0} }
   /* --- M4.1 FX: nightmare wisps, drain burst, hero portraits, card glyphs --- */
   .portrait { width:48px; height:48px; flex:none; border-radius:50%; overflow:hidden;
     border:2px solid var(--title); background:radial-gradient(circle at 35% 30%, var(--cardA), var(--bgC)); }
@@ -1934,15 +1934,14 @@ function cardHtml(inst, ownerIdx, opts) {
   var d = D(inst);
   var cls = 'card ' + d.type + (opts.cls || '');
   var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth - inst.damage) : null;
-  var textDiv = '<div class="ctext">' + esc(effectText(d)) + '</div>';
-  var foot = textDiv;
-  if (d.type === 'creature') foot = '<div class="cfoot"><span class="orb pow">' + (d.power + inst.permPower) + '⚔</span>' + textDiv + '<span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
+  var foot = '<div class="ctext">' + esc(effectText(d)) + '</div>';
+  if (d.type === 'creature') foot += '<div class="cstats"><span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '');
   return '<div class="' + cls + '" data-uid="' + inst.uid + '" ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="cost">' + d.cost + '</div>' + art +
     '<div class="cname">' + esc(d.name) + '</div>' +
-    '<div class="ctype">' + d.type + '</div>' +
-    '<div class="cbadges">' + badges(inst, ownerIdx) + '</div>' + foot + '</div>';
+    '<div class="ctyperow"><span class="ctype">' + d.type + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
+    foot + '</div>';
 }
 function emblemHtml(inst, ownerIdx, opts) {
   opts = opts || {};
@@ -2160,7 +2159,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M14 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M14.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2562,24 +2561,29 @@ render();
   function hideHover() {
     if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
     if (hoverBox) { hoverBox.remove(); hoverBox = null; }
+    if (hoverSrc) { hoverSrc.classList.remove('hover-src'); hoverSrc = null; }
     if (pressEl) pressEl.classList.remove('hover-src');
     hovering = false;
   }
+  var hoverSrc = null;
   function showHover(card) {
     if (hovering || dragging || !card) return;
-    hovering = true;
+    hovering = true; hoverSrc = card;
     card.classList.add('hover-src');
     var r = card.getBoundingClientRect();
     hoverBox = document.createElement('div');
     hoverBox.id = 'hoverZoom';
     var clone = card.cloneNode(true);
     clone.classList.remove('hover-src');
+    clone.style.height = 'auto';
+    var ct = clone.querySelector('.ctext');
+    if (ct) { ct.style.display = 'block'; ct.style.webkitLineClamp = 'none'; ct.style.overflow = 'visible'; ct.style.paddingBottom = '3px'; }
     hoverBox.appendChild(clone);
     var w = card.offsetWidth, h = card.offsetHeight;
-    hoverBox.style.width = w + 'px'; hoverBox.style.height = h + 'px';
+    hoverBox.style.width = w + 'px';
     var left = Math.max(4, Math.min(window.innerWidth - w - 4, r.left + r.width / 2 - w / 2));
     hoverBox.style.left = left + 'px';
-    hoverBox.style.top = Math.max(4, r.top - h - 10) + 'px';
+    hoverBox.style.bottom = (window.innerHeight - r.top + 10) + 'px';
     hoverBox.style.transform = 'scale(1.6)';
     document.body.appendChild(hoverBox);
   }
@@ -2605,10 +2609,21 @@ render();
       else if (typeof say === 'function') say('Now tap the target.');
     }
   }
+  var overlayPress = null;
   document.addEventListener('pointerdown', function (e) {
     if (!e.target.closest) return;
     var card = e.target.closest('.hand.fan .card');
-    if (!card) return;
+    if (!card) {
+      // Cards outside the hand (mulligan picks, draft picks, deck builder,
+      // collection) get hold-to-read only: a hold expands, the release-click
+      // is swallowed so reading never toggles or picks by accident.
+      var oc = e.target.closest('.panel .card, .overlay .card');
+      if (oc) {
+        overlayPress = oc; hideHover();
+        hoverTimer = setTimeout(function () { showHover(oc); }, 200);
+      }
+      return;
+    }
     pressEl = card; pressUid = Number(card.getAttribute('data-uid')); startX = e.clientX; startY = e.clientY;
     hideHover();
     var held = card;
@@ -2638,6 +2653,7 @@ render();
   }, true);
   document.addEventListener('pointerup', function (e) {
     if (!dragging && pressEl && hovering) { hideHover(); suppressClickUntil = Date.now() + 400; pressEl = null; return; }
+    if (overlayPress) { if (hovering) suppressClickUntil = Date.now() + 400; hideHover(); overlayPress = null; }
     hideHover();
     if (!dragging && pressEl) {
       // A tap on a hand card opens it big to read (never plays it), and
@@ -2657,7 +2673,7 @@ render();
     }
     pressEl = null;
   }, true);
-  document.addEventListener('pointercancel', function () { hideHover(); endDrag(); pressEl = null; }, true);
+  document.addEventListener('pointercancel', function () { hideHover(); endDrag(); pressEl = null; overlayPress = null; }, true);
   document.addEventListener('contextmenu', function (e) {
     // No long-press save-image / selection menus on game pieces.
     if (e.target.closest && e.target.closest('.card, .emblem, .herobar, .bfig')) e.preventDefault();

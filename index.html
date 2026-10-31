@@ -493,11 +493,13 @@ const CARDS = {
 
   // --- generated-only cards (did not start in anyone's deck) ---
   dream_wisp:     { icon: "💭", name: 'Dream Wisp',       cost: 0, type: 'creature', power: 1, health: 1, generatedOnly: true },
-  borrowed_spark: { icon: "🔆", name: 'Borrowed Spark',   cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'damageAny', amount: 2 } },
   stolen_echo:    { icon: "🗣️", name: 'Stolen Echo',      cost: 2, type: 'creature', power: 2, health: 2, generatedOnly: true },
   gilded_riddle:  { icon: "❓", name: 'Gilded Riddle',    cost: 2, type: 'spell', generatedOnly: true, effect: { kind: 'draw', count: 1 } },
+  pilfered_remedy: { icon: "🧪", name: 'Pilfered Remedy', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'healHero', amount: 3, who: 'self' } },
+  echo_hound:     { icon: "🐺", name: 'Echo Hound',       cost: 2, type: 'creature', power: 2, health: 2, keywords: ['haste'], generatedOnly: true },
+  stolen_hour:    { icon: "⏳", name: 'Stolen Hour',      cost: 2, type: 'spell', generatedOnly: true, effect: { kind: 'ramp' } },
 };
-const GENERATED_POOL = ['dream_wisp', 'borrowed_spark', 'stolen_echo', 'gilded_riddle'];
+const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound', 'stolen_hour'];
 const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire'];
 
 const HEROES = {
@@ -718,7 +720,7 @@ const SCHOOL_OF = {
   bloodrush:'ember', pit_spark:'ember', tripwire:'ember', cinder_hound:'ember', mountain_ogre:'ember', comet_fall:'ember',
   ember_snare:'ember', ravaging_tyrant:'ember', pyre_raider:'ember', embermaw_devil:'ember', ashwing_sovereign:'ember',
   eternal_phoenix:'ember', flame_shot:'ember', ember_deathraider:'ember', draconic_transfiguration:'ember', ash_dragon:'ember',
-  borrowed_spark:'ember', cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_raider:'ember',
+cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_raider:'ember',
   second_blow:'ember', kargs_mauler:'ember', unbroken_roar:'ember', sunder_line:'ember', curtain_call:'ember',
   axe_of_pyre:'ember', reckless_wrath:'ember', unbroken_might:'ember',
   // Hollow Grave — death, drain, graveyard, doom
@@ -739,6 +741,7 @@ const SCHOOL_OF = {
   duskmane_stag:'worldroot', beastcall_arrow:'worldroot', venom_grub:'worldroot', tusked_warboar:'worldroot', tasty_morsel:'worldroot',
   overgrowth:'worldroot', thornback_alpha:'worldroot', unbridled_cry:'worldroot', boarherd_horn:'worldroot',
   thornwolf:'worldroot', barkhide_bloom:'worldroot', worldroot_titanosaur:'worldroot',
+  pilfered_remedy:'dawn', echo_hound:'ember', stolen_hour:'worldroot',
   // Neutral — any hero may run these
   sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none',
 };
@@ -2000,7 +2003,7 @@ function badges(inst, ownerIdx) {
   var d = D(inst), out = '';
   if (d.legendary) out += '<span class="badge sig">legendary</span>';
   if (d.signatureFor) out += '<span class="badge sig">signature</span>';
-  if (inst.starterOwner !== ownerIdx) out += '<span class="badge gen">generated</span>';
+  if (inst.starterOwner !== ownerIdx) out += '<span class="badge gen" title="Generated — this card did not start in a deck">✦</span>';
   (d.keywords || []).forEach(function (k) { out += '<span class="badge">' + k + '</span>'; });
   return out;
 }
@@ -2034,7 +2037,7 @@ function cardHtml(inst, ownerIdx, opts) {
   return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + sigStyle(d) + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="cost">' + d.cost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') +
     '<div class="cname">' + esc(d.name) + '</div>' + art +
-    '<div class="ctyperow"><span class="ctype">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
+    '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type + ' · ' : '') + (d.cardSchool ? SCHOOL_META[d.cardSchool].icon : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
     foot + '</div>';
 }
 function emblemHtml(inst, ownerIdx, opts) {
@@ -2150,6 +2153,7 @@ function inspectHtml() {
     '<div class="ctype">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div><div class="ctext">' + esc(effectText(d)) + '</div>' +
     '<div>' + badges(inst, owner) + '</div>' + stats +
     (d.costForge ? '<div style="font-size:11px;color:#a793d6;margin-top:6px">Cost set by Forge — not in the recovered record (see the Costing Charter).</div>' : '') +
+    (inst.starterOwner !== owner ? '<div style="font-size:11px;color:#e8a0b4;margin-top:6px">✦ Generated — this card did not start in a deck.</div>' : '') +
     '<button class="big" onclick="closeInspect()">Close</button></div></div>';
 }
 function captureScroll() { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; return n ? n.scrollTop : 0; } catch (e) { return 0; } }
@@ -2254,7 +2258,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M16 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M16.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2316,7 +2320,7 @@ function renderCollection() {
   function group(title, ids) {
     if (!ids.length) return '';
     return '<div class="board-label" style="margin-top:14px">' + title + '</div><div class="hand">' +
-      ids.map(function (id) { return cardHtml(fakeInst(id), 0, {}); }).join('') + '</div>';
+      ids.map(function (id) { return cardHtml(fakeInst(id), 0, { showType: true }); }).join('') + '</div>';
   }
   var ids = Object.keys(CARDS);
   var byHero = function (h) { return ids.filter(function (id) { return CARDS[id].signatureFor === h; }); };

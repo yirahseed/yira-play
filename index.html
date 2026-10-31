@@ -100,7 +100,9 @@
                  border-radius:5px; padding:3px 6px 3px 17px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
   .card .ctype { font-size:10px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
   .card.sigcard, .bigcard.sigcard { border-width:3px; }
-  .card .ctyperow { display:flex; justify-content:space-between; align-items:center; height:16px; flex:none; margin-top:1px; gap:4px; }
+  .draftrow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .draftrow .card { width:100px; height:170px; }
+  .card .ctyperow { display:flex; justify-content:space-between; align-items:center; min-height:16px; flex:none; margin-top:1px; gap:4px; flex-wrap:wrap; }
   .card .ctyperow .cbadges { height:15px; overflow:hidden; text-align:right; }
   .card .ctext { font-size:10px; color:#33261a; line-height:1.28; flex:1 1 auto; min-height:0; overflow:hidden; margin-top:3px; padding-bottom:12px;
                  background:linear-gradient(180deg, rgba(240,229,199,.95), rgba(224,208,170,.95)); border-radius:6px; padding:3px 5px;
@@ -335,7 +337,7 @@ const CARDS = {
   // --- trap-controller signatures ---
   snare_of_no:    { icon: "🚫", name: 'Snare of No',      cost: 3, type: 'trap', signatureFor: 'controller', trigger: { kind: 'counterBig', minCost: 3 }, effect: { kind: 'healHero', amount: 2, who: 'self' } },
   vigil_acolyte:  { icon: "🕯️", name: 'Vigil Acolyte',    cost: 3, type: 'creature', power: 2, health: 5, signatureFor: 'controller', debut: { kind: 'nextTrapDiscount', amount: 2 } },
-  ward_lens:      { icon: "🔮", name: 'Ward Lens',        cost: 2, type: 'artifact', charges: 2, signatureFor: 'controller', effect: { kind: 'draftTrap' } },
+  ward_lens:      { icon: "🔮", name: 'Ward Lens',        cost: 2, type: 'artifact', charges: 3, signatureFor: 'controller', effect: { kind: 'draftTrap' } },
 
   // --- verdant keeper signatures ---
   rootcall_matriarch: { icon: "🌺", name: 'Rootcall Matriarch', cost: 5, type: 'creature', power: 3, health: 7, keywords: ['reach'], signatureFor: 'keeper', debut: { kind: 'healHero', amount: 3, who: 'self' } },
@@ -458,16 +460,16 @@ const CARDS = {
   torch_flare:    { icon: "☄️", name: 'Torch Flare',        cost: 2, type: 'spell', signatureFor: 'torchbearer', effect: { kind: 'damageAny', amount: 3 } },
   kindled_fury:   { icon: "🌋", name: 'Kindled Fury',       cost: 1, type: 'spell', signatureFor: 'torchbearer', effect: { kind: 'buffCreature', power: 2, health: 0 } },
   oathsworn_captain: { icon: "🛡️", name: 'Oathsworn Captain', cost: 3, type: 'creature', power: 2, health: 4, signatureFor: 'banneret', debut: { kind: 'buffRandomCreature', power: 1, health: 1 } },
-  bannerfall:     { icon: "🚩", name: 'Bannerfall',         cost: 3, type: 'spell', signatureFor: 'banneret', effect: { kind: 'buffAllCreatures', power: 1, health: 1 } },
-  aegis_standard: { icon: "🏛️", name: 'Aegis Standard',     cost: 2, type: 'artifact', charges: 2, signatureFor: 'banneret', effect: { kind: 'healHero', amount: 2, who: 'self' } },
+  bannerfall:     { icon: "🚩", name: 'Bannerfall',         cost: 3, type: 'spell', signatureFor: 'banneret', effect: { kind: 'buffAllCreatures', power: 2, health: 0 } },
+  aegis_standard: { icon: "🏛️", name: 'Aegis Standard',     cost: 2, type: 'artifact', charges: 2, signatureFor: 'banneret', effect: { kind: 'buffAllCreatures', power: 0, health: 1 } },
   pale_shepherd:  { icon: "🐑", name: 'Pale Shepherd',      cost: 4, type: 'creature', power: 3, health: 4, signatureFor: 'graven' },
   call_of_graven: { icon: "📣", name: 'Call of the Graven', cost: 5, type: 'spell', signatureFor: 'graven', effect: { kind: 'raiseStrongest' } },
   graven_tithe:   { icon: "🪙", name: 'Graven Tithe',       cost: 2, type: 'spell', signatureFor: 'graven', effect: { kind: 'drain', amount: 2 } },
   tollkeeper:     { icon: "🔔", name: 'Tollkeeper',         cost: 2, type: 'creature', power: 2, health: 2, signatureFor: 'unchained' },
-  severing_light: { icon: "✂️", name: 'Severing Light',     cost: 3, type: 'spell', signatureFor: 'unchained', effect: { kind: 'damageAny', amount: 3 } },
+  severing_light: { icon: "✂️", name: 'Severing Light',     cost: 3, type: 'spell', signatureFor: 'unchained', effect: { kind: 'drain', amount: 3 } },
   vesper_charm:   { icon: "📿", name: 'Vesper Charm',       cost: 2, type: 'artifact', charges: 3, signatureFor: 'unchained', effect: { kind: 'drain', amount: 1 } },
   thornback_alpha: { icon: "🦏", name: 'Thornback Alpha',   cost: 4, type: 'creature', power: 4, health: 4, keywords: ['trample'], signatureFor: 'unbridled' },
-  unbridled_cry:  { icon: "📯", name: 'Unbridled Cry',      cost: 2, type: 'spell', signatureFor: 'unbridled', effect: { kind: 'buffAllCreatures', power: 1, health: 0 } },
+  unbridled_cry:  { icon: "📯", name: 'Unbridled Cry',      cost: 3, type: 'spell', signatureFor: 'unbridled', effect: { kind: 'sequence', effects: [ { kind: 'buffAllCreatures', power: 1, health: 0 }, { kind: 'addCard', cardId: 'tusked_warboar' } ] } },
   boarherd_horn:  { icon: "🐗", name: 'Boarherd Horn',      cost: 3, type: 'artifact', charges: 2, signatureFor: 'unbridled', effect: { kind: 'addCard', cardId: 'tusked_warboar' } },
   sibilant_herald: { icon: "🎭", name: 'Sibilant Herald',   cost: 3, type: 'creature', power: 3, health: 3, signatureFor: 'sibilance', finale: { kind: 'drain', amount: 1 } },
   curtain_call:   { icon: "🎬", name: 'Curtain Call',       cost: 4, type: 'spell', signatureFor: 'sibilance', effect: { kind: 'damageAllEnemyCreatures', amount: 2 } },
@@ -480,7 +482,7 @@ const CARDS = {
   kraken_youngling: { icon: "🦑", name: 'Kraken Youngling', cost: 6, type: 'creature', power: 5, health: 6, signatureFor: 'tidemother' },
   kargs_mauler:   { icon: "🐂", name: "Karg's Mauler",      cost: 4, type: 'creature', power: 5, health: 3, keywords: ['trample'], signatureFor: 'bruiser' },
   unbroken_roar:  { icon: "🦁", name: 'Unbroken Roar',      cost: 2, type: 'spell', signatureFor: 'bruiser', effect: { kind: 'buffAllCreatures', power: 1, health: 0 } },
-  sunder_line:    { icon: "🪓", name: 'Sunder the Line',    cost: 3, type: 'spell', signatureFor: 'bruiser', effect: { kind: 'damageAny', amount: 3 } },
+  sunder_line:    { icon: "🪓", name: 'Sunder the Line',    cost: 3, type: 'spell', signatureFor: 'bruiser', effect: { kind: 'damageAny', amount: 4 } },
   reef_fish:      { icon: "🐟", name: 'Reef Fish',          cost: 0, type: 'creature', power: 0, health: 1, generatedOnly: true },
   unchained_spirit: { icon: "👻", name: 'Unchained Spirit', cost: 2, type: 'creature', power: 2, health: 1, keywords: ['flying'], generatedOnly: true },
   banneret_avatar: { icon: "⚔️", name: 'Ser Aldric',        cost: 4, type: 'creature', power: 4, health: 4, generatedOnly: true },
@@ -2182,7 +2184,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M15 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M15.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2447,9 +2449,9 @@ function pickDraft(uid) {
 function draftHtml() {
   var pd = G.pendingDraft;
   if (!pd) return '';
-  return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:92%"><div class="cname">Draft a signature — pick one</div>' +
+  return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">Draft a signature — pick one</div>' +
     '<div class="ctext">Three signature cards from across every hero\'s set. The other two are gone.</div>' +
-    '<div class="hand">' + pd.options.map(function (inst) { return cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }); }).join('') + '</div></div></div>';
+    '<div class="draftrow">' + pd.options.map(function (inst) { return cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }); }).join('') + '</div></div></div>';
 }
 function targetCreature(uid) {
   var all = G.players[0].board.concat(G.players[1].board);

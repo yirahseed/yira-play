@@ -63,7 +63,7 @@
   .card { width:102px; height:166px; flex:none; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
           background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
           border:2px solid transparent; border-radius:12px; padding:6px 7px; position:relative; cursor:default;
-          box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07);
+          box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05);
           display:flex; flex-direction:column; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
   .card img { -webkit-user-drag:none; -webkit-touch-callout:none; }
   /* Forge frame: metal hue by card type (M12) — creature warm bronze, spell blued steel, artifact antique brass, trap smoked iron + crimson */
@@ -93,9 +93,11 @@
   .card.redraw-pick { outline:3px solid #ff5d73; opacity:.75; }
   @keyframes pulse { 0%,100%{outline-offset:0} 50%{outline-offset:2px} }
   .card .cost { position:absolute; top:-9px; left:-9px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800;
-                width:25px; height:25px; border-radius:50%; text-align:center; line-height:22px; font-size:13.5px;
+                width:27px; height:27px; border-radius:60% 40% 55% 45% / 55% 45% 55% 45%; text-align:center; line-height:24px; font-size:13.5px;
                 border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 4px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
-  .card .cname { font-weight:700; font-size:12.5px; line-height:1.15; margin:2px 0 3px; color:#f3e6c8; text-shadow:0 1px 2px rgba(0,0,0,.6); height:29px; overflow:hidden; flex:none; }
+  .card .cname { font-weight:700; font-size:12.5px; line-height:1.15; margin:3px 0 3px; height:29px; overflow:hidden; flex:none;
+                 background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28);
+                 border-radius:5px; padding:3px 6px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
   .card .ctype { font-size:10px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
   .card .ctext { font-size:10.5px; color:#33261a; line-height:1.3; flex:1; overflow:hidden; margin-top:3px;
                  background:linear-gradient(180deg, rgba(240,229,199,.95), rgba(224,208,170,.95)); border-radius:6px; padding:3px 5px;
@@ -105,15 +107,24 @@
   .bigcard { width:240px; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
              background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
              border:2.5px solid transparent; border-radius:14px; padding:14px; position:relative; text-align:left;
-             box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07); }
-  .bigcard .cost { position:absolute; top:-11px; left:-11px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800; width:31px; height:31px; border-radius:50%; text-align:center; line-height:28px; font-size:16px; border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 5px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
-  .bigcard .cname { font-weight:700; font-size:17px; margin:2px 0 3px; color:#f3e6c8; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+             box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05); }
+  .bigcard .cost { position:absolute; top:-11px; left:-11px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800; width:33px; height:33px; border-radius:60% 40% 55% 45% / 55% 45% 55% 45%; text-align:center; line-height:30px; font-size:16px; border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 5px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
+  .bigcard .cname { font-weight:700; font-size:17px; margin:2px 0 3px; background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28); border-radius:6px; padding:4px 8px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
   .bigcard .ctype { font-size:11px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
   .bigcard .ctext { font-size:13.5px; color:#33261a; line-height:1.45; margin:8px 0;
                     background:linear-gradient(180deg, rgba(240,229,199,.96), rgba(224,208,170,.96)); border-radius:7px; padding:7px 9px;
                     box-shadow:inset 0 1px 3px rgba(90,60,20,.35); }
   .bigcard .stats { display:flex; justify-content:space-between; font-weight:800; font-size:17px; }
   .card .cbadges { height:15px; overflow:hidden; flex:none; }
+  .card .cfoot { display:flex; align-items:stretch; gap:4px; flex:1; margin-top:3px; }
+  .card .cfoot .ctext { flex:1; margin-top:0; }
+  .card .orb { align-self:flex-end; display:inline-flex; align-items:center; justify-content:center; min-width:25px; height:25px; padding:0 5px; border-radius:50%;
+               background:radial-gradient(circle at 35% 30%, #4a3a63, #231831 72%); border:1.5px solid var(--metalDk);
+               box-shadow:inset 0 1px 2px rgba(255,255,255,.16), 0 1px 3px rgba(0,0,0,.45); font-weight:800; font-size:12.5px; }
+  .card .orb.pow { color:#ffd28a; } .card .orb.hp { color:#9df0b6; } .card .orb.hp.hurt { color:#ff8fa3; }
+  #hoverZoom { position:fixed; z-index:60; pointer-events:none; transform-origin:50% 100%; animation:zoomIn .16s ease; filter:drop-shadow(0 12px 26px rgba(0,0,0,.65)); }
+  @keyframes zoomIn { from { transform:scale(1.3); opacity:.3 } to { transform:scale(1.6); opacity:1 } }
+  .card.hover-src { opacity:.35; }
   .card .ctext:empty { visibility:hidden; }
   .card .stats { display:flex; justify-content:space-between; font-weight:800; font-size:12.5px; margin-top:4px; }
   .card .stats span { display:inline-flex; align-items:center; justify-content:center; min-width:25px; height:25px; padding:0 5px; border-radius:50%;
@@ -126,16 +137,16 @@
   .badge { display:inline-block; font-size:9px; background:#54357e; color:#e7d9ff; border-radius:6px; padding:1px 5px; margin:1px 2px 0 0; }
   .badge.gen { background:#7e3550; } .badge.sig { background:#6d5a1e; color:#ffe9a8; } .badge.night { background:#4a105e; color:#f0b3ff; }
   /* Battlefield emblems (M13): creatures in play shrink to a readable token — face + power/health orbs */
-  .emblem { width:76px; flex:none; display:flex; flex-direction:column; align-items:center; position:relative; padding:3px 1px 1px; border-radius:14px; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
-  .emblem-face { width:56px; height:56px; border-radius:50%; position:relative; flex:none; border:2.5px solid transparent;
+  .emblem { width:96px; flex:none; display:flex; flex-direction:column; align-items:center; position:relative; padding:3px 1px 1px; border-radius:12px; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
+  .emblem-face { width:88px; height:54px; border-radius:10px; position:relative; flex:none; border:2px solid transparent;
                  background:radial-gradient(circle at 35% 30%, #3a2c52, #241a36 75%) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
                  box-shadow:0 2px 7px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; }
-  .emblem-face img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
+  .emblem-face img { width:100%; height:100%; border-radius:8px; object-fit:cover; display:block; }
   .emblem-glyph { font-size:27px; line-height:1; }
-  .emblem-pow, .emblem-hp { position:absolute; bottom:-6px; min-width:23px; height:23px; padding:0 4px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  .emblem-pow, .emblem-hp { position:absolute; bottom:-7px; min-width:23px; height:23px; padding:0 4px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
                  font-size:11.5px; font-weight:800; background:radial-gradient(circle at 35% 30%, #4a3a63, #231831 72%); border:1.5px solid #7c521f; box-shadow:0 1px 3px rgba(0,0,0,.5); z-index:2; }
-  .emblem-pow { left:-8px; color:#ffd28a; } .emblem-hp { right:-8px; color:#9df0b6; } .emblem-hp.hurt { color:#ff8fa3; }
-  .emblem-name { margin-top:9px; font-size:9.5px; font-weight:700; color:#ecdfc2; max-width:76px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; }
+  .emblem-pow { left:-6px; color:#ffd28a; } .emblem-hp { right:-6px; color:#9df0b6; } .emblem-hp.hurt { color:#ff8fa3; }
+  .emblem-name { margin-top:9px; font-size:9.5px; font-weight:700; color:#ecdfc2; max-width:94px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; }
   .emblem-badges { text-align:center; max-height:26px; overflow:hidden; }
   .emblem .badge { font-size:7.5px; padding:0 4px; margin:1px 1px 0 0; }
   .emblem.clickable { cursor:pointer; } .emblem.clickable:hover .emblem-face { transform:translateY(-2px); }
@@ -1923,15 +1934,15 @@ function cardHtml(inst, ownerIdx, opts) {
   var d = D(inst);
   var cls = 'card ' + d.type + (opts.cls || '');
   var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth - inst.damage) : null;
-  var stats = '';
-  if (d.type === 'creature') stats = '<div class="stats"><span class="pow">' + (d.power + inst.permPower) + '⚔</span><span class="hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
+  var textDiv = '<div class="ctext">' + esc(effectText(d)) + '</div>';
+  var foot = textDiv;
+  if (d.type === 'creature') foot = '<div class="cfoot"><span class="orb pow">' + (d.power + inst.permPower) + '⚔</span>' + textDiv + '<span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '');
   return '<div class="' + cls + '" data-uid="' + inst.uid + '" ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="cost">' + d.cost + '</div>' + art +
     '<div class="cname">' + esc(d.name) + '</div>' +
     '<div class="ctype">' + d.type + '</div>' +
-    '<div class="ctext">' + esc(effectText(d)) + '</div>' +
-    '<div class="cbadges">' + badges(inst, ownerIdx) + '</div>' + stats + '</div>';
+    '<div class="cbadges">' + badges(inst, ownerIdx) + '</div>' + foot + '</div>';
 }
 function emblemHtml(inst, ownerIdx, opts) {
   opts = opts || {};
@@ -2089,7 +2100,7 @@ function render() {
     // hand — tap magnifies to read, drag onto the field plays.
     return cardHtml(inst, humanIdx, opts);
   }).join('') + '</div>';
-  if (mode === 'main') html += '<div style="text-align:center;font-size:11.5px;color:#a793d6">Drag a card onto the battlefield to play it — Traps arm where you drop them (mana reserved until they fire). Tap a card to read it big; tap anywhere to put it back. Tap any creature on the board to read its full text.</div>';
+  if (mode === 'main') html += '<div style="text-align:center;font-size:11.5px;color:#a793d6">Hold a card to expand it; drag it onto the battlefield to play — Traps arm where you drop them (mana reserved until they fire). Tap a card to read it big; tap anywhere to put it back. Tap any creature on the board to read its full text.</div>';
   html += '</div></div>';
   if (inspectUid !== null) html += inspectHtml();
   if (mode === 'draftPick') html += draftHtml();
@@ -2149,7 +2160,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M13 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M14 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2532,11 +2543,13 @@ async function runAiTurn() {
 }
 render();
 
-/* Hand pointer play, one controller, two gestures (Jesse's M10 ruling,
-   reversing M9.3: tap-to-play is GONE — too many accidental plays):
+/* Hand pointer play, one controller, three gestures (Jesse's M10 ruling,
+   reversing M9.3: tap-to-play is GONE — too many accidental plays; M14
+   adds the middle gesture):
    - tap/click: open the card BIG to read it (the same inspect view board
-     creatures use) — tap anywhere to put it back. No zoom animation to
-     stutter: the card simply opens, full-size and readable (M10.1).
+     creatures use) — tap anywhere to put it back (M10.1).
+   - press-and-hold (hover): the card expands above the hand, enlarged for
+     reading, and shrinks back on release — no play, no inspect (M14).
    - drag: the ONLY way to play — carry the card to the field and release:
      onto a creature or hero to strike that target, onto open board to
      just play it. */
@@ -2545,6 +2558,31 @@ render();
   var pressEl = null, pressUid = null, startX = 0, startY = 0;
   var dragging = false, ghost = null, srcEl = null, dragUid = null, dropEl = null;
   var lastDragEnd = 0, suppressClickUntil = 0;
+  var hoverTimer = null, hoverBox = null, hovering = false;
+  function hideHover() {
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+    if (hoverBox) { hoverBox.remove(); hoverBox = null; }
+    if (pressEl) pressEl.classList.remove('hover-src');
+    hovering = false;
+  }
+  function showHover(card) {
+    if (hovering || dragging || !card) return;
+    hovering = true;
+    card.classList.add('hover-src');
+    var r = card.getBoundingClientRect();
+    hoverBox = document.createElement('div');
+    hoverBox.id = 'hoverZoom';
+    var clone = card.cloneNode(true);
+    clone.classList.remove('hover-src');
+    hoverBox.appendChild(clone);
+    var w = card.offsetWidth, h = card.offsetHeight;
+    hoverBox.style.width = w + 'px'; hoverBox.style.height = h + 'px';
+    var left = Math.max(4, Math.min(window.innerWidth - w - 4, r.left + r.width / 2 - w / 2));
+    hoverBox.style.left = left + 'px';
+    hoverBox.style.top = Math.max(4, r.top - h - 10) + 'px';
+    hoverBox.style.transform = 'scale(1.6)';
+    document.body.appendChild(hoverBox);
+  }
   function clearDrop() { if (dropEl) { dropEl.classList.remove('drop-hover'); dropEl = null; } }
   function endDrag() {
     if (ghost) { ghost.remove(); ghost = null; }
@@ -2572,11 +2610,15 @@ render();
     var card = e.target.closest('.hand.fan .card');
     if (!card) return;
     pressEl = card; pressUid = Number(card.getAttribute('data-uid')); startX = e.clientX; startY = e.clientY;
+    hideHover();
+    var held = card;
+    hoverTimer = setTimeout(function () { showHover(held); }, 200);
   }, true);
   document.addEventListener('pointermove', function (e) {
     if (!pressEl) return;
     var dx = e.clientX - startX, dy = e.clientY - startY;
     if (!dragging && Math.sqrt(dx * dx + dy * dy) > 16) {
+      hideHover();
       if (typeof mode === 'undefined' || mode !== 'main' || typeof G === 'undefined' || !G) { pressEl = null; return; }
       dragging = true; dragUid = pressUid; srcEl = pressEl;
       srcEl.classList.add('drag-src');
@@ -2595,6 +2637,8 @@ render();
     }
   }, true);
   document.addEventListener('pointerup', function (e) {
+    if (!dragging && pressEl && hovering) { hideHover(); suppressClickUntil = Date.now() + 400; pressEl = null; return; }
+    hideHover();
     if (!dragging && pressEl) {
       // A tap on a hand card opens it big to read (never plays it), and
       // its trailing click is swallowed so the tap can't also land on
@@ -2613,7 +2657,7 @@ render();
     }
     pressEl = null;
   }, true);
-  document.addEventListener('pointercancel', function () { endDrag(); pressEl = null; }, true);
+  document.addEventListener('pointercancel', function () { hideHover(); endDrag(); pressEl = null; }, true);
   document.addEventListener('contextmenu', function (e) {
     // No long-press save-image / selection menus on game pieces.
     if (e.target.closest && e.target.closest('.card, .emblem, .herobar, .bfig')) e.preventDefault();

@@ -61,7 +61,7 @@
   .board-label { text-align:center; font-size:11px; letter-spacing:.2em; color:#8f83ad; margin-top:5px; }
   .empty-board { color:#6f6292; font-size:12.5px; align-self:center; }
   .card { width:92px; min-height:100px; flex:none; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
-          background:linear-gradient(165deg,#2b2138,#221831) padding-box, var(--metal) border-box;
+          background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
           border:2px solid transparent; border-radius:12px; padding:6px 7px; position:relative; cursor:default;
           box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07);
           display:flex; flex-direction:column; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
@@ -75,6 +75,11 @@
   .card.artifact .ctype { color:#ecd284; } .card.trap .ctype { color:#e09aa6; }
   .bigcard.creature .ctype { color:#e8b06a; } .bigcard.spell .ctype { color:#a8c8ec; }
   .bigcard.artifact .ctype { color:#ecd284; } .bigcard.trap .ctype { color:#e09aa6; }
+  /* explicit rims — written out per type so no browser has to resolve a variable inside the background shorthand */
+  .card.creature, .bigcard.creature { background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box; }
+  .card.spell, .bigcard.spell { background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#aecbe8,#4a6f9e 55%,#84a7cc) border-box; }
+  .card.artifact, .bigcard.artifact { background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#f2d98c,#b08d2e 55%,#dec05e) border-box; }
+  .card.trap, .bigcard.trap { background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#9a8a90,#54424e 55%,#b04a5e) border-box; }
   .card.clickable { cursor:pointer; } .card.clickable:hover { transform:translateY(-3px); border-color:#c9aaff; }
   #app { user-select:none; -webkit-user-select:none; }
   .hand.fan .card { cursor:grab; }
@@ -87,7 +92,7 @@
   .card.targetable { outline:3px solid #ffd94d; animation:pulse 1s infinite; }
   .card.redraw-pick { outline:3px solid #ff5d73; opacity:.75; }
   @keyframes pulse { 0%,100%{outline-offset:0} 50%{outline-offset:2px} }
-  .card .cost { position:absolute; top:-9px; left:-9px; background:var(--metal); color:#221503; font-weight:800;
+  .card .cost { position:absolute; top:-9px; left:-9px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800;
                 width:25px; height:25px; border-radius:50%; text-align:center; line-height:22px; font-size:13.5px;
                 border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 4px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
   .card .cname { font-weight:700; font-size:12.5px; line-height:1.15; margin:2px 0 3px; color:#f3e6c8; text-shadow:0 1px 2px rgba(0,0,0,.6); }
@@ -98,10 +103,10 @@
                  display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; }
   .hand .card .ctext { -webkit-line-clamp:5; }
   .bigcard { width:240px; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
-             background:linear-gradient(165deg,#2b2138,#221831) padding-box, var(--metal) border-box;
+             background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
              border:2.5px solid transparent; border-radius:14px; padding:14px; position:relative; text-align:left;
              box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07); }
-  .bigcard .cost { position:absolute; top:-11px; left:-11px; background:var(--metal); color:#221503; font-weight:800; width:31px; height:31px; border-radius:50%; text-align:center; line-height:28px; font-size:16px; border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 5px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
+  .bigcard .cost { position:absolute; top:-11px; left:-11px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800; width:31px; height:31px; border-radius:50%; text-align:center; line-height:28px; font-size:16px; border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 5px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
   .bigcard .cname { font-weight:700; font-size:17px; margin:2px 0 3px; color:#f3e6c8; text-shadow:0 1px 2px rgba(0,0,0,.6); }
   .bigcard .ctype { font-size:11px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
   .bigcard .ctext { font-size:13.5px; color:#33261a; line-height:1.45; margin:8px 0;
@@ -2114,7 +2119,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M12 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M12.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

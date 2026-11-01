@@ -405,6 +405,25 @@
     background:radial-gradient(circle at 35% 30%, #4a3a63, #231831 75%); border:2px solid var(--title); box-shadow:0 4px 12px rgba(0,0,0,.55); }
   .passive-emblem .pe-count { position:absolute; right:-5px; bottom:-5px; font-size:10.5px; font-weight:800; color:#f0b3ff;
     background:rgba(74,16,94,.9); border:1px solid #b18cff; border-radius:999px; padding:0 5px; }
+  /* --- M29 batch --- */
+  #app { padding-top:max(8px, env(safe-area-inset-top)); }
+  .gems-col i.held { background:#ff8fa3; box-shadow:0 0 5px rgba(255,143,163,.85); }
+  .gems-col i:not(.off):not(.held) { animation:gemIn .35s ease both; }
+  .fx-death { position:fixed; z-index:65; transform:translate(-50%,-50%); font-size:27px; pointer-events:none; animation:deathPuff .72s ease-out forwards; }
+  @keyframes deathPuff { 0%{ opacity:.95; transform:translate(-50%,-50%) scale(.7) } 100%{ opacity:0; transform:translate(-50%,-74%) scale(1.7) } }
+  .summon-in { animation:summonIn .45s ease-out; }
+  @keyframes summonIn { 0%{ transform:scale(.55); filter:brightness(2.1) } 100%{ transform:scale(1); filter:brightness(1) } }
+  .emblem.summon-in .emblem-head::after { content:''; position:absolute; inset:-5px; border:2px solid rgba(200,170,255,.85); border-radius:50%; animation:ringOut .55s ease-out forwards; pointer-events:none; }
+  @keyframes ringOut { from{ transform:scale(.65); opacity:1 } to{ transform:scale(1.3); opacity:0 } }
+  .turn-sweep.warn { font-size:19px; color:#ffb84d; letter-spacing:.14em; }
+  .grave-chip { cursor:pointer; } .grave-chip:hover { text-decoration:underline dotted; }
+  .profile-portrait { width:84px; height:84px; border-radius:50%; overflow:hidden; margin:0 auto 6px; border:3px solid var(--title);
+    background:radial-gradient(circle at 35% 30%, var(--cardA), var(--bgC)); }
+  .profile-portrait img, .profile-portrait svg { width:100%; height:100%; object-fit:cover; display:block; }
+  .profile-life { font-weight:700; color:#e7d9ff; font-size:14px; }
+  .profile-blurb { font-size:13.5px; color:#c4b6e8; line-height:1.45; }
+  .profile-rows { font-size:13px; color:#cbbcf2; line-height:1.7; margin:8px 0; }
+  .hcluster.clickable { cursor:pointer; }
   @keyframes passPulse { 0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 0 rgba(255,120,140,0) } 50%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 18px rgba(255,120,140,.85) } }
   @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
 </style>
@@ -2260,6 +2279,98 @@ function spawnFx(cls, n) {
     }
   } catch (e) {}
 }
+/* ---------- M29 batch: summon/death cinematics, hero profile popup,
+   graveyard viewer, deck warnings. (AI play zoom deferred: the engine
+   log carries no "plays" lines to key on — it needs a real engine play
+   event, its own careful step.) --- */
+var profileIdx = null, graveIdx = null;
+function showHero(idx) {
+  if (mode === 'targeting') return; // a foe-bar tap while targeting means "hit them"
+  profileIdx = idx; render();
+}
+function closeProfile() { profileIdx = null; render(); }
+function heroProfileHtml() {
+  var p = G.players[profileIdx];
+  if (!p) return '';
+  var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘' };
+  var schools = ((typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[p.heroId]) || []).map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' · ');
+  return '<div class="overlay" onclick="closeProfile()"><div class="box">' +
+    '<div class="profile-portrait">' + heroPortrait(p.heroId) + '</div>' +
+    '<h2>' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</h2>' +
+    '<div class="profile-life">❤️ ' + p.life + ' / ' + p.hero.life + ' life · 💎 ' + Math.max(0, G.availableMana(p)) + '/' + p.maxMana + ' mana</div>' +
+    '<p class="profile-blurb">' + esc(p.hero.blurb) + '</p>' +
+    '<div class="profile-rows"><div>🏫 ' + schools + '</div>' +
+    '<div>' + st.icon + ' ' + esc(st.name) + '</div>' +
+    '<div>🂠 ' + p.deck.length + ' in deck · ✋ ' + p.hand.length + ' in hand · 🪦 ' + p.graveyard.length + ' in graveyard · ⚔️ ' + p.board.length + ' on the field</div></div>' +
+    '<button class="big" onclick="closeProfile()">Close</button></div></div>';
+}
+function showGraveyard(idx) { graveIdx = idx; render(); }
+function closeGrave() { graveIdx = null; render(); }
+function graveHtml() {
+  var p = G.players[graveIdx];
+  if (!p) return '';
+  var rows = p.graveyard.length ? p.graveyard.map(function (inst) {
+    var d = D(inst);
+    return '<div class="brow"><span class="bcost">' + d.cost + '</span><div class="bmain"><div class="bname">' + (d.icon || '') + ' ' + esc(d.name) + '</div><div class="btext">' + d.type + '</div></div></div>';
+  }).join('') : '<p style="color:#a793d6">The graveyard is empty.</p>';
+  return '<div class="overlay" onclick="closeGrave()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto"><h2 style="text-align:center">🪦 ' + esc(p.hero.name) + "'s graveyard</h2>" + rows + '<button class="big" onclick="closeGrave()">Close</button></div></div>';
+}
+var prevBoardUids = null, prevBoardGame = null, pendingArrivals = [];
+function boardFxWatch() {
+  try {
+    if (!G) return;
+    var cur = {};
+    G.players.forEach(function (p) { p.board.forEach(function (c) { cur[c.uid] = true; }); });
+    if (prevBoardGame !== G || !prevBoardUids) { prevBoardGame = G; prevBoardUids = cur; pendingArrivals = []; return; }
+    Object.keys(prevBoardUids).forEach(function (uid) {
+      if (cur[uid]) return;
+      var el = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
+      if (el && el.getBoundingClientRect) {
+        var r = el.getBoundingClientRect();
+        spawnDeathPuff(r.left + r.width / 2, r.top + r.height / 2);
+      }
+    });
+    pendingArrivals = Object.keys(cur).filter(function (uid) { return !prevBoardUids[uid]; });
+    prevBoardUids = cur;
+  } catch (e) {}
+}
+function spawnDeathPuff(x, y) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var node = document.createElement('div');
+    node.className = 'fx-death'; node.textContent = '💨';
+    node.style.left = x + 'px'; node.style.top = y + 'px';
+    document.body.appendChild(node);
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 780);
+  } catch (e) {}
+}
+function applyArrivals() {
+  try {
+    if (!pendingArrivals || !pendingArrivals.length) return;
+    pendingArrivals.forEach(function (uid) {
+      var el = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
+      if (el && el.classList) el.classList.add('summon-in');
+    });
+    pendingArrivals = [];
+  } catch (e) {}
+}
+var deckWarnGame = null, deckWarned = {};
+function checkDeckWarn() {
+  try {
+    if (!G || G.winner !== null || !document.body || !document.createElement) return;
+    if (deckWarnGame !== G) { deckWarnGame = G; deckWarned = {}; }
+    G.players.forEach(function (p) {
+      if (p.deck.length <= 5 && p.deck.length > 0 && !deckWarned[p.idx]) {
+        deckWarned[p.idx] = true;
+        var node = document.createElement('div');
+        node.className = 'turn-sweep warn';
+        node.textContent = '⚠️ ' + (p.idx === humanIdx ? 'YOUR DECK: ' : 'ENEMY DECK: ') + p.deck.length + ' LEFT';
+        document.body.appendChild(node);
+        setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1350);
+      }
+    });
+  } catch (e) {}
+}
 /* ---------- M28 Spellslingers-feel batch: blocker lines, hero hit
    feedback, trap reveals, turn sweeps, draw flights, emblem icons. --- */
 var KW_ICONS = { flying: '🪽', haste: '⚡', reach: '🎯', trample: '🦏', ward: '🛡️', cantAttack: '🚫', cantBlock: '⛔', relentless: '🔁', sneak: '👁️' };
@@ -2368,6 +2479,7 @@ function spawnDrawFlight(idx, delay) {
 }
 function soundWatch() {
   if (!G) return;
+  boardFxWatch();
   var s = G.stats;
   if (sndSnap.life) {
     G.players.forEach(function (p) {
@@ -2688,19 +2800,20 @@ function heroBarHtml(p, isMe) {
      life shield tucked on the portrait, mana as a vertical gem gauge
      beside the hero (fills from the bottom), enemy hand as card backs. */
   var avail = Math.max(0, G.availableMana(p));
+  var heldN = G.reservedMana(p);
   var gpips = '';
-  for (var gk = 0; gk < Math.min(p.maxMana, 12); gk++) gpips = '<i class="' + (gk < p.maxMana - avail ? 'off' : '') + '"></i>' + gpips;
-  var held = G.reservedMana(p) ? '<span class="resv">' + G.reservedMana(p) + ' held</span>' : '';
+  for (var gk = 0; gk < Math.min(p.maxMana, 12); gk++) gpips = '<i class="' + (gk < heldN ? 'held' : (gk < p.maxMana - avail ? 'off' : '')) + '"></i>' + gpips;
+  var held = '';
   var handBit = isMe ? '✋ ' + p.hand.length
     : '<span class="backs">' + '<i></i>'.repeat(Math.min(p.hand.length, 8)) + '</span> ' + p.hand.length;
   return '<div class="herobar' + (isMe ? ' me' : ' foe') + '" id="herobar-' + p.idx + '"' + click + '>' +
-    '<div class="hcluster"><div class="portrait">' + heroPortrait(p.heroId) +
+    '<div class="hcluster clickable" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="portrait">' + heroPortrait(p.heroId) +
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + '</span></div>' +
     '<div class="hname">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div></div>' + speechHtml(p) +
-    '<div class="gems-col" title="Mana — lit gems are ready">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b></div>' +
+    '<div class="gems-col" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b></div>' +
     stanceMiniHtml(p) +
     '<div class="spacer"></div>' + gems +
-    '<div class="pile clickable" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ' + handBit + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div></div>';
+    '<div class="pile clickable" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ' + handBit + ' · <span class="grave-chip" onclick="event.stopPropagation();showGraveyard(' + p.idx + ')" title="Open the graveyard">🪦 ' + p.graveyard.length + '</span>' + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div></div>';
 }
 function stanceEmblemHtml(p) {
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘', blurb: '' };
@@ -2870,12 +2983,16 @@ function render() {
   if (mode === 'main') html += '<div style="text-align:center;font-size:11px;color:#a793d6">Hold a card to read it big · drag up to play it · tap any creature to inspect it</div>';
   html += '</div></div>';
   if (inspectUid !== null) html += inspectHtml();
+  if (profileIdx !== null) html += heroProfileHtml();
+  if (graveIdx !== null) html += graveHtml();
   if (mode === 'draftPick') html += draftHtml();
   if (G.winner !== null) html += gameOverHtml();
   $app.innerHTML = html;
   figFx = { hurt: {}, flare: -1, lunge: '' };
   drawBlockLines();
   checkPhaseSweep();
+  applyArrivals();
+  checkDeckWarn();
   var log = document.getElementById('log'); if (log) log.scrollTop = log.scrollHeight;
 }
 function gameOverHtml() {
@@ -2931,7 +3048,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M28.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M29 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

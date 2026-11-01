@@ -809,250 +809,143 @@ class RNG {
 
 const CARDS = {
   // --- plain creatures (shared pool) ---
-  thorn_pup:      { icon: "🐺", name: 'Thorn Pup',        cost: 1, type: 'creature', power: 2, health: 1 },
-  ash_sprite:     { icon: "✨", name: 'Ash Sprite',       cost: 2, type: 'creature', power: 2, health: 2 },
-  shieldbearer:   { icon: "🛡️", name: 'Shieldbearer',     cost: 2, type: 'creature', power: 1, health: 4, keywords: ['reach'] },
-  sky_scout:      { icon: "🪶", name: 'Sky Scout',        cost: 2, type: 'creature', power: 2, health: 1, keywords: ['flying'] },
-  swift_runner:   { icon: "🐆", name: 'Swift Runner',     cost: 3, type: 'creature', power: 3, health: 2, keywords: ['haste'] },
-  moss_brute:     { icon: "🦍", name: 'Moss Brute',       cost: 3, type: 'creature', power: 3, health: 3 },
-  stone_warden:   { icon: "🗿", name: 'Stone Warden',     cost: 4, type: 'creature', power: 2, health: 6, keywords: ['reach'] },
-  sky_hunter:     { icon: "🦅", name: 'Sky Hunter',       cost: 4, type: 'creature', power: 3, health: 3, keywords: ['flying'] },
-  gore_horn:      { icon: "🐂", name: 'Gore Horn',        cost: 5, type: 'creature', power: 5, health: 4, keywords: ['trample'] },
-  ember_roc:      { icon: "🔥", name: 'Ember Roc',        cost: 6, type: 'creature', power: 5, health: 5, keywords: ['flying'] },
-  elder_titan:    { icon: "👑", name: 'Elder Titan',      cost: 7, type: 'creature', power: 6, health: 7, keywords: ['trample'], legendary: true, behemoth: true },
-  gazemaw:        { icon: "👁️", name: 'Gazemaw',          cost: 4, type: 'creature', power: 1, health: 4, keywords: ['flying', 'ward'], legendary: true, attackEffect: { kind: 'rays' }, cardSchool: 'tides' },
-  deepbreach_serpent: { icon: "🐍", name: 'Deepbreach Serpent', cost: 13, type: 'creature', power: 6, health: 6, keywords: ['sneak'], costMinusPerPlay: true, cardSchool: 'tides' },
+  gazemaw:        { icon: "👁️", name: 'Gazemaw',          cost: 4, type: 'creature', power: 1, health: 4, keywords: ['flying', 'ward'], legendary: true, attackEffect: { kind: 'rays' }, cardSchool: 'tides' , orig: "Karazikar, the Eye Tyrant", src: "Recovery Sweep 2 \u2014 rays recovered in full" },
+  deepbreach_serpent: { icon: "🐍", name: 'Deepbreach Serpent', cost: 13, type: 'creature', power: 6, health: 6, keywords: ['sneak'], costMinusPerPlay: true, cardSchool: 'tides' , orig: "Breaching Serpent", src: "Recovery Sweep 2 \u2014 Sneak + cost-per-play verified" },
   // --- M49: Sweep-4 conversions, verified from official card faces ---
-  emberling: { icon: "🔥", name: 'Emberling', cost: 0, type: 'creature', power: 2, health: 1, keywords: ['haste', 'fleeting'], generatedOnly: true, cardSchool: 'ember' },
-  kindling_pyromancer: { icon: "🔥", name: 'Kindling Pyromancer', cost: 4, type: 'creature', power: 3, health: 2, afterSpellSummon: 'emberling', cardSchool: 'ember' }, // original: Young Pyromancer — 3/2 verified (Helvault face); final cost 4 (v1.04)
-  cinder_court_embermage: { icon: "🔥", name: 'Cinder Court Embermage', cost: 3, type: 'creature', power: 2, health: 4, afterSpellPing: 1, cardSchool: 'ember' }, // original: Ghitu Embermage — cost 3 verified (Top-10 Creatures face)
-  deathshade: { icon: "🌑", name: 'Deathshade', cost: 20, type: 'creature', power: 13, health: 13, costMinusPerDamageTaken: true, cardSchool: 'grave' }, // original: Death's Shadow — 20-cost 13/13 verified face
-  desperate_prayer: { icon: "🙏", name: 'Desperate Prayer', cost: 2, type: 'spell', effect: { kind: 'drawHealByCost' }, cardSchool: 'dawn' },
-  fatetwist: { icon: "🌀", name: 'Fatetwist', cost: 4, type: 'spell', effect: { kind: 'copyOpponentHand' }, cardSchool: 'tides' },
-  sheep: { icon: "🐑", name: 'Sheep', cost: 1, type: 'creature', power: 1, health: 1, cardSchool: 'worldroot' },
-  beastkeeper: { icon: "🦌", name: 'Beastkeeper', cost: 3, type: 'creature', power: 2, health: 4, afterSummonBuffCheap: true, cardSchool: 'worldroot' },
-  heartswap_tree: { icon: "🌳", name: 'Heartswap Tree', cost: 5, type: 'creature', power: 0, health: 13, debut: { kind: 'swapHeroLifeWithHealth' }, cardSchool: 'worldroot' }, // original: Tree of Redemption
-  quakehoof_behemoth: { icon: "🐃", name: 'Quakehoof Behemoth', cost: 8, type: 'creature', power: 5, health: 5, keywords: ['haste'], debut: { kind: 'buffCreaturesAndHand', power: 2, health: 2 }, cardSchool: 'worldroot' }, // original: Craterhoof Behemoth
+  emberling: { icon: "🔥", name: 'Emberling', cost: 0, type: 'creature', power: 2, health: 1, keywords: ['haste', 'fleeting'], generatedOnly: true, cardSchool: 'ember' , orig: "Emberling \u2014 token created by Young Pyromancer", src: "cards.csv + Hipsters Helvault gallery" },
+  kindling_pyromancer: { icon: "🔥", name: 'Kindling Pyromancer', cost: 4, type: 'creature', power: 3, health: 2, afterSpellSummon: 'emberling', cardSchool: 'ember' , orig: "Young Pyromancer", src: "Helvault card face; cost 4 final (v1.04 notes)" }, // original: Young Pyromancer — 3/2 verified (Helvault face); final cost 4 (v1.04)
+  cinder_court_embermage: { icon: "🔥", name: 'Cinder Court Embermage', cost: 3, type: 'creature', power: 2, health: 4, afterSpellPing: 1, cardSchool: 'ember' , orig: "Ghitu Embermage", src: "Top-10 Creatures card face \u2014 cost 3 verified" }, // original: Ghitu Embermage — cost 3 verified (Top-10 Creatures face)
+  deathshade: { icon: "🌑", name: 'Deathshade', cost: 20, type: 'creature', power: 13, health: 13, costMinusPerDamageTaken: true, cardSchool: 'grave' , orig: "Death's Shadow", src: "verified card face \u2014 20-cost 13/13" }, // original: Death's Shadow — 20-cost 13/13 verified face
+  desperate_prayer: { icon: "🙏", name: 'Desperate Prayer', cost: 2, type: 'spell', effect: { kind: 'drawHealByCost' }, cardSchool: 'dawn' , orig: "Desperate Prayer", src: "Recovery Sweep 4 \u2014 Helvault gallery face" },
+  fatetwist: { icon: "🌀", name: 'Fatetwist', cost: 4, type: 'spell', effect: { kind: 'copyOpponentHand' }, cardSchool: 'tides' , orig: "Fatetwist", src: "Recovery Sweep 4 \u2014 Helvault gallery face" },
+  sheep: { icon: "🐑", name: 'Sheep', cost: 1, type: 'creature', power: 1, health: 1, cardSchool: 'worldroot' , orig: "Sheep", src: "Recovery Sweep 4 \u2014 Helvault gallery face" },
+  beastkeeper: { icon: "🦌", name: 'Beastkeeper', cost: 3, type: 'creature', power: 2, health: 4, afterSummonBuffCheap: true, cardSchool: 'worldroot' , orig: "Beastkeeper", src: "Recovery Sweep 4 \u2014 Helvault gallery face" },
+  heartswap_tree: { icon: "🌳", name: 'Heartswap Tree', cost: 5, type: 'creature', power: 0, health: 13, debut: { kind: 'swapHeroLifeWithHealth' }, cardSchool: 'worldroot' , orig: "Tree of Redemption", src: "verified record" }, // original: Tree of Redemption
+  quakehoof_behemoth: { icon: "🐃", name: 'Quakehoof Behemoth', cost: 8, type: 'creature', power: 5, health: 5, keywords: ['haste'], debut: { kind: 'buffCreaturesAndHand', power: 2, health: 2 }, cardSchool: 'worldroot' , orig: "Craterhoof Behemoth", src: "verified record" }, // original: Craterhoof Behemoth
   // --- M50: Sweep-4 conversions, second wave (verified card faces) ---
-  returnwing_angel: { icon: "🕊️", name: 'Returnwing Angel', cost: 4, type: 'creature', power: 3, health: 3, keywords: ['flying'], debut: { kind: 'bounceOwnSetCost', setCost: 1 }, cardSchool: 'dawn' }, // original: Restoration Angel
-  archwing_ravager: { icon: "🐉", name: 'Archwing Ravager', cost: 5, type: 'creature', power: 3, health: 3, keywords: ['flying'], attackEffect: { kind: 'destroyRandomArtifactDouble' }, cardSchool: 'ember' },
-  tollwarden_captain: { icon: "🛡️", name: 'Tollwarden Captain', cost: 2, type: 'creature', power: 3, health: 2, debut: { kind: 'taxFoeSpellsNextTurn', amount: 2 }, cardSchool: 'dawn' }, // original: Thalia, Guardian of Thraben
-  thirteenth_hour: { icon: "🕐", name: 'The Thirteenth Hour', cost: 3, type: 'spell', effect: { kind: 'armTriska' }, cardSchool: 'grave' }, // original: Triskaidekaphobia
-  wound_priest: { icon: "🩸", name: 'Wound Priest', cost: 2, type: 'creature', power: 2, health: 2, healOnDealtDamage: true, cardSchool: 'grave' }, // original: Demonic Priest — "After this deals damage, heal yourself for that much" (combat is its only damage source in this pool)
-  vein_drainlord: { icon: "🧛", name: 'Vein Drainlord', cost: 3, type: 'creature', power: 2, health: 3, keywords: ['flying'], drainAmp: 1, cardSchool: 'grave' }, // original: Voldaren Drainlord — drain effects you control drain 1 more (scope here: drain effects, Nightmare drains, grave whispers)
-  sanguine_pact: { icon: "🔗", name: 'The Sanguine Pact', cost: 3, type: 'artifact', charges: 3, activateCost: 2, effect: { kind: 'armBond' }, cardSchool: 'grave' }, // original: Sanguine Bond — "Whenever you heal this turn, deal that much damage to your opponent. Activate: pay 2" (charges follow this game's artifact pattern)
+  returnwing_angel: { icon: "🕊️", name: 'Returnwing Angel', cost: 4, type: 'creature', power: 3, health: 3, keywords: ['flying'], debut: { kind: 'bounceOwnSetCost', setCost: 1 }, cardSchool: 'dawn' , orig: "Restoration Angel", src: "verified card face" }, // original: Restoration Angel
+  archwing_ravager: { icon: "🐉", name: 'Archwing Ravager', cost: 5, type: 'creature', power: 3, health: 3, keywords: ['flying'], attackEffect: { kind: 'destroyRandomArtifactDouble' }, cardSchool: 'ember' , orig: "Archwing Ravager", src: "Recovery Sweep 4 \u2014 Helvault gallery face" },
+  tollwarden_captain: { icon: "🛡️", name: 'Tollwarden Captain', cost: 2, type: 'creature', power: 3, health: 2, debut: { kind: 'taxFoeSpellsNextTurn', amount: 2 }, cardSchool: 'dawn' , orig: "Thalia, Guardian of Thraben", src: "verified card face" }, // original: Thalia, Guardian of Thraben
+  thirteenth_hour: { icon: "🕐", name: 'The Thirteenth Hour', cost: 3, type: 'spell', effect: { kind: 'armTriska' }, cardSchool: 'grave' , orig: "Triskaidekaphobia", src: "verified card face" }, // original: Triskaidekaphobia
+  wound_priest: { icon: "🩸", name: 'Wound Priest', cost: 2, type: 'creature', power: 2, health: 2, healOnDealtDamage: true, cardSchool: 'grave' , orig: "Demonic Priest", src: "verified card face" }, // original: Demonic Priest — "After this deals damage, heal yourself for that much" (combat is its only damage source in this pool)
+  vein_drainlord: { icon: "🧛", name: 'Vein Drainlord', cost: 3, type: 'creature', power: 2, health: 3, keywords: ['flying'], drainAmp: 1, cardSchool: 'grave' , orig: "Voldaren Drainlord", src: "verified record" }, // original: Voldaren Drainlord — drain effects you control drain 1 more (scope here: drain effects, Nightmare drains, grave whispers)
+  sanguine_pact: { icon: "🔗", name: 'The Sanguine Pact', cost: 3, type: 'artifact', charges: 3, activateCost: 2, effect: { kind: 'armBond' }, cardSchool: 'grave' , orig: "Sanguine Bond", src: "verified record" }, // original: Sanguine Bond — "Whenever you heal this turn, deal that much damage to your opponent. Activate: pay 2" (charges follow this game's artifact pattern)
 
 
 
-  pyre_wraith:    { icon: "👻", name: 'Pyre Wraith',      cost: 3, type: 'creature', power: 3, health: 2, finale: { kind: 'damageHero', amount: 1, who: 'enemy' } },
-  bramble_imp:    { icon: "🌵", name: 'Bramble Imp',      cost: 1, type: 'creature', power: 1, health: 2, finale: { kind: 'healHero', amount: 2, who: 'self' } },
-  grove_tender:   { icon: "🌱", name: 'Grove Tender',     cost: 2, type: 'creature', power: 1, health: 3, debut: { kind: 'draw', count: 1 } },
-  nightjar:       { icon: "🌙", name: 'Nightjar',         cost: 3, type: 'creature', power: 2, health: 2, keywords: ['flying'], finale: { kind: 'damageHero', amount: 1, who: 'enemy' } },
-  dawn_chorister: { icon: "🎵", name: 'Dawn Chorister',   cost: 3, type: 'creature', power: 3, health: 3, debut: { kind: 'healHero', amount: 2, who: 'self' } },
-  ironbark_golem: { icon: "🌳", name: 'Ironbark Golem',   cost: 5, type: 'creature', power: 4, health: 6, keywords: ['reach'] },
-  storm_drake:    { icon: "🐉", name: 'Storm Drake',      cost: 5, type: 'creature', power: 4, health: 4, keywords: ['flying'] },
 
   // --- card-generation creatures (the nightmare weaver's fuel) ---
-  echo_familiar:  { icon: "🦊", name: 'Echo Familiar',    cost: 2, type: 'creature', power: 2, health: 2, debut: { kind: 'generate', count: 1 } },
-  lore_drifter:   { icon: "📖", name: 'Lore Drifter',     cost: 3, type: 'creature', power: 2, health: 3, debut: { kind: 'generate', count: 1 } },
-  mirror_moth:    { icon: "🦋", name: 'Mirror Moth',      cost: 4, type: 'creature', power: 3, health: 3, keywords: ['flying'], debut: { kind: 'generate', count: 1 } },
 
   // --- nightmare weaver signatures (original names, researched mechanical jobs) ---
-  pilfer_dream:   { icon: "🎭", name: 'Pilfer Dream',     cost: 1, type: 'spell', signatureFor: 'weaver', effect: { kind: 'stealFromDeck', count: 1, discount: 1 } },
-  dread_herald:   { icon: "📯", name: 'Dread Herald',     cost: 2, type: 'creature', power: 2, health: 3, signatureFor: 'weaver', doubler: true, debut: { kind: 'sowSeed', amount: 1 } },
-  umbral_stag:    { icon: "🦌", name: 'Umbral Stag',      cost: 4, type: 'creature', power: 4, health: 5, signatureFor: 'weaver', debut: { kind: 'discountGenerated', amount: 2 } },
+  pilfer_dream:   { icon: "🎭", name: 'Pilfer Dream',     cost: 1, type: 'spell', signatureFor: 'weaver', effect: { kind: 'stealFromDeck', count: 1, discount: 1 } , orig: "Extract Fear", src: "CONVERSION-AUDIT S4 \u2014 signature (Ashiok)" },
 
   // --- trap-controller signatures ---
-  snare_of_no:    { icon: "🚫", name: 'Snare of No',      cost: 3, type: 'trap', signatureFor: 'controller', trigger: { kind: 'counterBig', minCost: 3 }, effect: { kind: 'healHero', amount: 2, who: 'self' } },
-  vigil_acolyte:  { icon: "🕯️", name: 'Vigil Acolyte',    cost: 3, type: 'creature', power: 2, health: 5, signatureFor: 'controller', debut: { kind: 'nextTrapDiscount', amount: 2 } },
-  ward_lens:      { icon: "🔮", name: 'Ward Lens',        cost: 2, type: 'artifact', charges: 3, signatureFor: 'controller', effect: { kind: 'draftTrap' } },
+  snare_of_no:    { icon: "🚫", name: 'Snare of No',      cost: 3, type: 'trap', signatureFor: 'controller', trigger: { kind: 'counterBig', minCost: 3 }, effect: { kind: 'healHero', amount: 2, who: 'self' } , orig: "Absorb", src: "CONVERSION-AUDIT S4 \u2014 signature (Teferi)" },
+  vigil_acolyte:  { icon: "🕯️", name: 'Vigil Acolyte',    cost: 3, type: 'creature', power: 2, health: 5, signatureFor: 'controller', debut: { kind: 'nextTrapDiscount', amount: 2 } , orig: "Teferi's Acolyte", src: "CONVERSION-AUDIT S4 \u2014 signature (Teferi)" },
+  ward_lens:      { icon: "🔮", name: 'Ward Lens',        cost: 2, type: 'artifact', charges: 3, signatureFor: 'controller', effect: { kind: 'draftTrap' } , orig: "Teferi's Staff", src: "CONVERSION-AUDIT S4 \u2014 signature (Teferi)" },
 
   // --- verdant keeper signatures ---
-  rootcall_matriarch: { icon: "🌺", name: 'Rootcall Matriarch', cost: 5, type: 'creature', power: 3, health: 7, keywords: ['reach'], signatureFor: 'keeper', debut: { kind: 'healHero', amount: 3, who: 'self' } },
-  sunwell_charm:  { icon: "☀️", name: 'Sunwell Charm',    cost: 2, type: 'artifact', charges: 3, signatureFor: 'keeper', effect: { kind: 'healHero', amount: 2, who: 'self' } },
-  overgrowth:     { icon: "🌿", name: 'Overgrowth',       cost: 3, type: 'spell', signatureFor: 'keeper', effect: { kind: 'buffAllCreatures', power: 1, health: 1 } },
 
   // --- dream thief: generation engine on a body (weaver-flavoured, shared pool) ---
-  dream_thief:    { icon: "🥷", name: 'Dream Thief',      cost: 3, type: 'creature', power: 2, health: 2, debut: { kind: 'stealFromDeck', count: 1 } },
 
   // --- spells ---
-  spark_bolt:     { icon: "⚡", name: 'Spark Bolt',       cost: 1, type: 'spell', effect: { kind: 'damageAny', amount: 2 } },
-  grow_fierce:    { icon: "💪", name: 'Grow Fierce',      cost: 1, type: 'spell', effect: { kind: 'buffCreature', power: 2, health: 2 } },
-  mend_light:     { icon: "💚", name: 'Mend Light',       cost: 2, type: 'spell', effect: { kind: 'healHero', amount: 4, who: 'self' } },
-  strange_gift:   { icon: "🎁", name: 'Strange Gift',     cost: 2, type: 'spell', effect: { kind: 'generate', count: 2 } },
-  deep_breath:    { icon: "🌬️", name: 'Deep Breath',      cost: 3, type: 'spell', effect: { kind: 'draw', count: 2 } },
-  erode_memory:   { icon: "🧠", name: 'Erode Memory',     cost: 3, type: 'spell', effect: { kind: 'millOpponent', count: 3 } },
-  wither_wave:    { icon: "🥀", name: 'Wither Wave',      cost: 4, type: 'spell', effect: { kind: 'damageAllEnemyCreatures', amount: 2 } },
-  second_wind:    { icon: "🍃", name: 'Second Wind',      cost: 2, type: 'spell', effect: { kind: 'healCreatureAll', amount: 3 } },
-  drown_in_dreams: { icon: "🌊", name: 'Drown in Dreams', cost: 4, type: 'spell', effect: { kind: 'millOpponent', count: 5 } },
-  war_stomp:      { icon: "👣", name: 'War Stomp',        cost: 2, type: 'spell', effect: { kind: 'damageAllEnemyCreatures', amount: 1 } },
-  bloodrush:      { icon: "🩸", name: 'Bloodrush',        cost: 1, type: 'spell', effect: { kind: 'buffCreature', power: 2, health: 0 } },
 
   // --- traps (shared pool) ---
-  pit_spark:      { icon: "🕳️", name: 'Pit Spark',        cost: 2, type: 'trap', trigger: { kind: 'zapAttacker', amount: 2 } },
-  quiet_snare:    { icon: "🤫", name: 'Quiet Snare',      cost: 3, type: 'trap', trigger: { kind: 'counterBig', minCost: 3 } },
-  ward_of_dawn:   { icon: "🌅", name: 'Ward of Dawn',     cost: 1, type: 'trap', trigger: { kind: 'wardLife', amount: 3 } },
-  tripwire:       { icon: "🪤", name: 'Tripwire',         cost: 1, type: 'trap', trigger: { kind: 'zapAttacker', amount: 1 } },
-  iron_verdict:   { icon: "⚖️", name: 'Iron Verdict',     cost: 4, type: 'trap', trigger: { kind: 'counterBig', minCost: 2 } },
+  quiet_snare:    { icon: "🤫", name: 'Quiet Snare',      cost: 3, type: 'trap', trigger: { kind: 'counterBig', minCost: 3 } , orig: "(name unrecorded) counter-trap, 3+ window", src: "COSTING.md B11 \u2014 recorded counter family rates" },
+  iron_verdict:   { icon: "⚖️", name: 'Iron Verdict',     cost: 4, type: 'trap', trigger: { kind: 'counterBig', minCost: 2 } , orig: "(name unrecorded) counter-trap, 2+ window", src: "COSTING.md B11 \u2014 recorded counter family rates" },
   // --- M20 attack-window traps: Yira analogs of the two traps the Teferi
   // footage recovered (a glare that answers the attack declaration, and a
   // retort that answers at the end of the turn that hurt you). Names ours. ---
-  sunmirror_glare: { icon: "🪞", name: 'Sunmirror Glare', cost: 3, type: 'trap', trigger: { kind: 'slayAttacker' } },
-  vindictive_retort: { icon: "🎯", name: 'Vindictive Retort', cost: 2, type: 'trap', trigger: { kind: 'vindictive' } },
+  sunmirror_glare: { icon: "🪞", name: 'Sunmirror Glare', cost: 3, type: 'trap', trigger: { kind: 'slayAttacker' } , orig: "Immolating Glare", src: "CONVERSION-AUDIT S3 / M20 record" },
+  vindictive_retort: { icon: "🎯", name: 'Vindictive Retort', cost: 2, type: 'trap', trigger: { kind: 'vindictive' } , orig: "Vindictive Shot", src: "M20 record" },
 
   // --- M20 board-swing spells (Second Dawn pair + the great verdict) ---
-  second_suns_dawn: { icon: "🌄", name: "Second Sun's Dawn", cost: 6, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'healHero', amount: 7, who: 'self' }, { kind: 'shuffleSecondSun' } ] } },
-  second_sun:     { icon: "☀️", name: 'The Second Sun',   cost: 10, type: 'spell', generatedOnly: true, effect: { kind: 'damageAllEnemies', amount: 10 } },
-  daybreak_verdict: { icon: "⚖️", name: 'Daybreak Verdict', cost: 7, type: 'spell', effect: { kind: 'destroyAllCreatures' } },
+  second_suns_dawn: { icon: "🌄", name: "Second Sun's Dawn", cost: 6, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'healHero', amount: 7, who: 'self' }, { kind: 'shuffleSecondSun' } ] } , orig: "(name unrecorded) dawn second-sun spell", src: "Teferi + Nahiri footage / Rosetta record (M20)" },
+  second_sun:     { icon: "☀️", name: 'The Second Sun',   cost: 10, type: 'spell', generatedOnly: true, effect: { kind: 'damageAllEnemies', amount: 10 } , orig: "The Second Sun \u2014 generated payoff", src: "Teferi + Nahiri footage / Rosetta record (M20)" },
+  daybreak_verdict: { icon: "⚖️", name: 'Daybreak Verdict', cost: 7, type: 'spell', effect: { kind: 'destroyAllCreatures' } , orig: "(name unrecorded) dawn board-wipe", src: "Teferi + Nahiri footage / Rosetta record (M20)" },
 
   // --- Schools: three-stage class chains (the recovered Skill Class system, renamed original) ---
   // One school per deck: stage 1 is inserted into the top 3 of your deck at game
   // start; playing a stage inserts the next into the top 3. Stage cards are
   // generated cards, so Umbra plants Nightmares on their draw and play.
-  tidewing_familiar: { icon: "🕊️", name: 'Tidewing Familiar', cost: 2, type: 'creature', power: 1, health: 1, keywords: ['flying'], generatedOnly: true, school: 'wizard', schoolStage: 1, debut: { kind: 'discountSpell', amount: 1 } },
-  signature_weaving: { icon: "🧵", name: 'Signature Weaving', cost: 2, type: 'spell', generatedOnly: true, school: 'wizard', schoolStage: 2, effect: { kind: 'draftSignature' } },
-  mastery_of_currents: { icon: "🌊", name: 'Mastery of Currents', cost: 6, type: 'spell', generatedOnly: true, school: 'wizard', schoolStage: 3, effect: { kind: 'mastery' } },
-  tide_elemental: { icon: "💧", name: 'Tide Elemental', cost: 5, type: 'creature', power: 5, health: 5, generatedOnly: true },
-  gravebound_imp: { icon: "😈", name: 'Gravebound Imp', cost: 1, type: 'creature', power: 2, health: 3, generatedOnly: true, school: 'warlock', schoolStage: 1, selfDecay: 1 },
-  withering_edict: { icon: "📜", name: 'Withering Edict', cost: 3, type: 'spell', generatedOnly: true, school: 'warlock', schoolStage: 2, effect: { kind: 'wither' } },
-  whispers_of_grave: { icon: "👂", name: 'Whispers of the Grave', cost: 3, type: 'spell', generatedOnly: true, school: 'warlock', schoolStage: 3, effect: { kind: 'graveWhispers' } },
-  dawn_steed: { icon: "🐴", name: 'Dawn Steed', cost: 1, type: 'creature', power: 1, health: 2, generatedOnly: true, school: 'paladin', schoolStage: 1, debut: { kind: 'buffRandomCreature', power: 0, health: 1 } },
-  dawns_smite: { icon: "🔆", name: "Dawn's Smite", cost: 3, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 2, effect: { kind: 'smiteByBoard' } },
-  aura_of_valor: { icon: "🏵️", name: 'Aura of Valor', cost: 4, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 3, effect: { kind: 'auraValor' } },
-  axe_of_pyre: { icon: "🪓", name: 'Axe of the Pyre', cost: 1, type: 'artifact', charges: 3, generatedOnly: true, school: 'barbarian', schoolStage: 1, effect: { kind: 'axeBuff' } },
-  reckless_wrath: { icon: "💢", name: 'Reckless Wrath', cost: 2, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 2, effect: { kind: 'rageStrongest' } },
-  unbroken_might: { icon: "💥", name: 'Unbroken Might', cost: 4, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 3, effect: { kind: 'unbrokenMight' } },
-  thornwolf: { icon: "🐺", name: 'Thornwolf', cost: 2, type: 'creature', power: 3, health: 2, generatedOnly: true, school: 'druid', schoolStage: 1, debut: { kind: 'healHero', amount: 2, who: 'self' } },
-  barkhide_bloom: { icon: "🌸", name: 'Barkhide Bloom', cost: 3, type: 'spell', generatedOnly: true, school: 'druid', schoolStage: 2, effect: { kind: 'sequence', effects: [ { kind: 'ramp' }, { kind: 'buffRandomCreature', power: 1, health: 1 } ] } },
-  worldroot_titanosaur: { icon: "🦕", name: 'Worldroot Titanosaur', cost: 8, type: 'creature', power: 8, health: 10, keywords: ['trample', 'ward'], generatedOnly: true, school: 'druid', schoolStage: 3, guardian: true, regen: 2, behemoth: true },
-  stance_recruit: { icon: "🛡️", name: 'Recruit', cost: 0, type: 'creature', power: 1, health: 1, generatedOnly: true },
+  tidewing_familiar: { icon: "🕊️", name: 'Tidewing Familiar', cost: 2, type: 'creature', power: 1, health: 1, keywords: ['flying'], generatedOnly: true, school: 'wizard', schoolStage: 1, debut: { kind: 'discountSpell', amount: 1 } , orig: "Wizard's Familiar", src: "CONVERSION-AUDIT S4 \u2014 Tides chain stage 1" },
+  signature_weaving: { icon: "🧵", name: 'Signature Weaving', cost: 2, type: 'spell', generatedOnly: true, school: 'wizard', schoolStage: 2, effect: { kind: 'draftSignature' } , orig: "Signature Spell", src: "CONVERSION-AUDIT S4 \u2014 Tides chain stage 2" },
+  mastery_of_currents: { icon: "🌊", name: 'Mastery of Currents', cost: 6, type: 'spell', generatedOnly: true, school: 'wizard', schoolStage: 3, effect: { kind: 'mastery' } , orig: "Elemental Mastery", src: "CONVERSION-AUDIT S4 \u2014 Tides chain stage 3" },
+  tide_elemental: { icon: "💧", name: 'Tide Elemental', cost: 5, type: 'creature', power: 5, health: 5, generatedOnly: true , orig: "Water Elemental (token)", src: "CONVERSION-AUDIT S4 \u2014 record muddled; 5/5 is our reading, flagged" },
+  gravebound_imp: { icon: "😈", name: 'Gravebound Imp', cost: 1, type: 'creature', power: 2, health: 3, generatedOnly: true, school: 'warlock', schoolStage: 1, selfDecay: 1 , orig: "Pactbound Quasit", src: "CONVERSION-AUDIT S4 \u2014 Grave chain stage 1" },
+  withering_edict: { icon: "📜", name: 'Withering Edict', cost: 3, type: 'spell', generatedOnly: true, school: 'warlock', schoolStage: 2, effect: { kind: 'wither' } , orig: "Sign of Ill Omen", src: "CONVERSION-AUDIT S4 \u2014 Grave chain stage 2" },
+  whispers_of_grave: { icon: "👂", name: 'Whispers of the Grave', cost: 3, type: 'spell', generatedOnly: true, school: 'warlock', schoolStage: 3, effect: { kind: 'graveWhispers' } , orig: "Whispers of the Grave", src: "CONVERSION-AUDIT S4 \u2014 Grave chain stage 3" },
+  dawn_steed: { icon: "🐴", name: 'Dawn Steed', cost: 1, type: 'creature', power: 1, health: 2, generatedOnly: true, school: 'paladin', schoolStage: 1, debut: { kind: 'buffRandomCreature', power: 0, health: 1 } , orig: "Faithful Steed", src: "CONVERSION-AUDIT S4 \u2014 Dawn chain stage 1" },
+  dawns_smite: { icon: "🔆", name: "Dawn's Smite", cost: 3, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 2, effect: { kind: 'smiteByBoard' } , orig: "Divine Smite", src: "CONVERSION-AUDIT S4 \u2014 Dawn chain stage 2" },
+  aura_of_valor: { icon: "🏵️", name: 'Aura of Valor', cost: 4, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 3, effect: { kind: 'auraValor' } , orig: "Aura of Courage", src: "CONVERSION-AUDIT S4 \u2014 Dawn chain stage 3" },
+  axe_of_pyre: { icon: "🪓", name: 'Axe of the Pyre', cost: 1, type: 'artifact', charges: 3, generatedOnly: true, school: 'barbarian', schoolStage: 1, effect: { kind: 'axeBuff' } , orig: "Axe of Vengeance", src: "CONVERSION-AUDIT S4 \u2014 Ember chain stage 1" },
+  reckless_wrath: { icon: "💢", name: 'Reckless Wrath', cost: 2, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 2, effect: { kind: 'rageStrongest' } , orig: "Mindless Rage", src: "CONVERSION-AUDIT S4 \u2014 Ember chain stage 2" },
+  unbroken_might: { icon: "💥", name: 'Unbroken Might', cost: 4, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 3, effect: { kind: 'unbrokenMight' } , orig: "Indomitable Strength", src: "CONVERSION-AUDIT S4 \u2014 Ember chain stage 3" },
+  thornwolf: { icon: "🐺", name: 'Thornwolf', cost: 2, type: 'creature', power: 3, health: 2, generatedOnly: true, school: 'druid', schoolStage: 1, debut: { kind: 'healHero', amount: 2, who: 'self' } , orig: "Wildshape Wolf", src: "M40 verified-already-correct \u2014 Worldroot chain stage 1" },
+  barkhide_bloom: { icon: "🌸", name: 'Barkhide Bloom', cost: 3, type: 'spell', generatedOnly: true, school: 'druid', schoolStage: 2, effect: { kind: 'sequence', effects: [ { kind: 'ramp' }, { kind: 'buffRandomCreature', power: 1, health: 1 } ] } , orig: "Wildshape Brontosaurus", src: "CONVERSION-AUDIT S4 \u2014 Worldroot chain stage 2" },
+  worldroot_titanosaur: { icon: "🦕", name: 'Worldroot Titanosaur', cost: 8, type: 'creature', power: 8, health: 10, keywords: ['trample', 'ward'], generatedOnly: true, school: 'druid', schoolStage: 3, guardian: true, regen: 2, behemoth: true , orig: "Worldroot Titanosaur", src: "M40 verified-already-correct \u2014 Worldroot chain stage 3 (source conflict on guardian/regen reading, flagged)" },
+  stance_recruit: { icon: "🛡️", name: 'Recruit', cost: 0, type: 'creature', power: 1, health: 1, generatedOnly: true , orig: "Recruit \u2014 Training Yard stance token", src: "hero system (stances documented M6; trigger condition Forge's choice, flagged)" },
 
   // --- library batch (M5): more building blocks for custom decks ---
-  cinder_hound:   { icon: "🐕", name: 'Cinder Hound',     cost: 1, type: 'creature', power: 1, health: 1, keywords: ['haste'] },
-  glade_archer:   { icon: "🏹", name: 'Glade Archer',     cost: 4, type: 'creature', power: 4, health: 2, keywords: ['reach'] },
-  mountain_ogre:  { icon: "🧌", name: 'Mountain Ogre',    cost: 6, type: 'creature', power: 6, health: 6 },
-  worldroot_titan: { icon: "🌋", name: 'Worldroot Titan', cost: 8, type: 'creature', power: 8, health: 8, keywords: ['trample'], legendary: true, behemoth: true },
-  comet_fall:     { icon: "☄️", name: 'Comet Fall',       cost: 5, type: 'spell', effect: { kind: 'damageAny', amount: 6 } },
-  quick_study:    { icon: "📜", name: 'Quick Study',      cost: 1, type: 'spell', effect: { kind: 'draw', count: 1 } },
-  scatter_mind:   { icon: "🌀", name: 'Scatter Mind',     cost: 2, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'millOpponent', count: 2 }, { kind: 'healHero', amount: 2, who: 'self' } ] } },
-  recall:         { icon: "💨", name: 'Recall',           cost: 3, type: 'spell', effect: { kind: 'bounce' } },
-  ember_snare:    { icon: "🧨", name: 'Ember Snare',      cost: 3, type: 'trap', trigger: { kind: 'zapAttacker', amount: 3 } },
-  thiefs_regret:  { icon: "🎴", name: "Thief's Regret",   cost: 3, type: 'trap', trigger: { kind: 'counterBig', minCost: 4 }, effect: { kind: 'draw', count: 1 } },
-  sundial_charm:  { icon: "⌛", name: 'Sundial Charm',    cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draw', count: 1 } },
-  blood_idol:     { icon: "🗿", name: 'Blood Idol',       cost: 3, type: 'artifact', charges: 3, effect: { kind: 'damageHero', amount: 1, who: 'enemy' } },
+  recall:         { icon: "💨", name: 'Recall',           cost: 3, type: 'spell', effect: { kind: 'bounce' } , orig: "Recall \u2014 the recorded bounce spell", src: "COSTING.md tracker \u2014 cost 3 recorded" },
 
   // --- conversion batch 1 (M6.1): recovered library cards, mechanics 1:1, names ours ---
-  eager_smith:    { icon: "🔨", name: 'Eager Smith',        cost: 3, type: 'creature', power: 4, health: 3 },
-  evenhand_paragon: { icon: "⚖️", name: 'Evenhand Paragon', cost: 3, type: 'creature', power: 3, health: 3 },
-  tempest_giant:  { icon: "🌩️", name: 'Tempest Giant',      cost: 6, type: 'creature', power: 6, health: 6 },
-  ravaging_tyrant: { icon: "🦖", name: 'Ravaging Tyrant',   cost: 8, type: 'creature', power: 10, health: 8, behemoth: true },
-  grimwulf:       { icon: "🪓", name: 'Grimwulf',           cost: 3, type: 'creature', power: 3, health: 5 },
-  thorn_grub:     { icon: "🐛", name: 'Thorn Grub',         cost: 2, type: 'creature', power: 3, health: 2 },
-  pyre_raider:    { icon: "🏴‍☠️", name: 'Pyre Raider',       cost: 3, type: 'creature', power: 4, health: 3 },
-  runesteel_monstrosity: { icon: "🤖", name: 'Runesteel Monstrosity', cost: 3, type: 'creature', power: 3, health: 3 },
-  pluck_dread:    { icon: "🫳", name: 'Pluck Dread',        cost: 1, type: 'spell', effect: { kind: 'stealFromDeck', count: 1 } },
-  bring_down:     { icon: "🏹", name: 'Bring Down',         cost: 2, type: 'spell', effect: { kind: 'destroyFlyer' } },
-  scattershot_rig: { icon: "🎯", name: 'Scattershot Rig',   cost: 1, type: 'artifact', charges: 2, effect: { kind: 'damageHero', amount: 3, who: 'enemy' } },
+  eager_smith:    { icon: "🔨", name: 'Eager Smith',        cost: 3, type: 'creature', power: 4, health: 3 , orig: "Willful Smith (probable)", src: "CONVERSION-AUDIT S4 \u2014 probable identification" },
+  evenhand_paragon: { icon: "⚖️", name: 'Evenhand Paragon', cost: 3, type: 'creature', power: 3, health: 3 , orig: "Paragon of Balance", src: "CONVERSION-AUDIT S4" },
+  tempest_giant:  { icon: "🌩️", name: 'Tempest Giant',      cost: 6, type: 'creature', power: 6, health: 6 , orig: "Storm Seeker (probable)", src: "CONVERSION-AUDIT S4 \u2014 probable fingerprint" },
+  ravaging_tyrant: { icon: "🦖", name: 'Ravaging Tyrant',   cost: 8, type: 'creature', power: 10, health: 8, behemoth: true , orig: "Carnage Tyrant", src: "CONVERSION-AUDIT S4" },
+  grimwulf:       { icon: "🪓", name: 'Grimwulf',           cost: 3, type: 'creature', power: 3, health: 5 , orig: "Wulfgar (probable)", src: "CONVERSION-AUDIT S4 \u2014 probable fingerprint" },
+  runesteel_monstrosity: { icon: "🤖", name: 'Runesteel Monstrosity', cost: 3, type: 'creature', power: 3, health: 3 , orig: "Mizzium Monstrosity (probable)", src: "CONVERSION-AUDIT S4 \u2014 probable fingerprint" },
+  bring_down:     { icon: "🏹", name: 'Bring Down',         cost: 2, type: 'spell', effect: { kind: 'destroyFlyer' } , orig: "Plummet", src: "CONVERSION-AUDIT S4" },
+  scattershot_rig: { icon: "🎯", name: 'Scattershot Rig',   cost: 1, type: 'artifact', charges: 2, effect: { kind: 'damageHero', amount: 3, who: 'enemy' } , orig: "Scattershot Crossbow", src: "CONVERSION-AUDIT S4" },
 
   // --- conversion batch 2 (M6.2): each card brings one new engine verb ---
-  gravemaw:       { icon: "🦷", name: 'Gravemaw',           cost: 2, type: 'creature', power: 0, health: 1, graveyardGrowth: true },
-  embermaw_devil: { icon: "👿", name: 'Embermaw Devil',     cost: 2, type: 'creature', power: 2, health: 1, keywords: ['cantBlock'], deathShuffle: 2 },
-  deepcoil_serpent: { icon: "🐍", name: 'Deepcoil Serpent', cost: 13, type: 'creature', power: 6, health: 6, costMinusPerPlay: true, behemoth: true },
-  ashwing_sovereign: { icon: "🐲", name: 'Ashwing Sovereign', cost: 10, type: 'creature', power: 10, health: 7, keywords: ['flying'], behemoth: true, endTurn: { kind: 'sequence', effects: [ { kind: 'damageHero', amount: 3, who: 'enemy' }, { kind: 'damageNonFlying', amount: 3 } ] } },
-  drownscale:     { icon: "🦎", name: 'Drownscale',         cost: 3, type: 'creature', power: 1, health: 4, attackEffect: { kind: 'millSelf', count: 2 }, gravePower: true },
-  nightscale_revenant: { icon: "💀", name: 'Nightscale Revenant', cost: 8, type: 'creature', power: 6, health: 5, debut: { kind: 'raiseStrongest' } },
-  widow_matron:   { icon: "🕷️", name: 'Widow Matron',       cost: 1, type: 'creature', power: 3, health: 1, returnsFromGrave: true },
-  old_bonegnaw:   { icon: "🦴", name: 'Old Bonegnaw',       cost: 6, type: 'creature', power: 5, health: 4, manaOnHit: true },
-  frostreaver:    { icon: "❄️", name: 'Frostreaver',        cost: 8, type: 'creature', power: 6, health: 8, debut: { kind: 'cullByStats' } },
-  creeping_doom:  { icon: "☠️", name: 'Creeping Doom',      cost: 1, type: 'spell', effect: { kind: 'doom' } },
+  gravemaw:       { icon: "🦷", name: 'Gravemaw',           cost: 2, type: 'creature', power: 0, health: 1, graveyardGrowth: true , orig: "Tarmogoyf", src: "CONVERSION-AUDIT S4" },
+  embermaw_devil: { icon: "👿", name: 'Embermaw Devil',     cost: 2, type: 'creature', power: 2, health: 1, keywords: ['cantBlock'], deathShuffle: 2 , orig: "Gutfire Devil", src: "CONVERSION-AUDIT S4" },
+  ashwing_sovereign: { icon: "🐲", name: 'Ashwing Sovereign', cost: 10, type: 'creature', power: 10, health: 7, keywords: ['flying'], behemoth: true, endTurn: { kind: 'sequence', effects: [ { kind: 'damageHero', amount: 3, who: 'enemy' }, { kind: 'damageNonFlying', amount: 3 } ] } , orig: "Darigaaz", src: "CONVERSION-AUDIT S4" },
+  drownscale:     { icon: "🦎", name: 'Drownscale',         cost: 3, type: 'creature', power: 1, health: 4, attackEffect: { kind: 'millSelf', count: 2 }, gravePower: true , orig: "Imryth", src: "CONVERSION-AUDIT S4" },
+  nightscale_revenant: { icon: "💀", name: 'Nightscale Revenant', cost: 8, type: 'creature', power: 6, health: 5, debut: { kind: 'raiseStrongest' } , orig: "Ebondeath", src: "CONVERSION-AUDIT S4" },
+  widow_matron:   { icon: "🕷️", name: 'Widow Matron',       cost: 1, type: 'creature', power: 3, health: 1, returnsFromGrave: true , orig: "Matron Malice", src: "CONVERSION-AUDIT S4" },
+  old_bonegnaw:   { icon: "🦴", name: 'Old Bonegnaw',       cost: 6, type: 'creature', power: 5, health: 4, manaOnHit: true , orig: "Old Gnawbones", src: "CONVERSION-AUDIT S4" },
+  frostreaver:    { icon: "❄️", name: 'Frostreaver',        cost: 8, type: 'creature', power: 6, health: 8, debut: { kind: 'cullByStats' } , orig: "Icingdeath", src: "CONVERSION-AUDIT S4" },
+  creeping_doom:  { icon: "☠️", name: 'Creeping Doom',      cost: 1, type: 'spell', effect: { kind: 'doom' } , orig: "Fatal Infection", src: "CONVERSION-AUDIT S4" },
 
   // --- conversion batch 3 (M6.3): the Dreamer's friends + tempo tools ---
-  shadowsmith_saboteur: { icon: "🗡️", name: 'Shadowsmith Saboteur', cost: 2, type: 'creature', power: 2, health: 3, doubler: true },
-  duskmane_stag:  { icon: "🦌", name: 'Duskmane Stag',      cost: 4, type: 'creature', power: 4, health: 5, debut: { kind: 'discountGenerated', amount: 1 } },
-  wardens_acolyte: { icon: "🕯️", name: "Warden's Acolyte", cost: 3, type: 'creature', power: 2, health: 4, debut: { kind: 'nextTrapDiscount', amount: 2 } },
-  void_harvest:   { icon: "🌾", name: 'Void Harvest',       cost: 6, type: 'spell', effect: { kind: 'stealFromGrave', count: 4 } },
-  draconic_transfiguration: { icon: "🔥", name: 'Draconic Transfiguration', cost: 9, type: 'spell', effect: { kind: 'transformBoard' } },
-  beastcall_arrow: { icon: "🏹", name: 'Beastcall Arrow',   cost: 2, type: 'spell', effect: { kind: 'draftCreatureUpgrade' } },
-  wardens_staff:  { icon: "🪄", name: "Warden's Staff",     cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftTrap' } },
-  ember_deathraider: { icon: "⚔️", name: 'Ember Deathraider', cost: 3, type: 'creature', power: 4, health: 3 },
-  venom_grub:     { icon: "🐛", name: 'Venom Grub',         cost: 2, type: 'creature', power: 3, health: 2 },
-  tusked_warboar: { icon: "🐗", name: 'Tusked Warboar',     cost: 1, type: 'creature', power: 3, health: 2 },
+  shadowsmith_saboteur: { icon: "🗡️", name: 'Shadowsmith Saboteur', cost: 2, type: 'creature', power: 2, health: 3, doubler: true , orig: "Shadowmage Saboteur", src: "CONVERSION-AUDIT S4" },
+  duskmane_stag:  { icon: "🦌", name: 'Duskmane Stag',      cost: 4, type: 'creature', power: 4, health: 5, debut: { kind: 'discountGenerated', amount: 1 } , orig: "Shadowstag", src: "CONVERSION-AUDIT S4" },
+  wardens_acolyte: { icon: "🕯️", name: "Warden's Acolyte", cost: 3, type: 'creature', power: 2, health: 4, debut: { kind: 'nextTrapDiscount', amount: 2 } , orig: "Teferi's Acolyte", src: "CONVERSION-AUDIT S4 \u2014 batch-3 twin of the signature" },
+  void_harvest:   { icon: "🌾", name: 'Void Harvest',       cost: 6, type: 'spell', effect: { kind: 'stealFromGrave', count: 4 } , orig: "Scour the Void", src: "CONVERSION-AUDIT S4" },
+  draconic_transfiguration: { icon: "🔥", name: 'Draconic Transfiguration', cost: 9, type: 'spell', effect: { kind: 'transformBoard' } , orig: "Draconic Transformation", src: "CONVERSION-AUDIT S4" },
+  beastcall_arrow: { icon: "🏹", name: 'Beastcall Arrow',   cost: 2, type: 'spell', effect: { kind: 'draftCreatureUpgrade' } , orig: "Animal Arrow", src: "CONVERSION-AUDIT S4" },
+  wardens_staff:  { icon: "🪄", name: "Warden's Staff",     cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftTrap' } , orig: "Teferi's Staff", src: "CONVERSION-AUDIT S4 \u2014 batch-3 twin of the signature" },
+  ember_deathraider: { icon: "⚔️", name: 'Ember Deathraider', cost: 3, type: 'creature', power: 4, health: 3 , orig: "Angrath's Deathraider", src: "CONVERSION-AUDIT S4" },
+  venom_grub:     { icon: "🐛", name: 'Venom Grub',         cost: 2, type: 'creature', power: 3, health: 2 , orig: "Vraska's Grub", src: "cards.csv final form (2-mana 3/2, patch v1.03) + fingerprint" },
+  tusked_warboar: { icon: "🐗", name: 'Tusked Warboar',     cost: 1, type: 'creature', power: 3, health: 2 , orig: "War Boar (token)", src: "CONVERSION-AUDIT S4" },
 
   // --- conversion batch 4 (M11): the cost-known tail + labeled cost calls ---
   // Recorded exactly: Cerulean Dragon 3 mana 1/2 and Eternal Phoenix 3 mana 2/1
   // (final patched forms, no recorded text — faithful vanillas), Mindveil
   // Sovereign 7 mana 8/8 (the recovered Hlaavin, renamed; debut text recorded).
   // Forge-costed cards carry costForge: true and are argued in files/COSTING.md.
-  cerulean_dragon: { icon: "🐉", name: 'Cerulean Dragon',  cost: 3, type: 'creature', power: 1, health: 2 },
-  eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 3, type: 'creature', power: 2, health: 1 },
-  mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } },
-  vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } },
-  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 2, costForge: true, type: 'creature', power: 2, health: 3, keywords: ['cantAttack'] },
-  tasty_morsel:   { icon: "🍖", name: 'Tasty Morsel',       cost: 1, costForge: true, type: 'creature', power: 2, health: 1, finale: { kind: 'buffRandomCreature', power: 1, health: 1 } },
-  flame_shot:     { icon: "🔥", name: 'Flame Shot',         cost: 2, costForge: true, type: 'spell', effect: { kind: 'damageAny', amount: 3 } }, // 3 damage is the final recorded value
-  ash_dragon:     { icon: "🐉", name: 'Ash Dragon',         cost: 5, type: 'creature', power: 4, health: 4, keywords: ['flying'], generatedOnly: true },
+  cerulean_dragon: { icon: "🐉", name: 'Cerulean Dragon',  cost: 3, type: 'creature', power: 1, health: 2 , orig: "Cerulean Dragon", src: "CONVERSION-AUDIT S4 \u2014 same name" },
+  eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 3, type: 'creature', power: 2, health: 1 , orig: "Eternal Phoenix", src: "CONVERSION-AUDIT S4 \u2014 same name" },
+  mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } , orig: "Hlaavin, Lord of the Unseen", src: "CONVERSION-AUDIT S4" },
+  vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } , orig: "Vainglorious Hero", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
+  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 2, costForge: true, type: 'creature', power: 2, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "COSTING.md tracker \u2014 cost Forge-assigned; final stat line disputed across patches (v0.15/v0.20), open item" },
+  tasty_morsel:   { icon: "🍖", name: 'Tasty Morsel',       cost: 1, costForge: true, type: 'creature', power: 2, health: 1, finale: { kind: 'buffRandomCreature', power: 1, health: 1 } , orig: "Tasty Morsel", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
+  flame_shot:     { icon: "🔥", name: 'Flame Shot',         cost: 2, costForge: true, type: 'spell', effect: { kind: 'damageAny', amount: 3 } , orig: "Flame Shot", src: "COSTING.md tracker \u2014 cost Forge-assigned; 3 damage recorded" }, // 3 damage is the final recorded value
+  ash_dragon:     { icon: "🐉", name: 'Ash Dragon',         cost: 5, type: 'creature', power: 4, health: 4, keywords: ['flying'], generatedOnly: true , orig: "Darigaaz's dragon token", src: "effect verified via Darigaaz; 4/4 body Forge-assigned (COSTING.md labeled call)" },
 
   // --- M7 roster signatures (3 per new hero) + passive tokens ---
-  cinder_elemental: { icon: "🔥", name: 'Cinder Elemental', cost: 3, costForge: true, type: 'creature', power: 3, health: 2, signatureFor: 'torchbearer' },
-  torch_flare:    { icon: "☄️", name: 'Torch Flare',        cost: 2, type: 'spell', signatureFor: 'torchbearer', effect: { kind: 'damageAny', amount: 3, heroBonus: 1 } },
-  kindled_fury:   { icon: "🌋", name: 'Kindled Fury',       cost: 1, type: 'spell', signatureFor: 'torchbearer', effect: { kind: 'buffCreature', power: 3, health: 0, temp: true } },
-  oathsworn_captain: { icon: "🛡️", name: 'Oathsworn Captain', cost: 3, type: 'creature', power: 2, health: 4, signatureFor: 'banneret', debut: { kind: 'buffRandomCreature', power: 1, health: 1 } },
-  bannerfall:     { icon: "🚩", name: 'Bannerfall',         cost: 3, type: 'spell', signatureFor: 'banneret', effect: { kind: 'buffAllCreatures', power: 2, health: 0 } },
-  aegis_standard: { icon: "🏛️", name: 'Aegis Standard',     cost: 2, type: 'artifact', charges: 2, signatureFor: 'banneret', effect: { kind: 'buffAllCreatures', power: 0, health: 1 } },
-  pale_shepherd:  { icon: "🐑", name: 'Pale Shepherd',      cost: 4, type: 'creature', power: 3, health: 4, signatureFor: 'graven', debut: { kind: 'drain', amount: 1 } },
-  call_of_graven: { icon: "📣", name: 'Call of the Graven', cost: 5, type: 'spell', signatureFor: 'graven', effect: { kind: 'raiseStrongest' } },
-  graven_tithe:   { icon: "🪙", name: 'Graven Tithe',       cost: 2, type: 'spell', signatureFor: 'graven', effect: { kind: 'drain', amount: 2 } },
-  tollkeeper:     { icon: "🔔", name: 'Tollkeeper',         cost: 2, type: 'creature', power: 2, health: 2, signatureFor: 'unchained', debut: { kind: 'damageHero', amount: 1 } },
-  severing_light: { icon: "✂️", name: 'Severing Light',     cost: 3, type: 'spell', signatureFor: 'unchained', effect: { kind: 'drain', amount: 3 } },
-  vesper_charm:   { icon: "📿", name: 'Vesper Charm',       cost: 2, type: 'artifact', charges: 3, signatureFor: 'unchained', effect: { kind: 'drain', amount: 1 } },
-  thornback_alpha: { icon: "🦏", name: 'Thornback Alpha',   cost: 4, type: 'creature', power: 4, health: 4, keywords: ['trample'], signatureFor: 'unbridled' },
-  unbridled_cry:  { icon: "📯", name: 'Unbridled Cry',      cost: 3, type: 'spell', signatureFor: 'unbridled', effect: { kind: 'sequence', effects: [ { kind: 'buffAllCreatures', power: 1, health: 0 }, { kind: 'addCard', cardId: 'tusked_warboar' } ] } },
-  boarherd_horn:  { icon: "🐗", name: 'Boarherd Horn',      cost: 3, type: 'artifact', charges: 2, signatureFor: 'unbridled', effect: { kind: 'addCard', cardId: 'tusked_warboar' } },
-  sibilant_herald: { icon: "🎭", name: 'Sibilant Herald',   cost: 3, type: 'creature', power: 3, health: 3, signatureFor: 'sibilance', finale: { kind: 'drain', amount: 1 } },
-  curtain_call:   { icon: "🎬", name: 'Curtain Call',       cost: 4, type: 'spell', signatureFor: 'sibilance', effect: { kind: 'damageAllEnemyCreatures', amount: 2, requiem: 2 } },
-  encore_venom:   { icon: "🧪", name: 'Encore Venom',       cost: 2, type: 'spell', signatureFor: 'sibilance', effect: { kind: 'wither', amount: 2 } },
-  hammerfall_raider: { icon: "⚒️", name: 'Hammerfall Raider', cost: 3, type: 'creature', power: 4, health: 2, keywords: ['haste'], signatureFor: 'hammer' },
-  second_blow:    { icon: "💢", name: 'Second Blow',        cost: 2, type: 'spell', signatureFor: 'hammer', effect: { kind: 'damageAny', amount: 2 } },
-  anvil_fury:     { icon: "🔨", name: 'Fury of the Anvil',  cost: 2, type: 'spell', signatureFor: 'hammer', effect: { kind: 'buffCreature', power: 3, health: 0 } },
-  suras_herald:   { icon: "🐚", name: "Sura's Herald",      cost: 5, type: 'creature', power: 4, health: 5, signatureFor: 'tidemother', debut: { kind: 'ramp' } },
-  deep_call:      { icon: "🌊", name: 'Deep Call',          cost: 3, type: 'spell', signatureFor: 'tidemother', effect: { kind: 'sequence', effects: [ { kind: 'ramp' }, { kind: 'drawCards', count: 1 } ] } },
-  kraken_youngling: { icon: "🦑", name: 'Kraken Youngling', cost: 6, type: 'creature', power: 5, health: 6, signatureFor: 'tidemother', finale: { kind: 'millOpponent', count: 3 } },
-  kargs_mauler:   { icon: "🐂", name: "Karg's Mauler",      cost: 4, type: 'creature', power: 5, health: 3, keywords: ['trample'], signatureFor: 'bruiser' },
-  unbroken_roar:  { icon: "🦁", name: 'Unbroken Roar',      cost: 2, type: 'spell', signatureFor: 'bruiser', effect: { kind: 'buffAllCreatures', power: 1, health: 0 } },
-  sunder_line:    { icon: "🪓", name: 'Sunder the Line',    cost: 3, type: 'spell', signatureFor: 'bruiser', effect: { kind: 'damageAny', amount: 4 } },
-  reef_fish:      { icon: "🐟", name: 'Reef Fish',          cost: 0, type: 'creature', power: 0, health: 1, generatedOnly: true },
-  unchained_spirit: { icon: "👻", name: 'Unchained Spirit', cost: 2, type: 'creature', power: 2, health: 1, keywords: ['flying'], generatedOnly: true },
-  banneret_avatar: { icon: "⚔️", name: 'Ser Aldric',        cost: 4, type: 'creature', power: 4, health: 4, generatedOnly: true },
+  cinder_elemental: { icon: "🔥", name: 'Cinder Elemental', cost: 3, costForge: true, type: 'creature', power: 3, health: 2, signatureFor: 'torchbearer' , orig: "Fire Elemental", src: "CONVERSION-AUDIT S4 \u2014 signature (Chandra); cost Forge-assigned (COSTING.md)" },
+  reef_fish:      { icon: "🐟", name: 'Reef Fish',          cost: 0, type: 'creature', power: 0, health: 1, generatedOnly: true , orig: "Reef Fish \u2014 Sura passive token", src: "hero system (digest-documented passive)" },
+  unchained_spirit: { icon: "👻", name: 'Unchained Spirit', cost: 2, type: 'creature', power: 2, health: 1, keywords: ['flying'], generatedOnly: true , orig: "Unchained Spirit (token)", src: "TheGamer guide \u2014 2/1 verified (scour, Nov 1)" },
+  banneret_avatar: { icon: "⚔️", name: 'Ser Aldric',        cost: 4, type: 'creature', power: 4, health: 4, generatedOnly: true , orig: "Ser Aldric \u2014 phantom attacker", src: "hero system (documented passive representation)" },
 
   // --- generated-only cards (did not start in anyone's deck) ---
-  dream_wisp:     { icon: "💭", name: 'Dream Wisp',       cost: 0, type: 'creature', power: 1, health: 1, generatedOnly: true },
-  stolen_echo:    { icon: "🗣️", name: 'Stolen Echo',      cost: 2, type: 'creature', power: 2, health: 2, generatedOnly: true },
-  gilded_riddle:  { icon: "❓", name: 'Gilded Riddle',    cost: 2, type: 'spell', generatedOnly: true, effect: { kind: 'draw', count: 1 } },
-  pilfered_remedy: { icon: "🧪", name: 'Pilfered Remedy', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'healHero', amount: 3, who: 'self' } },
-  echo_hound:     { icon: "🐺", name: 'Echo Hound',       cost: 2, type: 'creature', power: 2, health: 2, keywords: ['haste'], generatedOnly: true },
 
   // ——— Library batch 5 (M17): two per school, every card schooled ———
-  reefcaller_adept: { icon: "🪸", name: 'Reefcaller Adept', cost: 3, type: 'creature', power: 2, health: 4, debut: { kind: 'draw', count: 1 } },
-  slipstream:     { icon: "🌀", name: 'Slipstream',       cost: 2, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'draw', count: 1 }, { kind: 'discountSpell', amount: 1 } ] } },
-  pyre_charger:   { icon: "🐎", name: 'Pyre Charger',     cost: 4, type: 'creature', power: 4, health: 3, keywords: ['haste'] },
-  pyrebrand:      { icon: "💥", name: 'Pyrebrand',        cost: 4, type: 'spell', effect: { kind: 'damageAny', amount: 4 } },
-  bonegleaner:    { icon: "🦴", name: 'Bonegleaner',      cost: 2, type: 'creature', power: 2, health: 2, debut: { kind: 'millOpponent', count: 2 } },
-  funeral_march:  { icon: "⚰️", name: 'Funeral March',    cost: 4, type: 'spell', effect: { kind: 'millOpponent', count: 4 } },
-  dawn_squire:    { icon: "⚜️", name: 'Dawn Squire',      cost: 1, type: 'creature', power: 1, health: 2, debut: { kind: 'healHero', amount: 1, who: 'self' } },
-  sanctuary:      { icon: "⛪", name: 'Sanctuary',        cost: 3, type: 'artifact', charges: 2, effect: { kind: 'healHero', amount: 2, who: 'self' } },
-  canopy_ancient: { icon: "🌲", name: 'Canopy Ancient',   cost: 6, type: 'creature', power: 5, health: 7, keywords: ['reach'] },
-  overbloom:      { icon: "🌸", name: 'Overbloom',        cost: 2, type: 'spell', effect: { kind: 'buffAllCreatures', power: 0, health: 1 } },
   // Batch 6 (M19, Forge-original, two per school)
-  undertow:           { icon: "🌪️", name: 'Undertow',           cost: 4, type: 'spell', effect: { kind: 'bounce', draw: 1 } },
-  riptide_trickster:  { icon: "🦦", name: 'Riptide Trickster',  cost: 2, type: 'creature', power: 2, health: 2, debut: { kind: 'discountSpell', amount: 1 } },
-  pyre_golem:         { icon: "🗿", name: 'Pyre Golem',         cost: 5, type: 'creature', power: 4, health: 5, debut: { kind: 'damageAllEnemyCreatures', amount: 1 } },
-  ashfall:            { icon: "🌋", name: 'Ashfall',            cost: 3, type: 'spell', effect: { kind: 'damageAllEnemyCreatures', amount: 1, heroDamage: 1 } },
-  crypt_warden:       { icon: "⚰️", name: 'Crypt Warden',       cost: 4, type: 'creature', power: 3, health: 5, keywords: ['ward'] },
-  toll_bell_wraith:   { icon: "🔔", name: 'Toll Bell Wraith',   cost: 3, type: 'creature', power: 2, health: 3, finale: { kind: 'millOpponent', count: 3 } },
-  aegis_squire:       { icon: "🛡️", name: 'Aegis Squire',       cost: 2, type: 'creature', power: 2, health: 2, debut: { kind: 'healHero', amount: 2, who: 'self' } },
-  sanctuary_knight:   { icon: "⚜️", name: 'Sanctuary Knight',   cost: 4, type: 'creature', power: 3, health: 4, debut: { kind: 'healHero', amount: 3, who: 'self' } },
-  rootbound_colossus: { icon: "🌳", name: 'Rootbound Colossus', cost: 7, type: 'creature', power: 7, health: 7 },
-  mossback_grazer:    { icon: "🦬", name: 'Mossback Grazer',    cost: 3, type: 'creature', power: 2, health: 4, debut: { kind: 'draw', count: 1 } },
   // ——— Conversion batch 7 (M22, sprint): the audit's Forge-costable vein ———
   // Stats/effects are the recovered final values (CONVERSION-AUDIT §2); every
   // cost here is FORGE-COSTED under the charter and argued in files/COSTING.md
@@ -1060,16 +953,17 @@ const CARDS = {
   // converted: the bounce (Recall already owns plain bounce at its recorded
   // 3 — Jesse's no-duplicate rule) and the +1/+0 buff (a strictly weaker twin
   // of Bloodrush at any honest price).
-  deep_rooting:       { icon: "🪴", name: 'Deep Rooting',       cost: 2, costForge: true, type: 'spell', effect: { kind: 'ramp' } },
-  firstroot_titan:    { icon: "🐘", name: 'Firstroot Titan',    cost: 8, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true, debut: { kind: 'ramp' }, attackEffect: { kind: 'ramp' } },
-  sepulcher_titan:    { icon: "🪦", name: 'Sepulcher Titan',    cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
-  rime_titan:         { icon: "🧊", name: 'Rime Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
-  dawn_titan:         { icon: "🌞", name: 'Dawn Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
-  cinder_titan:       { icon: "🌋", name: 'Cinder Titan',       cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
-  hollowgrin_giant:   { icon: "👹", name: 'Hollowgrin Giant',   cost: 9, costForge: true, type: 'creature', power: 8, health: 7, behemoth: true },
-  rushhorn_minotaur:  { icon: "🐃", name: 'Rushhorn Minotaur',  cost: 3, costForge: true, type: 'creature', power: 4, health: 3 },
-  grove_sentinel:     { icon: "🍃", name: 'Grove Sentinel',     cost: 2, costForge: true, type: 'creature', power: 3, health: 2 },
-  thornwood_archer:   { icon: "🏹", name: 'Thornwood Archer',   cost: 3, costForge: true, type: 'creature', power: 2, health: 4 },
+  deep_rooting:       { icon: "🪴", name: 'Deep Rooting',       cost: 2, costForge: true, type: 'spell', effect: { kind: 'ramp' } , orig: "Rampant Growth", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  oakenhide:      { icon: "🌰", name: 'Oakenhide',       cost: 2, type: 'spell', effect: { kind: 'buffCreature', power: 2, health: 2 }, orig: "Oakenhide", src: "recovered record — cost 2 recorded; held while its 1-mana twin Grow Fierce existed (Jesse parity rule), enters now that the twin is purged" },
+  firstroot_titan:    { icon: "🐘", name: 'Firstroot Titan',    cost: 8, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true, debut: { kind: 'ramp' }, attackEffect: { kind: 'ramp' } , orig: "Primeval Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  sepulcher_titan:    { icon: "🪦", name: 'Sepulcher Titan',    cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Grave Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  rime_titan:         { icon: "🧊", name: 'Rime Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Frost Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  dawn_titan:         { icon: "🌞", name: 'Dawn Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Sun Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  cinder_titan:       { icon: "🌋", name: 'Cinder Titan',       cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Inferno Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  hollowgrin_giant:   { icon: "👹", name: 'Hollowgrin Giant',   cost: 9, costForge: true, type: 'creature', power: 8, health: 7, behemoth: true , orig: "Grimgrin", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  rushhorn_minotaur:  { icon: "🐃", name: 'Rushhorn Minotaur',  cost: 3, costForge: true, type: 'creature', power: 4, health: 3 , orig: "Blitzing Minotaur", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  grove_sentinel:     { icon: "🍃", name: 'Grove Sentinel',     cost: 2, costForge: true, type: 'creature', power: 3, health: 2 , orig: "Elite Forest Guard", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  thornwood_archer:   { icon: "🏹", name: 'Thornwood Archer',   cost: 3, costForge: true, type: 'creature', power: 2, health: 4 , orig: "Elvish Archer", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
   // ——— Conversion batch 8 (M23, sprint): the first NEEDS-ENGINE conversion ———
   // The Eminent Archangel of the record (W, 3/4 final stats, CONVERSION-AUDIT
   // §3; its Rosetta ID WV1_273 was forced in Wave 1): Debut — heal yourself
@@ -1078,7 +972,7 @@ const CARDS = {
   // every turn start; hero life loss only — a guardian taking the blow for
   // you does not count as damage dealt to you). Cost was never recorded:
   // FORGE-COSTED at 4, argued in files/COSTING.md (Batch 8). Name is ours.
-  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } },
+  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } , orig: "Eminent Archangel", src: "COSTING.md B8 \u2014 cost Forge-assigned" },
   // ——— Conversion batch 9 (M24, sprint): the second NEEDS-ENGINE conversion ———
   // The Ravenous Pit Lord of the record (no colour recorded, 7/5 final stats,
   // CONVERSION-AUDIT §3): Debut — raise the cost of all cards in your
@@ -1088,7 +982,7 @@ const CARDS = {
   // cards drawn later are untouched). Colour was never recorded, so the
   // card is NEUTRAL — no school invented for it. Cost was never recorded:
   // FORGE-COSTED at 8, argued in files/COSTING.md (Batch 9). Name is ours.
-  hungerpit_tyrant: { icon: "👺", name: 'Hungerpit Tyrant', cost: 8, costForge: true, type: 'creature', power: 7, health: 5, debut: { kind: 'taxFoeHand', amount: 2 } },
+  hungerpit_tyrant: { icon: "👺", name: 'Hungerpit Tyrant', cost: 8, costForge: true, type: 'creature', power: 7, health: 5, debut: { kind: 'taxFoeHand', amount: 2 } , orig: "Ravenous Pit Lord", src: "COSTING.md B9 \u2014 cost Forge-assigned; no colour recorded, neutral" },
   // ——— Conversion batch 10 (M25, sprint): the third NEEDS-ENGINE conversion ———
   // The Dark Gladiator of the record (B, 6/5 final stats, CONVERSION-AUDIT
   // §3): Debut — give an enemy creature -1/-1 (final text; an earlier build
@@ -1100,7 +994,7 @@ const CARDS = {
   // NOT the Withering Edict's conditional -3/-3/-5/-5 (see engine wither).
   // Colour recorded (B) -> Hollow Grave. Cost was never recorded:
   // FORGE-COSTED at 6, argued in files/COSTING.md (Batch 10). Name is ours.
-  grave_gladiator: { icon: "⚔️", name: 'Grave Gladiator', cost: 6, costForge: true, type: 'creature', power: 6, health: 5, debut: { kind: 'wither', amount: 1 } },
+  grave_gladiator: { icon: "⚔️", name: 'Grave Gladiator', cost: 6, costForge: true, type: 'creature', power: 6, health: 5, debut: { kind: 'wither', amount: 1 } , orig: "Dark Gladiator", src: "COSTING.md B10 \u2014 cost Forge-assigned" },
   // ——— Conversion batch 11 (M26, sprint): the fourth NEEDS-ENGINE conversion ———
   // The Guard the Flock of the record (U, trap, CONVERSION-AUDIT §3; LT_WV1_342
   // per the Wave 1 archive mapping): Trap — counter any spell or Debut effect
@@ -1110,10 +1004,9 @@ const CARDS = {
   // Debut is negated while its creature still takes the field. Colour
   // recorded (U) -> Tides. Cost was never recorded: FORGE-COSTED at 2,
   // argued in files/COSTING.md (Batch 11). Name is ours.
-  flockguard_vigil: { icon: "🛡️", name: 'Flockguard Vigil', cost: 2, costForge: true, type: 'trap', trigger: { kind: 'guardFlock' } },
+  flockguard_vigil: { icon: "🛡️", name: 'Flockguard Vigil', cost: 2, costForge: true, type: 'trap', trigger: { kind: 'guardFlock' } , orig: "Guard the Flock", src: "COSTING.md B11 \u2014 cost Forge-assigned" },
 };
-const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound']; // M22: 'stolen_hour' pruned — Deep Rooting (batch 7) owns plain ramp at 2; the generated filler was its exact twin (Jesse's prune rule)
-const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil'];
+const TRAP_POOL = ['quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil']; // M62 purge: only verified traps remain
 
 const HEROES = {
   weaver: {
@@ -1174,94 +1067,89 @@ const HEROES = {
 // decks (1:1 swaps, counts and school legality preserved) so they are
 // faced in play, not just collected.
 const DECKS = {
-  // M44 (Jesse, Nov 1): a deck is just 30 cards; it MAY include a class
-  // (stage-1 quest) card or not — the class card is an ordinary pool card
-  // of its school, never a built-in slot. These defaults are plain 30s.
-  // Weaver below is M18: Jesse's own build, screenshotted from his deck
-  // builder — seed generation/theft plus Tides spell pressure.
   weaver: [
-    'creeping_doom', 'pilfer_dream', 'pilfer_dream', 'pluck_dread', 'pluck_dread', 'quick_study',
-    'quick_study', 'bring_down', 'thirteenth_hour', 'recall', 'dread_herald', 'dread_herald',
-    'echo_familiar', 'echo_familiar', 'scatter_mind', 'scatter_mind', 'shadowsmith_saboteur', 'shadowsmith_saboteur',
-    'strange_gift', 'strange_gift', 'tidewing_familiar', 'deep_breath', 'dream_thief', 'dream_thief',
-    'lore_drifter', 'lore_drifter', 'quiet_snare', 'drown_in_dreams', 'deathshade', 'void_harvest',
+    'tidewing_familiar', 'runeshell_crab', 'runeshell_crab', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'widow_matron',
+    'widow_matron', 'creeping_doom', 'creeping_doom', 'gravemaw', 'gravemaw', 'wound_priest',
+    'wound_priest', 'bring_down', 'bring_down', 'recall', 'recall', 'quiet_snare',
+    'vein_drainlord', 'vein_drainlord', 'fatetwist', 'drownscale', 'drownscale', 'void_harvest',
+    'void_harvest', 'thirteenth_hour', 'pilfer_dream', 'cerulean_dragon', 'gazemaw', 'nightscale_revenant',
   ],
   controller: [
-    'snare_of_no', 'snare_of_no', 'vigil_acolyte', 'vigil_acolyte', 'ward_lens', 'quiet_snare',
-    'flockguard_vigil', 'thiefs_regret', 'thiefs_regret', 'desperate_prayer', 'ward_of_dawn', 'shieldbearer',
-    'shieldbearer', 'stone_warden', 'stone_warden', 'sky_scout', 'sky_hunter', 'sky_scout',
-    'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'deep_breath',
-    'second_suns_dawn', 'second_wind', 'radiant_intercessor', 'tollwarden_captain', 'desperate_prayer', 'daybreak_verdict',
-  ],
-  bruiser: [
-    'thorn_pup', 'thorn_pup', 'kargs_mauler', 'kargs_mauler', 'swift_runner', 'swift_runner',
-    'cinder_hound', 'cinder_hound', 'moss_brute', 'moss_brute', 'gore_horn', 'gore_horn',
-    'ember_roc', 'ravaging_tyrant', 'ember_roc', 'elder_titan', 'embermaw_devil', 'embermaw_devil',
-    'spark_bolt', 'spark_bolt', 'grow_fierce', 'unbroken_roar', 'sunder_line', 'kindling_pyromancer',
-    'kindling_pyromancer', 'war_stomp', 'pit_spark', 'quakehoof_behemoth', 'comet_fall', 'war_stomp',
+    'iron_verdict', 'runeshell_crab', 'runeshell_crab', 'tollwarden_captain', 'tollwarden_captain', 'wardens_acolyte',
+    'wardens_acolyte', 'wardens_staff', 'wardens_staff', 'quiet_snare', 'flockguard_vigil', 'flockguard_vigil',
+    'vindictive_retort', 'vindictive_retort', 'desperate_prayer', 'desperate_prayer', 'vainglorious_hero', 'vainglorious_hero',
+    'evenhand_paragon', 'evenhand_paragon', 'recall', 'recall', 'iron_verdict', 'sunmirror_glare',
+    'sunmirror_glare', 'radiant_intercessor', 'radiant_intercessor', 'returnwing_angel', 'returnwing_angel', 'second_suns_dawn',
   ],
   keeper: [
-    'rootcall_matriarch', 'sunwell_charm', 'overgrowth', 'overgrowth', 'bramble_imp', 'bramble_imp',
-    'deep_rooting', 'grove_tender', 'dawn_chorister', 'dawn_chorister', 'shieldbearer', 'shieldbearer',
-    'stone_warden', 'stone_warden', 'ironbark_golem', 'ironbark_golem', 'moss_brute', 'moss_brute',
-    'beastkeeper', 'firstroot_titan', 'mend_light', 'beastkeeper', 'second_wind', 'second_wind',
-    'ward_of_dawn', 'ward_of_dawn', 'heartswap_tree', 'thorn_pup', 'thorn_grub', 'thorn_grub',
+    'beastcall_arrow', 'tasty_morsel', 'tasty_morsel', 'sheep', 'sheep', 'venom_grub',
+    'venom_grub', 'deep_rooting', 'deep_rooting', 'grove_sentinel', 'grove_sentinel', 'beastkeeper',
+    'beastkeeper', 'thornwood_archer', 'thornwood_archer', 'desperate_prayer', 'desperate_prayer', 'tollwarden_captain',
+    'tollwarden_captain', 'wardens_acolyte', 'wardens_acolyte', 'oakenhide', 'oakenhide', 'heartswap_tree',
+    'radiant_intercessor', 'radiant_intercessor', 'returnwing_angel', 'returnwing_angel', 'quakehoof_behemoth', 'firstroot_titan',
+  ],
+  bruiser: [
+    'sheep', 'tasty_morsel', 'tasty_morsel', 'sheep', 'venom_grub', 'venom_grub',
+    'flame_shot', 'flame_shot', 'embermaw_devil', 'embermaw_devil', 'rushhorn_minotaur', 'rushhorn_minotaur',
+    'ember_deathraider', 'ember_deathraider', 'cinder_court_embermage', 'cinder_court_embermage', 'beastkeeper', 'beastkeeper',
+    'thornwood_archer', 'thornwood_archer', 'kindling_pyromancer', 'kindling_pyromancer', 'archwing_ravager', 'archwing_ravager',
+    'grove_sentinel', 'grove_sentinel', 'cinder_titan', 'ravaging_tyrant', 'quakehoof_behemoth', 'draconic_transfiguration',
   ],
   torchbearer: [
-    'cinder_elemental', 'cinder_elemental', 'torch_flare', 'torch_flare', 'kindled_fury', 'eager_smith',
-    'eager_smith', 'pyre_raider', 'pyre_raider', 'ember_deathraider', 'ember_deathraider', 'ash_sprite',
-    'ash_sprite', 'cinder_hound', 'cinder_hound', 'spark_bolt', 'spark_bolt', 'pit_spark',
-    'pit_spark', 'swift_runner', 'swift_runner', 'scattershot_rig', 'cinder_court_embermage', 'cinder_court_embermage',
-    'gore_horn', 'gore_horn', 'vainglorious_hero', 'ember_roc', 'ashwing_sovereign', 'vainglorious_hero',
+    'desperate_prayer', 'flame_shot', 'flame_shot', 'tollwarden_captain', 'tollwarden_captain', 'embermaw_devil',
+    'embermaw_devil', 'vainglorious_hero', 'vainglorious_hero', 'rushhorn_minotaur', 'rushhorn_minotaur', 'ember_deathraider',
+    'ember_deathraider', 'evenhand_paragon', 'evenhand_paragon', 'wardens_acolyte', 'wardens_acolyte', 'cinder_court_embermage',
+    'cinder_court_embermage', 'radiant_intercessor', 'radiant_intercessor', 'kindling_pyromancer', 'kindling_pyromancer', 'returnwing_angel',
+    'returnwing_angel', 'archwing_ravager', 'archwing_ravager', 'dawn_titan', 'cinder_titan', 'ashwing_sovereign',
   ],
   banneret: [
-    'oathsworn_captain', 'oathsworn_captain', 'bannerfall', 'bannerfall', 'aegis_standard', 'evenhand_paragon',
-    'evenhand_paragon', 'shieldbearer', 'shieldbearer', 'cinder_hound', 'cinder_hound', 'swift_runner',
-    'swift_runner', 'eager_smith', 'eager_smith', 'pyre_raider', 'pyre_raider', 'tollwarden_captain',
-    'runesteel_monstrosity', 'vainglorious_hero', 'vainglorious_hero', 'wardens_acolyte', 'wardens_acolyte', 'ash_sprite',
-    'ash_sprite', 'ember_deathraider', 'returnwing_angel', 'gore_horn', 'spark_bolt', 'ember_deathraider',
+    'desperate_prayer', 'desperate_prayer', 'tollwarden_captain', 'tollwarden_captain', 'wardens_staff', 'wardens_staff',
+    'flame_shot', 'flame_shot', 'vainglorious_hero', 'vainglorious_hero', 'wardens_acolyte', 'wardens_acolyte',
+    'rushhorn_minotaur', 'rushhorn_minotaur', 'ember_deathraider', 'ember_deathraider', 'evenhand_paragon', 'evenhand_paragon',
+    'eager_smith', 'eager_smith', 'radiant_intercessor', 'radiant_intercessor', 'returnwing_angel', 'returnwing_angel',
+    'second_suns_dawn', 'second_suns_dawn', 'dawn_titan', 'daybreak_verdict', 'ashwing_sovereign', 'cinder_titan',
   ],
   graven: [
-    'pale_shepherd', 'pale_shepherd', 'call_of_graven', 'graven_tithe', 'graven_tithe', 'gravemaw',
-    'gravemaw', 'widow_matron', 'widow_matron', 'drownscale', 'drownscale', 'pyre_wraith',
-    'pyre_wraith', 'void_harvest', 'void_harvest', 'creeping_doom', 'creeping_doom', 'grimwulf',
-    'grave_gladiator', 'vein_drainlord', 'wound_priest', 'venom_grub', 'venom_grub', 'sanguine_pact',
-    'duskmane_stag', 'shadowsmith_saboteur', 'wound_priest', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur',
+    'beastcall_arrow', 'widow_matron', 'widow_matron', 'tasty_morsel', 'tasty_morsel', 'venom_grub',
+    'venom_grub', 'gravemaw', 'gravemaw', 'wound_priest', 'wound_priest', 'creeping_doom',
+    'creeping_doom', 'deep_rooting', 'deep_rooting', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'grave_gladiator',
+    'grave_gladiator', 'vein_drainlord', 'vein_drainlord', 'sanguine_pact', 'sanguine_pact', 'thirteenth_hour',
+    'duskmane_stag', 'duskmane_stag', 'void_harvest', 'void_harvest', 'sepulcher_titan', 'hollowgrin_giant',
   ],
   unchained: [
-    'tollkeeper', 'tollkeeper', 'severing_light', 'severing_light', 'vesper_charm', 'nightjar',
-    'nightjar', 'sky_scout', 'sky_scout', 'mirror_moth', 'mirror_moth', 'lore_drifter',
-    'lore_drifter', 'echo_familiar', 'echo_familiar', 'runeshell_crab', 'runeshell_crab', 'bring_down',
-    'bring_down', 'drownscale', 'drownscale', 'widow_matron', 'widow_matron', 'dream_thief',
-    'dream_thief', 'eager_smith', 'deathshade', 'thirteenth_hour', 'pluck_dread', 'eager_smith',
+    'tempest_giant', 'widow_matron', 'widow_matron', 'runeshell_crab', 'runeshell_crab', 'gravemaw',
+    'gravemaw', 'wound_priest', 'wound_priest', 'cerulean_dragon', 'cerulean_dragon', 'vein_drainlord',
+    'vein_drainlord', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'bring_down', 'bring_down', 'drownscale',
+    'drownscale', 'recall', 'recall', 'thirteenth_hour', 'fatetwist', 'fatetwist',
+    'sanguine_pact', 'sanguine_pact', 'void_harvest', 'void_harvest', 'gazemaw', 'nightscale_revenant',
   ],
   unbridled: [
-    'thornback_alpha', 'thornback_alpha', 'unbridled_cry', 'unbridled_cry', 'boarherd_horn', 'tusked_warboar',
-    'tusked_warboar', 'thorn_pup', 'thorn_pup', 'venom_grub', 'venom_grub', 'thorn_grub',
-    'thorn_grub', 'gore_horn', 'gore_horn', 'moss_brute', 'moss_brute', 'embermaw_devil',
-    'embermaw_devil', 'pyre_raider', 'pyre_raider', 'ember_deathraider', 'ember_deathraider', 'sheep',
-    'sheep', 'beastkeeper', 'mountain_ogre', 'quakehoof_behemoth', 'beastkeeper', 'eager_smith',
+    'beastcall_arrow', 'tasty_morsel', 'tasty_morsel', 'sheep', 'sheep', 'venom_grub',
+    'venom_grub', 'flame_shot', 'flame_shot', 'grove_sentinel', 'grove_sentinel', 'embermaw_devil',
+    'embermaw_devil', 'rushhorn_minotaur', 'rushhorn_minotaur', 'beastkeeper', 'beastkeeper', 'thornwood_archer',
+    'thornwood_archer', 'ember_deathraider', 'ember_deathraider', 'kindling_pyromancer', 'kindling_pyromancer', 'duskmane_stag',
+    'duskmane_stag', 'archwing_ravager', 'archwing_ravager', 'quakehoof_behemoth', 'ravaging_tyrant', 'firstroot_titan',
   ],
   sibilance: [
-    'sibilant_herald', 'sibilant_herald', 'curtain_call', 'curtain_call', 'encore_venom', 'embermaw_devil',
-    'embermaw_devil', 'widow_matron', 'widow_matron', 'gravemaw', 'gravemaw', 'drownscale',
-    'drownscale', 'grimwulf', 'grimwulf', 'nightjar', 'nightjar', 'creeping_doom',
-    'creeping_doom', 'void_harvest', 'void_harvest', 'pyre_wraith', 'pyre_wraith', 'ash_sprite',
-    'ash_sprite', 'shadowsmith_saboteur', 'nightscale_revenant', 'wound_priest', 'vein_drainlord', 'shadowsmith_saboteur',
+    'drownscale', 'widow_matron', 'widow_matron', 'flame_shot', 'flame_shot', 'gravemaw',
+    'gravemaw', 'wound_priest', 'wound_priest', 'embermaw_devil', 'embermaw_devil', 'vein_drainlord',
+    'vein_drainlord', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'ember_deathraider', 'ember_deathraider', 'sanguine_pact',
+    'sanguine_pact', 'cinder_court_embermage', 'cinder_court_embermage', 'void_harvest', 'void_harvest', 'creeping_doom',
+    'creeping_doom', 'thirteenth_hour', 'kindling_pyromancer', 'nightscale_revenant', 'hollowgrin_giant', 'ashwing_sovereign',
   ],
   hammer: [
-    'hammerfall_raider', 'hammerfall_raider', 'second_blow', 'second_blow', 'anvil_fury', 'eager_smith',
-    'eager_smith', 'pyre_raider', 'pyre_raider', 'gore_horn', 'gore_horn', 'ember_deathraider',
-    'ember_deathraider', 'cinder_hound', 'cinder_hound', 'ash_sprite', 'ash_sprite', 'spark_bolt',
-    'spark_bolt', 'pit_spark', 'pit_spark', 'swift_runner', 'swift_runner', 'vainglorious_hero',
-    'vainglorious_hero', 'archwing_ravager', 'cinder_court_embermage', 'mountain_ogre', 'shieldbearer', 'shieldbearer',
+    'wardens_staff', 'scattershot_rig', 'scattershot_rig', 'tollwarden_captain', 'tollwarden_captain', 'flame_shot',
+    'flame_shot', 'vainglorious_hero', 'vainglorious_hero', 'rushhorn_minotaur', 'rushhorn_minotaur', 'eager_smith',
+    'eager_smith', 'ember_deathraider', 'ember_deathraider', 'evenhand_paragon', 'evenhand_paragon', 'wardens_acolyte',
+    'wardens_acolyte', 'cinder_court_embermage', 'cinder_court_embermage', 'runesteel_monstrosity', 'runesteel_monstrosity', 'radiant_intercessor',
+    'radiant_intercessor', 'returnwing_angel', 'returnwing_angel', 'dawn_titan', 'cinder_titan', 'hungerpit_tyrant',
   ],
   tidemother: [
-    'suras_herald', 'suras_herald', 'deep_call', 'deep_call', 'kraken_youngling', 'moss_brute',
-    'moss_brute', 'thorn_pup', 'thorn_pup', 'sky_scout', 'sky_scout', 'runeshell_crab',
-    'runeshell_crab', 'tempest_giant', 'rime_titan', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow',
-    'beastcall_arrow', 'lore_drifter', 'lore_drifter', 'mirror_moth', 'mirror_moth', 'echo_familiar',
-    'echo_familiar', 'runesteel_monstrosity', 'elder_titan', 'heartswap_tree', 'fatetwist', 'runesteel_monstrosity',
+    'fatetwist', 'runeshell_crab', 'runeshell_crab', 'tasty_morsel', 'tasty_morsel', 'venom_grub',
+    'venom_grub', 'deep_rooting', 'deep_rooting', 'cerulean_dragon', 'cerulean_dragon', 'grove_sentinel',
+    'grove_sentinel', 'beastkeeper', 'beastkeeper', 'bring_down', 'bring_down', 'tempest_giant',
+    'tempest_giant', 'thornwood_archer', 'thornwood_archer', 'recall', 'recall', 'frostreaver',
+    'rime_titan', 'mindveil_sovereign', 'firstroot_titan', 'deepbreach_serpent', 'quakehoof_behemoth', 'fatetwist',
   ],
 };
 
@@ -1301,51 +1189,30 @@ const SCHOOL_META = {
   none:      { name: 'Neutral',                 icon: '⚪' },
 };
 const SCHOOL_OF = {
-  // Tides — control, draw, bounce, mill, generation
-  sky_scout:'tides', sky_hunter:'tides', storm_drake:'tides', echo_familiar:'tides', lore_drifter:'tides', mirror_moth:'tides',
-  strange_gift:'tides', deep_breath:'tides', erode_memory:'tides', drown_in_dreams:'tides', quiet_snare:'tides', iron_verdict:'tides',
-  quick_study:'tides', scatter_mind:'tides', recall:'tides', thiefs_regret:'tides', tempest_giant:'tides', bring_down:'tides',
-  deepcoil_serpent:'tides', frostreaver:'tides', cerulean_dragon:'tides', mindveil_sovereign:'tides', runeshell_crab:'tides',
-  tidewing_familiar:'tides', signature_weaving:'tides', mastery_of_currents:'tides', tide_elemental:'tides',
-  suras_herald:'tides', deep_call:'tides', kraken_youngling:'tides', reef_fish:'tides', dream_wisp:'tides', gilded_riddle:'tides',
-  // Ember Wrath — direct damage, haste, aggression
-  ash_sprite:'ember', swift_runner:'ember', gore_horn:'ember', ember_roc:'ember', spark_bolt:'ember', war_stomp:'ember',
-  bloodrush:'ember', pit_spark:'ember', tripwire:'ember', cinder_hound:'ember', mountain_ogre:'ember', comet_fall:'ember',
-  ember_snare:'ember', ravaging_tyrant:'ember', pyre_raider:'ember', embermaw_devil:'ember', ashwing_sovereign:'ember',
-  eternal_phoenix:'ember', flame_shot:'ember', ember_deathraider:'ember', draconic_transfiguration:'ember', ash_dragon:'ember',
-cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_raider:'ember',
-  second_blow:'ember', kargs_mauler:'ember', unbroken_roar:'ember', sunder_line:'ember', curtain_call:'ember',
-  axe_of_pyre:'ember', reckless_wrath:'ember', unbroken_might:'ember',
-  // Hollow Grave — death, drain, graveyard, doom
-  pyre_wraith:'grave', nightjar:'grave', dream_thief:'grave', wither_wave:'grave', grimwulf:'grave', gravemaw:'grave',
-  drownscale:'grave', nightscale_revenant:'grave', widow_matron:'grave', old_bonegnaw:'grave', creeping_doom:'grave',
-  shadowsmith_saboteur:'grave', void_harvest:'grave', blood_idol:'grave', dread_herald:'grave', umbral_stag:'grave',
-  pale_shepherd:'grave', call_of_graven:'grave', graven_tithe:'grave', tollkeeper:'grave', severing_light:'grave',
-  vesper_charm:'grave', sibilant_herald:'grave', encore_venom:'grave', stolen_echo:'grave', unchained_spirit:'grave',
-  gravebound_imp:'grave', withering_edict:'grave', whispers_of_grave:'grave',
-  // First Dawn — healing, shielding, protection, formation
-  shieldbearer:'dawn', stone_warden:'dawn', dawn_chorister:'dawn', mend_light:'dawn', second_wind:'dawn', ward_of_dawn:'dawn',
-  evenhand_paragon:'dawn', vainglorious_hero:'dawn', wardens_acolyte:'dawn', wardens_staff:'dawn', vigil_acolyte:'dawn',
-  sunwell_charm:'dawn', rootcall_matriarch:'worldroot', oathsworn_captain:'dawn', bannerfall:'dawn', aegis_standard:'dawn',
-  anvil_fury:'dawn', dawn_steed:'dawn', dawns_smite:'dawn', aura_of_valor:'dawn', stance_recruit:'dawn', banneret_avatar:'dawn',
-  // Worldroot — growth, ramp, beasts, numbers
-  thorn_pup:'worldroot', moss_brute:'worldroot', elder_titan:'worldroot', bramble_imp:'worldroot', grove_tender:'worldroot',
-  ironbark_golem:'worldroot', grow_fierce:'worldroot', glade_archer:'worldroot', worldroot_titan:'worldroot', thorn_grub:'worldroot',
-  duskmane_stag:'worldroot', beastcall_arrow:'worldroot', venom_grub:'worldroot', tusked_warboar:'worldroot', tasty_morsel:'worldroot',
-  overgrowth:'worldroot', thornback_alpha:'worldroot', unbridled_cry:'worldroot', boarherd_horn:'worldroot',
-  thornwolf:'worldroot', barkhide_bloom:'worldroot', worldroot_titanosaur:'worldroot',
-  pilfered_remedy:'dawn', echo_hound:'ember',
-  pluck_dread:'grave', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
-  reefcaller_adept:'tides', slipstream:'tides', pyre_charger:'ember', pyrebrand:'ember', bonegleaner:'grave',
-  funeral_march:'grave', dawn_squire:'dawn', sanctuary:'dawn', canopy_ancient:'worldroot', overbloom:'worldroot',
-  undertow:'tides', riptide_trickster:'tides', pyre_golem:'ember', ashfall:'ember', crypt_warden:'grave',
-  toll_bell_wraith:'grave', aegis_squire:'dawn', sanctuary_knight:'dawn', rootbound_colossus:'worldroot', mossback_grazer:'worldroot',
-  sunmirror_glare:'tides', vindictive_retort:'tides', second_suns_dawn:'dawn', second_sun:'dawn', daybreak_verdict:'dawn',
-  deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn', radiant_intercessor:'dawn',
-  cinder_titan:'ember', hollowgrin_giant:'grave', rushhorn_minotaur:'ember', grove_sentinel:'worldroot', thornwood_archer:'worldroot',
-  grave_gladiator:'grave', flockguard_vigil:'tides',
-  // Neutral — any hero may run these
-  sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none', hungerpit_tyrant:'none',
+  // Tides
+  gazemaw:'tides', deepbreach_serpent:'tides', fatetwist:'tides', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
+  quiet_snare:'tides', iron_verdict:'tides', sunmirror_glare:'tides', vindictive_retort:'tides', tidewing_familiar:'tides', signature_weaving:'tides',
+  mastery_of_currents:'tides', tide_elemental:'tides', recall:'tides', tempest_giant:'tides', bring_down:'tides', frostreaver:'tides',
+  cerulean_dragon:'tides', mindveil_sovereign:'tides', runeshell_crab:'tides', reef_fish:'tides', rime_titan:'tides', flockguard_vigil:'tides',
+  // Ember Wrath
+  emberling:'ember', kindling_pyromancer:'ember', cinder_court_embermage:'ember', archwing_ravager:'ember', axe_of_pyre:'ember', reckless_wrath:'ember',
+  unbroken_might:'ember', ravaging_tyrant:'ember', embermaw_devil:'ember', ashwing_sovereign:'ember', draconic_transfiguration:'ember', ember_deathraider:'ember',
+  eternal_phoenix:'ember', flame_shot:'ember', ash_dragon:'ember', cinder_elemental:'ember', cinder_titan:'ember', rushhorn_minotaur:'ember',
+  // Hollow Grave
+  deathshade:'grave', thirteenth_hour:'grave', wound_priest:'grave', vein_drainlord:'grave', sanguine_pact:'grave', gravebound_imp:'grave',
+  withering_edict:'grave', whispers_of_grave:'grave', grimwulf:'grave', gravemaw:'grave', drownscale:'grave', nightscale_revenant:'grave',
+  widow_matron:'grave', old_bonegnaw:'grave', creeping_doom:'grave', shadowsmith_saboteur:'grave', void_harvest:'grave', unchained_spirit:'grave',
+  sepulcher_titan:'grave', hollowgrin_giant:'grave', grave_gladiator:'grave',
+  // First Dawn
+  desperate_prayer:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn',
+  daybreak_verdict:'dawn', dawn_steed:'dawn', dawns_smite:'dawn', aura_of_valor:'dawn', stance_recruit:'dawn', evenhand_paragon:'dawn',
+  wardens_acolyte:'dawn', wardens_staff:'dawn', vainglorious_hero:'dawn', banneret_avatar:'dawn', dawn_titan:'dawn', radiant_intercessor:'dawn',
+  // Worldroot
+  sheep:'worldroot', beastkeeper:'worldroot', heartswap_tree:'worldroot', quakehoof_behemoth:'worldroot', thornwolf:'worldroot', barkhide_bloom:'worldroot',
+  worldroot_titanosaur:'worldroot', duskmane_stag:'worldroot', beastcall_arrow:'worldroot', venom_grub:'worldroot', tusked_warboar:'worldroot', tasty_morsel:'worldroot',
+  deep_rooting:'worldroot', firstroot_titan:'worldroot', grove_sentinel:'worldroot', thornwood_archer:'worldroot', oakenhide:'worldroot',
+  // Neutral
+  eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none', hungerpit_tyrant:'none',
 };
 for (const [id, sch] of Object.entries(SCHOOL_OF)) if (CARDS[id]) CARDS[id].cardSchool = sch;
 const HERO_SCHOOLS = {
@@ -1915,10 +1782,6 @@ class Game {
       }
     }
     switch (effect.kind) {
-      case 'generate': {
-        for (let k = 0; k < effect.count; k++) this.addToHand(i, makeInstance(this.rng.pick(GENERATED_POOL), null), srcName);
-        break;
-      }
       case 'rays': {
         // The Eye Tyrant's rays, recovered in full by Recovery Sweep 2
         // (Charm Ray's -2/+2 was the last missing pair). One ray, at
@@ -3569,7 +3432,7 @@ function boardHtml(p, isMe) {
         }
       }
     } else if (mode === 'targeting') {
-      var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }) || { cardId: 'spark_bolt' });
+      var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }) || { cardId: 'flame_shot' });
       var k = (d.effect || d.debut) && (d.effect || d.debut).kind;
       var warded = (D(inst).keywords || []).indexOf('ward') >= 0;
       var flying = (D(inst).keywords || []).indexOf('flying') >= 0;
@@ -3707,6 +3570,7 @@ function inspectHtml() {
       return bits.join('');
     })() +
     '<div>' + badges(inst, owner) + '</div>' + stats +
+    (d.orig ? '<div style="font-size:11px;color:#8f83b8;margin-top:6px">Original: ' + d.orig + (d.src ? ' · ' + d.src : '') + '</div>' : '') +
     (d.costForge ? '<div style="font-size:11px;color:#a793d6;margin-top:6px">Cost set by Forge — not in the recovered record (see the Costing Charter).</div>' : '') +
     (inst.starterOwner !== owner ? '<div style="font-size:11px;color:#e8a0b4;margin-top:6px">✦ ' + (inst.createdBy ? 'Created by ' + esc(inst.createdBy) : 'Generated — this card did not start in a deck') + '.</div>' : '') +
     '<button class="big" onclick="closeInspect()">Close</button></div>' + assocHtmlFor(d, inst.cardId) + '</div>';
@@ -3934,7 +3798,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M61 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M62 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

@@ -560,6 +560,29 @@
   @keyframes vsIn { from { opacity:0; transform:scale(1.06); } to { opacity:1; transform:scale(1); } }
   @keyframes passPulse { 0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 0 rgba(255,120,140,0) } 50%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 18px rgba(255,120,140,.85) } }
   @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
+
+  /* --- M42: LANDSCAPE STAGE (Jesse) — a wide Coliseum when the phone
+     turns. Portrait stays the tuned default; this block only applies to
+     short, wide screens (phones held in landscape). --- */
+  @media (orientation: landscape) and (max-height: 540px) {
+    #app { padding:4px 6px 6px; }
+    .board { min-height:0; padding:3px 4px 1px; gap:5px; }
+    .board-label { display:none; }
+    .emblem { width:57px; padding-top:1px; }
+    .emblem-head { width:48px; height:62px; }
+    .emblem-name { font-size:8.5px; max-width:62px; margin-top:3px; }
+    .emblem-badges { max-height:19px; }
+    .herobar { padding:4px 8px; gap:7px; }
+    .herobar .portrait { width:44px; height:44px; }
+    .gems-col span { width:11px; height:11px; }
+    .hand.fan { padding:14px 2px 4px; }
+    .hand.fan .card { scale:.6; }
+    .hand.fan.engaged { --spread:1.35; }
+    .hand.fan.engaged .card { scale:.8; }
+    .hand.fan.mini { height:52px; padding-top:4px; }
+    .hand.fan.mini .card { scale:.3; }
+    .vs-side .portrait { width:64px; height:64px; }
+  }
 </style>
 </head>
 <body>
@@ -3378,11 +3401,12 @@ function render() {
      ten cards still fit the stage width. */
   var iw = (typeof window !== 'undefined' && window.innerWidth) || 390;
   var cardW = iw < 560 ? 102 : 112;
-  var availW = Math.min(iw, 560) - 8;
+  var availW = Math.min(iw, iw > window.innerHeight ? 900 : 560) - 8;
   /* M36: the fan is CONTAINED (Jesse) — a centered cluster, never an
      edge-to-edge strip: its width is capped, and the visible sliver is
-     capped too, so even a small hand overlaps like held cards. */
-  var fanW = Math.min(availW, iw < 560 ? 302 : 380);
+     capped too, so even a small hand overlaps like held cards.
+     M42: in landscape the fan gets the wide stage to breathe in. */
+  var fanW = Math.min(availW, iw < 560 ? 302 : (iw > window.innerHeight ? 640 : 380));
   var stepPx = hn > 1 ? Math.max(26, Math.min(58, (fanW - cardW) / (hn - 1))) : 0;
   if (!handOpen) stepPx = hn > 1 ? 20 : 0;
   var hStep = hn > 1 ? Math.min(6.5, Math.max(2.0, stepPx * 0.085)) : 0;
@@ -3470,7 +3494,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M41 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M42 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -4172,6 +4196,14 @@ render();
   document.addEventListener('pointerdown', function (e) {
     if (e.target.closest && e.target.closest('.actions button')) sfx('click');
   }, true);
+  /* M42: rotating the phone re-renders at once, so the fan math and the
+     landscape stage apply the moment the phone turns — before this, a
+     rotation alone changed nothing on screen (Jesse). */
+  var lastLand = window.innerWidth > window.innerHeight;
+  window.addEventListener('resize', function () {
+    var nowLand = window.innerWidth > window.innerHeight;
+    if (nowLand !== lastLand) { lastLand = nowLand; setTimeout(function () { if (typeof G !== 'undefined' && G) render(); }, 80); }
+  });
   /* M38: tapping the field puts the hand away. */
   document.addEventListener('click', function (e) {
     if (!handOpen) return;

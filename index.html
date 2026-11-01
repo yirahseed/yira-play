@@ -319,6 +319,44 @@
   .emblem.selected-attacker { transform:rotate(-5deg) scale(1.05); }
   .card.blocking { outline:3px solid #57e88a; box-shadow:0 0 14px rgba(87,232,138,.7); }
   .emblem.blocking { outline:3px solid #57e88a; box-shadow:0 0 14px rgba(87,232,138,.7); }
+  /* --- M27 Spellslingers-look pass (Jesse, Sun Nov 1 ~06:05): corner hero
+     clusters, gem-gauge mana, enemy card backs, the floating arena-edge
+     control, full-path Nightmare streams, the targeting line, Zz badge --- */
+  .herobar { padding:6px 10px; gap:8px; }
+  .herobar.me .portrait { margin-left:0; } .herobar.foe .portrait { margin-right:0; }
+  .hcluster { display:flex; flex-direction:column; align-items:center; gap:1px; flex:none; width:78px; }
+  .hcluster .portrait { width:62px; height:62px; position:relative; border-width:2.5px; overflow:visible; }
+  .hcluster .portrait img, .hcluster .portrait svg { border-radius:50%; }
+  .hcluster .hname { font-size:11px; font-weight:700; text-align:center; line-height:1.15; max-width:78px; }
+  .hcluster .life { position:absolute; right:-10px; bottom:-8px; font-size:13.5px; padding:9px 8px 11px; z-index:2; }
+  .gems-col { display:flex; flex-direction:column-reverse; align-items:center; gap:1.5px; flex:none; min-width:16px; }
+  .gems-col i { width:7px; height:7px; border-radius:50%; background:#9a6ae0; box-shadow:0 0 4px rgba(154,106,224,.85); }
+  .gems-col i.off { background:rgba(255,255,255,.14); box-shadow:none; }
+  .gems-col b { font-size:10.5px; color:#d9ccff; margin-bottom:2px; }
+  .gems-col .resv { writing-mode:vertical-rl; font-size:9px; }
+  .backs { display:inline-flex; gap:1.5px; vertical-align:middle; }
+  .backs i { width:9px; height:13px; border-radius:2px; background:linear-gradient(160deg,#5a4390,#2c1e52); border:1px solid rgba(200,170,255,.5); display:inline-block; }
+  .herobar.me .speech-bubble { left:88px; } .herobar.foe .speech-bubble { right:88px; }
+  .field .actions { position:absolute; right:3px; top:50%; transform:translateY(-50%); flex-direction:column; align-items:stretch; z-index:6; margin:0; }
+  .field .actions button { box-shadow:0 4px 14px rgba(0,0,0,.55); padding:13px 20px; font-size:15.5px; }
+  @media (min-width:700px){ .field { padding-right:104px; } }
+  #log { max-height:52px; }
+  .fx-pathsvg { position:fixed; left:0; top:0; z-index:61; pointer-events:none; }
+  .stream-under { fill:none; stroke:rgba(120,70,220,.16); stroke-width:11; stroke-linecap:round; }
+  .stream-path { fill:none; stroke:rgba(168,120,255,.6); stroke-width:5; stroke-linecap:round; stroke-dasharray:1 13; animation:dashFlow 1.05s linear forwards; }
+  @keyframes dashFlow { 0%{ opacity:0 } 10%{ opacity:.95 } 78%{ opacity:.9 } 100%{ stroke-dashoffset:-168; opacity:0 } }
+  .fx-puff { position:fixed; z-index:62; pointer-events:none; font-size:19px; transform:translate(-50%,-50%);
+    filter:drop-shadow(0 0 8px #8a5cff) drop-shadow(0 0 18px rgba(120,60,255,.55)) blur(.4px); animation:puffPulse 1.15s ease-out forwards; }
+  @keyframes puffPulse { 0%{ opacity:0; scale:.5 } 16%{ opacity:.95 } 100%{ opacity:0; scale:1.4 } }
+  #targetSvg { position:fixed; inset:0; width:100%; height:100%; z-index:115; pointer-events:none; display:none; }
+  #targetPath { fill:none; stroke-width:3.5; stroke-linecap:round; stroke-dasharray:8 7; animation:tlMarch .5s linear infinite; }
+  #targetPath.tl-aim { stroke:rgba(255,217,77,.8); filter:drop-shadow(0 0 5px rgba(255,217,77,.55)); }
+  #targetPath.tl-ok { stroke:#7dff9a; filter:drop-shadow(0 0 8px rgba(87,232,138,.9)); }
+  #targetDot.tl-aim { fill:rgba(255,217,77,.9); } #targetDot.tl-ok { fill:#7dff9a; }
+  @keyframes tlMarch { to { stroke-dashoffset:-15; } }
+  .emblem-zz { position:absolute; top:-5px; right:-3px; z-index:4; font-size:11px; font-weight:900; font-style:italic;
+    color:#d9c8ff; text-shadow:0 1px 3px rgba(0,0,0,.9); transform:rotate(14deg); }
+  @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
 </style>
 </head>
 <body>
@@ -2085,18 +2123,76 @@ function spawnStreams(fromIdx, toIdx, n) {
     var src = anchorPoint('herobar-' + fromIdx, { x: fromFoe ? W * 0.78 : W * 0.22, y: fromFoe ? H * 0.16 : H * 0.84 });
     var dst = anchorPoint('pile-' + toIdx, { x: toFoe ? W * 0.16 : W * 0.84, y: toFoe ? H * 0.07 : H * 0.93 });
     var count = Math.min(Math.max(n, 1), 12);
+    /* M27 (Jesse's direction): not an icon travelling a path — the WHOLE
+       route streams at once. Each Nightmare is a full arc drawn as flowing
+       dashes (the flow reads along the entire path simultaneously) over a
+       soft smoke body, with smoke puffs distributed along the arc, all
+       live in the same volley. */
+    var midX = (src.x + dst.x) / 2, midY = (src.y + dst.y) / 2;
+    var dxv = dst.x - src.x, dyv = dst.y - src.y;
+    var len = Math.sqrt(dxv * dxv + dyv * dyv) || 1;
+    var px = -dyv / len, py = dxv / len;
+    var curves = [], paths = '';
     for (var k = 0; k < count; k++) {
-      var node = document.createElement('div');
-      node.className = 'fx-stream'; node.textContent = '🌑';
-      var jx = (Math.random() * 36) - 18, jy = (Math.random() * 24) - 12;
-      node.style.left = (src.x + jx) + 'px'; node.style.top = (src.y + jy) + 'px';
-      node.style.setProperty('--dx', ((dst.x - src.x) + jx) + 'px');
-      node.style.setProperty('--dy', ((dst.y - src.y) + jy) + 'px');
-      node.style.animationDelay = (k * 0.05) + 's';
-      document.body.appendChild(node);
-      setTimeout((function (nd) { return function () { if (nd.parentNode) nd.parentNode.removeChild(nd); }; })(node), 2400);
+      var bow = (k - (count - 1) / 2) * 13 + ((k % 2) ? 24 : -16);
+      var cx = midX + px * bow, cy = midY + py * bow - 22;
+      curves.push({ cx: cx, cy: cy });
+      var dAttr = 'M ' + src.x.toFixed(1) + ' ' + src.y.toFixed(1) + ' Q ' + cx.toFixed(1) + ' ' + cy.toFixed(1) + ' ' + dst.x.toFixed(1) + ' ' + dst.y.toFixed(1);
+      paths += '<path class="stream-under" d="' + dAttr + '"/>' +
+               '<path class="stream-path" style="animation-delay:' + (k * 0.05) + 's" d="' + dAttr + '"/>';
+    }
+    var wrap = document.createElement('div');
+    wrap.innerHTML = '<svg class="fx-pathsvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + paths + '</svg>';
+    if (wrap.firstChild) document.body.appendChild(wrap.firstChild);
+    setTimeout(function () { try { var s = document.querySelector('.fx-pathsvg'); if (s && s.parentNode) s.parentNode.removeChild(s); } catch (e) {} }, 2400);
+    for (var j = 0; j < count; j++) {
+      var c = curves[j];
+      [0.16, 0.36, 0.56, 0.76, 0.92].forEach(function (t, ti) {
+        var mt = 1 - t;
+        var x = mt * mt * src.x + 2 * mt * t * c.cx + t * t * dst.x;
+        var y = mt * mt * src.y + 2 * mt * t * c.cy + t * t * dst.y;
+        var puff = document.createElement('div');
+        puff.className = 'fx-puff'; puff.textContent = '🌑';
+        puff.style.left = x + 'px'; puff.style.top = y + 'px';
+        puff.style.animationDelay = (j * 0.05 + ti * 0.07) + 's';
+        document.body.appendChild(puff);
+        setTimeout((function (nd) { return function () { if (nd.parentNode) nd.parentNode.removeChild(nd); }; })(puff), 2800);
+      });
     }
   } catch (e) {}
+}
+/* ---------- M27 targeting line: while a targeted cast is being aimed
+   (dragging the card, or in tap-targeting mode), an arcing dashed line
+   runs from the casting card to the pointer — gold while aiming, green
+   when a legal target is under the pointer. ---------- */
+var tlSvg = null, tlPath = null, tlDot = null;
+function targetSvgEls() {
+  if (tlSvg && tlPath) return true;
+  try {
+    if (!document.body || !document.createElement) return false;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = '<svg id="targetSvg"><path id="targetPath" d=""/><circle id="targetDot" r="6"/></svg>';
+    if (!wrap.firstChild) return false;
+    document.body.appendChild(wrap.firstChild);
+    tlSvg = document.getElementById('targetSvg'); tlPath = document.getElementById('targetPath'); tlDot = document.getElementById('targetDot');
+    return !!tlPath;
+  } catch (e) { return false; }
+}
+function drawTargetLine(x1, y1, x2, y2, ok) {
+  try {
+    if (!targetSvgEls()) return;
+    var mx = (x1 + x2) / 2, my = Math.min(y1, y2) - 46;
+    tlPath.setAttribute('d', 'M ' + x1 + ' ' + y1 + ' Q ' + mx + ' ' + my + ' ' + x2 + ' ' + y2);
+    tlPath.setAttribute('class', ok ? 'tl-ok' : 'tl-aim');
+    tlDot.setAttribute('cx', x2); tlDot.setAttribute('cy', y2);
+    tlDot.setAttribute('class', ok ? 'tl-ok' : 'tl-aim');
+    tlSvg.style.display = 'block';
+  } catch (e) {}
+}
+function clearTargetLine() { try { if (tlSvg) tlSvg.style.display = 'none'; } catch (e) {} }
+function defNeedsTarget(d) {
+  var eff = d && (d.effect || d.debut);
+  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom'].indexOf(eff.kind) >= 0);
 }
 /* Floating nightmare wisps (plant: rise from mid-screen toward the enemy;
    drain: fall over the afflicted hero). Count scales with the event size. */
@@ -2340,7 +2436,7 @@ function emblemHtml(inst, ownerIdx, opts) {
   return '<div class="emblem' + (opts.cls || '') + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' +
     '<span class="emblem-pow">' + (d.power + inst.permPower) + '⚔</span>' +
-    '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span></div>' +
+    '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + '</div>' +
     (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') +
     '<div class="emblem-name">' + esc(d.name) + '</div>' +
     '<div class="emblem-badges">' + badges(inst, ownerIdx) + '</div></div>';
@@ -2414,12 +2510,22 @@ function heroBarHtml(p, isMe) {
     if (p.school && SCHOOLS[p.school]) loadLine += questLine(p.school, false);
     Object.keys(p.questDone || {}).filter(function (s) { return s !== p.school && SCHOOLS[s]; }).sort().forEach(function (s) { loadLine += ' ' + questLine(s, true); });
   }
+  /* M27 Spellslingers-look: corner cluster — big portrait, name beneath,
+     life shield tucked on the portrait, mana as a vertical gem gauge
+     beside the hero (fills from the bottom), enemy hand as card backs. */
+  var avail = Math.max(0, G.availableMana(p));
+  var gpips = '';
+  for (var gk = 0; gk < Math.min(p.maxMana, 12); gk++) gpips = '<i class="' + (gk < p.maxMana - avail ? 'off' : '') + '"></i>' + gpips;
+  var held = G.reservedMana(p) ? '<span class="resv">' + G.reservedMana(p) + ' held</span>' : '';
+  var handBit = isMe ? '✋ ' + p.hand.length
+    : '<span class="backs">' + '<i></i>'.repeat(Math.min(p.hand.length, 8)) + '</span> ' + p.hand.length;
   return '<div class="herobar' + (isMe ? ' me' : ' foe') + '" id="herobar-' + p.idx + '"' + click + '>' +
-    '<div class="portrait">' + heroPortrait(p.heroId) + '</div>' + speechHtml(p) +
-    '<div><div class="hero-name">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (isMe ? ' (you)' : '') + '</div>' +
-    '<div class="hero-sub">' + esc(p.hero.blurb) + '</div></div><div class="spacer"></div>' + gems +
-    '<div class="pile clickable" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ✋ ' + p.hand.length + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div>' +
-    '<div class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + ' ♥</div></div>';
+    '<div class="hcluster"><div class="portrait">' + heroPortrait(p.heroId) +
+    '<span class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + '</span></div>' +
+    '<div class="hname">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div></div>' + speechHtml(p) +
+    '<div class="gems-col" title="Mana — lit gems are ready">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b></div>' +
+    '<div class="spacer"></div>' + gems +
+    '<div class="pile clickable" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ' + handBit + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div></div>';
 }
 function stanceEmblemHtml(p) {
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘', blurb: '' };
@@ -2429,7 +2535,6 @@ function stanceEmblemHtml(p) {
   var label = avail + '/' + p.maxMana + (G.reservedMana(p) ? ' · ' + G.reservedMana(p) + ' held' : '');
   return '<div class="emblem stance clickable" onclick="showStance(' + p.idx + ')" title="' + esc(st.name) + '">' +
     '<div class="emblem-head stance-head"><div class="emblem-rim stance-rim"></div><div class="emblem-face stance-face"><span class="emblem-glyph">' + st.icon + '</span></div></div>' +
-    '<div class="pipsrow">' + pips + '</div><div class="pipslabel">' + label + '</div>' +
     '<div class="emblem-name">' + esc(st.name.replace(' Stance', '')) + '</div></div>';
 }
 function showStance(idx) {
@@ -2466,7 +2571,7 @@ function boardHtml(p, isMe) {
       if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && k === 'buffCreature') || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
     }
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
-    if (!G.canAttack(inst, p) && d2type(inst) === 'creature' && inst.summonedTurn === G.turnNumber) opts.cls = (opts.cls || '') + ' ready-dim';
+    if (!G.canAttack(inst, p) && d2type(inst) === 'creature' && inst.summonedTurn === G.turnNumber) { opts.cls = (opts.cls || '') + ' ready-dim'; opts.zz = true; }
     out += (d2type(inst) === 'creature') ? emblemHtml(inst, p.idx, opts) : cardHtml(inst, p.idx, opts);
   });
   // face-down traps count for the opponent; own traps shown as chips elsewhere
@@ -2514,6 +2619,7 @@ function inspectHtml() {
 function captureScroll() { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; return n ? n.scrollTop : 0; } catch (e) { return 0; } }
 function restoreScroll(y) { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; if (n) n.scrollTop = y; } catch (e) {} }
 function render() {
+  clearTargetLine();
   if (mode === 'menu') return renderMenu();
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
@@ -2523,7 +2629,7 @@ function render() {
   computeNmPops();
   var html = '<div class="shell"><div class="scrollzone">';
   html += heroBarHtml(foe, false);
-  html += '<div class="field"' + ((typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:linear-gradient(rgba(15,9,27,.38), rgba(15,9,27,.52)), url(' + PORTRAITS.arena + ')"' : '') + '>';
+  html += '<div class="field"' + ((typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:linear-gradient(rgba(15,9,27,.16), rgba(15,9,27,.32)), url(' + PORTRAITS.arena + ')"' : '') + '>';
   html += '<div class="board-label">ENEMY CREATURES</div>' + boardHtml(foe, false) + chipsHtml(foe, false);
   if (mode === 'blocking') html += '<div class="banner blocking">⚔️ The enemy attacks with ' + aiAttackers.length + ' creature' + (aiAttackers.length > 1 ? 's' : '') + '! Tap an attacker (orange), then tap one of your creatures to block it — one blocker each. Blocking is your choice: you may also take the hits.<br><button onclick="confirmBlocks()" style="margin-top:8px">Confirm blocks</button> <button class="ghost" onclick="clearBlocks()">Clear</button></div>';
   if (mode === 'attackSelect') {
@@ -2537,12 +2643,8 @@ function render() {
   if (mode === 'aiTurn') html += '<div class="banner info">THEIR TURN — the enemy is playing…</div>';
   if (mode === 'main') html += '<div class="banner info">YOUR TURN — play cards, attack once if you wish, then Pass.</div>';
   html += '<div class="board-label">YOUR CREATURES</div>' + boardHtml(me, true) + chipsHtml(me, true);
-  html += '</div>';
-  html += heroBarHtml(me, true);
-  html += '<div class="msg">' + esc(msg) + '</div>';
-  html += '<h3 style="color:#a793d6;margin:10px 0 4px;font-size:12px;letter-spacing:.15em">BATTLE LOG</h3><div id="log">' + uiLog.join('<br>') + '</div>';
-  html += '</div><div class="handzone">';
-  html += '<div style="text-align:right;padding:2px 4px 0"><button class="ghost" style="padding:4px 10px;font-size:12px" onclick="toggleMute()">' + (muted ? '🔇 Sound off' : '🔊 Sound on') + '</button></div>';
+  /* M27: the one big contextual control floats at the arena's right edge,
+     like the original's angled PASS control. */
   html += '<div class="actions">';
   if (mode === 'main') {
     if (!me.combatDone) html += '<button onclick="startAttackSelect()">⚔️ Attack</button>';
@@ -2553,6 +2655,12 @@ function render() {
     html += '<button class="ghost" onclick="cancelAttack()">Cancel</button>';
   }
   html += '</div>';
+  html += '</div>';
+  html += heroBarHtml(me, true);
+  html += '<div class="msg">' + esc(msg) + '</div>';
+  html += '<div id="log">' + uiLog.join('<br>') + '</div>';
+  html += '</div><div class="handzone">';
+  html += '<div style="text-align:right;padding:2px 4px 0"><button class="ghost" style="padding:4px 10px;font-size:12px" onclick="toggleMute()">' + (muted ? '🔇 Sound off' : '🔊 Sound on') + '</button></div>';
   html += '<div class="hand fan">' + me.hand.map(function (inst) {
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
     var opts = { cls: ' clickable' + (afford && mode === 'main' ? '' : ' unaffordable') };
@@ -2622,7 +2730,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M26.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M27 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2906,11 +3014,12 @@ function targetCreature(uid) {
 }
 function targetHero() { resolveTarget({ kind: 'hero' }); }
 function resolveTarget(target) {
+  clearTargetLine();
   var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }));
   try { G.playCard(humanIdx, pendingUid, target); sfx('spell'); say('You play ' + (d ? d.name : 'a card') + '.'); } catch (e) { msg = e.message; }
   pendingUid = null; mode = (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : 'main'; flushEngineLog(); if (!finishCheck()) render();
 }
-function cancelTarget() { pendingUid = null; mode = 'main'; render(); }
+function cancelTarget() { clearTargetLine(); pendingUid = null; mode = 'main'; render(); }
 function disarm(uid) {
   try { G.disarmTrap(humanIdx, uid); say('Trap disarmed — mana released.'); } catch (e) { msg = e.message; }
   render();
@@ -3113,6 +3222,7 @@ render();
   }
   function clearDrop() { if (dropEl) { dropEl.classList.remove('drop-hover'); dropEl = null; } }
   function endDrag() {
+    if (typeof clearTargetLine === 'function') clearTargetLine();
     if (ghost) { ghost.remove(); ghost = null; }
     if (srcEl) srcEl.classList.remove('drag-src');
     if (document.body) document.body.classList.remove('yira-dragging');
@@ -3153,7 +3263,7 @@ render();
     var held = card;
     hoverTimer = setTimeout(function () { showHover(held); }, 200);
   }, true);
-  var dirLock = null, scrolled = false, lastX = 0;
+  var dirLock = null, scrolled = false, lastX = 0, dragSrcX = 0, dragSrcY = 0;
   document.addEventListener('pointermove', function (e) {
     if (!pressEl) return;
     if (scrolled) {
@@ -3173,6 +3283,8 @@ render();
       hideHover();
       if (typeof mode === 'undefined' || mode !== 'main' || typeof G === 'undefined' || !G) { pressEl = null; return; }
       dragging = true; dragUid = pressUid; srcEl = pressEl;
+      var sr = srcEl.getBoundingClientRect();
+      dragSrcX = sr.left + sr.width / 2; dragSrcY = sr.top + 8;
       srcEl.classList.add('drag-src');
       ghost = srcEl.cloneNode(true);
       ghost.classList.remove('drag-src'); ghost.classList.add('drag-ghost');
@@ -3186,6 +3298,14 @@ render();
       var under = document.elementFromPoint(e.clientX, e.clientY);
       var t = (under && under.closest) ? (under.closest('.board .card, .board .emblem') || under.closest('.herobar')) : null;
       if (t !== dropEl) { clearDrop(); if (t) { t.classList.add('drop-hover'); dropEl = t; } }
+      /* M27: a targeted cast draws its aiming line from the card to the
+         pointer while it is being dragged. */
+      if (typeof drawTargetLine === 'function' && typeof defNeedsTarget === 'function') {
+        var dinst = null;
+        try { dinst = G.players[humanIdx].hand.find(function (c) { return c.uid === dragUid; }); } catch (e) {}
+        if (dinst && defNeedsTarget(D(dinst))) drawTargetLine(dragSrcX, dragSrcY, e.clientX, e.clientY, !!dropEl);
+        else clearTargetLine();
+      }
     }
   }, true);
   document.addEventListener('pointerup', function (e) {
@@ -3213,6 +3333,18 @@ render();
     pressEl = null;
   }, true);
   document.addEventListener('pointercancel', function () { hideHover(); endDrag(); pressEl = null; overlayPress = null; scrolled = false; dirLock = null; }, true);
+  /* M27: in tap-targeting mode (a targeted cast is waiting for its target),
+     the aiming line follows the pointer from the pending hand card. */
+  document.addEventListener('pointermove', function (e) {
+    if (dragging) return;
+    if (typeof mode === 'undefined' || mode !== 'targeting' || typeof pendingUid === 'undefined' || pendingUid === null) return;
+    if (typeof drawTargetLine !== 'function') return;
+    var el = document.querySelector ? document.querySelector('.hand .card[data-uid="' + pendingUid + '"]') : null;
+    if (!el || !el.getBoundingClientRect) return;
+    var r = el.getBoundingClientRect();
+    var ok = !!(e.target && e.target.closest && e.target.closest('.targetable, .herobar.foe'));
+    drawTargetLine(r.left + r.width / 2, r.top + 8, e.clientX, e.clientY, ok);
+  }, true);
   document.addEventListener('contextmenu', function (e) {
     // No long-press save-image / selection menus on game pieces.
     if (e.target.closest && e.target.closest('.card, .emblem, .herobar, .bfig')) e.preventDefault();

@@ -613,6 +613,16 @@ const CARDS = {
   // you does not count as damage dealt to you). Cost was never recorded:
   // FORGE-COSTED at 4, argued in files/COSTING.md (Batch 8). Name is ours.
   radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } },
+  // ——— Conversion batch 9 (M24, sprint): the second NEEDS-ENGINE conversion ———
+  // The Ravenous Pit Lord of the record (no colour recorded, 7/5 final stats,
+  // CONVERSION-AUDIT §3): Debut — raise the cost of all cards in your
+  // opponent's hand by 2 (the beta redesign, the final recorded text). The
+  // engine had no hand-cost modification; M24 adds the 'taxFoeHand' debut
+  // kind (a negative discount on every card currently in the foe's hand;
+  // cards drawn later are untouched). Colour was never recorded, so the
+  // card is NEUTRAL — no school invented for it. Cost was never recorded:
+  // FORGE-COSTED at 8, argued in files/COSTING.md (Batch 9). Name is ours.
+  hungerpit_tyrant: { icon: "👺", name: 'Hungerpit Tyrant', cost: 8, costForge: true, type: 'creature', power: 7, health: 5, debut: { kind: 'taxFoeHand', amount: 2 } },
 };
 const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound']; // M22: 'stolen_hour' pruned — Deep Rooting (batch 7) owns plain ramp at 2; the generated filler was its exact twin (Jesse's prune rule)
 const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort'];
@@ -841,7 +851,7 @@ cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_
   deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn', radiant_intercessor:'dawn',
   cinder_titan:'ember', hollowgrin_giant:'grave', rushhorn_minotaur:'ember', grove_sentinel:'worldroot', thornwood_archer:'worldroot',
   // Neutral — any hero may run these
-  sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none',
+  sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none', hungerpit_tyrant:'none',
 };
 for (const [id, sch] of Object.entries(SCHOOL_OF)) if (CARDS[id]) CARDS[id].cardSchool = sch;
 const HERO_SCHOOLS = {
@@ -1366,6 +1376,15 @@ class Game {
       }
       case 'healHero': { const who = effect.who === 'self' ? p : foe; who.life += effect.amount; break; }
       case 'healFromWounds': { const amount = Math.min(effect.cap || 7, p.damageTakenPrevTurn || 0); if (amount > 0) { p.life += amount; this.log.push(`${def(sourceInst).name} mends ${p.hero.name} for ${amount} — the wounds of last turn, answered`); } break; }
+      case 'taxFoeHand': {
+        // M24: a negative discount is a tax — effectiveCost subtracts the
+        // discount, so -amount makes each card CURRENTLY in the foe's hand
+        // cost that much more. Cards drawn later are untouched: the tax fell
+        // on the hand the Tyrant saw when it arrived, nothing else.
+        for (const c of foe.hand) c.discount = (c.discount || 0) - effect.amount;
+        if (foe.hand.length) this.log.push(`${def(sourceInst).name} taxes ${foe.hero.name}'s hand: every card costs ${effect.amount} more`);
+        break;
+      }
       case 'drain': {
         this.hurtHero(foe.idx, effect.amount, i); foe.tookDamageThisTurn = true;
         p.life += effect.amount;
@@ -2142,6 +2161,7 @@ function effectText(d) {
       case 'damageHero': return 'Deal ' + e.amount + ' damage to the enemy hero.';
       case 'healHero': return 'Gain ' + e.amount + ' life.';
       case 'healFromWounds': return 'Gain life equal to the damage you were dealt last turn (max ' + (e.cap || 7) + ').';
+      case 'taxFoeHand': return 'Every card in your opponent\'s hand costs ' + e.amount + ' more.';
       case 'buffCreature': return e.temp ? ('Give a creature +' + e.power + '/+' + e.health + ' until end of turn.') : ('Give a creature +' + e.power + '/+' + e.health + ' permanently.');
       case 'buffAllCreatures': return 'Give all your creatures +' + e.power + '/+' + e.health + ' permanently.';
       case 'damageAllEnemyCreatures': return 'Deal ' + e.amount + ' damage to all enemy creatures' + (e.heroDamage ? ' and ' + e.heroDamage + ' to the enemy hero.' : '.') + (e.requiem ? ' If any of your creatures died this turn, deal ' + e.requiem + ' damage to the enemy hero.' : '');
@@ -2543,7 +2563,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M23.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M24 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

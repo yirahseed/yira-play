@@ -637,6 +637,24 @@
   .cbar i { display:block; width:14px; background:linear-gradient(180deg,#b18cff,#6d3bd1); border-radius:3px 3px 0 0; }
   .cbar em { font-size:9.5px; color:#a793d6; font-style:normal; }
   .cmeta { margin-left:10px; font-size:12px; color:#c4b6e8; align-self:center; }
+
+  /* --- M48: THE HAND, GENEROUS + SMOOTH; SPELLS GET THE STAT SPACE ---
+     Jesse: the rested hand is THE primary reach — it was finicky-precise.
+     Its hit box now extends well past the visible cards (padding grown,
+     margins pulled back so nothing moves visually), the minis sit a
+     touch larger, and opening BLOOMS: the fan scales up fluidly from
+     its resting footprint instead of teleporting. Spells have no stat
+     orbs, so their text panel takes the stats row's space too. */
+  .hand.fan.mini { padding:32px 36px 16px; margin:-32px -36px -16px; cursor:pointer; }
+  .hand.fan.mini .card { scale:.42; }
+  @keyframes fanBloom { from { transform:scale(.52) translateY(54px); opacity:.5; } to { transform:scale(1) translateY(0); opacity:1; } }
+  .hand.fan.bloom { animation:fanBloom .34s cubic-bezier(.22,.9,.28,1.12) both; transform-origin:50% 100%; }
+  @keyframes fanSettle { from { transform:scale(1.16) translateY(-9px); opacity:.7; } to { transform:scale(1) translateY(0); opacity:1; } }
+  .hand.fan.mini.settle { animation:fanSettle .22s ease both; transform-origin:50% 100%; }
+  .card.nostats .ctext { height:75px; -webkit-line-clamp:6; }
+  .card.sigcard.nostats .ctext { height:75px; }
+  .card.nostats .cstats { display:none; }
+  @media (max-width: 560px) { .hand.fan.mini .card { scale:.38; } }
 </style>
 </head>
 <body>
@@ -3053,7 +3071,6 @@ function effectText(d) {
 function badges(inst, ownerIdx) {
   var d = D(inst), out = '';
   if (d.legendary) out += '<span class="badge sig">legendary</span>';
-  if (d.signatureFor) out += '<span class="badge sig">signature</span>';
   if (inst.starterOwner !== ownerIdx) out += '<span class="badge gen" title="Generated — this card did not start in a deck">✦</span>';
   (d.keywords || []).forEach(function (k) { out += '<span class="badge">' + k + '</span>'; });
   return out;
@@ -3080,7 +3097,7 @@ function sigStyle(d) {
 function cardHtml(inst, ownerIdx, opts) {
   opts = opts || {};
   var d = D(inst);
-  var cls = 'card ' + d.type + (d.signatureFor ? ' sigcard' : '') + (opts.cls || '');
+  var cls = 'card ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.power === undefined ? ' nostats' : '') + (opts.cls || '');
   var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth - inst.damage) : null;
   /* M43 (Jesse): the stats row is ALWAYS rendered (empty on non-creatures)
      so the text panel above it is the same fixed size on every card and the
@@ -3327,7 +3344,8 @@ function openInspect(ev, uid) {
 }
 function closeInspect() { inspectUid = null; inspectCardId = null; render(); }
 function openInspectCard(cardId) { inspectCardId = cardId; inspectUid = null; render(); }
-function toggleHand(v) { handOpen = v; render(); }
+var fanBloom = false, fanSettle = false;
+function toggleHand(v) { if (v && !handOpen) fanBloom = true; if (!v && handOpen) fanSettle = true; handOpen = v; render(); }
 function showLog() { logOpen = true; render(); }
 function closeLog() { logOpen = false; render(); }
 function logHtml() {
@@ -3491,7 +3509,7 @@ function render() {
      so the resting fan ALSO carries the plain inline tap. The pointer
      catch stays as the second channel; the guard is mini-only, so an
      open fan never toggles itself shut mid-play. */
-  html += '<div class="hand fan' + (handOpen ? '' : ' mini') + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + me.hand.map(function (inst, hi) {
+  html += '<div class="hand fan' + (handOpen ? (fanBloom ? ' bloom' : '') : ' mini' + (fanSettle ? ' settle' : '')) + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + me.hand.map(function (inst, hi) {
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
     var off = hi - hMid;
     var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 1.2 : 1.8)).toFixed(1) + 'px)';
@@ -3501,6 +3519,7 @@ function render() {
     return cardHtml(inst, humanIdx, opts);
   }).join('') + '</div>' + (handOpen ? '<button class="ghost hand-close" onclick="toggleHand(false)" title="Put the hand away">▾</button>' : '');
   html += '</div></div>';
+  fanBloom = false; fanSettle = false;
   if (inspectUid !== null || inspectCardId !== null) html += inspectHtml();
   if (profileIdx !== null) html += heroProfileHtml();
   if (graveIdx !== null) html += graveHtml();
@@ -3575,7 +3594,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M47 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M48 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +

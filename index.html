@@ -107,8 +107,6 @@
   .card .ctype { font-size:10px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
   .card.sigcard { border-width:4px; padding:4px 5px; box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), 0 0 14px var(--metalDk); }
   .bigcard.sigcard { border-width:4px; padding:12.5px; box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), 0 0 18px var(--metalDk); }
-  .siggem { position:absolute; top:7px; right:7px; width:13px; height:13px; transform:rotate(45deg); background-image:var(--metal); border:1.5px solid rgba(20,10,2,.55); border-radius:3px; box-shadow:0 1px 3px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.6); z-index:3; }
-  .bigcard .siggem { width:16px; height:16px; top:10px; right:10px; }
   .emblem-face.sigface { border-width:3px; }
   .draftrow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .draftrow .card { width:100px; height:170px; }
@@ -117,14 +115,13 @@
   .card .ctext { font-size:10px; color:#33261a; line-height:1.28; flex:1 1 auto; min-height:0; overflow:hidden; margin-top:3px; padding-bottom:12px;
                  background:linear-gradient(180deg, rgba(240,229,199,.95), rgba(224,208,170,.95)); border-radius:6px; padding:3px 5px;
                  box-shadow:inset 0 1px 3px rgba(90,60,20,.35);
-                 display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; }
-  .hand .card .ctext { -webkit-line-clamp:4; }
+                 display:block; }
   .bigcard { width:240px; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
              background:linear-gradient(165deg,#2b2138,#221831) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
              border:2.5px solid transparent; border-radius:14px; padding:14px; position:relative; text-align:left;
              box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05); }
   .bigcard .cost { position:absolute; top:-11px; left:-11px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800; width:33px; height:33px; border-radius:60% 40% 55% 45% / 55% 45% 55% 45%; text-align:center; line-height:30px; font-size:16px; border:2px solid rgba(24,12,2,.6); box-shadow:0 1px 5px rgba(0,0,0,.5), inset 0 1px 2px rgba(255,255,255,.55); }
-  .bigcard .cname { font-weight:700; font-size:17px; margin:2px 0 3px; background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28); border-radius:6px; padding:4px 8px 4px 26px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
+  .bigcard .cname { font-weight:700; font-size:17px; white-space:nowrap; overflow:hidden; margin:2px 0 3px; background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28); border-radius:6px; padding:4px 8px 4px 26px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); }
   .bigcard .cart { border-radius:9px; overflow:hidden; margin:5px 0 7px; line-height:0; border:1px solid rgba(0,0,0,.6); box-shadow:inset 0 0 0 1px rgba(255,255,255,.10), 0 1px 3px rgba(0,0,0,.4); }
   .bigcard .cart img { width:100%; height:118px; object-fit:cover; display:block; }
   .bigcard .ctype { font-size:11px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
@@ -591,7 +588,7 @@
   .card .ctyperow { height:10px; min-height:10px; margin:0 0 2px; flex:none; }
   .card .ctext { flex:none; height:54px; margin:0; padding:3px 6px; }
   .card .cstats { height:25px; margin:2px 0 0; padding:0 2px; flex:none; }
-  .card.sigcard .ctext { height:49px; }
+  .card.sigcard .ctext { height:54px; }
   .card .glyphbox { display:flex; align-items:center; justify-content:center; font-size:32px;
                     background:radial-gradient(ellipse at 50% 42%, rgba(150,120,220,.22), rgba(20,14,34,.28) 75%); }
   .hand.fan.mini { touch-action:manipulation; }
@@ -925,7 +922,7 @@ const CARDS = {
   eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 4, type: 'creature', power: 2, health: 2, keywords: ['flying'], phoenixReturn: true , orig: "Eternal Phoenix", src: "Wayback Hipsters gallery face - cost 4, 2/2 Flying recorded; end-of-turn graveyard return implemented; its Miracle random-upgrade rider stays unimplemented (upgrade system undefined)" },
   mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } , orig: "Hlaavin, Lord of the Unseen", src: "CONVERSION-AUDIT S4" },
   vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } , orig: "Vainglorious Hero", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
-  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 2, costForge: true, type: 'creature', power: 2, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "COSTING.md tracker \u2014 cost Forge-assigned; final stat line disputed across patches (v0.15/v0.20), open item" },
+  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 1, type: 'creature', power: 2, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "Patch notes v0.12 (research corpus) - the crab is a one-mana creature; final line 2/3 cant-attack. The charter cost of 2 was superseded by the record in M64." },
   tasty_morsel:   { icon: "🍖", name: 'Tasty Morsel',       cost: 1, costForge: true, type: 'creature', power: 2, health: 1, finale: { kind: 'buffRandomCreature', power: 1, health: 1 } , orig: "Tasty Morsel", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
   flame_shot:     { icon: "🔥", name: 'Flame Shot',         cost: 2, costForge: true, type: 'spell', effect: { kind: 'damageAny', amount: 3 } , orig: "Flame Shot", src: "COSTING.md tracker \u2014 cost Forge-assigned; 3 damage recorded" }, // 3 damage is the final recorded value
   ash_dragon:     { icon: "🐉", name: 'Ash Dragon',         cost: 5, type: 'creature', power: 4, health: 4, keywords: ['flying'], generatedOnly: true , orig: "Darigaaz's dragon token", src: "effect verified via Darigaaz; 4/4 body Forge-assigned (COSTING.md labeled call)" },
@@ -3207,10 +3204,15 @@ var HERO_ACCENT = {
   hammer: ['linear-gradient(160deg,#d9d4c5,#5d6d7e 55%,#b3543f)', '#3f4a56'],
   tidemother: ['linear-gradient(160deg,#9ae6d8,#1f6f7a 55%,#4aa3a2)', '#14494f']
 };
+var SCHOOL_COLORS = { tides: ['#2f7fd0', '#123c66'], grave: ['#4b3566', '#17102a'], ember: ['#e0532f', '#6e1f0e'], dawn: ['#e9b949', '#7a5510'], worldroot: ['#57a773', '#1e4d2e'] };
 function sigStyle(d) {
-  if (!d.signatureFor || !HERO_ACCENT[d.signatureFor]) return '';
-  var a = HERO_ACCENT[d.signatureFor];
-  return ' style="--metal:' + a[0] + ';--metalDk:' + a[1] + ';background:linear-gradient(165deg,#2b2138,#221831) padding-box, ' + a[0] + ' border-box"';
+  /* M64 (Jesse): no diamond emblem — a signature card wears a BORDER blended
+     from its hero's two school colours (Umbra: blue into grave-violet black). */
+  if (!d.signatureFor) return '';
+  var schools = (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[d.signatureFor]) || [];
+  if (schools.length < 2 || !SCHOOL_COLORS[schools[0]] || !SCHOOL_COLORS[schools[1]]) return '';
+  var grad = 'linear-gradient(150deg,' + SCHOOL_COLORS[schools[0]][0] + ',' + SCHOOL_COLORS[schools[1]][0] + ' 78%)';
+  return ' style="--metal:' + grad + ';--metalDk:' + SCHOOL_COLORS[schools[1]][1] + ';background:linear-gradient(165deg,#2b2138,#221831) padding-box, ' + grad + ' border-box"';
 }
 function cardHtml(inst, ownerIdx, opts) {
   opts = opts || {};
@@ -3239,7 +3241,7 @@ function cardHtml(inst, ownerIdx, opts) {
   if (opts.ml) extraVars += '--ml:' + opts.ml + 'px;';
   if (extraVars) styAttr = styAttr ? styAttr.replace(/"$/, ';' + extraVars + '"') : ' style="' + extraVars + '"';
   return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + styAttr + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + (opts.onpd ? ' onpointerdown="' + opts.onpd + '" onpointerup="mullPressEnd()" onpointerleave="mullPressEnd()" oncontextmenu="return false"' : '') + '>' +
-    '<div class="cost' + costCls + '">' + effCost + '</div>' + (opts.gap ? '<span class="gapbadge">+' + opts.gap + '</span>' : '') + (d.signatureFor ? '<span class="siggem"></span>' : '') + (opts.ribbon ? '<span class="newribbon">NEW</span>' : '') +
+    '<div class="cost' + costCls + '">' + effCost + '</div>' + (opts.gap ? '<span class="gapbadge">+' + opts.gap + '</span>' : '') + (opts.ribbon ? '<span class="newribbon">NEW</span>' : '') +
     '<div class="cname" style="font-size:' + tfs + 'px">' + esc(d.name) + '</div>' + art +
     '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
     foot + '</div>';
@@ -3562,7 +3564,7 @@ function inspectHtml() {
   var stats = '';
   if (d.type === 'creature') stats = '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
   return '<div class="overlay" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + '"' + sigStyle(d) + '>' +
-    '<div class="cost">' + d.cost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname" style="font-size:' + Math.max(10, Math.min(17, Math.round(500 / Math.max(8, d.name.length)) / 2)) + 'px">' + esc(d.name) + '</div>' +
+    '<div class="cost">' + d.cost + '</div>' + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '') +
     '<div class="ctype">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div><div class="ctext">' + esc(effectText(d)) + '</div>' +
     (function () {
@@ -3586,7 +3588,24 @@ function restoreScroll(y) { try { var n = document.querySelector ? document.quer
 var concedeArmed = false;
 function concede() { if (!G || G.winner !== null) return; if (!concedeArmed) { concedeArmed = true; msg = 'Concede? Tap the flag again to yield the match.'; render(); return; } concedeArmed = false; G.winner = aiIdx; try { finishCheck(); } catch (e) {} render(); }
 var endArmed = false, endArmFresh = false;
-function render() {
+/* M64 (Jesse): titles and descriptions are MEASURED after every render and
+   shrunk until fully visible — the full card title and the full description,
+   in the mulligan grid, the inspect view, everywhere. No truncation, ever. */
+function fitTextEl(el, minPx) {
+  if (!el || el.scrollWidth === undefined || !el.clientWidth) return;
+  var fs = parseFloat(el.style.fontSize) || parseFloat(getComputedStyle(el).fontSize) || 12;
+  var guard = 0;
+  while (guard++ < 28 && fs > minPx && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) { fs -= 0.5; el.style.fontSize = fs + 'px'; }
+}
+function fitAllText() {
+  try {
+    document.querySelectorAll('.card .cname, .bigcard .cname').forEach(function (el) { fitTextEl(el, 8.5); });
+    document.querySelectorAll('.card .ctext').forEach(function (el) { fitTextEl(el, 7.5); });
+    document.querySelectorAll('.bigcard .ctext').forEach(function (el) { fitTextEl(el, 10.5); });
+  } catch (e) {}
+}
+function render() { renderBody(); fitAllText(); }
+function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
@@ -3804,7 +3823,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M62 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M64 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4404,7 +4423,9 @@ render();
     clone.style.opacity = '1';
     clone.style.height = 'auto';
     var ct = clone.querySelector('.ctext');
-    if (ct) { ct.style.display = 'block'; ct.style.webkitLineClamp = 'none'; ct.style.overflow = 'visible'; ct.style.paddingBottom = '3px'; }
+    if (ct) { ct.style.display = 'block'; ct.style.webkitLineClamp = 'none'; ct.style.overflow = 'visible'; ct.style.height = 'auto'; ct.style.paddingBottom = '3px'; }
+    var cn = clone.querySelector('.cname');
+    if (cn) fitTextEl(cn, 8.5);
     hoverBox.appendChild(clone);
     var w = card.offsetWidth;
     hoverBox.style.width = w + 'px';

@@ -1084,11 +1084,22 @@ const HEROES = {
 // faced in play, not just collected.
 const DECKS = {
   weaver: [
-    'tidewing_familiar', 'runeshell_crab', 'runeshell_crab', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'widow_matron',
-    'widow_matron', 'wrong_turn', 'creeping_doom', 'gravemaw', 'gravemaw', 'wound_priest',
-    'wound_priest', 'bring_down', 'bring_down', 'recall', 'recall', 'quiet_snare',
-    'vein_drainlord', 'vein_drainlord', 'hollow_fathomer', 'drownscale', 'drownscale', 'void_harvest',
-    'void_harvest', 'thirteenth_hour', 'pilfer_dream', 'cerulean_dragon', 'gazemaw', 'nightscale_revenant',
+    'tidewing_familiar',
+    'runeshell_crab', 'runeshell_crab',
+    'shadowsmith_saboteur', 'shadowsmith_saboteur',
+    'widow_matron', 'widow_matron',
+    'gravemaw', 'gravemaw',
+    'pilfer_dream',
+    'recall', 'recall',
+    'fatetwist', 'fatetwist',
+    'signature_weaving',
+    'mastery_of_currents', 'mastery_of_currents',
+    'void_harvest', 'void_harvest',
+    'bring_down', 'bring_down',
+    'wrong_turn',
+    'quiet_snare', 'iron_verdict',
+    'cerulean_dragon', 'gazemaw', 'tempest_giant',
+    'mindveil_sovereign', 'nightscale_revenant', 'vein_drainlord',
   ],
   controller: [
     'iron_verdict', 'runeshell_crab', 'runeshell_crab', 'tollwarden_captain', 'tollwarden_captain', 'wardens_acolyte',
@@ -3754,7 +3765,8 @@ function renderBody() {
   if (mode === 'aiTurn') html += '<button disabled>⏳ Their turn</button>';
   else if (mode === 'targeting') html += '<button class="danger" onclick="cancelTarget()">✕ Cancel cast</button>';
   else if (mode === 'attackSelect') {
-    if (attackSet.size) { var totPow = 0; attackSet.forEach(function (u) { var c = me.board.find(function (x) { return x.uid === u; }); if (c) totPow += D(c).power + c.permPower; }); html += '<button class="pass-ready" onclick="declareAttack()">⚔️ Declare (' + attackSet.size + ') · ' + totPow + ' power</button>'; }
+    if (attackSet.size) { var totPow = 0; attackSet.forEach(function (u) { var c = me.board.find(function (x) { return x.uid === u; }); if (c) totPow += D(c).power + c.permPower; }); html += '<button class="pass-ready" onclick="declareAttack()">⚔️ Declare (' + attackSet.size + ') · ' + totPow + ' power</button>';
+    html += '<button class="ghost" onclick="endTurn()" title="Pass without attacking — your creatures hold their ground">⏭ End Turn</button>'; }
     else html += '<button class="danger" onclick="endTurn()">⏭ End Turn</button>';
   }
   else if (mode === 'blocking') {
@@ -3766,12 +3778,13 @@ function renderBody() {
   else if (mode === 'main') {
     var readyN = me.board.filter(function (c) { return G.canAttack(c, me); }).length;
     var readyPow = me.board.filter(function (c) { return G.canAttack(c, me); }).reduce(function (s, c) { return s + D(c).power + c.permPower; }, 0);
-    if (!me.combatDone && readyN) html += '<button' + (readyPow >= foe.life ? ' class="lethal"' : '') + ' onclick="startAttackSelect()">⚔️ Attack' + (readyN > 1 ? ' · ' + readyN + ' ready' : '') + (readyPow >= foe.life ? ' · lethal!' : '') + '</button>';
-    else {
-      var canPlay = me.hand.some(function (c) { return G.effectiveCost(me, c) <= G.availableMana(me); });
-      html += '<button class="danger' + ((me.combatDone && !canPlay) ? ' pass-ready' : '') + '" onclick="endTurn()" title="End turn — hand it to the enemy">' + (endArmed ? '⏭ End turn? Tap again' : '⏭ End Turn') + '</button>';
-  if (!me.combatDone && me.board.some(function (c) { return G.canAttack(c, me); })) html += '<button class="ghost" onclick="attackAllToggle()" title="Select or recall every ready attacker">⚔️ All</button>';
-    }
+    if (!me.combatDone && readyN) html += '<button' + (readyPow >= foe.life ? ' class="lethal"' : '') + ' onclick="startAttackSelect()">⚔️ Attack' + (readyN > 1 ? ' · ' + readyN + ' ready' : '') + (readyPow ? ' · ' + readyPow + ' power' : '') + (readyPow >= foe.life ? ' · lethal!' : '') + '</button>';
+    /* M66 (Jesse playtest): passing must ALWAYS be one tap — End Turn stands
+       beside Attack even when creatures are ready, so holding a creature
+       (the Shadowsmith, say) never requires attacking or deselecting first. */
+    var canPlay = me.hand.some(function (c) { return G.effectiveCost(me, c) <= G.availableMana(me); });
+    html += '<button class="danger' + ((me.combatDone && !canPlay) ? ' pass-ready' : '') + '" onclick="endTurn()" title="End turn — hand it to the enemy">' + (endArmed ? '⏭ End turn? Tap again' : '⏭ End Turn') + '</button>';
+    if (!me.combatDone && readyN) html += '<button class="ghost" onclick="attackAllToggle()" title="Select or recall every ready attacker">⚔️ All</button>';
   }
   html += '<button class="ghost mute-btn" onclick="toggleMute()" title="Sound on/off">' + (muted ? '🔇' : '🔊') + '</button>';
   html += '</div>';
@@ -3904,7 +3917,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M65 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M66 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

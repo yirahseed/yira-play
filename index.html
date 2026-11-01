@@ -604,6 +604,15 @@ const CARDS = {
   rushhorn_minotaur:  { icon: "🐃", name: 'Rushhorn Minotaur',  cost: 3, costForge: true, type: 'creature', power: 4, health: 3 },
   grove_sentinel:     { icon: "🍃", name: 'Grove Sentinel',     cost: 2, costForge: true, type: 'creature', power: 3, health: 2 },
   thornwood_archer:   { icon: "🏹", name: 'Thornwood Archer',   cost: 3, costForge: true, type: 'creature', power: 2, health: 4 },
+  // ——— Conversion batch 8 (M23, sprint): the first NEEDS-ENGINE conversion ———
+  // The Eminent Archangel of the record (W, 3/4 final stats, CONVERSION-AUDIT
+  // §3; its Rosetta ID WV1_273 was forced in Wave 1): Debut — heal yourself
+  // equal to the damage you were dealt last turn, max 7. The engine had no
+  // last-turn damage tracking; M23 adds it (damageTakenPrevTurn, rotated at
+  // every turn start; hero life loss only — a guardian taking the blow for
+  // you does not count as damage dealt to you). Cost was never recorded:
+  // FORGE-COSTED at 4, argued in files/COSTING.md (Batch 8). Name is ours.
+  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } },
 };
 const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound']; // M22: 'stolen_hour' pruned — Deep Rooting (batch 7) owns plain ramp at 2; the generated filler was its exact twin (Jesse's prune rule)
 const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort'];
@@ -679,7 +688,7 @@ const DECKS = {
     'quiet_snare', 'thiefs_regret', 'thiefs_regret', 'ward_of_dawn', 'ward_of_dawn', 'shieldbearer',
     'shieldbearer', 'stone_warden', 'stone_warden', 'sky_scout', 'sky_hunter', 'sky_scout',
     'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'deep_breath',
-    'second_suns_dawn', 'second_wind', 'evenhand_paragon', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict',
+    'second_suns_dawn', 'second_wind', 'radiant_intercessor', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict',
   ],
   bruiser: [
     'thorn_pup', 'thorn_pup', 'kargs_mauler', 'kargs_mauler', 'swift_runner', 'swift_runner',
@@ -829,7 +838,7 @@ cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_
   undertow:'tides', riptide_trickster:'tides', pyre_golem:'ember', ashfall:'ember', crypt_warden:'grave',
   toll_bell_wraith:'grave', aegis_squire:'dawn', sanctuary_knight:'dawn', rootbound_colossus:'worldroot', mossback_grazer:'worldroot',
   sunmirror_glare:'tides', vindictive_retort:'tides', second_suns_dawn:'dawn', second_sun:'dawn', daybreak_verdict:'dawn',
-  deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn',
+  deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn', radiant_intercessor:'dawn',
   cinder_titan:'ember', hollowgrin_giant:'grave', rushhorn_minotaur:'ember', grove_sentinel:'worldroot', thornwood_archer:'worldroot',
   // Neutral — any hero may run these
   sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none',
@@ -900,6 +909,7 @@ class Game {
         traps: [], artifacts: [],
         maxMana: 0, manaSpent: 0, ownTurns: 0, bonusMana: 0,
         trapsTriggeredCount: 0, trapsArmedCount: 0, hurtBy: [], combatDone: false, doublerAttacks: 0,
+        damageTakenPrevTurn: 0, damageTakenCurrTurn: 0, // M23: hero life lost per half-turn (rotated in startTurn)
         nextTrapDiscount: 0, fragileGem: false, tookDamageThisTurn: false,
         spellManaTurn: 0, deathsThisTurn: 0, playsThisGame: 0, creaturesToGraveThisTurn: 0,
         summonCount: 0, damageDealtThisTurn: 0, spiritThreshold: 3, beckonClaimed: [],
@@ -920,7 +930,7 @@ class Game {
     for (const p of this.players) if (p.school) this.insertStageCard(p, p.school, 1);
     // Match-start heroics: Kael's Torch burns before the first draw; Sura's fish waits.
     for (const p of this.players) {
-      if (p.hero.passive === 'torch') { const foe = this.players[this.opp(p.idx)]; foe.life -= 4; this.log.push(`${p.hero.name}'s Torch sears ${foe.hero.name} for 4`); }
+      if (p.hero.passive === 'torch') { const foe = this.players[this.opp(p.idx)]; foe.life -= 4; foe.damageTakenCurrTurn += 4; this.log.push(`${p.hero.name}'s Torch sears ${foe.hero.name} for 4`); }
       if (p.hero.passive === 'beckon') { const fish = makeInstance('reef_fish', null); fish.summonedTurn = -99; p.board.push(fish); }
     }
   }
@@ -978,6 +988,7 @@ class Game {
     }
     t.life -= amount;
     if (amount > 0) {
+      t.damageTakenCurrTurn += amount; // M23: only real hero life loss counts — a guardian taking the blow above does not
       t.tookDamageThisTurn = true;
       if (sourceIdx !== undefined && sourceIdx !== targetIdx) this.players[sourceIdx].damageDealtThisTurn += amount;
     }
@@ -1067,7 +1078,7 @@ class Game {
     if (inst.nightmares > 0 && inst.nightmareOwner !== null) {
       const owner = this.players[inst.nightmareOwner];
       const n = inst.nightmares;
-      p.life -= n; owner.life += n; // overheal allowed
+      p.life -= n; p.damageTakenCurrTurn += n; owner.life += n; // overheal allowed; a Nightmare drain is damage dealt to its victim (M23)
       this.stats.nightmareDrains++; this.stats.nightmareLifeDrained += n;
       this.log.push(`Nightmare x${n} drains ${p.hero.name} -> ${owner.hero.name}`);
       inst.nightmares = 0; inst.nightmareOwner = null;
@@ -1104,6 +1115,9 @@ class Game {
     this.active = i; this.turnNumber++;
     p.ownTurns++;
     for (const q of this.players) { q.deathsThisTurn = 0; q.creaturesToGraveThisTurn = 0; }
+    // M23: a new half-turn begins — what each hero suffered during the half-turn
+    // just ended becomes their "damage dealt last turn" (Radiant Intercessor).
+    for (const q of this.players) { q.damageTakenPrevTurn = q.damageTakenCurrTurn; q.damageTakenCurrTurn = 0; }
     // Upkeep on standing creatures: decay (Gravebound Imp), regeneration, doom.
     for (const c of p.board) {
       const d = def(c);
@@ -1351,6 +1365,7 @@ class Game {
         break;
       }
       case 'healHero': { const who = effect.who === 'self' ? p : foe; who.life += effect.amount; break; }
+      case 'healFromWounds': { const amount = Math.min(effect.cap || 7, p.damageTakenPrevTurn || 0); if (amount > 0) { p.life += amount; this.log.push(`${def(sourceInst).name} mends ${p.hero.name} for ${amount} — the wounds of last turn, answered`); } break; }
       case 'drain': {
         this.hurtHero(foe.idx, effect.amount, i); foe.tookDamageThisTurn = true;
         p.life += effect.amount;
@@ -1633,7 +1648,7 @@ class Game {
         // Whispers of the Grave: your creatures dying on YOUR turn drain the foe.
         if (p.graveWhispers && this.active === p.idx && this.winner === null) {
           const foe = this.players[this.opp(p.idx)];
-          foe.life -= 1; p.life += 1;
+          foe.life -= 1; foe.damageTakenCurrTurn += 1; p.life += 1;
           this.log.push(`Whispers of the Grave drain 1 from ${foe.hero.name}`);
           this.checkWin();
         }
@@ -2126,6 +2141,7 @@ function effectText(d) {
       case 'damageAny': return 'Deal ' + e.amount + ' damage to a creature or the enemy hero.' + (e.heroBonus ? ' Deals ' + (e.amount + e.heroBonus) + ' to the enemy hero instead.' : '');
       case 'damageHero': return 'Deal ' + e.amount + ' damage to the enemy hero.';
       case 'healHero': return 'Gain ' + e.amount + ' life.';
+      case 'healFromWounds': return 'Gain life equal to the damage you were dealt last turn (max ' + (e.cap || 7) + ').';
       case 'buffCreature': return e.temp ? ('Give a creature +' + e.power + '/+' + e.health + ' until end of turn.') : ('Give a creature +' + e.power + '/+' + e.health + ' permanently.');
       case 'buffAllCreatures': return 'Give all your creatures +' + e.power + '/+' + e.health + ' permanently.';
       case 'damageAllEnemyCreatures': return 'Deal ' + e.amount + ' damage to all enemy creatures' + (e.heroDamage ? ' and ' + e.heroDamage + ' to the enemy hero.' : '.') + (e.requiem ? ' If any of your creatures died this turn, deal ' + e.requiem + ' damage to the enemy hero.' : '');
@@ -2527,7 +2543,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M22.3 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M23 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

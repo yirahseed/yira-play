@@ -583,6 +583,25 @@
     .hand.fan.mini .card { scale:.3; }
     .vs-side .portrait { width:64px; height:64px; }
   }
+
+  /* --- M43: THE FRAME, FIXED (Jesse's spec, Nov 1) — titles are ONE line
+     (font steps down for the longest names), the description panel is the
+     SAME fixed size on every card, the power/health orbs sit in fixed
+     spots in their own row and never overlap the text, and the art banner
+     gives up some height so all of that fits the 184px card:
+     title 22 + art 56 + badges 12 + text 54 + stats 27 = 171 of 172. --- */
+  .card .cname { height:19px; line-height:15px; font-size:12px; margin:0 0 3px; padding:2px 4px 2px 16px;
+                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:none; }
+  .card .cart { height:54px; margin:0 0 2px; }
+  .hand.fan .card .cart { height:54px; }
+  .card .ctyperow { height:10px; min-height:10px; margin:0 0 2px; flex:none; }
+  .card .ctext { flex:none; height:54px; margin:0; padding:3px 6px; }
+  .card .cstats { height:25px; margin:2px 0 0; padding:0 2px; flex:none; }
+  .card.sigcard .ctext { height:49px; }
+  .card .glyphbox { display:flex; align-items:center; justify-content:center; font-size:32px;
+                    background:radial-gradient(ellipse at 50% 42%, rgba(150,120,220,.22), rgba(20,14,34,.28) 75%); }
+  .hand.fan.mini { touch-action:manipulation; }
+  .bigcard .cname { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style>
 </head>
 <body>
@@ -972,92 +991,94 @@ const HEROES = {
 
 // Pre-built 30-card decks (max 2 copies, legendary max 1). Signatures included.
 const DECKS = {
+  // M43 (Jesse, Nov 1): every deck is 29 cards + its class (stage-1 quest)
+  // card inside the 30, as in the original game.
   // M18: Jesse's own build, screenshotted from his deck builder and set as the
   // standard Nightmare deck for testing — seed generation/theft plus Tides spell
   // pressure, with Creeping Doom, Scatter Mind and a second Void Harvest.
   weaver: [
     'creeping_doom', 'pilfer_dream', 'pilfer_dream', 'pluck_dread', 'pluck_dread', 'quick_study',
-    'quick_study', 'bring_down', 'recall', 'recall', 'dread_herald', 'dread_herald',
-    'echo_familiar', 'echo_familiar', 'scatter_mind', 'scatter_mind', 'shadowsmith_saboteur', 'shadowsmith_saboteur',
-    'strange_gift', 'strange_gift', 'deep_breath', 'deep_breath', 'dream_thief', 'dream_thief',
-    'lore_drifter', 'lore_drifter', 'quiet_snare', 'drown_in_dreams', 'void_harvest', 'void_harvest',
+    'quick_study', 'bring_down', 'recall', 'dread_herald', 'dread_herald', 'echo_familiar',
+    'echo_familiar', 'scatter_mind', 'scatter_mind', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'strange_gift',
+    'strange_gift', 'deep_breath', 'deep_breath', 'dream_thief', 'dream_thief', 'lore_drifter',
+    'lore_drifter', 'quiet_snare', 'drown_in_dreams', 'void_harvest', 'void_harvest', 'tidewing_familiar',
   ],
   controller: [
     'snare_of_no', 'snare_of_no', 'vigil_acolyte', 'vigil_acolyte', 'ward_lens', 'quiet_snare',
     'flockguard_vigil', 'thiefs_regret', 'thiefs_regret', 'ward_of_dawn', 'ward_of_dawn', 'shieldbearer',
     'shieldbearer', 'stone_warden', 'stone_warden', 'sky_scout', 'sky_hunter', 'sky_scout',
-    'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'deep_breath',
-    'second_suns_dawn', 'second_wind', 'radiant_intercessor', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict',
+    'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'second_suns_dawn',
+    'second_wind', 'radiant_intercessor', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict', 'tidewing_familiar',
   ],
   bruiser: [
     'thorn_pup', 'thorn_pup', 'kargs_mauler', 'kargs_mauler', 'swift_runner', 'swift_runner',
     'cinder_hound', 'cinder_hound', 'moss_brute', 'moss_brute', 'gore_horn', 'gore_horn',
     'ember_roc', 'ravaging_tyrant', 'ember_roc', 'elder_titan', 'embermaw_devil', 'embermaw_devil',
     'spark_bolt', 'spark_bolt', 'grow_fierce', 'unbroken_roar', 'sunder_line', 'venom_grub',
-    'glade_archer', 'war_stomp', 'pit_spark', 'bloodrush', 'comet_fall', 'war_stomp',
+    'glade_archer', 'pit_spark', 'bloodrush', 'comet_fall', 'war_stomp', 'axe_of_pyre',
   ],
   keeper: [
     'rootcall_matriarch', 'sunwell_charm', 'overgrowth', 'overgrowth', 'bramble_imp', 'bramble_imp',
     'deep_rooting', 'grove_tender', 'dawn_chorister', 'dawn_chorister', 'shieldbearer', 'shieldbearer',
     'stone_warden', 'stone_warden', 'ironbark_golem', 'ironbark_golem', 'moss_brute', 'moss_brute',
-    'tasty_morsel', 'firstroot_titan', 'mend_light', 'beastcall_arrow', 'second_wind', 'second_wind',
-    'ward_of_dawn', 'ward_of_dawn', 'sundial_charm', 'thorn_pup', 'thorn_grub', 'thorn_grub',
+    'tasty_morsel', 'firstroot_titan', 'mend_light', 'beastcall_arrow', 'second_wind', 'ward_of_dawn',
+    'ward_of_dawn', 'sundial_charm', 'thorn_pup', 'thorn_grub', 'thorn_grub', 'thornwolf',
   ],
   torchbearer: [
     'cinder_elemental', 'cinder_elemental', 'torch_flare', 'torch_flare', 'kindled_fury', 'eager_smith',
     'eager_smith', 'pyre_raider', 'pyre_raider', 'ember_deathraider', 'ember_deathraider', 'ash_sprite',
     'ash_sprite', 'cinder_hound', 'cinder_hound', 'spark_bolt', 'spark_bolt', 'pit_spark',
     'pit_spark', 'swift_runner', 'swift_runner', 'scattershot_rig', 'mountain_ogre', 'eternal_phoenix',
-    'gore_horn', 'gore_horn', 'vainglorious_hero', 'ember_roc', 'ashwing_sovereign', 'vainglorious_hero',
+    'gore_horn', 'gore_horn', 'ember_roc', 'ashwing_sovereign', 'vainglorious_hero', 'axe_of_pyre',
   ],
   banneret: [
     'oathsworn_captain', 'oathsworn_captain', 'bannerfall', 'bannerfall', 'aegis_standard', 'evenhand_paragon',
     'evenhand_paragon', 'shieldbearer', 'shieldbearer', 'cinder_hound', 'cinder_hound', 'swift_runner',
     'swift_runner', 'eager_smith', 'eager_smith', 'pyre_raider', 'pyre_raider', 'runesteel_monstrosity',
     'runesteel_monstrosity', 'vainglorious_hero', 'vainglorious_hero', 'wardens_acolyte', 'wardens_acolyte', 'ash_sprite',
-    'ash_sprite', 'ember_deathraider', 'dawn_titan', 'gore_horn', 'spark_bolt', 'ember_deathraider',
+    'ash_sprite', 'dawn_titan', 'gore_horn', 'spark_bolt', 'ember_deathraider', 'dawn_steed',
   ],
   graven: [
     'pale_shepherd', 'pale_shepherd', 'call_of_graven', 'graven_tithe', 'graven_tithe', 'gravemaw',
     'gravemaw', 'widow_matron', 'widow_matron', 'drownscale', 'drownscale', 'pyre_wraith',
     'pyre_wraith', 'void_harvest', 'void_harvest', 'creeping_doom', 'creeping_doom', 'grimwulf',
     'hollowgrin_giant', 'sepulcher_titan', 'grave_gladiator', 'venom_grub', 'venom_grub', 'duskmane_stag',
-    'duskmane_stag', 'shadowsmith_saboteur', 'nightscale_revenant', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur',
+    'duskmane_stag', 'nightscale_revenant', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur', 'gravebound_imp',
   ],
   unchained: [
     'tollkeeper', 'tollkeeper', 'severing_light', 'severing_light', 'vesper_charm', 'nightjar',
     'nightjar', 'sky_scout', 'sky_scout', 'mirror_moth', 'mirror_moth', 'lore_drifter',
     'lore_drifter', 'echo_familiar', 'echo_familiar', 'runeshell_crab', 'runeshell_crab', 'bring_down',
     'bring_down', 'drownscale', 'drownscale', 'widow_matron', 'widow_matron', 'dream_thief',
-    'dream_thief', 'eager_smith', 'tempest_giant', 'frostreaver', 'pluck_dread', 'eager_smith',
+    'dream_thief', 'tempest_giant', 'frostreaver', 'pluck_dread', 'eager_smith', 'gravebound_imp',
   ],
   unbridled: [
     'thornback_alpha', 'thornback_alpha', 'unbridled_cry', 'unbridled_cry', 'boarherd_horn', 'tusked_warboar',
     'tusked_warboar', 'thorn_pup', 'thorn_pup', 'venom_grub', 'venom_grub', 'thorn_grub',
     'thorn_grub', 'gore_horn', 'gore_horn', 'moss_brute', 'moss_brute', 'embermaw_devil',
     'embermaw_devil', 'pyre_raider', 'pyre_raider', 'ember_deathraider', 'ember_deathraider', 'beastcall_arrow',
-    'beastcall_arrow', 'mountain_ogre', 'mountain_ogre', 'eager_smith', 'ravaging_tyrant', 'eager_smith',
+    'beastcall_arrow', 'mountain_ogre', 'mountain_ogre', 'ravaging_tyrant', 'eager_smith', 'axe_of_pyre',
   ],
   sibilance: [
     'sibilant_herald', 'sibilant_herald', 'curtain_call', 'curtain_call', 'encore_venom', 'embermaw_devil',
     'embermaw_devil', 'widow_matron', 'widow_matron', 'gravemaw', 'gravemaw', 'drownscale',
     'drownscale', 'grimwulf', 'grimwulf', 'nightjar', 'nightjar', 'creeping_doom',
     'creeping_doom', 'void_harvest', 'void_harvest', 'pyre_wraith', 'pyre_wraith', 'ash_sprite',
-    'ash_sprite', 'shadowsmith_saboteur', 'nightscale_revenant', 'ashwing_sovereign', 'old_bonegnaw', 'shadowsmith_saboteur',
+    'ash_sprite', 'nightscale_revenant', 'ashwing_sovereign', 'old_bonegnaw', 'shadowsmith_saboteur', 'gravebound_imp',
   ],
   hammer: [
     'hammerfall_raider', 'hammerfall_raider', 'second_blow', 'second_blow', 'anvil_fury', 'eager_smith',
     'eager_smith', 'pyre_raider', 'pyre_raider', 'gore_horn', 'gore_horn', 'ember_deathraider',
     'ember_deathraider', 'cinder_hound', 'cinder_hound', 'ash_sprite', 'ash_sprite', 'spark_bolt',
     'spark_bolt', 'pit_spark', 'pit_spark', 'swift_runner', 'swift_runner', 'vainglorious_hero',
-    'vainglorious_hero', 'scattershot_rig', 'mountain_ogre', 'mountain_ogre', 'shieldbearer', 'shieldbearer',
+    'vainglorious_hero', 'scattershot_rig', 'mountain_ogre', 'mountain_ogre', 'shieldbearer', 'axe_of_pyre',
   ],
   tidemother: [
     'suras_herald', 'suras_herald', 'deep_call', 'deep_call', 'kraken_youngling', 'moss_brute',
-    'moss_brute', 'thorn_pup', 'thorn_pup', 'sky_scout', 'sky_scout', 'runeshell_crab',
-    'runeshell_crab', 'tempest_giant', 'rime_titan', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow',
-    'beastcall_arrow', 'lore_drifter', 'lore_drifter', 'mirror_moth', 'mirror_moth', 'echo_familiar',
-    'echo_familiar', 'runesteel_monstrosity', 'elder_titan', 'worldroot_titan', 'frostreaver', 'runesteel_monstrosity',
+    'moss_brute', 'thorn_pup', 'sky_scout', 'sky_scout', 'runeshell_crab', 'runeshell_crab',
+    'tempest_giant', 'rime_titan', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow', 'beastcall_arrow',
+    'lore_drifter', 'lore_drifter', 'mirror_moth', 'mirror_moth', 'echo_familiar', 'echo_familiar',
+    'runesteel_monstrosity', 'elder_titan', 'worldroot_titan', 'frostreaver', 'runesteel_monstrosity', 'thornwolf',
   ],
 };
 
@@ -1225,10 +1246,11 @@ class Game {
     this.drawOpening(1, 4);
     this.players[1].fragileGem = true;
     this.active = 0;
-    // Schools: the class card sits OUTSIDE the 30 (the original's placement —
-    // Jesse tried it as a deck card in M19 and reverted the same evening):
-    // stage 1 is inserted into the top 3 of each deck at game start.
-    for (const p of this.players) if (p.school) this.insertStageCard(p, p.school, 1);
+    // Schools (M43 — Jesse's ruling, Nov 1, restoring the original's
+    // placement): the class card sits INSIDE the 30 as an ordinary deck
+    // card. The quest is seeded as due at stage 1; stages 2-3 slip into
+    // the top 3 as the chain is played (advanceSchool).
+    for (const p of this.players) if (p.school) { p.questDue[p.school] = 1; p.schoolNext = 2; }
     // Match-start heroics: Kael's Torch burns before the first draw; Sura's fish waits.
     for (const p of this.players) {
       if (p.hero.passive === 'torch') { const foe = this.players[this.opp(p.idx)]; foe.life -= 4; foe.damageTakenCurrTurn += 4; this.log.push(`${p.hero.name}'s Torch sears ${foe.hero.name} for 4`); }
@@ -3023,9 +3045,12 @@ function cardHtml(inst, ownerIdx, opts) {
   var d = D(inst);
   var cls = 'card ' + d.type + (d.signatureFor ? ' sigcard' : '') + (opts.cls || '');
   var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth - inst.damage) : null;
+  /* M43 (Jesse): the stats row is ALWAYS rendered (empty on non-creatures)
+     so the text panel above it is the same fixed size on every card and the
+     orbs never overlap it. Art-less cards get a proper art window too. */
   var foot = '<div class="ctext">' + esc(effectText(d)) + '</div>';
-  if (d.type === 'creature') foot += '<div class="cstats"><span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
-  var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '');
+  foot += '<div class="cstats">' + (d.type === 'creature' ? '<span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span>' : '') + '</div>';
+  var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '<div class="cart glyphbox">' + (d.icon || '') + '</div>';
   /* M27.1: a card in hand shows its EFFECTIVE cost — green when discounted,
      red when taxed — not just the printed number. */
   var effCost = d.cost, costCls = '';
@@ -3042,8 +3067,8 @@ function cardHtml(inst, ownerIdx, opts) {
   if (extraVars) styAttr = styAttr ? styAttr.replace(/"$/, ';' + extraVars + '"') : ' style="' + extraVars + '"';
   return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + styAttr + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="cost' + costCls + '">' + effCost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') +
-    '<div class="cname">' + esc(d.name) + '</div>' + art +
-    '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type + ' · ' : '') + (d.cardSchool ? SCHOOL_META[d.cardSchool].icon : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
+    '<div class="cname"' + (d.name.length <= 13 ? '' : ' style="font-size:' + (d.name.length <= 16 ? '11px' : d.name.length <= 19 ? '10px' : d.name.length <= 21 ? '9px' : '8.5px') + '"') + '>' + esc(d.name) + '</div>' + art +
+    '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
     foot + '</div>';
 }
 function emblemHtml(inst, ownerIdx, opts) {
@@ -3494,7 +3519,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M42 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M43 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -3519,7 +3544,7 @@ function renderMenu() {
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
     'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10. <b>Tap either deck pile</b> (the 🂠 count on a hero bar) to inspect it: cards left, and how many Nightmares are buried inside. When you are done, <b>⏭ Pass</b> hands the turn over.<br><br>' +
-    '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. Stage 1 waits inside the <b>top 3 cards</b> of your deck at game start; playing a stage slips the next stage into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
+    '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. The stage-1 class card is a normal card of its school — run it in your 30 (or don\'t); playing it starts the chain, and each stage played slips the next into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
     '</details></div></div>';
 }
 function renderMulligan() {
@@ -3603,7 +3628,7 @@ try {
 } catch (e) {}
 function customDeckKey(heroId) { return 'yira_custom_' + heroId; }
 function loadCustomDeck(heroId) { try { var a = JSON.parse(localStorage.getItem(customDeckKey(heroId)) || 'null'); return Array.isArray(a) ? a : null; } catch (e) { return null; } }
-function heroPool(heroId) { return Object.keys(CARDS).filter(function (id) { var d = CARDS[id]; return !d.generatedOnly && (!d.signatureFor || d.signatureFor === heroId) && cardLegalFor(heroId, id); }); }
+function heroPool(heroId) { return Object.keys(CARDS).filter(function (id) { var d = CARDS[id]; return (!d.generatedOnly || d.schoolStage === 1) && (!d.signatureFor || d.signatureFor === heroId) && cardLegalFor(heroId, id); }); }
 function deckErrors(heroId, ids) {
   var errs = [];
   if (ids.length !== 30) errs.push('Deck has ' + ids.length + ' of 30 cards');
@@ -3612,7 +3637,7 @@ function deckErrors(heroId, ids) {
   Object.keys(counts).forEach(function (id) {
     var d = CARDS[id];
     if (!d) { errs.push('Unknown card: ' + id); return; }
-    if (d.generatedOnly) errs.push(d.name + ' can never start in a deck');
+    if (d.generatedOnly && d.schoolStage !== 1) errs.push(d.name + ' can never start in a deck');
     if (d.signatureFor && d.signatureFor !== heroId) errs.push(d.name + ' is another hero\'s signature');
     else if (!d.signatureFor && !cardLegalFor(heroId, id)) errs.push(d.name + ' belongs to ' + SCHOOL_META[d.cardSchool].name + ' — outside this hero\'s schools');
     var cap = d.legendary ? 1 : 2;
@@ -4056,6 +4081,15 @@ render();
   var overlayPress = null;
   document.addEventListener('pointerdown', function (e) {
     if (!e.target.closest) return;
+    /* M43 (Jesse): the resting hand would not engage from taps on his
+       phone — the card-level hit test alone was too easy to miss among
+       scaled, overlapping minis. ANY touch on the resting fan opens it. */
+    if (e.target.closest('.hand.fan.mini')) {
+      if (hoverTimer) clearTimeout(hoverTimer);
+      hideHover(); suppressClickUntil = Date.now() + 300;
+      toggleHand(true);
+      return;
+    }
     var card = e.target.closest('.hand.fan .card');
     if (!card) {
       // Cards outside the hand (mulligan picks, draft picks, deck builder,

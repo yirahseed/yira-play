@@ -212,12 +212,12 @@
   /* M10.1: the fan is retired — hand cards sit side by side in a plain row
      (scrolls sideways when a big hand needs it), no overlap. Reading a card
      happens in the big inspect view, so at rest a card only needs its face. */
-  .hand.fan { overflow-x:auto; overflow-y:hidden; justify-content:flex-start; align-items:flex-end; padding:30px 2px 10px; }
-  .hand.fan .card { margin-left:6px; transform-origin:50% 100%; transition:transform .16s ease, box-shadow .16s ease; touch-action:none; }
+  .hand.fan { overflow-x:auto; overflow-y:hidden; justify-content:flex-start; align-items:flex-end; padding:36px 2px 10px; }
+  .hand.fan .card { margin-left:6px; transform-origin:50% 100%; transition:transform .16s ease, box-shadow .16s ease; touch-action:none; transform:var(--fan, none); }
   .hand.fan .card:first-child { margin-left:auto; }
   .hand.fan .card:last-child { margin-right:auto; }
   .hand.fan .card .badge { display:none; }
-  .hand.fan .card:hover { transform:scale(1.12) translateY(-8px); z-index:60; box-shadow:0 14px 34px rgba(0,0,0,.6); }
+  .hand.fan .card:hover { transform:var(--fan, none) translateY(-10px) scale(1.07); z-index:60; box-shadow:0 14px 34px rgba(0,0,0,.6); }
   /* Card art (M8): a painted banner on the card face when art exists. */
   .card .cart { height:38px; border-radius:5px; overflow:hidden; margin:1px 0 3px; flex:none; }
   .card .cart img { width:100%; height:100%; object-fit:cover; display:block; }
@@ -438,6 +438,8 @@
   @keyframes vigOut { from{ opacity:1 } to{ opacity:0 } }
   .hcluster.thinking .portrait { animation:thinkPulse 1.05s ease-in-out infinite; }
   @keyframes thinkPulse { 0%,100%{ box-shadow:0 0 0 2px rgba(177,140,255,.35) } 50%{ box-shadow:0 0 0 4px rgba(177,140,255,.85), 0 0 14px rgba(177,140,255,.5) } }
+  /* --- M31: drag-to-block needs pointer control over board emblems --- */
+  .board .emblem { touch-action:none; }
   @keyframes passPulse { 0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 0 rgba(255,120,140,0) } 50%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 18px rgba(255,120,140,.85) } }
   @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
 </style>
@@ -2762,7 +2764,12 @@ function cardHtml(inst, ownerIdx, opts) {
       if (effCost < d.cost) costCls = ' disc'; else if (effCost > d.cost) costCls = ' taxed';
     }
   } catch (e) {}
-  return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + sigStyle(d) + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
+  var styAttr = sigStyle(d);
+  if (opts.fan) {
+    var fanVars = '--fan:' + opts.fan + ';z-index:' + (opts.fz || 1);
+    styAttr = styAttr ? styAttr.replace(/"$/, ';' + fanVars + '"') : ' style="' + fanVars + '"';
+  }
+  return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + styAttr + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="cost' + costCls + '">' + effCost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') +
     '<div class="cname">' + esc(d.name) + '</div>' + art +
     '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type + ' · ' : '') + (d.cardSchool ? SCHOOL_META[d.cardSchool].icon : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
@@ -2776,11 +2783,9 @@ function emblemHtml(inst, ownerIdx, opts) {
   var rimStyle = (d.signatureFor && HERO_ACCENT[d.signatureFor]) ? ' style="background:' + HERO_ACCENT[d.signatureFor][0] + '"' : '';
   var openHit = '';
   try {
-    if (mode === 'blocking' && G && G.attackers && G.attackers.indexOf(inst.uid) >= 0) {
-      var assigned = false;
-      for (var bk in blockAssign) if (blockAssign[bk] === inst.uid) assigned = true;
-      if (!assigned) openHit = ' open-hit';
-    }
+    // M31 repair: the real blocking state is aiAttackers + blockMap
+    // (M30 keyed on names that do not exist — the pulse never fired).
+    if (mode === 'blocking' && aiAttackers.some(function (a) { return a.uid === inst.uid; }) && !blockMap[inst.uid]) openHit = ' open-hit';
   } catch (e) {}
   return '<div class="emblem' + (opts.cls || '') + openHit + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' +
@@ -2869,21 +2874,17 @@ function heroBarHtml(p, isMe) {
   var held = '';
   var ghost = '';
   try {
-    if (mode === 'attackSelect' && !isMe && selectedAttackers.length) {
+    // M31 repair: keyed on the real state (attackSet / aiAttackers /
+    // blockMap) — M30's version referenced variables that do not exist
+    // and silently never rendered.
+    if (mode === 'attackSelect' && !isMe && attackSet.size) {
       var gp = 0;
-      G.players[humanIdx].board.forEach(function (c) { if (selectedAttackers.indexOf(c.uid) >= 0) gp += D(c).power + c.permPower; });
+      G.players[humanIdx].board.forEach(function (c) { if (attackSet.has(c.uid)) gp += D(c).power + c.permPower; });
       if (gp > 0) ghost = ' <span class="ghost-dmg">−' + gp + ' if unblocked</span>';
     }
-    if (mode === 'blocking' && isMe && G.attackers && G.attackers.length) {
-      var up = 0, found = {};
-      G.players[1 - humanIdx].board.forEach(function (c) {
-        if (G.attackers.indexOf(c.uid) < 0) return;
-        found[c.uid] = true;
-        var asg = false;
-        for (var bk2 in blockAssign) if (blockAssign[bk2] === c.uid) asg = true;
-        if (!asg) up += D(c).power + c.permPower;
-      });
-      G.attackers.forEach(function (uid) { if (!found[uid]) up += 4; }); // phantom attacker (Aldric's 4/4) never sits on the board
+    if (mode === 'blocking' && isMe && aiAttackers.length) {
+      var up = 0;
+      aiAttackers.forEach(function (a) { if (!blockMap[a.uid]) up += D(a).power + a.permPower; });
       if (up > 0) ghost = ' <span class="ghost-dmg">−' + up + ' unblocked</span>';
     }
   } catch (e) {}
@@ -3020,7 +3021,7 @@ function render() {
   }
   html += '<div class="field"' + ((typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.16), rgba(15,9,27,.32)), url(' + PORTRAITS.arena + ')"' : '') + '>';
   html += '<div class="board-label">ENEMY CREATURES</div>' + boardHtml(foe, false) + chipsHtml(foe, false);
-  if (mode === 'blocking') html += '<div class="banner blocking">⚔️ ' + aiAttackers.length + ' attacker' + (aiAttackers.length > 1 ? 's' : '') + ' — tap an attacker, then your blocker. Taking the hits is allowed.</div>';
+  if (mode === 'blocking') html += '<div class="banner blocking">⚔️ ' + aiAttackers.length + ' attacker' + (aiAttackers.length > 1 ? 's' : '') + ' — tap an attacker, then your blocker, or drag your creature onto it. Taking the hits is allowed.</div>';
   if (mode === 'attackSelect') {
     html += '<div class="banner">⚔️ Choose your attackers, then Declare.</div>';
     if (attackSet.size) {
@@ -3056,14 +3057,17 @@ function render() {
   html += '<div id="log">' + uiLog.join('<br>') + '</div>';
   html += '</div><div class="handzone">';
   html += '<div style="text-align:right;padding:2px 4px 0"><button class="ghost" style="padding:4px 10px;font-size:12px" onclick="toggleMute()">' + (muted ? '🔇 Sound off' : '🔊 Sound on') + '</button></div>';
-  html += '<div class="hand fan">' + me.hand.map(function (inst) {
+  var hn = me.hand.length, hMid = (hn - 1) / 2, hStep = hn > 1 ? Math.min(6.5, 54 / hn) : 0;
+  html += '<div class="hand fan">' + me.hand.map(function (inst, hi) {
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
-    var opts = { cls: ' clickable' + (afford && mode === 'main' ? '' : ' unaffordable') };
+    var off = hi - hMid;
+    var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 1.2 : 1.8)).toFixed(1) + 'px)';
+    var opts = { cls: ' clickable' + (afford && mode === 'main' ? '' : ' unaffordable'), fan: fanT, fz: hi + 1 };
     // No onclick on hand cards since M10: the pointer controller owns the
     // hand — tap magnifies to read, drag onto the field plays.
     return cardHtml(inst, humanIdx, opts);
   }).join('') + '</div>';
-  if (mode === 'main') html += '<div style="text-align:center;font-size:11px;color:#a793d6">Hold a card to read it big · drag up to play it · tap any creature to inspect it</div>';
+  if (mode === 'main') html += '<div style="text-align:center;font-size:11px;color:#a793d6">Hold a card to read it big · drag up to play it · double-tap the field: everyone attacks</div>';
   html += '</div></div>';
   if (inspectUid !== null) html += inspectHtml();
   if (profileIdx !== null) html += heroProfileHtml();
@@ -3133,7 +3137,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M30 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M31 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -3432,6 +3436,36 @@ function activateArtifact(uid) {
   flushEngineLog(); if (!finishCheck()) render();
 }
 function startAttackSelect() { attackSet = new Set(); mode = 'attackSelect'; render(); }
+/* M31: double-tap the field — everyone ready attacks (tap again to call
+   them all back). The original's gesture, on our tap-safe terms. */
+function attackAllToggle() {
+  if (!G || (mode !== 'main' && mode !== 'attackSelect')) return;
+  var me = G.players[humanIdx];
+  var ready = me.board.filter(function (c) { return G.canAttack(c, me); });
+  if (!ready.length) { msg = 'No creature is ready to attack.'; render(); return; }
+  var allIn = ready.every(function (c) { return attackSet.has(c.uid); });
+  if (allIn) attackSet = new Set(); else ready.forEach(function (c) { attackSet.add(c.uid); });
+  mode = attackSet.size ? 'attackSelect' : 'main';
+  msg = '';
+  render();
+}
+/* M31: drag-to-block assignment — same semantics as assignBlocker, with
+   the pair given explicitly instead of via blockPick. */
+function dragAssignBlock(blockerUid, attackerUid) {
+  var attacker = aiAttackers.find(function (x) { return x.uid === attackerUid; });
+  var blocker = G.players[humanIdx].board.find(function (c) { return c.uid === blockerUid; });
+  if (!attacker || !blocker) return;
+  if (!canBlockCreature(attacker, blocker)) {
+    if ((D(blocker).keywords || []).indexOf('cantBlock') >= 0) msg = '⚠️ ' + D(blocker).name + ' cannot block — it refuses to stand in anything\'s way.';
+    else msg = '⚠️ ' + D(blocker).name + ' can\'t block ' + D(attacker).name + ' — it\'s Flying, and ' + D(blocker).name + ' has neither Flying nor Reach.';
+    render(); return;
+  }
+  var usedBy = Object.keys(blockMap).find(function (k) { return blockMap[k] === blockerUid; });
+  if (usedBy) delete blockMap[usedBy];
+  if (blockMap[attackerUid] === blockerUid) delete blockMap[attackerUid]; else blockMap[attackerUid] = blockerUid;
+  blockPick = null;
+  render();
+}
 function cancelAttack() { mode = 'main'; render(); }
 function toggleAttacker(uid) {
   var me = G.players[humanIdx];
@@ -3747,6 +3781,50 @@ render();
     var r = el.getBoundingClientRect();
     var ok = !!(e.target && e.target.closest && e.target.closest('.targetable, .herobar.foe'));
     drawTargetLine(r.left + r.width / 2, r.top + 8, e.clientX, e.clientY, ok);
+  }, true);
+  /* M31 gestures: drag-to-block (blocker-first, the original's language)
+     and double-tap-the-field attack-all. Both live alongside the tap
+     flows; a drag that never moves stays a tap. */
+  var blockDrag = null;
+  document.addEventListener('pointerdown', function (e) {
+    if (typeof mode === 'undefined' || mode !== 'blocking' || !e.target.closest) return;
+    var el = e.target.closest('.board .emblem');
+    if (!el) return;
+    var uid = Number(el.getAttribute('data-uid'));
+    if (!G || !G.players[humanIdx].board.some(function (c) { return c.uid === uid; })) return;
+    var r = el.getBoundingClientRect();
+    blockDrag = { uid: uid, x0: r.left + r.width / 2, y0: r.top + r.height / 2, sx: e.clientX, sy: e.clientY, moved: false };
+  }, true);
+  document.addEventListener('pointermove', function (e) {
+    if (!blockDrag) return;
+    if (!blockDrag.moved && Math.sqrt(Math.pow(e.clientX - blockDrag.sx, 2) + Math.pow(e.clientY - blockDrag.sy, 2)) < 12) return;
+    blockDrag.moved = true;
+    var under = document.elementFromPoint ? document.elementFromPoint(e.clientX, e.clientY) : null;
+    var t = (under && under.closest) ? under.closest('.board .emblem') : null;
+    var ok = !!(t && aiAttackers.some(function (a) { return a.uid === Number(t.getAttribute('data-uid')); }));
+    if (typeof drawTargetLine === 'function') drawTargetLine(blockDrag.x0, blockDrag.y0, e.clientX, e.clientY, ok);
+  }, true);
+  document.addEventListener('pointerup', function (e) {
+    if (!blockDrag) return;
+    var bd = blockDrag; blockDrag = null;
+    if (!bd.moved) return; // a plain tap — the tap-tap flow owns it
+    if (typeof clearTargetLine === 'function') clearTargetLine();
+    suppressClickUntil = Date.now() + 350;
+    var under = document.elementFromPoint ? document.elementFromPoint(e.clientX, e.clientY) : null;
+    var t = (under && under.closest) ? under.closest('.board .emblem') : null;
+    if (!t) return;
+    var aUid = Number(t.getAttribute('data-uid'));
+    if (!aiAttackers.some(function (a) { return a.uid === aUid; })) return;
+    dragAssignBlock(bd.uid, aUid);
+  }, true);
+  var lastBoardTapAt = 0;
+  document.addEventListener('pointerup', function (e) {
+    if (typeof mode === 'undefined' || (mode !== 'main' && mode !== 'attackSelect')) return;
+    if (!e.target.closest || !e.target.closest('.board')) return;
+    if (e.target.closest('.emblem, .card, button, .herobar')) return;
+    var now = Date.now();
+    if (now - lastBoardTapAt < 330) { lastBoardTapAt = 0; attackAllToggle(); }
+    else lastBoardTapAt = now;
   }, true);
   document.addEventListener('contextmenu', function (e) {
     // No long-press save-image / selection menus on game pieces.

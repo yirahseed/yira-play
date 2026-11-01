@@ -370,6 +370,37 @@
     background:rgba(40,4,16,.85); border:1px solid #ae4f7d; border-radius:999px; padding:1px 5px; text-shadow:0 1px 2px rgba(0,0,0,.8); }
   .card .cost.disc { background-image:none; background-color:#2e7d4f; color:#dcffe6; border-color:#14532d; }
   .card .cost.taxed { background-image:none; background-color:#8e2f3c; color:#ffe0e4; border-color:#5e1f28; }
+  /* --- M28 Spellslingers-feel batch --- */
+  .eicon { font-size:10.5px; margin:0 1px; text-shadow:0 1px 2px rgba(0,0,0,.7); }
+  .emblem-badges { min-height:15px; }
+  .fx-herofloat { position:fixed; z-index:66; transform:translate(-50%,-50%); font-size:24px; font-weight:900; color:#ff8fa3;
+    text-shadow:0 2px 6px rgba(0,0,0,.9); pointer-events:none; animation:floatUp 1.05s ease-out forwards; }
+  .fx-herofloat.good { color:#9df0b6; }
+  .herobar.hero-hit { animation:heroHit .45s ease-out; }
+  .herobar.hero-hit .portrait { animation:heroShake .4s ease-in-out; }
+  @keyframes heroHit { 0%{ filter:brightness(1.7) } 100%{ filter:brightness(1) } }
+  @keyframes heroShake { 0%,100%{ transform:translateX(0) } 25%{ transform:translateX(-3px) } 60%{ transform:translateX(3px) } }
+  .trap-reveal { position:fixed; left:50%; top:42%; z-index:80; pointer-events:none; text-align:center; animation:revealIn 1.3s ease-out forwards; }
+  .trap-reveal .card { transform:scale(1.35); box-shadow:0 18px 44px rgba(0,0,0,.75); margin:0 auto; }
+  .trap-reveal .tr-label { font-size:13px; font-weight:900; letter-spacing:.22em; color:#ffc4cd; text-shadow:0 2px 6px rgba(0,0,0,.9); margin-bottom:18px; }
+  @keyframes revealIn { 0%{ opacity:0; transform:translate(-50%,-50%) scale(.8) } 14%{ opacity:1; transform:translate(-50%,-50%) scale(1) } 82%{ opacity:1 } 100%{ opacity:0; transform:translate(-50%,-54%) scale(1.02) } }
+  .turn-sweep { position:fixed; left:50%; top:38%; transform:translate(-50%,-50%); z-index:78; pointer-events:none; font-size:32px; font-weight:900;
+    letter-spacing:.26em; color:#ffe1a8; text-shadow:0 3px 14px rgba(0,0,0,.85); animation:sweepIn 1.25s ease-out forwards; white-space:nowrap; }
+  .turn-sweep.foe { color:#ffc4cd; }
+  @keyframes sweepIn { 0%{ opacity:0; transform:translate(-50%,-50%) scale(1.5) } 18%{ opacity:1; transform:translate(-50%,-50%) scale(1) } 78%{ opacity:1 } 100%{ opacity:0; transform:translate(-50%,-56%) scale(.98) } }
+  #blockSvg { position:fixed; left:0; top:0; z-index:40; pointer-events:none; }
+  #blockSvg line { stroke:#57b6ff; stroke-width:3; stroke-linecap:round; stroke-dasharray:2 7; filter:drop-shadow(0 0 4px rgba(87,182,255,.8)); }
+  .fx-drawback { position:fixed; width:30px; height:43px; margin:-21px 0 0 -15px; border-radius:4px; z-index:64; pointer-events:none;
+    background:linear-gradient(160deg,#5a4390,#2c1e52); border:1.5px solid rgba(200,170,255,.65); box-shadow:0 4px 12px rgba(0,0,0,.55);
+    transition:transform .55s ease, opacity .55s ease; }
+  .gems-col i:not(.off) { animation:gemIn .35s ease both; }
+  .gems-col i:nth-of-type(2){ animation-delay:.04s } .gems-col i:nth-of-type(3){ animation-delay:.08s }
+  .gems-col i:nth-of-type(4){ animation-delay:.12s } .gems-col i:nth-of-type(5){ animation-delay:.16s }
+  .gems-col i:nth-of-type(6){ animation-delay:.20s } .gems-col i:nth-of-type(7){ animation-delay:.24s }
+  .gems-col i:nth-of-type(8){ animation-delay:.28s } .gems-col i:nth-of-type(9){ animation-delay:.32s }
+  @keyframes gemIn { 0%{ transform:scale(.4); filter:brightness(2.2) } 100%{ transform:scale(1); filter:brightness(1) } }
+  .actions button.pass-ready { animation:passPulse 1.15s ease-in-out infinite; }
+  @keyframes passPulse { 0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 0 rgba(255,120,140,0) } 50%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 18px rgba(255,120,140,.85) } }
   @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
 </style>
 </head>
@@ -2104,7 +2135,7 @@ function toggleMute() {
 }
 /* Watch engine stats each render: nightmare plants/drains and trap fires
    get their sounds AND visual effects without threading hooks through the engine. */
-var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null };
+var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null };
 function sfxPlant(n) {
   /* Jesse's player-memory spec (2026-10-31): one smoke stream per Nightmare,
      all at once, EACH stream with its own sound — a layered rush, not one tick.
@@ -2224,6 +2255,112 @@ function spawnFx(cls, n) {
     }
   } catch (e) {}
 }
+/* ---------- M28 Spellslingers-feel batch: blocker lines, hero hit
+   feedback, trap reveals, turn sweeps, draw flights, emblem icons. --- */
+var KW_ICONS = { flying: '🪽', haste: '⚡', reach: '🎯', trample: '🦏', ward: '🛡️', cantAttack: '🚫', cantBlock: '⛔', relentless: '🔁', sneak: '👁️' };
+function emblemIcons(inst, ownerIdx) {
+  var d = D(inst), out = '';
+  if (d.legendary) out += '<span class="eicon" title="legendary">👑</span>';
+  if (d.signatureFor) out += '<span class="eicon" title="signature">◆</span>';
+  if (inst.starterOwner !== ownerIdx) out += '<span class="eicon" title="Generated — this card did not start in a deck">✦</span>';
+  (d.keywords || []).forEach(function (k) { out += '<span class="eicon" title="' + esc(k) + '">' + (KW_ICONS[k] || '•') + '</span>'; });
+  return out;
+}
+function spawnHeroFloat(idx, text, cls) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var H = window.innerHeight || 700, W = window.innerWidth || 400;
+    var pt = anchorPoint('herobar-' + idx, { x: idx === aiIdx ? W * 0.7 : W * 0.3, y: idx === aiIdx ? H * 0.12 : H * 0.8 });
+    var node = document.createElement('div');
+    node.className = 'fx-herofloat ' + (cls || '');
+    node.textContent = text;
+    node.style.left = (pt.x + (Math.random() * 30 - 15)) + 'px';
+    node.style.top = pt.y + 'px';
+    document.body.appendChild(node);
+    var bar = document.querySelector ? document.querySelector('#herobar-' + idx) : null;
+    if (bar && bar.classList) { bar.classList.add('hero-hit'); setTimeout(function () { bar.classList.remove('hero-hit'); }, 480); }
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1100);
+  } catch (e) {}
+}
+var TRAP_BY_NAME = null;
+function trapReveal() {
+  try {
+    if (!TRAP_BY_NAME) {
+      TRAP_BY_NAME = {};
+      Object.keys(CARDS).forEach(function (id) { if (CARDS[id].type === 'trap') TRAP_BY_NAME[CARDS[id].name] = id; });
+    }
+    for (var i = uiLog.length - 1; i >= 0 && i > uiLog.length - 6; i--) {
+      var line = String(uiLog[i]).replace(/<[^>]*>/g, '');
+      var hit = Object.keys(TRAP_BY_NAME).find(function (nm) { return line.indexOf(nm) === 0 || line.indexOf(nm + ' ') >= 0; });
+      if (hit) {
+        var fake = { cardId: TRAP_BY_NAME[hit], uid: -7, permPower: 0, permHealth: 0, damage: 0, starterOwner: humanIdx };
+        var node = document.createElement('div');
+        node.className = 'trap-reveal';
+        node.innerHTML = '<div class="tr-label">🪤 TRAP SPRUNG</div>' + cardHtml(fake, humanIdx, {});
+        document.body.appendChild(node);
+        setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1300);
+        return;
+      }
+    }
+  } catch (e) {}
+}
+function drawBlockLines() {
+  try {
+    var old = document.querySelector ? document.querySelector('#blockSvg') : null;
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    if (typeof mode === 'undefined' || mode !== 'blocking' || !document.body || !document.createElement) return;
+    var keys = Object.keys(blockMap || {});
+    if (!keys.length) return;
+    var W = window.innerWidth || 400, H = window.innerHeight || 700, parts = '';
+    keys.forEach(function (aUid) {
+      var ea = document.querySelector('.emblem[data-uid="' + aUid + '"]');
+      var eb = document.querySelector('.emblem[data-uid="' + blockMap[aUid] + '"]');
+      if (!ea || !eb || !ea.getBoundingClientRect) return;
+      var ra = ea.getBoundingClientRect(), rb = eb.getBoundingClientRect();
+      parts += '<line x1="' + (ra.left + ra.width / 2) + '" y1="' + (ra.top + ra.height / 2) + '" x2="' + (rb.left + rb.width / 2) + '" y2="' + (rb.top + rb.height / 2) + '"/>';
+    });
+    if (!parts) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = '<svg id="blockSvg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">' + parts + '</svg>';
+    if (wrap.firstChild) document.body.appendChild(wrap.firstChild);
+  } catch (e) {}
+}
+var sweepGame = null, sweepPhase = null;
+function checkPhaseSweep() {
+  try {
+    if (!G || G.winner !== null || !document.body || !document.createElement) return;
+    if (sweepGame !== G) { sweepGame = G; sweepPhase = null; }
+    var phase = (mode === 'main') ? 'me' : (mode === 'aiTurn' ? 'foe' : null);
+    if (!phase || sweepPhase === phase) return;
+    var first = sweepPhase === null;
+    sweepPhase = phase;
+    if (first) return;
+    var node = document.createElement('div');
+    node.className = 'turn-sweep ' + phase;
+    node.textContent = phase === 'me' ? 'YOUR TURN' : 'THEIR TURN';
+    document.body.appendChild(node);
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1300);
+  } catch (e) {}
+}
+function spawnDrawFlight(idx, delay) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var H = window.innerHeight || 700, W = window.innerWidth || 400;
+    var src = anchorPoint('pile-' + idx, { x: W * 0.8, y: idx === aiIdx ? H * 0.08 : H * 0.9 });
+    var dst = { x: W / 2, y: idx === aiIdx ? H * 0.1 : H * 0.92 };
+    var handEl = document.querySelector ? document.querySelector(idx === humanIdx ? '.hand' : '.herobar.foe') : null;
+    if (handEl && handEl.getBoundingClientRect) { var r = handEl.getBoundingClientRect(); dst = { x: r.left + r.width / 2, y: r.top + (idx === aiIdx ? r.height / 2 : 26) }; }
+    var node = document.createElement('div');
+    node.className = 'fx-drawback';
+    node.style.left = src.x + 'px'; node.style.top = src.y + 'px';
+    document.body.appendChild(node);
+    setTimeout(function () {
+      node.style.transform = 'translate(' + (dst.x - src.x) + 'px,' + (dst.y - src.y) + 'px) rotate(7deg) scale(1.12)';
+      node.style.opacity = '0.15';
+    }, 30 + (delay || 0));
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 850 + (delay || 0));
+  } catch (e) {}
+}
 function soundWatch() {
   if (!G) return;
   var s = G.stats;
@@ -2231,10 +2368,13 @@ function soundWatch() {
     G.players.forEach(function (p) {
       if (p.life < sndSnap.life[p.idx]) {
         figFx.hurt[p.idx] = true;
+        spawnHeroFloat(p.idx, '-' + (sndSnap.life[p.idx] - p.life), 'bad');
         if (!speechFlags['hurt' + p.idx] && p.life > 0 && p.life <= Math.ceil(p.hero.life / 4)) {
           speechFlags['hurt' + p.idx] = true;
           heroSay(p.idx, heroLine(p.idx, 'hurt'));
         }
+      } else if (p.life > sndSnap.life[p.idx]) {
+        spawnHeroFloat(p.idx, '+' + (p.life - sndSnap.life[p.idx]), 'good');
       }
     });
   }
@@ -2254,10 +2394,16 @@ function soundWatch() {
     say('🌑 ' + dPlant + ' Nightmare' + (dPlant > 1 ? 's' : '') + ' planted — ' + total + ' now growing in the afflicted deck.', 'drain');
   }
   if (s.nightmareLifeDrained > sndSnap.drained) { sfx('drain'); spawnFx('fx-drain', 3); var wv = G.players.find(function (p) { return p.hero.passive === 'weave'; }); if (wv) figFx.flare = wv.idx; }
-  if (s.cardsCountered > sndSnap.countered) sfx('counter');
-  else if (s.trapsTriggered > sndSnap.traps) sfx('trapFire');
+  if (s.cardsCountered > sndSnap.countered) { sfx('counter'); trapReveal(); }
+  else if (s.trapsTriggered > sndSnap.traps) { sfx('trapFire'); trapReveal(); }
+  if (sndSnap.hands) {
+    G.players.forEach(function (p) {
+      var grew = p.hand.length - (sndSnap.hands[p.idx] || 0);
+      for (var di = 0; di < Math.min(grew, 3); di++) spawnDrawFlight(p.idx, di * 90);
+    });
+  }
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }) };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }) };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
 }
 /* M4.3 battlefield staging: one-shot figure animations computed by the
@@ -2462,7 +2608,7 @@ function emblemHtml(inst, ownerIdx, opts) {
     '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + (inst.doom > 0 ? '<span class="emblem-doom" title="Doomed — dies when the counter runs out">💀' + inst.doom + '</span>' : '') + '</div>' +
     (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') +
     '<div class="emblem-name">' + esc(d.name) + '</div>' +
-    '<div class="emblem-badges">' + badges(inst, ownerIdx) + '</div></div>';
+    '<div class="emblem-badges">' + emblemIcons(inst, ownerIdx) + '</div></div>';
 }
 /* ---------- M21 speech: small cream bubble beside the corner portrait,
    a few seconds, one short ORIGINAL line — the original game's own format
@@ -2680,8 +2826,9 @@ function render() {
   html += '<div class="actions">';
   if (mode === 'main') {
     if (!me.combatDone) html += '<button onclick="startAttackSelect()">⚔️ Attack</button>';
-    html += '<button class="danger" onclick="endTurn()" title="Pass — hand the turn to the enemy">⏭ Pass</button>';
+    html += '<button class="danger' + ((me.combatDone && G.availableMana(me) <= 0) ? ' pass-ready' : '') + '" onclick="endTurn()" title="Pass — hand the turn to the enemy">⏭ Pass</button>';
   }
+  if (mode === 'aiTurn') html += '<button disabled>⏳ Their turn</button>';
   if (mode === 'attackSelect') {
     html += '<button onclick="declareAttack()">Declare attack (' + attackSet.size + ')</button>';
     html += '<button class="ghost" onclick="cancelAttack()">Cancel</button>';
@@ -2711,6 +2858,8 @@ function render() {
   if (G.winner !== null) html += gameOverHtml();
   $app.innerHTML = html;
   figFx = { hurt: {}, flare: -1, lunge: '' };
+  drawBlockLines();
+  checkPhaseSweep();
   var log = document.getElementById('log'); if (log) log.scrollTop = log.scrollHeight;
 }
 function gameOverHtml() {
@@ -2766,7 +2915,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M27.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M28 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2944,7 +3093,7 @@ function renderBuilder() {
 /* ---------- match flow ---------- */
 function startMatch() {
   soundInit();
-  sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null };
+  sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null };
   var seat = climb ? 'first' : setup.seat;
   var foeHero = climb ? CLIMB_RUNGS[climb.rung - 1].hero : setup.foe;
   var climbBonus = climb ? CLIMB_RUNGS[climb.rung - 1].bonus : 0;

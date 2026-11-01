@@ -377,7 +377,7 @@ const CARDS = {
   sky_hunter:     { icon: "🦅", name: 'Sky Hunter',       cost: 4, type: 'creature', power: 3, health: 3, keywords: ['flying'] },
   gore_horn:      { icon: "🐂", name: 'Gore Horn',        cost: 5, type: 'creature', power: 5, health: 4, keywords: ['trample'] },
   ember_roc:      { icon: "🔥", name: 'Ember Roc',        cost: 6, type: 'creature', power: 5, health: 5, keywords: ['flying'] },
-  elder_titan:    { icon: "👑", name: 'Elder Titan',      cost: 7, type: 'creature', power: 6, health: 7, keywords: ['trample'], legendary: true },
+  elder_titan:    { icon: "👑", name: 'Elder Titan',      cost: 7, type: 'creature', power: 6, health: 7, keywords: ['trample'], legendary: true, behemoth: true },
   pyre_wraith:    { icon: "👻", name: 'Pyre Wraith',      cost: 3, type: 'creature', power: 3, health: 2, finale: { kind: 'damageHero', amount: 1, who: 'enemy' } },
   bramble_imp:    { icon: "🌵", name: 'Bramble Imp',      cost: 1, type: 'creature', power: 1, health: 2, finale: { kind: 'healHero', amount: 2, who: 'self' } },
   grove_tender:   { icon: "🌱", name: 'Grove Tender',     cost: 2, type: 'creature', power: 1, health: 3, debut: { kind: 'draw', count: 1 } },
@@ -458,14 +458,14 @@ const CARDS = {
   unbroken_might: { icon: "💥", name: 'Unbroken Might', cost: 4, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 3, effect: { kind: 'unbrokenMight' } },
   thornwolf: { icon: "🐺", name: 'Thornwolf', cost: 2, type: 'creature', power: 3, health: 2, generatedOnly: true, school: 'druid', schoolStage: 1, debut: { kind: 'healHero', amount: 2, who: 'self' } },
   barkhide_bloom: { icon: "🌸", name: 'Barkhide Bloom', cost: 3, type: 'spell', generatedOnly: true, school: 'druid', schoolStage: 2, effect: { kind: 'sequence', effects: [ { kind: 'ramp' }, { kind: 'buffRandomCreature', power: 1, health: 1 } ] } },
-  worldroot_titanosaur: { icon: "🦕", name: 'Worldroot Titanosaur', cost: 8, type: 'creature', power: 8, health: 10, keywords: ['trample', 'ward'], generatedOnly: true, school: 'druid', schoolStage: 3, guardian: true, regen: 2 },
+  worldroot_titanosaur: { icon: "🦕", name: 'Worldroot Titanosaur', cost: 8, type: 'creature', power: 8, health: 10, keywords: ['trample', 'ward'], generatedOnly: true, school: 'druid', schoolStage: 3, guardian: true, regen: 2, behemoth: true },
   stance_recruit: { icon: "🛡️", name: 'Recruit', cost: 0, type: 'creature', power: 1, health: 1, generatedOnly: true },
 
   // --- library batch (M5): more building blocks for custom decks ---
   cinder_hound:   { icon: "🐕", name: 'Cinder Hound',     cost: 1, type: 'creature', power: 1, health: 1, keywords: ['haste'] },
   glade_archer:   { icon: "🏹", name: 'Glade Archer',     cost: 4, type: 'creature', power: 4, health: 2, keywords: ['reach'] },
   mountain_ogre:  { icon: "🧌", name: 'Mountain Ogre',    cost: 6, type: 'creature', power: 6, health: 6 },
-  worldroot_titan: { icon: "🌋", name: 'Worldroot Titan', cost: 8, type: 'creature', power: 8, health: 8, keywords: ['trample'], legendary: true },
+  worldroot_titan: { icon: "🌋", name: 'Worldroot Titan', cost: 8, type: 'creature', power: 8, health: 8, keywords: ['trample'], legendary: true, behemoth: true },
   comet_fall:     { icon: "☄️", name: 'Comet Fall',       cost: 5, type: 'spell', effect: { kind: 'damageAny', amount: 6 } },
   quick_study:    { icon: "📜", name: 'Quick Study',      cost: 1, type: 'spell', effect: { kind: 'draw', count: 1 } },
   scatter_mind:   { icon: "🌀", name: 'Scatter Mind',     cost: 2, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'millOpponent', count: 2 }, { kind: 'healHero', amount: 2, who: 'self' } ] } },
@@ -479,7 +479,7 @@ const CARDS = {
   eager_smith:    { icon: "🔨", name: 'Eager Smith',        cost: 3, type: 'creature', power: 4, health: 3 },
   evenhand_paragon: { icon: "⚖️", name: 'Evenhand Paragon', cost: 3, type: 'creature', power: 3, health: 3 },
   tempest_giant:  { icon: "🌩️", name: 'Tempest Giant',      cost: 6, type: 'creature', power: 6, health: 6 },
-  ravaging_tyrant: { icon: "🦖", name: 'Ravaging Tyrant',   cost: 8, type: 'creature', power: 10, health: 8 },
+  ravaging_tyrant: { icon: "🦖", name: 'Ravaging Tyrant',   cost: 8, type: 'creature', power: 10, health: 8, behemoth: true },
   grimwulf:       { icon: "🪓", name: 'Grimwulf',           cost: 3, type: 'creature', power: 3, health: 5 },
   thorn_grub:     { icon: "🐛", name: 'Thorn Grub',         cost: 2, type: 'creature', power: 3, health: 2 },
   pyre_raider:    { icon: "🏴‍☠️", name: 'Pyre Raider',       cost: 3, type: 'creature', power: 4, health: 3 },
@@ -491,8 +491,8 @@ const CARDS = {
   // --- conversion batch 2 (M6.2): each card brings one new engine verb ---
   gravemaw:       { icon: "🦷", name: 'Gravemaw',           cost: 2, type: 'creature', power: 0, health: 1, graveyardGrowth: true },
   embermaw_devil: { icon: "👿", name: 'Embermaw Devil',     cost: 2, type: 'creature', power: 2, health: 1, keywords: ['cantBlock'], deathShuffle: 2 },
-  deepcoil_serpent: { icon: "🐍", name: 'Deepcoil Serpent', cost: 13, type: 'creature', power: 6, health: 6, costMinusPerPlay: true },
-  ashwing_sovereign: { icon: "🐲", name: 'Ashwing Sovereign', cost: 10, type: 'creature', power: 10, health: 7, keywords: ['flying'], endTurn: { kind: 'sequence', effects: [ { kind: 'damageHero', amount: 3, who: 'enemy' }, { kind: 'damageNonFlying', amount: 3 } ] } },
+  deepcoil_serpent: { icon: "🐍", name: 'Deepcoil Serpent', cost: 13, type: 'creature', power: 6, health: 6, costMinusPerPlay: true, behemoth: true },
+  ashwing_sovereign: { icon: "🐲", name: 'Ashwing Sovereign', cost: 10, type: 'creature', power: 10, health: 7, keywords: ['flying'], behemoth: true, endTurn: { kind: 'sequence', effects: [ { kind: 'damageHero', amount: 3, who: 'enemy' }, { kind: 'damageNonFlying', amount: 3 } ] } },
   drownscale:     { icon: "🦎", name: 'Drownscale',         cost: 3, type: 'creature', power: 1, health: 4, attackEffect: { kind: 'millSelf', count: 2 }, gravePower: true },
   nightscale_revenant: { icon: "💀", name: 'Nightscale Revenant', cost: 8, type: 'creature', power: 6, health: 5, debut: { kind: 'raiseStrongest' } },
   widow_matron:   { icon: "🕷️", name: 'Widow Matron',       cost: 1, type: 'creature', power: 3, health: 1, returnsFromGrave: true },
@@ -564,7 +564,6 @@ const CARDS = {
   gilded_riddle:  { icon: "❓", name: 'Gilded Riddle',    cost: 2, type: 'spell', generatedOnly: true, effect: { kind: 'draw', count: 1 } },
   pilfered_remedy: { icon: "🧪", name: 'Pilfered Remedy', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'healHero', amount: 3, who: 'self' } },
   echo_hound:     { icon: "🐺", name: 'Echo Hound',       cost: 2, type: 'creature', power: 2, health: 2, keywords: ['haste'], generatedOnly: true },
-  stolen_hour:    { icon: "⏳", name: 'Stolen Hour',      cost: 2, type: 'spell', generatedOnly: true, effect: { kind: 'ramp' } },
 
   // ——— Library batch 5 (M17): two per school, every card schooled ———
   reefcaller_adept: { icon: "🪸", name: 'Reefcaller Adept', cost: 3, type: 'creature', power: 2, health: 4, debut: { kind: 'draw', count: 1 } },
@@ -588,8 +587,25 @@ const CARDS = {
   sanctuary_knight:   { icon: "⚜️", name: 'Sanctuary Knight',   cost: 4, type: 'creature', power: 3, health: 4, debut: { kind: 'healHero', amount: 3, who: 'self' } },
   rootbound_colossus: { icon: "🌳", name: 'Rootbound Colossus', cost: 7, type: 'creature', power: 7, health: 7 },
   mossback_grazer:    { icon: "🦬", name: 'Mossback Grazer',    cost: 3, type: 'creature', power: 2, health: 4, debut: { kind: 'draw', count: 1 } },
+  // ——— Conversion batch 7 (M22, sprint): the audit's Forge-costable vein ———
+  // Stats/effects are the recovered final values (CONVERSION-AUDIT §2); every
+  // cost here is FORGE-COSTED under the charter and argued in files/COSTING.md
+  // (Batch 7 table). Names are ours. Two audit cards were deliberately NOT
+  // converted: the bounce (Recall already owns plain bounce at its recorded
+  // 3 — Jesse's no-duplicate rule) and the +1/+0 buff (a strictly weaker twin
+  // of Bloodrush at any honest price).
+  deep_rooting:       { icon: "🪴", name: 'Deep Rooting',       cost: 2, costForge: true, type: 'spell', effect: { kind: 'ramp' } },
+  firstroot_titan:    { icon: "🐘", name: 'Firstroot Titan',    cost: 8, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true, debut: { kind: 'ramp' }, attackEffect: { kind: 'ramp' } },
+  sepulcher_titan:    { icon: "🪦", name: 'Sepulcher Titan',    cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
+  rime_titan:         { icon: "🧊", name: 'Rime Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
+  dawn_titan:         { icon: "🌞", name: 'Dawn Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
+  cinder_titan:       { icon: "🌋", name: 'Cinder Titan',       cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true },
+  hollowgrin_giant:   { icon: "👹", name: 'Hollowgrin Giant',   cost: 9, costForge: true, type: 'creature', power: 8, health: 7, behemoth: true },
+  rushhorn_minotaur:  { icon: "🐃", name: 'Rushhorn Minotaur',  cost: 3, costForge: true, type: 'creature', power: 4, health: 3 },
+  grove_sentinel:     { icon: "🍃", name: 'Grove Sentinel',     cost: 2, costForge: true, type: 'creature', power: 3, health: 2 },
+  thornwood_archer:   { icon: "🏹", name: 'Thornwood Archer',   cost: 3, costForge: true, type: 'creature', power: 2, health: 4 },
 };
-const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound', 'stolen_hour'];
+const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound']; // M22: 'stolen_hour' pruned — Deep Rooting (batch 7) owns plain ramp at 2; the generated filler was its exact twin (Jesse's prune rule)
 const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort'];
 
 const HEROES = {
@@ -674,9 +690,9 @@ const DECKS = {
   ],
   keeper: [
     'rootcall_matriarch', 'sunwell_charm', 'overgrowth', 'overgrowth', 'bramble_imp', 'bramble_imp',
-    'grove_tender', 'grove_tender', 'dawn_chorister', 'dawn_chorister', 'shieldbearer', 'shieldbearer',
+    'deep_rooting', 'grove_tender', 'dawn_chorister', 'dawn_chorister', 'shieldbearer', 'shieldbearer',
     'stone_warden', 'stone_warden', 'ironbark_golem', 'ironbark_golem', 'moss_brute', 'moss_brute',
-    'tasty_morsel', 'worldroot_titan', 'mend_light', 'beastcall_arrow', 'second_wind', 'second_wind',
+    'tasty_morsel', 'firstroot_titan', 'mend_light', 'beastcall_arrow', 'second_wind', 'second_wind',
     'ward_of_dawn', 'ward_of_dawn', 'sundial_charm', 'thorn_pup', 'thorn_grub', 'thorn_grub',
   ],
   torchbearer: [
@@ -691,13 +707,13 @@ const DECKS = {
     'evenhand_paragon', 'shieldbearer', 'shieldbearer', 'cinder_hound', 'cinder_hound', 'swift_runner',
     'swift_runner', 'eager_smith', 'eager_smith', 'pyre_raider', 'pyre_raider', 'runesteel_monstrosity',
     'runesteel_monstrosity', 'vainglorious_hero', 'vainglorious_hero', 'wardens_acolyte', 'wardens_acolyte', 'ash_sprite',
-    'ash_sprite', 'ember_deathraider', 'mountain_ogre', 'gore_horn', 'spark_bolt', 'ember_deathraider',
+    'ash_sprite', 'ember_deathraider', 'dawn_titan', 'gore_horn', 'spark_bolt', 'ember_deathraider',
   ],
   graven: [
     'pale_shepherd', 'pale_shepherd', 'call_of_graven', 'graven_tithe', 'graven_tithe', 'gravemaw',
     'gravemaw', 'widow_matron', 'widow_matron', 'drownscale', 'drownscale', 'pyre_wraith',
     'pyre_wraith', 'void_harvest', 'void_harvest', 'creeping_doom', 'creeping_doom', 'grimwulf',
-    'grimwulf', 'moss_brute', 'moss_brute', 'venom_grub', 'venom_grub', 'duskmane_stag',
+    'hollowgrin_giant', 'sepulcher_titan', 'moss_brute', 'venom_grub', 'venom_grub', 'duskmane_stag',
     'duskmane_stag', 'shadowsmith_saboteur', 'nightscale_revenant', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur',
   ],
   unchained: [
@@ -731,7 +747,7 @@ const DECKS = {
   tidemother: [
     'suras_herald', 'suras_herald', 'deep_call', 'deep_call', 'kraken_youngling', 'moss_brute',
     'moss_brute', 'thorn_pup', 'thorn_pup', 'sky_scout', 'sky_scout', 'runeshell_crab',
-    'runeshell_crab', 'tempest_giant', 'tempest_giant', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow',
+    'runeshell_crab', 'tempest_giant', 'rime_titan', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow',
     'beastcall_arrow', 'lore_drifter', 'lore_drifter', 'mirror_moth', 'mirror_moth', 'echo_familiar',
     'echo_familiar', 'runesteel_monstrosity', 'elder_titan', 'worldroot_titan', 'frostreaver', 'runesteel_monstrosity',
   ],
@@ -806,13 +822,15 @@ cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_
   duskmane_stag:'worldroot', beastcall_arrow:'worldroot', venom_grub:'worldroot', tusked_warboar:'worldroot', tasty_morsel:'worldroot',
   overgrowth:'worldroot', thornback_alpha:'worldroot', unbridled_cry:'worldroot', boarherd_horn:'worldroot',
   thornwolf:'worldroot', barkhide_bloom:'worldroot', worldroot_titanosaur:'worldroot',
-  pilfered_remedy:'dawn', echo_hound:'ember', stolen_hour:'worldroot',
+  pilfered_remedy:'dawn', echo_hound:'ember',
   pluck_dread:'grave', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
   reefcaller_adept:'tides', slipstream:'tides', pyre_charger:'ember', pyrebrand:'ember', bonegleaner:'grave',
   funeral_march:'grave', dawn_squire:'dawn', sanctuary:'dawn', canopy_ancient:'worldroot', overbloom:'worldroot',
   undertow:'tides', riptide_trickster:'tides', pyre_golem:'ember', ashfall:'ember', crypt_warden:'grave',
   toll_bell_wraith:'grave', aegis_squire:'dawn', sanctuary_knight:'dawn', rootbound_colossus:'worldroot', mossback_grazer:'worldroot',
   sunmirror_glare:'tides', vindictive_retort:'tides', second_suns_dawn:'dawn', second_sun:'dawn', daybreak_verdict:'dawn',
+  deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn',
+  cinder_titan:'ember', hollowgrin_giant:'grave', rushhorn_minotaur:'ember', grove_sentinel:'worldroot', thornwood_archer:'worldroot',
   // Neutral — any hero may run these
   sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none',
 };
@@ -971,12 +989,17 @@ class Game {
     for (const q of this.players) if (q.hero.passive === 'graveAmbition') { q.life += 1; this.log.push(`${q.hero.name}'s Grave Ambition stirs: +1 life`); }
   }
   // Sura's Beckon: crossing a mana milestone calls a great beast to hand.
+  // M22: the pool is the behemoth-tagged creatures, not a cost threshold —
+  // the original's gifts were leviathan-class, and Kiora's own recovered deck
+  // runs 7-cost behemoths (Brawling Behemoth, Primeval Titan), so the old
+  // Forge 9+ threshold (a labeled call in COSTING.md) was both unfaithful
+  // and starved: it held only Deepcoil + Ashwing. Superseded, on the record.
   checkBeckon(p) {
     if (p.hero.passive !== 'beckon') return;
     for (const t of [10, 15, 20]) {
       if (p.maxMana >= t && !p.beckonClaimed.includes(t)) {
         p.beckonClaimed.push(t);
-        const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'creature' && CARDS[id].cost >= 9 && !CARDS[id].generatedOnly);
+        const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'creature' && CARDS[id].behemoth && !CARDS[id].generatedOnly);
         if (pool.length) { const beast = makeInstance(pool[this.rng.int(pool.length)], null); this.log.push(`The deep answers ${p.hero.name}: ${def(beast).name} rises`); this.addToHand(p.idx, beast); }
       }
     }
@@ -2504,7 +2527,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M21 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M22 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

@@ -623,6 +623,18 @@ const CARDS = {
   // card is NEUTRAL — no school invented for it. Cost was never recorded:
   // FORGE-COSTED at 8, argued in files/COSTING.md (Batch 9). Name is ours.
   hungerpit_tyrant: { icon: "👺", name: 'Hungerpit Tyrant', cost: 8, costForge: true, type: 'creature', power: 7, health: 5, debut: { kind: 'taxFoeHand', amount: 2 } },
+  // ——— Conversion batch 10 (M25, sprint): the third NEEDS-ENGINE conversion ———
+  // The Dark Gladiator of the record (B, 6/5 final stats, CONVERSION-AUDIT
+  // §3): Debut — give an enemy creature -1/-1 (final text; an earlier build
+  // carried -2/-2 on a 5/5 body). Debuts took no target anywhere in the
+  // engine/UI/AI; M25 adds targeted debuts end to end: playCard already
+  // forwarded a target to a creature's debut, and the UI targeting flow +
+  // the AI's targetFor now treat a targeted debut like a targeted spell.
+  // The debut reuses the 'wither' kind with amount 1 — the recorded -1/-1 —
+  // NOT the Withering Edict's conditional -3/-3/-5/-5 (see engine wither).
+  // Colour recorded (B) -> Hollow Grave. Cost was never recorded:
+  // FORGE-COSTED at 6, argued in files/COSTING.md (Batch 10). Name is ours.
+  grave_gladiator: { icon: "⚔️", name: 'Grave Gladiator', cost: 6, costForge: true, type: 'creature', power: 6, health: 5, debut: { kind: 'wither', amount: 1 } },
 };
 const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound']; // M22: 'stolen_hour' pruned — Deep Rooting (batch 7) owns plain ramp at 2; the generated filler was its exact twin (Jesse's prune rule)
 const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort'];
@@ -732,7 +744,7 @@ const DECKS = {
     'pale_shepherd', 'pale_shepherd', 'call_of_graven', 'graven_tithe', 'graven_tithe', 'gravemaw',
     'gravemaw', 'widow_matron', 'widow_matron', 'drownscale', 'drownscale', 'pyre_wraith',
     'pyre_wraith', 'void_harvest', 'void_harvest', 'creeping_doom', 'creeping_doom', 'grimwulf',
-    'hollowgrin_giant', 'sepulcher_titan', 'moss_brute', 'venom_grub', 'venom_grub', 'duskmane_stag',
+    'hollowgrin_giant', 'sepulcher_titan', 'grave_gladiator', 'venom_grub', 'venom_grub', 'duskmane_stag',
     'duskmane_stag', 'shadowsmith_saboteur', 'nightscale_revenant', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur',
   ],
   unchained: [
@@ -850,6 +862,7 @@ cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_
   sunmirror_glare:'tides', vindictive_retort:'tides', second_suns_dawn:'dawn', second_sun:'dawn', daybreak_verdict:'dawn',
   deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn', radiant_intercessor:'dawn',
   cinder_titan:'ember', hollowgrin_giant:'grave', rushhorn_minotaur:'ember', grove_sentinel:'worldroot', thornwood_archer:'worldroot',
+  grave_gladiator:'grave',
   // Neutral — any hero may run these
   sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none', hungerpit_tyrant:'none',
 };
@@ -1457,9 +1470,12 @@ class Game {
       }
       case 'wither': {
         if (target && target.kind === 'creature') {
+          // An explicit amount is the recorded fixed wither (M25: the Grave
+          // Gladiator's debut -1/-1). No amount = the Withering Edict's
+          // conditional -3/-3, deepening to -5/-5 on a death-turn.
           const n = effect.amount ? effect.amount : (p.deathsThisTurn > 0 ? 5 : 3);
           target.inst.permPower -= n; target.inst.permHealth -= n;
-          this.log.push(`Withering Edict: ${def(target.inst).name} withers by ${n}`);
+          this.log.push(`${def(sourceInst).name}: ${def(target.inst).name} withers by ${n}`);
         }
         break;
       }
@@ -1752,27 +1768,29 @@ function chooseBlockers(game, defIdx, attackerInsts) {
 function targetFor(game, i, inst) {
   const foe = game.players[game.opp(i)];
   const d = def(inst);
-  if (!d.effect) return null;
-  if (d.effect.kind === 'damageAny') {
+  // M25: a targeted DEBUT (the Grave Gladiator's -1/-1) aims like a spell.
+  const eff = d.effect || d.debut;
+  if (!eff) return null;
+  if (eff.kind === 'damageAny') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
-    if (target && (healthOf(target) - target.damage) <= d.effect.amount) return { kind: 'creature', inst: target };
-    if (foe.life <= d.effect.amount + 3) return { kind: 'hero' };
+    if (target && (healthOf(target) - target.damage) <= eff.amount) return { kind: 'creature', inst: target };
+    if (foe.life <= eff.amount + 3) return { kind: 'hero' };
     if (target) return { kind: 'creature', inst: target };
     return { kind: 'hero' };
   }
-  if (d.effect.kind === 'buffCreature') {
+  if (eff.kind === 'buffCreature') {
     const mine = game.players[i].board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return mine ? { kind: 'creature', inst: mine } : null;
   }
-  if (d.effect.kind === 'wither' || d.effect.kind === 'smiteByBoard') {
+  if (eff.kind === 'wither' || eff.kind === 'smiteByBoard') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
-  if (d.effect.kind === 'destroyFlyer') {
+  if (eff.kind === 'destroyFlyer') {
     const target = foe.board.filter((c) => (def(c).keywords || []).includes('flying')).sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
-  if (d.effect.kind === 'doom') {
+  if (eff.kind === 'doom') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
@@ -1786,6 +1804,7 @@ function priority(game, i, c) {
   if (d.debut && d.debut.kind === 'stealFromDeck') s += 50;
   if (d.debut && d.debut.kind === 'draw') s += 35;
   if (d.debut && d.debut.kind === 'healHero') s += 15;
+  if (d.debut && d.debut.kind === 'wither') s += 25; // M25: a debut that shrinks a foe wants a board to land on
   if (d.effect && d.effect.kind === 'generate') s += 55;
   if (d.effect && d.effect.kind === 'buffAllCreatures') s += 20 + game.players[i].board.length * 8;
   if (d.effect && d.effect.kind === 'stealFromDeck') s += 55;
@@ -1808,7 +1827,8 @@ function playMainPhase(game, i) {
   const foeBoard = () => game.players[game.opp(i)].board.length;
   const playable = () => p.hand.filter((c) => {
     if (def(c).type === 'trap' || game.effectiveCost(p, c) > game.availableMana(p)) return false;
-    const k = def(c).effect && def(c).effect.kind;
+    const eff2 = def(c).effect || def(c).debut;
+    const k = eff2 && eff2.kind;
     if ((k === 'wither' || k === 'smiteByBoard' || k === 'doom') && !foeBoard()) return false; // needs a victim
     if (k === 'stealFromGrave' && game.players[game.opp(i)].graveyard.length === 0) return false;
     if (k === 'transformBoard' && p.board.length === 0) return false;
@@ -2198,7 +2218,7 @@ function effectText(d) {
       case 'gainKeywordsInPlay': return 'Gains every keyword in play (flying, trample, ward, and the rest).';
       case 'smiteByBoard': return 'Deal damage to an enemy creature equal to the number of creatures you control.';
       case 'rageStrongest': return 'Deal damage to a random enemy creature equal to your strongest creature\'s power.';
-      case 'wither': return 'Give an enemy creature -3/-3 (-5/-5 instead if one of your creatures died this turn).';
+      case 'wither': return e.amount ? ('Give an enemy creature -' + e.amount + '/-' + e.amount + '.') : 'Give an enemy creature -3/-3 (-5/-5 instead if one of your creatures died this turn).';
       case 'axeBuff': return 'Give your strongest creature +1 power until end of turn.';
       case 'sequence': return e.effects.map(function (sub) { return eff(sub); }).join(' ');
       case 'bounce': return 'Return a creature to its owner\'s hand.' + (e.draw ? ' Draw ' + e.draw + ' card' + (e.draw === 1 ? '' : 's') + '.' : '');
@@ -2345,7 +2365,7 @@ function heroBarHtml(p, isMe) {
   var gems = '';
   var pendingDef = null;
   if (mode === 'targeting' && pendingUid !== null) { var pc = G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }); if (pc) pendingDef = D(pc); }
-  var click = (mode === 'targeting' && !isMe && pendingDef && pendingDef.effect && pendingDef.effect.kind === 'damageAny') ? ' onclick="targetHero()"' : '';
+  var click = (mode === 'targeting' && !isMe && pendingDef && pendingDef.effect && pendingDef.effect.kind === 'damageAny') ? ' onclick="targetHero()"' : ''; // hero target exists only for damageAny spells — no debut targets a hero
   var loadLine = '';
   if (typeof SCHOOLS !== 'undefined') {
     var questLine = function (s, taken) {
@@ -2401,7 +2421,7 @@ function boardHtml(p, isMe) {
       }
     } else if (mode === 'targeting') {
       var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }) || { cardId: 'spark_bolt' });
-      var k = d.effect && d.effect.kind;
+      var k = (d.effect || d.debut) && (d.effect || d.debut).kind;
       var warded = (D(inst).keywords || []).indexOf('ward') >= 0;
       var flying = (D(inst).keywords || []).indexOf('flying') >= 0;
       if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && k === 'buffCreature') || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
@@ -2563,7 +2583,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M24.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M25 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2817,8 +2837,9 @@ function clickHand(uid) {
     try { G.armTrap(humanIdx, uid); sfx('trapArm'); say('You arm ' + d.name + ' (' + 'mana reserved).'); } catch (e) { msg = e.message; }
     flushEngineLog(); render(); return;
   }
-  if (d.effect && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom'].indexOf(d.effect.kind) >= 0) {
-    var k = d.effect.kind;
+  var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
+  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom'].indexOf(targetedEff.kind) >= 0) {
+    var k = targetedEff.kind;
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'damageAny' || k === 'bounce') ? true : (k === 'buffCreature' ? me.board.length > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0));
     if (!hasTarget) { msg = 'No valid target yet.'; render(); return; }

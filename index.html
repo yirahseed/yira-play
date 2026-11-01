@@ -775,6 +775,14 @@
   .inspect-emblems .eicon { filter:drop-shadow(0 1px 3px rgba(0,0,0,.65)); }
   .bigcard .cart { height:198px; }
   .bigcard .ctext { font-size:13.5px; line-height:1.45; }
+
+/* M68: badge grammar (power green / health red), played-card lift, victory bloom */
+.orb.pow { background: linear-gradient(180deg, #3f9e4d, #256b31) !important; color: #eaffea !important; }
+.orb.hp { background: linear-gradient(180deg, #c0453d, #8e2a24) !important; color: #ffe9e7 !important; }
+.card.justplayed { animation: justPlayed .6s ease-out; }
+@keyframes justPlayed { 0% { transform: translateY(10px) scale(1.04); filter: brightness(1.5); } 100% { transform: none; filter: none; } }
+.endscreen .bigemoji { animation: victoryBloom 1.6s ease-out; display: inline-block; }
+@keyframes victoryBloom { 0% { transform: scale(.4); filter: brightness(2); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
 </style>
 </head>
 <body>
@@ -875,7 +883,7 @@ const CARDS = {
   vindictive_retort: { icon: "🎯", name: 'Vindictive Retort', cost: 2, type: 'trap', trigger: { kind: 'vindictive' } , orig: "Vindictive Shot", src: "M20 record" },
 
   // --- M20 board-swing spells (Second Dawn pair + the great verdict) ---
-  second_suns_dawn: { icon: "🌄", name: "Second Sun's Dawn", cost: 6, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'healHero', amount: 7, who: 'self' }, { kind: 'shuffleSecondSun' } ] } , orig: "(name unrecorded) dawn second-sun spell", src: "Teferi + Nahiri footage / Rosetta record (M20)" },
+  second_suns_dawn: { icon: "🌄", name: "Second Sun's Dawn", cost: 6, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'healHero', amount: 7, who: 'self' }, { kind: 'shuffleSecondSun' } ] } , orig: "Second Sun's Dawn", src: "VIDEO-DIGEST batch 2B (YouTube face-verified), 2026-11-01 \u2014 name, cost 6 and text all confirmed against the M20 conversion, which had them right" },
   second_sun:     { icon: "☀️", name: 'The Second Sun',   cost: 10, type: 'spell', generatedOnly: true, effect: { kind: 'damageAllEnemies', amount: 10 } , orig: "The Second Sun \u2014 generated payoff", src: "Teferi + Nahiri footage / Rosetta record (M20)" },
   daybreak_verdict: { icon: "⚖️", name: 'Daybreak Verdict', cost: 7, type: 'spell', effect: { kind: 'destroyAllCreatures' } , orig: "(name unrecorded) dawn board-wipe", src: "Teferi + Nahiri footage / Rosetta record (M20)" },
 
@@ -946,7 +954,7 @@ const CARDS = {
   eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 4, type: 'creature', power: 2, health: 2, keywords: ['flying'], phoenixReturn: true , orig: "Eternal Phoenix", src: "Wayback Hipsters gallery face - cost 4, 2/2 Flying recorded; end-of-turn graveyard return implemented; its Miracle random-upgrade rider stays unimplemented (upgrade system undefined)" },
   mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } , orig: "Hlaavin, Lord of the Unseen", src: "CONVERSION-AUDIT S4" },
   vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } , orig: "Vainglorious Hero", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
-  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 1, type: 'creature', power: 2, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "Patch notes v0.12 (research corpus) - the crab is a one-mana creature; final line 2/3 cant-attack. The charter cost of 2 was superseded by the record in M64." },
+  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 1, type: 'creature', power: 3, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "Patch notes v0.12 (research corpus) - the crab is a one-mana creature; final line 2/3 cant-attack. The charter cost of 2 was superseded by the record in M64." },
   tasty_morsel:   { icon: "🍖", name: 'Tasty Morsel',       cost: 1, costForge: true, type: 'creature', power: 2, health: 1, finale: { kind: 'buffRandomCreature', power: 1, health: 1 } , orig: "Tasty Morsel", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
   flame_shot:     { icon: "🔥", name: 'Flame Shot',         cost: 2, costForge: true, type: 'spell', effect: { kind: 'damageAny', amount: 3 } , orig: "Flame Shot", src: "COSTING.md tracker \u2014 cost Forge-assigned; 3 damage recorded" }, // 3 damage is the final recorded value
   ash_dragon:     { icon: "🐉", name: 'Ash Dragon',         cost: 5, type: 'creature', power: 4, health: 4, keywords: ['flying'], generatedOnly: true , orig: "Darigaaz's dragon token", src: "effect verified via Darigaaz; 4/4 body Forge-assigned (COSTING.md labeled call)" },
@@ -968,7 +976,7 @@ const CARDS = {
   // converted: the bounce (Recall already owns plain bounce at its recorded
   // 3 — Jesse's no-duplicate rule) and the +1/+0 buff (a strictly weaker twin
   // of Bloodrush at any honest price).
-  deep_rooting:       { icon: "🪴", name: 'Deep Rooting',       cost: 2, costForge: true, type: 'spell', effect: { kind: 'ramp' } , orig: "Rampant Growth", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  deep_rooting:       { icon: "🪴", name: 'Deep Rooting',       cost: 2, type: 'spell', signatureFor: 'keeper', effect: { kind: 'ramp' } , orig: "Rampant Growth", src: "Rampant Growth \u2014 cost 2 now RECORDED (VIDEO-DIGEST batch 1, 2026-11-01, deck view; the Forge cost matched it and retires). The same haul proves it a Nissa SIGNATURE, so Deep Rooting takes its signature place for the Keeper; other decks lose their copies." },
   oakenhide:      { icon: "🌰", name: 'Oakenhide',       cost: 2, type: 'spell', effect: { kind: 'buffCreature', power: 2, health: 2 }, orig: "Oakenhide", src: "recovered record — cost 2 recorded; held while its 1-mana twin Grow Fierce existed (Jesse parity rule), enters now that the twin is purged" },
   firstroot_titan:    { icon: "🐘", name: 'Firstroot Titan',    cost: 8, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true, debut: { kind: 'ramp' }, attackEffect: { kind: 'ramp' } , orig: "Primeval Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
   sepulcher_titan:    { icon: "🪦", name: 'Sepulcher Titan',    cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Grave Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
@@ -1052,6 +1060,27 @@ const CARDS = {
   dawnkite_apprentice: { icon: "\uD83E\uDDBF", name: 'Dawnkite Apprentice', cost: 2, type: 'creature', power: 1, health: 1, subtype: 'angel', debut: { kind: 'draw', count: 1 }, orig: "Aven Apprentice", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
   dawnkite_archon: { icon: "\uD83D\uDD4A\uFE0F", name: 'Dawnkite Archon', cost: 5, type: 'creature', power: 4, health: 5, subtype: 'angel', debut: { kind: 'gainMana', amount: 1 }, orig: "Aven Archon", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
   pilgrim_of_the_vault: { icon: "\uD83D\uDEB6", name: 'Pilgrim of the Vault', cost: 4, type: 'creature', power: 3, health: 5, subtype: 'angel', legendary: true, debut: { kind: 'gainMana', amount: 1 }, orig: "Helvault Pilgrim", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
+  // ---------- M68: the video-sweep wave (all face-verified) ----------
+  countersign: { icon: "\u270B", name: 'Countersign', cost: 2, type: 'trap', trigger: { kind: 'counterAny' }, orig: "Negate", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'If your opponent plays a spell, trap, or artifact, counter it.'" },
+  broken_focus: { icon: "\uD83C\uDF2B\uFE0F", name: 'Broken Focus', cost: 1, type: 'trap', trigger: { kind: 'afterAttackDeclared' }, orig: "Disorient", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01; timing per Jesse (top-Mythic Teferi): fires after attackers are declared, before damage; -3/-0 lasts the turn" },
+  day_of_reckoning: { icon: "\u2600\uFE0F", name: 'Day of Reckoning', cost: 7, type: 'spell', effect: { kind: 'destroyAllCreatures' }, orig: "Day of Judgment", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
+  withering_blight: { icon: "\uD83E\uDD40", name: 'Withering Blight', cost: 4, type: 'spell', effect: { kind: 'debuffAll', power: -2, health: -2 }, orig: "Infest", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Give all creatures -2/-2' (permanent, the game's stat-change language)" },
+  flood_of_ideas: { icon: "\uD83D\uDCA1", name: 'Flood of Ideas', cost: 4, type: 'spell', effect: { kind: 'generateSpells', count: 3 }, orig: "Jolt of Inspiration", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Add 3 random spells to your hand'" },
+  spark_of_insight: { icon: "\u2728", name: 'Spark of Insight', cost: 0, type: 'spell', effect: { kind: 'draftSpell' }, orig: "Spark of Genius", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — draft resolves as a random pick, the draft family's standing simplification" },
+  counterfeiter: { icon: "\uD83C\uDFAD", name: 'Counterfeiter', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'rogue', keywords: ['sneak'], stealOnHeroDamage: true, orig: "Counterfeiter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — two independent face sightings agree exactly" },
+  scourge_of_the_pact: { icon: "\uD83D\uDE08", name: 'Scourge of the Pact', cost: 3, type: 'creature', power: 2, health: 2, subtype: 'demon', keywords: ['flying'], signatureFor: 'unchained', spellDrain: 1, orig: "Davriel's Scourge", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — played-face values (3, 2/2); an official v1.05.00 render reads 2, 1/2 — conflict flagged, the played face governs" },
+  infectious_scorpion: { icon: "\uD83E\uDD82", name: 'Infectious Scorpion', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'pest', finale: { kind: 'addCard', cardId: 'fatal_infection' }, orig: "Infectious Scorpion", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — face-verified twice (Roxora tech + Garruk deck); sits in the BLACK section of a played Ashiok deck view, hence Grave" },
+  fatal_infection: { icon: "\u2623\uFE0F", name: 'Fatal Infection', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'doom' }, orig: "Fatal Infection (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
+  frostgrip_mage: { icon: "\u2744\uFE0F", name: 'Frostgrip Mage', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'wizard', finale: { kind: 'addCard', cardId: 'chill_wind' }, orig: "Wintergrip Mage", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — cost + Finale face-verified; final stats 2/3 per the v1.04 patch record (an older video face read 1/3)" },
+  chill_wind: { icon: "\uD83C\uDF2C\uFE0F", name: 'Chill Wind', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'stunCreature' }, orig: "Chill Wind (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
+  warp_of_agony: { icon: "\uD83E\uDD22", name: 'Warp of Agony', cost: 3, type: 'spell', effect: { kind: 'debuffAndAdd', power: -3, health: 0, cardId: 'agonys_twist' }, orig: "Agony Warp", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
+  agonys_twist: { icon: "\uD83E\uDE22", name: "Agony's Twist", cost: 3, type: 'spell', generatedOnly: true, effect: { kind: 'buffCreature', power: 0, health: -3 }, orig: "Agony Twist (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
+  bloodline_sire: { icon: "\uD83E\uDDDB", name: 'Bloodline Sire', cost: 1, type: 'creature', power: 2, health: 1, subtype: 'vampire', finale: { kind: 'addRandomSubtype', subtype: 'vampire' }, orig: "Bloodline Creator", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Sorin signature set member (hero panel), face-verified" },
+  snapshell_turtle: { icon: "\uD83D\uDC22", name: 'Snapshell Turtle', cost: 2, type: 'creature', power: 2, health: 4, subtype: 'beast', trapGrowth: true, orig: "Snapshell Turtle", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'After you play a trap, this gets +1/+0' (permanent, the game's growth language)" },
+  echo_scepter: { icon: "\uD83E\uDE84", name: 'Echo Scepter', cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftSpell', maxCost: 2 }, orig: "Isochron Scepter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Activate: Draft a spell that costs 2 or less'; draft resolves as a random pick, the family's standing simplification" },
+  bearer_of_the_curse: { icon: "\uD83D\uDC3B", name: 'Bearer of the Curse', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'beast', keywords: ['trample'], signatureFor: 'unbridled', deathGrowth: true, orig: "Cursebearer", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature, hero panel + official render + face all agree" },
+  fury_of_the_wilds: { icon: "\uD83C\uDF32", name: 'Fury of the Wilds', cost: 3, type: 'spell', signatureFor: 'unbridled', effect: { kind: 'destroyAndSelfDamage' }, orig: "Wildspeaker's Fury", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature; two independent reads agree word-for-word" },
+  falkenrath_duchess: { icon: "\uD83D\uDC78", name: 'Falkenrath Duchess', cost: 5, type: 'creature', power: 5, health: 4, subtype: 'vampire', debut: { kind: 'buffSubtype', subtype: 'vampire', power: 2, health: 0 }, orig: "Falkenrath Duchess", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — pack-opening face" },
 };
 const TRAP_POOL = ['quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil']; // M62 purge: only verified traps remain
 
@@ -1118,25 +1147,25 @@ const DECKS = {
     'tidewing_familiar',
     'runeshell_crab', 'runeshell_crab',
     'shadowsmith_saboteur', 'shadowsmith_saboteur',
-    'wound_priest', 'wound_priest',
+    'warp_of_agony', 'wound_priest',
     'pilfer_dream',
     'recall', 'recall',
     'fatetwist', 'fatetwist',
     'void_harvest', 'void_harvest',
     'bring_down', 'bring_down',
-    'creeping_doom', 'creeping_doom',
+    'infectious_scorpion', 'infectious_scorpion',
     'wrong_turn',
     'quiet_snare', 'iron_verdict',
     'vindictive_retort', 'sunmirror_glare', 'flockguard_vigil',
-    'cerulean_dragon', 'gazemaw', 'tempest_giant',
+    'cerulean_dragon', 'gazemaw', 'frostgrip_mage',
     'mindveil_sovereign', 'vein_drainlord', 'frostreaver',
   ],
   controller: [
     'iron_verdict', 'runeshell_crab', 'runeshell_crab', 'tollwarden_captain', 'tollwarden_captain', 'pilgrim_of_the_vault',
     'wardens_acolyte', 'wardens_staff', 'wardens_staff', 'quiet_snare', 'flockguard_vigil', 'flockguard_vigil',
-    'vindictive_retort', 'vindictive_retort', 'stay_thy_hand', 'desperate_prayer', 'vainglorious_hero', 'vainglorious_hero',
-    'evenhand_paragon', 'evenhand_paragon', 'recall', 'recall', 'iron_verdict', 'sunmirror_glare',
-    'sunmirror_glare', 'radiant_intercessor', 'radiant_intercessor', 'returnwing_angel', 'returnwing_angel', 'second_suns_dawn',
+    'vindictive_retort', 'vindictive_retort', 'stay_thy_hand', 'desperate_prayer', 'countersign', 'vainglorious_hero',
+    'broken_focus', 'evenhand_paragon', 'recall', 'recall', 'iron_verdict', 'sunmirror_glare',
+    'sunmirror_glare', 'snapshell_turtle', 'radiant_intercessor', 'returnwing_angel', 'returnwing_angel', 'second_suns_dawn',
   ],
   keeper: [
     'beastcall_arrow', 'tasty_morsel', 'tasty_morsel', 'sheep', 'sheep', 'venom_grub',
@@ -1169,19 +1198,19 @@ const DECKS = {
   graven: [
     'beastcall_arrow', 'widow_matron', 'widow_matron', 'tasty_morsel', 'tasty_morsel', 'venom_grub',
     'venom_grub', 'gravemaw', 'gravemaw', 'grave_cantor', 'wound_priest', 'creeping_doom',
-    'creeping_doom', 'deep_rooting', 'deep_rooting', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'grave_gladiator',
+    'creeping_doom', 'oakenhide', 'oakenhide', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'grave_gladiator',
     'grave_gladiator', 'vein_drainlord', 'vein_drainlord', 'court_command', 'sanguine_pact', 'thirteenth_hour',
     'grim_echoes', 'duskmane_stag', 'void_harvest', 'void_harvest', 'sepulcher_titan', 'hollowgrin_giant',
   ],
   unchained: [
     'tempest_giant', 'widow_matron', 'widow_matron', 'runeshell_crab', 'runeshell_crab', 'gravemaw',
     'gravemaw', 'wound_priest', 'wound_priest', 'cerulean_dragon', 'cerulean_dragon', 'vein_drainlord',
-    'vein_drainlord', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'bring_down', 'bring_down', 'drownscale',
+    'vein_drainlord', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'bring_down', 'bring_down', 'scourge_of_the_pact',
     'drownscale', 'recall', 'recall', 'thirteenth_hour', 'fatetwist', 'fatetwist',
     'sanguine_pact', 'sanguine_pact', 'void_harvest', 'void_harvest', 'gazemaw', 'nightscale_revenant',
   ],
   unbridled: [
-    'beastcall_arrow', 'tasty_morsel', 'tasty_morsel', 'sheep', 'sheep', 'venom_grub',
+    'beastcall_arrow', 'fury_of_the_wilds', 'tasty_morsel', 'bearer_of_the_curse', 'sheep', 'venom_grub',
     'venom_grub', 'flame_shot', 'flame_shot', 'grove_sentinel', 'grove_sentinel', 'embermaw_devil',
     'embermaw_devil', 'rushhorn_minotaur', 'rushhorn_minotaur', 'beastkeeper', 'beastkeeper', 'thornwood_archer',
     'thornwood_archer', 'ember_deathraider', 'ember_deathraider', 'kindling_pyromancer', 'kindling_pyromancer', 'duskmane_stag',
@@ -1203,7 +1232,7 @@ const DECKS = {
   ],
   tidemother: [
     'fatetwist', 'runeshell_crab', 'runeshell_crab', 'twinfeather_sparrow', 'tasty_morsel', 'dawnkite_apprentice',
-    'venom_grub', 'deep_rooting', 'deep_rooting', 'cerulean_dragon', 'cerulean_dragon', 'grove_sentinel',
+    'venom_grub', 'oakenhide', 'oakenhide', 'cerulean_dragon', 'cerulean_dragon', 'grove_sentinel',
     'grove_sentinel', 'beastkeeper', 'beastkeeper', 'bring_down', 'bring_down', 'river_dragon',
     'tempest_giant', 'thornwood_archer', 'thornwood_archer', 'recall', 'recall', 'frostreaver',
     'rime_titan', 'mindveil_sovereign', 'firstroot_titan', 'deepbreach_serpent', 'quakehoof_behemoth', 'fatetwist',
@@ -1248,7 +1277,7 @@ const SCHOOL_META = {
 };
 const SCHOOL_OF = {
   // Tides
-  gazemaw:'tides', deepbreach_serpent:'tides', fatetwist:'tides', hollow_fathomer:'tides', twinfeather_sparrow:'tides', river_dragon:'tides', dawnkite_scholar:'tides', dawnkite_apprentice:'tides', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
+  gazemaw:'tides', deepbreach_serpent:'tides', fatetwist:'tides', hollow_fathomer:'tides', twinfeather_sparrow:'tides', river_dragon:'tides', dawnkite_scholar:'tides', dawnkite_apprentice:'tides', countersign:'tides', broken_focus:'tides', flood_of_ideas:'tides', spark_of_insight:'tides', frostgrip_mage:'tides', chill_wind:'tides', snapshell_turtle:'tides', echo_scepter:'tides', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
   quiet_snare:'tides', iron_verdict:'tides', sunmirror_glare:'tides', vindictive_retort:'tides', tidewing_familiar:'tides', signature_weaving:'tides',
   mastery_of_currents:'tides', tide_elemental:'tides', recall:'tides', tempest_giant:'tides', bring_down:'tides', frostreaver:'tides',
   cerulean_dragon:'tides', mindveil_sovereign:'tides', runeshell_crab:'tides', reef_fish:'tides', rime_titan:'tides', flockguard_vigil:'tides',
@@ -1258,11 +1287,11 @@ const SCHOOL_OF = {
   eternal_phoenix:'ember', flame_shot:'ember', ash_dragon:'ember', cinder_elemental:'ember', cinder_titan:'ember', rushhorn_minotaur:'ember',
   // Hollow Grave
   deathshade:'grave', thirteenth_hour:'grave', wound_priest:'grave', vein_drainlord:'grave', sanguine_pact:'grave', gravebound_imp:'grave',
-  withering_edict:'grave', whispers_of_grave:'grave', wrong_turn:'grave', grim_echoes:'grave', vampire_thrall:'grave', crypt_pup:'grave', sanguine_imp:'grave', crypt_noble:'grave', crypt_assassin:'grave', crypt_adept:'grave', crypt_warrior:'grave', crypt_elder:'grave', court_messenger:'grave', pale_stalker:'grave', stalking_revenant:'grave', crypt_lord:'grave', crypt_sorcerer:'grave', crimson_knight:'grave', veiled_confidant:'grave', grave_cantor:'grave', court_command:'grave', night_revel:'grave', grimwulf:'grave', gravemaw:'grave', drownscale:'grave', nightscale_revenant:'grave',
+  withering_edict:'grave', whispers_of_grave:'grave', wrong_turn:'grave', grim_echoes:'grave', vampire_thrall:'grave', crypt_pup:'grave', sanguine_imp:'grave', crypt_noble:'grave', crypt_assassin:'grave', crypt_adept:'grave', crypt_warrior:'grave', crypt_elder:'grave', court_messenger:'grave', pale_stalker:'grave', stalking_revenant:'grave', crypt_lord:'grave', crypt_sorcerer:'grave', crimson_knight:'grave', veiled_confidant:'grave', grave_cantor:'grave', court_command:'grave', night_revel:'grave', withering_blight:'grave', counterfeiter:'grave', scourge_of_the_pact:'grave', infectious_scorpion:'grave', fatal_infection:'grave', warp_of_agony:'grave', agonys_twist:'grave', bloodline_sire:'grave', falkenrath_duchess:'grave', grimwulf:'grave', gravemaw:'grave', drownscale:'grave', nightscale_revenant:'grave',
   widow_matron:'grave', old_bonegnaw:'grave', creeping_doom:'grave', shadowsmith_saboteur:'grave', void_harvest:'grave', unchained_spirit:'grave',
   sepulcher_titan:'grave', hollowgrin_giant:'grave', grave_gladiator:'grave',
   // First Dawn
-  stay_thy_hand:'dawn', desperate_prayer:'dawn', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn',
+  stay_thy_hand:'dawn', desperate_prayer:'dawn', day_of_reckoning:'dawn', bearer_of_the_curse:'worldroot', fury_of_the_wilds:'worldroot', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn',
   daybreak_verdict:'dawn', dawn_steed:'dawn', dawns_smite:'dawn', aura_of_valor:'dawn', stance_recruit:'dawn', evenhand_paragon:'dawn',
   wardens_acolyte:'dawn', wardens_staff:'dawn', vainglorious_hero:'dawn', banneret_avatar:'dawn', dawn_titan:'dawn', radiant_intercessor:'dawn',
   // Worldroot
@@ -1590,6 +1619,7 @@ class Game {
     this.active = i; this.turnNumber++;
     p.ownTurns++;
     p.gainedMana = 0; // M67: last turn's gained mana is spent or gone (bonusMana = ramp pool, never reset)
+    this.turnDeaths = 0; // M68: the death ledger is per-turn
     if (p.spellTaxPending) { p.spellTax = p.spellTaxPending; p.spellTaxPending = 0; } // M50: the Tollwarden's toll applies for this turn only
     for (const q of this.players) if (q.bondTurn !== this.turnNumber) q._bondLife = q.life; // M53: the pact's ledger resets as turns roll
     for (const q of this.players) { q.deathsThisTurn = 0; q.creaturesToGraveThisTurn = 0; }
@@ -1627,6 +1657,7 @@ class Game {
     }
   }
   endTurn(i) {
+    { const p0 = this.players[i]; if (this.turnDeaths > 0) for (const c of p0.board) if (def(c).deathGrowth) { c.permPower += 1; c.permHealth += 1; this.log.push(`${def(c).name} feeds on the day's deaths (+1/+1)`); } } // M68 Cursebearer
     const p = this.players[i];
     p.spellTax = 0;
     if (p.fragileGem && p.ownTurns >= 1 && p.manaSpent > 0) p.fragileGem = false;
@@ -1736,6 +1767,8 @@ class Game {
     this.advanceSchool(p, d);
     this.cleanupDeaths();
     this.checkWin();
+    // M68 (Davriel's Scourge): after you play a spell, each of your scourges drains 1.
+    if (d.type === 'spell') for (const c of p.board) if (def(c).spellDrain) { const foe = this.players[this.opp(i)]; foe.life -= def(c).spellDrain; p.life += def(c).spellDrain; this.log.push(`${def(c).name} drains ${def(c).spellDrain} from ${foe.hero.name}`); }
     return { countered: false };
   }
   armTrap(i, uid) {
@@ -1749,6 +1782,7 @@ class Game {
     p.hand.splice(hi, 1);
     inst.reservedCost = cost;
     p.traps.push(inst);
+    for (const c of p.board) if (def(c).trapGrowth) { c.permPower += 1; this.log.push(`${def(c).name} grows behind the fresh trap (+1/+0)`); } // M68 Snapshell Turtle
     p.playsThisGame++;
     if (p.nextTrapDiscount) p.nextTrapDiscount = 0;
     // M20 fidelity: the Warden's Outwit counts traps ARMED (played), not
@@ -1785,6 +1819,19 @@ class Game {
   // Counter traps: fire on opponent playing a card costing >= minCost.
   tryCounterTrap(trapOwnerIdx, playedInst) {
     const owner = this.players[trapOwnerIdx];
+    // M68 (Negate, face-verified): a counterAny trap answers a spell, trap or artifact of any cost.
+    if (['spell', 'trap', 'artifact'].includes(def(playedInst).type)) {
+      const ai = owner.traps.findIndex((t) => def(t).trigger && def(t).trigger.kind === 'counterAny');
+      if (ai >= 0) {
+        const [trap] = owner.traps.splice(ai, 1);
+        trap.reservedCost = 0; owner.graveyard.push(trap);
+        this.stats.trapsTriggered++; this.stats.cardsCountered++;
+        this.onTrapTriggered(trapOwnerIdx, trap);
+        if (def(trap).effect) this.resolveEffect(trapOwnerIdx, def(trap).effect, trap, null);
+        this.log.push(`${def(trap).name} countered ${def(playedInst).name}`);
+        return true;
+      }
+    }
     const ti = owner.traps.findIndex((t) => def(t).trigger && def(t).trigger.kind === 'counterBig' && def(playedInst).cost >= def(t).trigger.minCost);
     if (ti < 0) return false;
     const [trap] = owner.traps.splice(ti, 1);
@@ -1964,6 +2011,13 @@ class Game {
       case 'buffAllCreatures': for (const c of p.board) { c.permPower += effect.power; c.permHealth += effect.health; } break;
       case 'gainMana': { p.gainedMana = (p.gainedMana || 0) + effect.amount; this.log.push(`${def(sourceInst).name}: ${p.hero.name} gains ${effect.amount} mana this turn`); break; }
       case 'summonPerCount': { const n = effect.count === 'foeCreatures' ? this.players[this.opp(i)].board.length : p.board.filter((c) => def(c).subtype === effect.subtype).length; let s = 0; for (let k = 0; k < n && p.board.length < 5; k++) { this.summonToken(p, effect.token); s++; } if (s) this.log.push(`${def(sourceInst).name}: ${s} ${def(effect.token) ? '' : ''}thrall${s === 1 ? '' : 's'} answer${s === 1 ? 's' : ''} the call`); break; }
+      case 'debuffAll': for (const q of this.players) for (const c of q.board) { c.permPower += effect.power; c.permHealth += effect.health; } this.cleanupDeaths(); break;
+      case 'generateSpells': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly); for (let k = 0; k < effect.count; k++) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
+      case 'draftSpell': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
+      case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
+      case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === effect.subtype && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
+      case 'debuffAndAdd': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.cleanupDeaths(); } this.addToHand(i, makeInstance(effect.cardId, null), srcName); break; }
+      case 'buffSubtype': for (const c of p.board) if (c !== sourceInst && def(c).subtype === effect.subtype) { c.permPower += effect.power; c.permHealth += effect.health; } break;
       case 'buffOtherCreatures': { for (const c of p.board) if (c !== sourceInst) { c.permPower += effect.power; c.permHealth += effect.health; } this.log.push(`${def(sourceInst).name}: the others rise +${effect.power}/+${effect.health}`); break; }
       case 'summonCopy': { if (p.board.length < 5) { const t2 = this.summonToken(p, sourceInst.cardId); this.log.push(`${def(sourceInst).name} arrives with its twin`); } break; }
       case 'stunCreature': { if (target && target.kind === 'creature') { target.inst.stunned = true; this.log.push(`${def(sourceInst).name} stuns ${def(target.inst).name} \u2014 it cannot attack next turn`); } break; }
@@ -2194,6 +2248,16 @@ class Game {
       atk.board.push(avatar); liveAttackers.push(avatar);
       this.log.push(`${atk.hero.name} leads the charge in person`);
     }
+    // M68 (Disorient, face + Jesse's timing): the defender's combat-window traps
+    // answer AFTER attackers are declared, BEFORE damage lands.
+    for (let ti = dfn.traps.length - 1; ti >= 0; ti--) {
+      const trap = dfn.traps[ti];
+      if (!def(trap).trigger || def(trap).trigger.kind !== 'afterAttackDeclared') continue;
+      dfn.traps.splice(ti, 1); trap.reservedCost = 0; dfn.graveyard.push(trap);
+      this.stats.trapsTriggered++; this.onTrapTriggered(dfn.idx, trap);
+      const strongest = liveAttackers.slice().sort((x, y) => powerOf(y) - powerOf(x))[0];
+      if (strongest) { strongest.tempPower -= 3; this.log.push(`${def(trap).name}: ${def(strongest).name} is disoriented (-3/-0) before the blow lands`); }
+    }
     // Attack triggers (e.g. Drownscale mills its own deck as it lunges).
     for (const a of liveAttackers) { const ae = def(a).attackEffect; if (ae) this.resolveEffect(atkIdx, ae, a, null); }
     const stampede = atk.hero.passive === 'stampede' && liveAttackers.length >= 3;
@@ -2220,6 +2284,7 @@ class Game {
         if (amount > 0 && def(a).manaOnHit) { atk.manaSpent -= aPow; this.log.push(`${def(a).name} gnaws the wound into ${aPow} mana`); }
         if (amount > 0 && def(a).healOnDealtDamage) { atk.life += amount; this.log.push(`${def(a).name} drinks the wound: ${atk.hero.name} heals ${amount}`); }
         if (amount > 0) a._dealtDmg = true; // M67: flat damage triggers sweep below
+        if (amount > 0 && def(a).stealOnHeroDamage && dfn.deck.length) { const srcCard = dfn.deck[this.rng.int(dfn.deck.length)]; this.addToHand(atkIdx, makeInstance(srcCard.cardId, null), def(a).name); this.log.push(`${def(a).name} counterfeits a ${def(srcCard).name} from ${dfn.hero.name}'s deck`); }
       };
       if (!bUid) { hitHero(aPow); continue; }
       const b = dfn.board.find((x) => x.uid === Number(bUid));
@@ -2247,12 +2312,13 @@ class Game {
   }
   cleanupDeaths() {
     let deathCount = 0; // M67: fed to the death-watchers below
+    this.turnDeaths = (this.turnDeaths || 0);
     for (const p of this.players) {
       const dead = p.board.filter((c) => c.damage >= healthOf(c));
       p.board = p.board.filter((c) => c.damage < healthOf(c));
       for (const d of dead) {
         if (d.phantom) continue; // Aldric's charge-form leaves no corpse and tells no tales
-        deathCount++;
+        deathCount++; this.turnDeaths++;
         p.graveyard.push(d);
         p.deathsThisTurn++;
         p.creaturesToGraveThisTurn++;
@@ -2409,7 +2475,7 @@ function targetFor(game, i, inst) {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
-  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature') {
+  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
@@ -2456,7 +2522,7 @@ function playMainPhase(game, i) {
     if (k === 'stealFromGrave' && game.players[game.opp(i)].graveyard.length === 0) return false;
     if (k === 'transformBoard' && p.board.length === 0) return false;
     if (k === 'destroyFlyer' && !game.players[game.opp(i)].board.some((c) => (def(c).keywords || []).includes('flying'))) return false;
-    if ((k === 'stunCreature' || k === 'destroyCreature') && !foeBoard()) return false;
+    if ((k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage') && !foeBoard()) return false;
     if (k === 'grimEchoes' && p.board.length === 0) return false;
     if (k === 'summonPerCount' && eff2.count === 'foeCreatures' && !foeBoard()) return false;
     if (k === 'summonPerCount' && eff2.count === 'yourVampires' && !p.board.some((c) => def(c).subtype === eff2.subtype)) return false;
@@ -2786,7 +2852,7 @@ function drawTargetLine(x1, y1, x2, y2, ok) {
 function clearTargetLine() { try { if (tlSvg) tlSvg.style.display = 'none'; } catch (e) {} }
 function defNeedsTarget(d) {
   var eff = d && (d.effect || d.debut);
-  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes'].indexOf(eff.kind) >= 0);
+  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage'].indexOf(eff.kind) >= 0);
 }
 /* Floating nightmare wisps (plant: rise from mid-screen toward the enemy;
    drain: fall over the afflicted hero). Count scales with the event size. */
@@ -3247,6 +3313,13 @@ function effectText(d) {
       case 'grimEchoes': return 'Destroy a friendly creature. Summon base copies of it until your side is full.';
       case 'buffOtherCreatures': return 'Give your other creatures +' + e.power + '/+' + e.health + '.';
       case 'gainMana': return 'Gain ' + e.amount + ' mana this turn.';
+      case 'debuffAll': return 'Give all creatures ' + e.power + '/' + e.health + '.';
+      case 'generateSpells': return 'Add ' + e.count + ' random spells to your hand.';
+      case 'draftSpell': return e.maxCost != null ? 'Draft a spell that costs ' + e.maxCost + ' or less and add it to your hand.' : 'Draft a spell and add it to your hand.';
+      case 'destroyAndSelfDamage': return 'Destroy an enemy creature. Deal damage to yourself equal to its power unless a creature died this turn.';
+      case 'debuffAndAdd': return 'Give an enemy creature ' + e.power + '/' + e.health + ' and add ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'a card') + ' to your hand.';
+      case 'addRandomSubtype': return 'Add a random ' + e.subtype + ' to your hand.';
+      case 'buffSubtype': return 'Give each other friendly ' + e.subtype + ' +' + e.power + '/+' + e.health + '.';
       case 'summonPerCount': return e.count === 'foeCreatures' ? 'Summon a 1/1 Vampire Thrall for each enemy creature.' : 'Summon a 1/1 Vampire Thrall for each of your Vampires.';
       case 'summonCopy': return 'Summon a copy of this creature.';
       case 'drain': return 'Drain ' + e.amount + ': the enemy hero loses ' + e.amount + ' life and you gain ' + e.amount + '.';
@@ -3292,6 +3365,11 @@ function effectText(d) {
   if (d.healFlatOnDamage) parts.push('Whenever this deals damage, gain ' + d.healFlatOnDamage + ' life.');
   if (d.drawOnDamage) parts.push('Whenever this deals damage, draw a card.');
   if (d.unblockableIfFoeHealthier) parts.push('Cannot be blocked while the enemy hero has more life than you.');
+  if (d.stealOnHeroDamage) parts.push('After this damages the enemy hero, add a copy of a random card from their deck to your hand.');
+  if (d.spellDrain) parts.push('After you play a spell, Drain ' + d.spellDrain + ' from your opponent.');
+  if (d.trapGrowth) parts.push('After you play a trap, this gets +1/+0.');
+  if (d.deathGrowth) parts.push('Trample. At the end of your turn, if a creature died, this gets +1/+1.');
+  if (d.charges) parts.push('Activate (' + d.charges + ' charges): ' + eff(d.effect));
   if (d.emptyDeckWin) parts.push('If your deck is empty, you win the game.');
   if (d.miracle) parts.push('\u2728 Miracle: ' + (d.miracle.kind === 'healSelf' ? 'Heal yourself for ' + d.miracle.amount + '.' : d.miracle.kind === 'discountSelf' ? 'Costs ' + d.miracle.amount + ' less this turn.' : 'Mill yourself for ' + d.miracle.amount + '.') + ' (Resolves free when you draw this card.)');
   if (d.drainAmp) parts.push('Drain effects you control drain ' + d.drainAmp + ' more.');
@@ -3310,6 +3388,8 @@ function effectText(d) {
   if (d.effect && d.type !== 'trap') parts.push(eff(d.effect));
   if (d.type === 'trap' && d.trigger) {
     if (d.trigger.kind === 'counterBig') parts.push('Trap: counter the enemy\'s next card costing ' + d.trigger.minCost + '+.' + (d.effect ? ' ' + eff(d.effect) : ''));
+    if (d.trigger.kind === 'counterAny') parts.push('Trap: if your opponent plays a spell, trap, or artifact, counter it.');
+    if (d.trigger.kind === 'afterAttackDeclared') parts.push('Trap: after your opponent declares attackers, the strongest attacking creature gets -3/-0 before damage lands.');
     if (d.trigger.kind === 'zapAttacker') parts.push('Trap: when the enemy attacks, deal ' + d.trigger.amount + ' damage to their strongest attacker.');
     if (d.trigger.kind === 'wardLife') parts.push('Trap: when the enemy attacks, gain ' + d.trigger.amount + ' life.');
     if (d.trigger.kind === 'slayAttacker') parts.push('Trap: when the enemy attacks, destroy their strongest attacking creature.');
@@ -3583,7 +3663,7 @@ function boardHtml(p, isMe) {
       var k = (d.effect || d.debut) && (d.effect || d.debut).kind;
       var warded = (D(inst).keywords || []).indexOf('ward') >= 0;
       var flying = (D(inst).keywords || []).indexOf('flying') >= 0;
-      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && (k === 'buffCreature' || k === 'bounceOwnSetCost' || k === 'grimEchoes')) || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
+      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && (k === 'buffCreature' || k === 'bounceOwnSetCost' || k === 'grimEchoes')) || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
     }
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
     if (!G.canAttack(inst, p) && d2type(inst) === 'creature' && inst.summonedTurn === G.turnNumber) { opts.cls = (opts.cls || '') + ' ready-dim'; opts.zz = true; }
@@ -3964,7 +4044,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M67 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M68 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4303,7 +4383,7 @@ function clickHand(uid) {
     flushEngineLog(); render(); return;
   }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
-  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes'].indexOf(targetedEff.kind) >= 0) {
+  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage'].indexOf(targetedEff.kind) >= 0) {
     var k = targetedEff.kind;
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'damageAny' || k === 'bounce') ? true : (k === 'grimEchoes' ? me.board.length > 0 : (k === 'buffCreature' ? me.board.length > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0)));
@@ -4869,6 +4949,8 @@ render();
     if (now - lastDragEnd < 400 || now < suppressClickUntil) { e.stopPropagation(); e.preventDefault(); lastDragEnd = 0; suppressClickUntil = 0; }
   }, true);
 })();
+
+/* M68: the original's badge grammar — power reads green, health reads red */
 
 </script>
 </body>

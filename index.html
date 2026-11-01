@@ -363,6 +363,7 @@ class RNG {
 //                     'wardLife' (opponent declares attackers -> you gain life)
 //                     'slayAttacker' (opponent declares attackers -> destroy the strongest attacker) [M20]
 //                     'vindictive' (end of opponent's turn -> destroy the strongest creature that damaged you this turn) [M20]
+//                     'guardFlock' (opponent's spell or Debut targets one of your creatures -> counter it, any cost) [M26]
 // Generated-only cards (never in a starting deck) have generatedOnly: true.
 
 const CARDS = {
@@ -635,9 +636,19 @@ const CARDS = {
   // Colour recorded (B) -> Hollow Grave. Cost was never recorded:
   // FORGE-COSTED at 6, argued in files/COSTING.md (Batch 10). Name is ours.
   grave_gladiator: { icon: "⚔️", name: 'Grave Gladiator', cost: 6, costForge: true, type: 'creature', power: 6, health: 5, debut: { kind: 'wither', amount: 1 } },
+  // ——— Conversion batch 11 (M26, sprint): the fourth NEEDS-ENGINE conversion ———
+  // The Guard the Flock of the record (U, trap, CONVERSION-AUDIT §3; LT_WV1_342
+  // per the Wave 1 archive mapping): Trap — counter any spell or Debut effect
+  // that targets one of your creatures, regardless of cost. The engine had no
+  // targeted-counter trigger; M26 adds the 'guardFlock' trigger kind (see
+  // engine tryGuardTrap): a targeted spell is countered whole, a targeted
+  // Debut is negated while its creature still takes the field. Colour
+  // recorded (U) -> Tides. Cost was never recorded: FORGE-COSTED at 2,
+  // argued in files/COSTING.md (Batch 11). Name is ours.
+  flockguard_vigil: { icon: "🛡️", name: 'Flockguard Vigil', cost: 2, costForge: true, type: 'trap', trigger: { kind: 'guardFlock' } },
 };
 const GENERATED_POOL = ['dream_wisp', 'stolen_echo', 'gilded_riddle', 'pilfered_remedy', 'echo_hound']; // M22: 'stolen_hour' pruned — Deep Rooting (batch 7) owns plain ramp at 2; the generated filler was its exact twin (Jesse's prune rule)
-const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort'];
+const TRAP_POOL = ['pit_spark', 'quiet_snare', 'ward_of_dawn', 'snare_of_no', 'tripwire', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil'];
 
 const HEROES = {
   weaver: {
@@ -707,7 +718,7 @@ const DECKS = {
   ],
   controller: [
     'snare_of_no', 'snare_of_no', 'vigil_acolyte', 'vigil_acolyte', 'ward_lens', 'quiet_snare',
-    'quiet_snare', 'thiefs_regret', 'thiefs_regret', 'ward_of_dawn', 'ward_of_dawn', 'shieldbearer',
+    'flockguard_vigil', 'thiefs_regret', 'thiefs_regret', 'ward_of_dawn', 'ward_of_dawn', 'shieldbearer',
     'shieldbearer', 'stone_warden', 'stone_warden', 'sky_scout', 'sky_hunter', 'sky_scout',
     'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'deep_breath',
     'second_suns_dawn', 'second_wind', 'radiant_intercessor', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict',
@@ -862,7 +873,7 @@ cinder_elemental:'ember', torch_flare:'ember', kindled_fury:'ember', hammerfall_
   sunmirror_glare:'tides', vindictive_retort:'tides', second_suns_dawn:'dawn', second_sun:'dawn', daybreak_verdict:'dawn',
   deep_rooting:'worldroot', firstroot_titan:'worldroot', sepulcher_titan:'grave', rime_titan:'tides', dawn_titan:'dawn', radiant_intercessor:'dawn',
   cinder_titan:'ember', hollowgrin_giant:'grave', rushhorn_minotaur:'ember', grove_sentinel:'worldroot', thornwood_archer:'worldroot',
-  grave_gladiator:'grave',
+  grave_gladiator:'grave', flockguard_vigil:'tides',
   // Neutral — any hero may run these
   sundial_charm:'none', eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'none', hungerpit_tyrant:'none',
 };
@@ -1233,6 +1244,9 @@ class Game {
     if (p.hero.passive === 'weave' && inst.starterOwner !== i) this.plantNightmares(i);
     // Opponent Traps can counter the card before it resolves.
     if (this.tryCounterTrap(this.opp(i), inst)) { p.graveyard.push(inst); return { countered: true }; }
+    // Guard-the-Flock traps (M26): a spell aimed at one of the defender's
+    // creatures is countered outright, whatever the spell costs.
+    if (d.type === 'spell' && this.tryGuardTrap(this.opp(i), inst, target, false)) { p.graveyard.push(inst); return { countered: true }; }
     if (d.type === 'creature') {
       if (p.board.length >= 5) throw new Error('board full (5)');
       inst.summonedTurn = this.turnNumber; inst.damage = 0;
@@ -1243,7 +1257,9 @@ class Game {
       this.noteSummon(p);
       // Keeper passive (bloom): playing a creature gains 1 life.
       if (p.hero.passive === 'bloom') { p.life += 1; this.log.push(`${p.hero.name} blooms: +1 life`); }
-      if (d.debut) this.resolveEffect(i, d.debut, inst, target);
+      // M26: a Guard-the-Flock trap negates a Debut aimed at one of the
+      // defender's creatures — the body still lands, only the Debut dies.
+      if (d.debut && !this.tryGuardTrap(this.opp(i), inst, target, true)) this.resolveEffect(i, d.debut, inst, target);
     } else if (d.type === 'artifact') {
       const existing = p.artifacts.find((a) => a.cardId === inst.cardId);
       if (existing) { existing.charges += d.charges; p.graveyard.push(inst); }
@@ -1312,6 +1328,28 @@ class Game {
     this.onTrapTriggered(trapOwnerIdx, trap);
     if (def(trap).effect) this.resolveEffect(trapOwnerIdx, def(trap).effect, trap, null);
     this.log.push(`${def(trap).name} countered ${def(playedInst).name}`);
+    return true;
+  }
+  // Guard traps (M26): fire when the opponent plays a spell — or a creature
+  // whose Debut aims — at one of the trap owner's creatures, regardless of
+  // the played card's cost (the recorded text counters "any spell or Debut
+  // effect that targets one of your creatures"). A spell is countered whole;
+  // a Debut is negated while its creature still takes the field.
+  tryGuardTrap(trapOwnerIdx, playedInst, target, isDebut) {
+    if (!target || target.kind !== 'creature' || !target.inst) return false;
+    const owner = this.players[trapOwnerIdx];
+    if (!owner.board.includes(target.inst)) return false;
+    const ti = owner.traps.findIndex((t) => def(t).trigger && def(t).trigger.kind === 'guardFlock');
+    if (ti < 0) return false;
+    const [trap] = owner.traps.splice(ti, 1);
+    trap.reservedCost = 0;
+    owner.graveyard.push(trap);
+    this.stats.trapsTriggered++;
+    if (!isDebut) this.stats.cardsCountered++;
+    this.onTrapTriggered(trapOwnerIdx, trap);
+    this.log.push(isDebut
+      ? `${def(trap).name} guards ${def(target.inst).name}: ${def(playedInst).name}'s Debut is turned aside`
+      : `${def(trap).name} guards ${def(target.inst).name}: ${def(playedInst).name} is countered`);
     return true;
   }
   onTrapTriggered(ownerIdx, trap) {
@@ -2247,6 +2285,7 @@ function effectText(d) {
     if (d.trigger.kind === 'wardLife') parts.push('Trap: when the enemy attacks, gain ' + d.trigger.amount + ' life.');
     if (d.trigger.kind === 'slayAttacker') parts.push('Trap: when the enemy attacks, destroy their strongest attacking creature.');
     if (d.trigger.kind === 'vindictive') parts.push('Trap: at the end of the enemy\'s turn, destroy the strongest creature that damaged you this turn.');
+    if (d.trigger.kind === 'guardFlock') parts.push('Trap: counter a spell or Debut that targets one of your creatures, whatever it costs.');
   }
   if (d.type === 'artifact') parts.push('Artifact, ' + d.charges + ' charges. Activate once per turn: ' + eff(d.effect));
   return parts.join(' ');
@@ -2583,7 +2622,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M25.1 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M26 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

@@ -602,6 +602,16 @@
                     background:radial-gradient(ellipse at 50% 42%, rgba(150,120,220,.22), rgba(20,14,34,.28) 75%); }
   .hand.fan.mini { touch-action:manipulation; }
   .bigcard .cname { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* --- M46: FRAME SLACK (Jesse's mulligan shot: the orbs straddled the
+     card's bottom border). The M43 stack summed to 171px against a
+     168px border-box interior — the last row spilled. Trimmed to 165:
+     title 22 + art 54 + badges 12 + text 48 + stats 29. --- */
+  .card .cart { height:52px; }
+  .hand.fan .card .cart { height:52px; }
+  .card .ctext { height:48px; }
+  .card.sigcard .ctext { height:48px; }
+  .card .cstats { height:27px; align-items:center; }
 </style>
 </head>
 <body>
@@ -1363,7 +1373,9 @@ class Game {
   reservedMana(p) { return p.traps.reduce((s, t) => s + t.reservedCost, 0); }
   availableMana(p) {
     let base = p.maxMana - p.manaSpent - this.reservedMana(p);
-    if (p.fragileGem) base += 1;
+    // The second player's fragile gem is a first-turn catch-up: it only
+    // exists during that player's own turn (before it, they read 0/0).
+    if (p.fragileGem && this.active === p.idx) base += 1;
     return base;
   }
   effectiveCost(p, inst) {
@@ -3438,7 +3450,12 @@ function render() {
   /* M39 (Jesse): the resting hand is the hand itself, only small — the
      real cards fanned tiny, like the corner hand in his LoR clip. A tap
      on them (pointer controller, below) brings the full fan up. */
-  html += '<div class="hand fan' + (handOpen ? '' : ' mini') + '">' + me.hand.map(function (inst, hi) {
+  /* M46 (Jesse): two builds of pointer-only opening never engaged on his
+     phone, while every inline-onclick control in the game works there —
+     so the resting fan ALSO carries the plain inline tap. The pointer
+     catch stays as the second channel; the guard is mini-only, so an
+     open fan never toggles itself shut mid-play. */
+  html += '<div class="hand fan' + (handOpen ? '' : ' mini') + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + me.hand.map(function (inst, hi) {
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
     var off = hi - hMid;
     var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 1.2 : 1.8)).toFixed(1) + 'px)';
@@ -3519,7 +3536,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M45 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M46 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

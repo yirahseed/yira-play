@@ -991,94 +991,94 @@ const HEROES = {
 
 // Pre-built 30-card decks (max 2 copies, legendary max 1). Signatures included.
 const DECKS = {
-  // M43 (Jesse, Nov 1): every deck is 29 cards + its class (stage-1 quest)
-  // card inside the 30, as in the original game.
-  // M18: Jesse's own build, screenshotted from his deck builder and set as the
-  // standard Nightmare deck for testing — seed generation/theft plus Tides spell
-  // pressure, with Creeping Doom, Scatter Mind and a second Void Harvest.
+  // M44 (Jesse, Nov 1): a deck is just 30 cards; it MAY include a class
+  // (stage-1 quest) card or not — the class card is an ordinary pool card
+  // of its school, never a built-in slot. These defaults are plain 30s.
+  // Weaver below is M18: Jesse's own build, screenshotted from his deck
+  // builder — seed generation/theft plus Tides spell pressure.
   weaver: [
     'creeping_doom', 'pilfer_dream', 'pilfer_dream', 'pluck_dread', 'pluck_dread', 'quick_study',
-    'quick_study', 'bring_down', 'recall', 'dread_herald', 'dread_herald', 'echo_familiar',
-    'echo_familiar', 'scatter_mind', 'scatter_mind', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'strange_gift',
-    'strange_gift', 'deep_breath', 'deep_breath', 'dream_thief', 'dream_thief', 'lore_drifter',
-    'lore_drifter', 'quiet_snare', 'drown_in_dreams', 'void_harvest', 'void_harvest', 'tidewing_familiar',
+    'quick_study', 'bring_down', 'recall', 'recall', 'dread_herald', 'dread_herald',
+    'echo_familiar', 'echo_familiar', 'scatter_mind', 'scatter_mind', 'shadowsmith_saboteur', 'shadowsmith_saboteur',
+    'strange_gift', 'strange_gift', 'deep_breath', 'deep_breath', 'dream_thief', 'dream_thief',
+    'lore_drifter', 'lore_drifter', 'quiet_snare', 'drown_in_dreams', 'void_harvest', 'void_harvest',
   ],
   controller: [
     'snare_of_no', 'snare_of_no', 'vigil_acolyte', 'vigil_acolyte', 'ward_lens', 'quiet_snare',
     'flockguard_vigil', 'thiefs_regret', 'thiefs_regret', 'ward_of_dawn', 'ward_of_dawn', 'shieldbearer',
     'shieldbearer', 'stone_warden', 'stone_warden', 'sky_scout', 'sky_hunter', 'sky_scout',
-    'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'second_suns_dawn',
-    'second_wind', 'radiant_intercessor', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict', 'tidewing_familiar',
+    'vainglorious_hero', 'vainglorious_hero', 'quick_study', 'quick_study', 'deep_breath', 'deep_breath',
+    'second_suns_dawn', 'second_wind', 'radiant_intercessor', 'wardens_acolyte', 'sunmirror_glare', 'daybreak_verdict',
   ],
   bruiser: [
     'thorn_pup', 'thorn_pup', 'kargs_mauler', 'kargs_mauler', 'swift_runner', 'swift_runner',
     'cinder_hound', 'cinder_hound', 'moss_brute', 'moss_brute', 'gore_horn', 'gore_horn',
     'ember_roc', 'ravaging_tyrant', 'ember_roc', 'elder_titan', 'embermaw_devil', 'embermaw_devil',
     'spark_bolt', 'spark_bolt', 'grow_fierce', 'unbroken_roar', 'sunder_line', 'venom_grub',
-    'glade_archer', 'pit_spark', 'bloodrush', 'comet_fall', 'war_stomp', 'axe_of_pyre',
+    'glade_archer', 'war_stomp', 'pit_spark', 'bloodrush', 'comet_fall', 'war_stomp',
   ],
   keeper: [
     'rootcall_matriarch', 'sunwell_charm', 'overgrowth', 'overgrowth', 'bramble_imp', 'bramble_imp',
     'deep_rooting', 'grove_tender', 'dawn_chorister', 'dawn_chorister', 'shieldbearer', 'shieldbearer',
     'stone_warden', 'stone_warden', 'ironbark_golem', 'ironbark_golem', 'moss_brute', 'moss_brute',
-    'tasty_morsel', 'firstroot_titan', 'mend_light', 'beastcall_arrow', 'second_wind', 'ward_of_dawn',
-    'ward_of_dawn', 'sundial_charm', 'thorn_pup', 'thorn_grub', 'thorn_grub', 'thornwolf',
+    'tasty_morsel', 'firstroot_titan', 'mend_light', 'beastcall_arrow', 'second_wind', 'second_wind',
+    'ward_of_dawn', 'ward_of_dawn', 'sundial_charm', 'thorn_pup', 'thorn_grub', 'thorn_grub',
   ],
   torchbearer: [
     'cinder_elemental', 'cinder_elemental', 'torch_flare', 'torch_flare', 'kindled_fury', 'eager_smith',
     'eager_smith', 'pyre_raider', 'pyre_raider', 'ember_deathraider', 'ember_deathraider', 'ash_sprite',
     'ash_sprite', 'cinder_hound', 'cinder_hound', 'spark_bolt', 'spark_bolt', 'pit_spark',
     'pit_spark', 'swift_runner', 'swift_runner', 'scattershot_rig', 'mountain_ogre', 'eternal_phoenix',
-    'gore_horn', 'gore_horn', 'ember_roc', 'ashwing_sovereign', 'vainglorious_hero', 'axe_of_pyre',
+    'gore_horn', 'gore_horn', 'vainglorious_hero', 'ember_roc', 'ashwing_sovereign', 'vainglorious_hero',
   ],
   banneret: [
     'oathsworn_captain', 'oathsworn_captain', 'bannerfall', 'bannerfall', 'aegis_standard', 'evenhand_paragon',
     'evenhand_paragon', 'shieldbearer', 'shieldbearer', 'cinder_hound', 'cinder_hound', 'swift_runner',
     'swift_runner', 'eager_smith', 'eager_smith', 'pyre_raider', 'pyre_raider', 'runesteel_monstrosity',
     'runesteel_monstrosity', 'vainglorious_hero', 'vainglorious_hero', 'wardens_acolyte', 'wardens_acolyte', 'ash_sprite',
-    'ash_sprite', 'dawn_titan', 'gore_horn', 'spark_bolt', 'ember_deathraider', 'dawn_steed',
+    'ash_sprite', 'ember_deathraider', 'dawn_titan', 'gore_horn', 'spark_bolt', 'ember_deathraider',
   ],
   graven: [
     'pale_shepherd', 'pale_shepherd', 'call_of_graven', 'graven_tithe', 'graven_tithe', 'gravemaw',
     'gravemaw', 'widow_matron', 'widow_matron', 'drownscale', 'drownscale', 'pyre_wraith',
     'pyre_wraith', 'void_harvest', 'void_harvest', 'creeping_doom', 'creeping_doom', 'grimwulf',
     'hollowgrin_giant', 'sepulcher_titan', 'grave_gladiator', 'venom_grub', 'venom_grub', 'duskmane_stag',
-    'duskmane_stag', 'nightscale_revenant', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur', 'gravebound_imp',
+    'duskmane_stag', 'shadowsmith_saboteur', 'nightscale_revenant', 'old_bonegnaw', 'pluck_dread', 'shadowsmith_saboteur',
   ],
   unchained: [
     'tollkeeper', 'tollkeeper', 'severing_light', 'severing_light', 'vesper_charm', 'nightjar',
     'nightjar', 'sky_scout', 'sky_scout', 'mirror_moth', 'mirror_moth', 'lore_drifter',
     'lore_drifter', 'echo_familiar', 'echo_familiar', 'runeshell_crab', 'runeshell_crab', 'bring_down',
     'bring_down', 'drownscale', 'drownscale', 'widow_matron', 'widow_matron', 'dream_thief',
-    'dream_thief', 'tempest_giant', 'frostreaver', 'pluck_dread', 'eager_smith', 'gravebound_imp',
+    'dream_thief', 'eager_smith', 'tempest_giant', 'frostreaver', 'pluck_dread', 'eager_smith',
   ],
   unbridled: [
     'thornback_alpha', 'thornback_alpha', 'unbridled_cry', 'unbridled_cry', 'boarherd_horn', 'tusked_warboar',
     'tusked_warboar', 'thorn_pup', 'thorn_pup', 'venom_grub', 'venom_grub', 'thorn_grub',
     'thorn_grub', 'gore_horn', 'gore_horn', 'moss_brute', 'moss_brute', 'embermaw_devil',
     'embermaw_devil', 'pyre_raider', 'pyre_raider', 'ember_deathraider', 'ember_deathraider', 'beastcall_arrow',
-    'beastcall_arrow', 'mountain_ogre', 'mountain_ogre', 'ravaging_tyrant', 'eager_smith', 'axe_of_pyre',
+    'beastcall_arrow', 'mountain_ogre', 'mountain_ogre', 'eager_smith', 'ravaging_tyrant', 'eager_smith',
   ],
   sibilance: [
     'sibilant_herald', 'sibilant_herald', 'curtain_call', 'curtain_call', 'encore_venom', 'embermaw_devil',
     'embermaw_devil', 'widow_matron', 'widow_matron', 'gravemaw', 'gravemaw', 'drownscale',
     'drownscale', 'grimwulf', 'grimwulf', 'nightjar', 'nightjar', 'creeping_doom',
     'creeping_doom', 'void_harvest', 'void_harvest', 'pyre_wraith', 'pyre_wraith', 'ash_sprite',
-    'ash_sprite', 'nightscale_revenant', 'ashwing_sovereign', 'old_bonegnaw', 'shadowsmith_saboteur', 'gravebound_imp',
+    'ash_sprite', 'shadowsmith_saboteur', 'nightscale_revenant', 'ashwing_sovereign', 'old_bonegnaw', 'shadowsmith_saboteur',
   ],
   hammer: [
     'hammerfall_raider', 'hammerfall_raider', 'second_blow', 'second_blow', 'anvil_fury', 'eager_smith',
     'eager_smith', 'pyre_raider', 'pyre_raider', 'gore_horn', 'gore_horn', 'ember_deathraider',
     'ember_deathraider', 'cinder_hound', 'cinder_hound', 'ash_sprite', 'ash_sprite', 'spark_bolt',
     'spark_bolt', 'pit_spark', 'pit_spark', 'swift_runner', 'swift_runner', 'vainglorious_hero',
-    'vainglorious_hero', 'scattershot_rig', 'mountain_ogre', 'mountain_ogre', 'shieldbearer', 'axe_of_pyre',
+    'vainglorious_hero', 'scattershot_rig', 'mountain_ogre', 'mountain_ogre', 'shieldbearer', 'shieldbearer',
   ],
   tidemother: [
     'suras_herald', 'suras_herald', 'deep_call', 'deep_call', 'kraken_youngling', 'moss_brute',
-    'moss_brute', 'thorn_pup', 'sky_scout', 'sky_scout', 'runeshell_crab', 'runeshell_crab',
-    'tempest_giant', 'rime_titan', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow', 'beastcall_arrow',
-    'lore_drifter', 'lore_drifter', 'mirror_moth', 'mirror_moth', 'echo_familiar', 'echo_familiar',
-    'runesteel_monstrosity', 'elder_titan', 'worldroot_titan', 'frostreaver', 'runesteel_monstrosity', 'thornwolf',
+    'moss_brute', 'thorn_pup', 'thorn_pup', 'sky_scout', 'sky_scout', 'runeshell_crab',
+    'runeshell_crab', 'tempest_giant', 'rime_titan', 'duskmane_stag', 'duskmane_stag', 'beastcall_arrow',
+    'beastcall_arrow', 'lore_drifter', 'lore_drifter', 'mirror_moth', 'mirror_moth', 'echo_familiar',
+    'echo_familiar', 'runesteel_monstrosity', 'elder_titan', 'worldroot_titan', 'frostreaver', 'runesteel_monstrosity',
   ],
 };
 
@@ -3519,7 +3519,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M43 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M44 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

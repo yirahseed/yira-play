@@ -400,6 +400,11 @@
   .gems-col i:nth-of-type(8){ animation-delay:.28s } .gems-col i:nth-of-type(9){ animation-delay:.32s }
   @keyframes gemIn { 0%{ transform:scale(.4); filter:brightness(2.2) } 100%{ transform:scale(1); filter:brightness(1) } }
   .actions button.pass-ready { animation:passPulse 1.15s ease-in-out infinite; }
+  .passive-emblem { position:absolute; right:12px; top:calc(50% - 114px); z-index:6; width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:21px; cursor:pointer;
+    background:radial-gradient(circle at 35% 30%, #4a3a63, #231831 75%); border:2px solid var(--title); box-shadow:0 4px 12px rgba(0,0,0,.55); }
+  .passive-emblem .pe-count { position:absolute; right:-5px; bottom:-5px; font-size:10.5px; font-weight:800; color:#f0b3ff;
+    background:rgba(74,16,94,.9); border:1px solid #b18cff; border-radius:999px; padding:0 5px; }
   @keyframes passPulse { 0%,100%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 0 rgba(255,120,140,0) } 50%{ box-shadow:0 4px 14px rgba(0,0,0,.55), 0 0 18px rgba(255,120,140,.85) } }
   @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
 </style>
@@ -2715,6 +2720,11 @@ function stanceMiniHtml(p) {
     '<span class="sm-shield"><span class="sm-glyph">' + st.icon + '</span></span>' +
     '<span class="sm-name">' + esc(st.name.replace(' Stance', '')) + '</span></div>';
 }
+function showPassive(idx) {
+  var p = G.players[idx];
+  msg = (SIGILS[p.heroId] || '') + ' ' + p.hero.name + ' — ' + p.hero.blurb;
+  render();
+}
 function showStance(idx) {
   var p = G.players[idx];
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', blurb: '' };
@@ -2807,7 +2817,12 @@ function render() {
   computeNmPops();
   var html = '<div class="shell"><div class="scrollzone">';
   html += heroBarHtml(foe, false);
-  html += '<div class="field"' + ((typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:linear-gradient(rgba(15,9,27,.16), rgba(15,9,27,.32)), url(' + PORTRAITS.arena + ')"' : '') + '>';
+  var foeTint = 'rgba(0,0,0,0)';
+  if (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[foe.heroId]) {
+    var TINTS = { tides: 'rgba(60,110,220,.20)', ember: 'rgba(230,90,30,.20)', grave: 'rgba(130,55,190,.24)', dawn: 'rgba(240,200,90,.15)', worldroot: 'rgba(70,170,80,.20)', none: 'rgba(0,0,0,0)' };
+    foeTint = TINTS[HERO_SCHOOLS[foe.heroId][0]] || foeTint;
+  }
+  html += '<div class="field"' + ((typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.16), rgba(15,9,27,.32)), url(' + PORTRAITS.arena + ')"' : '') + '>';
   html += '<div class="board-label">ENEMY CREATURES</div>' + boardHtml(foe, false) + chipsHtml(foe, false);
   if (mode === 'blocking') html += '<div class="banner blocking">⚔️ ' + aiAttackers.length + ' attacker' + (aiAttackers.length > 1 ? 's' : '') + ' — tap an attacker, then your blocker. Taking the hits is allowed.</div>';
   if (mode === 'attackSelect') {
@@ -2838,6 +2853,7 @@ function render() {
     html += '<button class="ghost" onclick="clearBlocks()">Clear</button>';
   }
   html += '</div>';
+  html += '<div class="passive-emblem" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + '</div>';
   html += '</div>';
   html += heroBarHtml(me, true);
   html += '<div class="msg">' + esc(msg) + '</div>';
@@ -2915,7 +2931,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M28 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M28.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

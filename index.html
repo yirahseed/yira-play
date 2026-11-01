@@ -2,13 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Yira">
-<meta name="theme-color" content="#17102b">
-<link rel="apple-touch-icon" href="yira-icon-180.png">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Yira: Enchanted Coliseum</title>
 <style>
   /* Skins: the whole palette runs on variables; data-theme on <html> swaps them. */
@@ -828,8 +822,8 @@ const CARDS = {
   tollwarden_captain: { icon: "🛡️", name: 'Tollwarden Captain', cost: 2, type: 'creature', power: 3, health: 2, debut: { kind: 'taxFoeSpellsNextTurn', amount: 2 }, cardSchool: 'dawn' , orig: "Thalia, Guardian of Thraben", src: "verified card face" }, // original: Thalia, Guardian of Thraben
   thirteenth_hour: { icon: "🕐", name: 'The Thirteenth Hour', cost: 3, type: 'spell', effect: { kind: 'armTriska' }, cardSchool: 'grave' , orig: "Triskaidekaphobia", src: "verified card face" }, // original: Triskaidekaphobia
   wound_priest: { icon: "🩸", name: 'Wound Priest', cost: 2, type: 'creature', power: 2, health: 2, healOnDealtDamage: true, cardSchool: 'grave' , orig: "Demonic Priest", src: "verified card face" }, // original: Demonic Priest — "After this deals damage, heal yourself for that much" (combat is its only damage source in this pool)
-  vein_drainlord: { icon: "🧛", name: 'Vein Drainlord', cost: 3, type: 'creature', power: 2, health: 3, keywords: ['flying'], drainAmp: 1, cardSchool: 'grave' , orig: "Voldaren Drainlord", src: "verified record" }, // original: Voldaren Drainlord — drain effects you control drain 1 more (scope here: drain effects, Nightmare drains, grave whispers)
-  sanguine_pact: { icon: "🔗", name: 'The Sanguine Pact', cost: 3, type: 'artifact', charges: 3, activateCost: 2, effect: { kind: 'armBond' }, cardSchool: 'grave' , orig: "Sanguine Bond", src: "verified record" }, // original: Sanguine Bond — "Whenever you heal this turn, deal that much damage to your opponent. Activate: pay 2" (charges follow this game's artifact pattern)
+  vein_drainlord: { icon: "🧛", name: 'Vein Drainlord', cost: 6, type: 'creature', power: 3, health: 5, keywords: ['flying'], drainAmp: 1, cardSchool: 'grave' , orig: "Voldaren Drainlord", src: "Wayback Hipsters gallery face - cost 6, 3/5 recorded (supersedes the sweep-4 transcription of 3-cost 2/3)" }, // original: Voldaren Drainlord — drain effects you control drain 1 more (scope here: drain effects, Nightmare drains, grave whispers)
+  sanguine_pact: { icon: "🔗", name: 'The Sanguine Pact', cost: 3, type: 'artifact', charges: 3, activateCost: 2, effect: { kind: 'armBond' }, cardSchool: 'grave' , orig: "Sanguine Bond", src: "verified record - WORDING CONFLICT: one face transcription reads healing-instead-damages (replacement); ours implements the additive reading from the earlier record; under review" }, // original: Sanguine Bond — "Whenever you heal this turn, deal that much damage to your opponent. Activate: pay 2" (charges follow this game's artifact pattern)
 
 
 
@@ -875,9 +869,9 @@ const CARDS = {
   gravebound_imp: { icon: "😈", name: 'Gravebound Imp', cost: 1, type: 'creature', power: 2, health: 3, generatedOnly: true, school: 'warlock', schoolStage: 1, selfDecay: 1 , orig: "Pactbound Quasit", src: "CONVERSION-AUDIT S4 \u2014 Grave chain stage 1" },
   withering_edict: { icon: "📜", name: 'Withering Edict', cost: 3, type: 'spell', generatedOnly: true, school: 'warlock', schoolStage: 2, effect: { kind: 'wither' } , orig: "Sign of Ill Omen", src: "CONVERSION-AUDIT S4 \u2014 Grave chain stage 2" },
   whispers_of_grave: { icon: "👂", name: 'Whispers of the Grave', cost: 3, type: 'spell', generatedOnly: true, school: 'warlock', schoolStage: 3, effect: { kind: 'graveWhispers' } , orig: "Whispers of the Grave", src: "CONVERSION-AUDIT S4 \u2014 Grave chain stage 3" },
-  dawn_steed: { icon: "🐴", name: 'Dawn Steed', cost: 1, type: 'creature', power: 1, health: 2, generatedOnly: true, school: 'paladin', schoolStage: 1, debut: { kind: 'buffRandomCreature', power: 0, health: 1 } , orig: "Faithful Steed", src: "CONVERSION-AUDIT S4 \u2014 Dawn chain stage 1" },
+  dawn_steed: { icon: "🐴", name: 'Dawn Steed', cost: 1, type: 'creature', power: 1, health: 2, generatedOnly: true, school: 'paladin', schoolStage: 1, debut: { kind: 'buffRandomCreature', power: 0, health: 1 } , orig: "Faithful Steed", src: "Wayback D&D Icons Preview face - 1-cost 1/2 confirmed; the original debut targets a friendly creature, ours grants a random one (simplification, flagged)" },
   dawns_smite: { icon: "🔆", name: "Dawn's Smite", cost: 3, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 2, effect: { kind: 'smiteByBoard' } , orig: "Divine Smite", src: "CONVERSION-AUDIT S4 \u2014 Dawn chain stage 2" },
-  aura_of_valor: { icon: "🏵️", name: 'Aura of Valor', cost: 4, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 3, effect: { kind: 'auraValor' } , orig: "Aura of Courage", src: "CONVERSION-AUDIT S4 \u2014 Dawn chain stage 3" },
+  aura_of_valor: { icon: "🏵️", name: 'Aura of Valor', cost: 5, type: 'spell', generatedOnly: true, school: 'paladin', schoolStage: 3, effect: { kind: 'auraValor' } , orig: "Aura of Courage", src: "Wayback D&D Icons Preview face - cost 5 recorded; growth is permanent, granted after each friendly attack" },
   axe_of_pyre: { icon: "🪓", name: 'Axe of the Pyre', cost: 1, type: 'artifact', charges: 3, generatedOnly: true, school: 'barbarian', schoolStage: 1, effect: { kind: 'axeBuff' } , orig: "Axe of Vengeance", src: "CONVERSION-AUDIT S4 \u2014 Ember chain stage 1" },
   reckless_wrath: { icon: "💢", name: 'Reckless Wrath', cost: 2, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 2, effect: { kind: 'rageStrongest' } , orig: "Mindless Rage", src: "CONVERSION-AUDIT S4 \u2014 Ember chain stage 2" },
   unbroken_might: { icon: "💥", name: 'Unbroken Might', cost: 4, type: 'spell', generatedOnly: true, school: 'barbarian', schoolStage: 3, effect: { kind: 'unbrokenMight' } , orig: "Indomitable Strength", src: "CONVERSION-AUDIT S4 \u2014 Ember chain stage 3" },
@@ -928,7 +922,7 @@ const CARDS = {
   // Sovereign 7 mana 8/8 (the recovered Hlaavin, renamed; debut text recorded).
   // Forge-costed cards carry costForge: true and are argued in files/COSTING.md.
   cerulean_dragon: { icon: "🐉", name: 'Cerulean Dragon',  cost: 3, type: 'creature', power: 1, health: 2 , orig: "Cerulean Dragon", src: "CONVERSION-AUDIT S4 \u2014 same name" },
-  eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 3, type: 'creature', power: 2, health: 1 , orig: "Eternal Phoenix", src: "CONVERSION-AUDIT S4 \u2014 same name" },
+  eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 4, type: 'creature', power: 2, health: 2, keywords: ['flying'], phoenixReturn: true , orig: "Eternal Phoenix", src: "Wayback Hipsters gallery face - cost 4, 2/2 Flying recorded; end-of-turn graveyard return implemented; its Miracle random-upgrade rider stays unimplemented (upgrade system undefined)" },
   mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } , orig: "Hlaavin, Lord of the Unseen", src: "CONVERSION-AUDIT S4" },
   vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } , orig: "Vainglorious Hero", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
   runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 2, costForge: true, type: 'creature', power: 2, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "COSTING.md tracker \u2014 cost Forge-assigned; final stat line disputed across patches (v0.15/v0.20), open item" },
@@ -1004,7 +998,7 @@ const CARDS = {
   // Debut is negated while its creature still takes the field. Colour
   // recorded (U) -> Tides. Cost was never recorded: FORGE-COSTED at 2,
   // argued in files/COSTING.md (Batch 11). Name is ours.
-  flockguard_vigil: { icon: "🛡️", name: 'Flockguard Vigil', cost: 2, costForge: true, type: 'trap', trigger: { kind: 'guardFlock' } , orig: "Guard the Flock", src: "COSTING.md B11 \u2014 cost Forge-assigned" },
+  flockguard_vigil: { icon: "🛡️", name: 'Flockguard Vigil', cost: 1, type: 'trap', trigger: { kind: 'guardFlock' } , orig: "Guard the Flock", src: "Wayback: Meet Mu Yanling hero page - cost 1 recorded (supersedes the COSTING B11 Forge cost of 2)" },
 };
 const TRAP_POOL = ['quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil']; // M62 purge: only verified traps remain
 
@@ -1173,6 +1167,7 @@ const STANCES = {
 };
 
 const SPELL_POOL = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly);
+const FOUNTAIN_POOL = SPELL_POOL.filter((id) => CARDS[id].cost <= 6); // Land Ho! (Wayback): the Fountain of Magic grants a spell costing 6 or less
 const LEGENDARY_POOL = Object.keys(CARDS).filter((id) => CARDS[id].legendary && !CARDS[id].generatedOnly);
 
 
@@ -1541,7 +1536,7 @@ class Game {
     for (const a of p.artifacts) a.usedThisTurn = false;
     this.drawCard(i); // draw step (v1 choice: every turn incl. the first)
     // Stance gifts arrive after the draw.
-    if (p.stance === 'fountain') this.addToHand(i, makeInstance(this.rng.pick(SPELL_POOL), null), 'Fountain Stance');
+    if (p.stance === 'fountain') this.addToHand(i, makeInstance(this.rng.pick(FOUNTAIN_POOL), null), 'Fountain Stance');
     if (p.stance === 'portal' && p.ownTurns % 3 === 0) this.addToHand(i, makeInstance(this.rng.pick(LEGENDARY_POOL), null), 'Portal Stance');
     if (p.stance === 'training') {
       const foe = this.players[this.opp(i)];
@@ -1557,7 +1552,16 @@ class Game {
     if (p.fragileGem && p.ownTurns >= 1 && p.manaSpent > 0) p.fragileGem = false;
     // Standing creatures with end-of-turn triggers breathe, burn, or brood.
     for (const c of p.board.slice()) { const et = def(c).endTurn; if (et && this.winner === null) this.resolveEffect(i, et, c, null); }
-    // Temporary buffs (Axe of the Pyre, Aura of Valor) last until end of turn.
+    // Eternal Phoenix (recorded face, Wayback): at end of turn, a Phoenix
+    // resting in a graveyard rises back into its owner's deck.
+    for (const q of this.players) {
+      const risen = q.graveyard.filter((c) => def(c).phoenixReturn);
+      if (risen.length) {
+        q.graveyard = q.graveyard.filter((c) => !def(c).phoenixReturn);
+        for (const ph of risen) { ph.damage = 0; q.deck.splice(this.rng.int(q.deck.length + 1), 0, ph); this.log.push(`Eternal Phoenix rises from ${q.hero.name}'s graveyard back into the deck`); }
+      }
+    }
+    // Temporary buffs (Axe of the Pyre) last until end of turn.
     for (const q of this.players) for (const c of q.board) { c.tempPower = 0; c.tempHealth = 0; }
     // M49: Fleeting creatures (the Emberling) burn out at end of turn.
     for (const c of [...p.board]) if ((def(c).keywords || []).includes('fleeting')) { p.board.splice(p.board.indexOf(c), 1); p.graveyard.push(c); this.log.push(`${def(c).name} was fleeting — gone with the turn`); }
@@ -2103,8 +2107,9 @@ class Game {
     // Attack triggers (e.g. Drownscale mills its own deck as it lunges).
     for (const a of liveAttackers) { const ae = def(a).attackEffect; if (ae) this.resolveEffect(atkIdx, ae, a, null); }
     const stampede = atk.hero.passive === 'stampede' && liveAttackers.length >= 3;
-    // Aura of Valor: attackers fight at +1/+1 for this combat (cleared at end of turn).
-    if (atk.auraValor) for (const a of liveAttackers) { a.tempPower += 1; a.tempHealth += 1; }
+    // Aura of Valor (recorded face, Wayback D&D Icons Preview): after each
+    // friendly creature attacks, it PERMANENTLY gets +1/+1 — applied below,
+    // once combat resolves, to the attackers still standing.
     // Unbroken Might: when your giants attack, the foe's hero suffers 5 (once per combat).
     if (atk.unbrokenMight && liveAttackers.some((a) => powerOf(a) >= 5)) {
       this.hurtHero(dfn.idx, 5, atkIdx); dfn.tookDamageThisTurn = true;
@@ -2142,6 +2147,7 @@ class Game {
     // Aldric's charge-form departs with the combat, living or struck down.
     atk.board = atk.board.filter((c) => !c.phantom);
     this.cleanupDeaths();
+    if (atk.auraValor) for (const a of liveAttackers) if (atk.board.includes(a)) { a.permPower += 1; a.permHealth += 1; this.log.push(`${def(a).name} grows under the Aura of Valor (+1/+1, now ${powerOf(a)}/${healthOf(a)})`); }
     this.checkWin();
     return true;
   }

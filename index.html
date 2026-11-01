@@ -301,6 +301,24 @@
     16%{ opacity:.95 } 100%{ transform:translate(calc(-50% + var(--drift,0px)),30vh) scale(1.15); opacity:0 } }
   .fx-drain { position:fixed; left:50%; top:9%; z-index:60; pointer-events:none; font-size:24px;
     filter:drop-shadow(0 0 9px #8a5cff); animation:wispFall 1.3s ease-in forwards; }
+  /* M21 smoke streams: one per Nightmare, hero -> afflicted deck, single volley */
+  @keyframes streamFly { 0%{ transform:translate(-50%,-50%) scale(.55) rotate(-8deg); opacity:0 }
+    12%{ opacity:.95 } 82%{ opacity:.9 } 100%{ transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(1.2) rotate(10deg); opacity:0 } }
+  .fx-stream { position:fixed; z-index:61; pointer-events:none; font-size:22px;
+    filter:drop-shadow(0 0 8px #8a5cff) drop-shadow(0 0 20px rgba(120,60,255,.65)) blur(.4px); animation:streamFly .95s ease-in forwards; }
+  /* M21 speech bubble: small, cream, beside the corner portrait (the original's format) */
+  .speech-bubble { position:absolute; top:-9px; z-index:30; max-width:210px; background:#fdf6dd; color:#33261a;
+    font-size:12.5px; font-weight:600; line-height:1.3; padding:6px 10px; border-radius:12px;
+    border:1.5px solid #d8c58f; box-shadow:0 3px 10px rgba(0,0,0,.45); animation:speechIn .25s ease-out; }
+  .herobar.me .speech-bubble { left:66px; border-bottom-left-radius:3px; }
+  .herobar.foe .speech-bubble { right:66px; border-bottom-right-radius:3px; }
+  @keyframes speechIn { 0%{ transform:scale(.7); opacity:0 } 100%{ transform:scale(1); opacity:1 } }
+  .pile.clickable { cursor:pointer; } .pile.clickable:hover { color:#efe6ff; text-decoration:underline dotted; }
+  /* M21 format pass: queued attackers tilt in; blockers glow GREEN */
+  .card.selected-attacker { transform:rotate(-4deg) scale(1.04); }
+  .emblem.selected-attacker { transform:rotate(-5deg) scale(1.05); }
+  .card.blocking { outline:3px solid #57e88a; box-shadow:0 0 14px rgba(87,232,138,.7); }
+  .emblem.blocking { outline:3px solid #57e88a; box-shadow:0 0 14px rgba(87,232,138,.7); }
 </style>
 </head>
 <body>
@@ -1906,6 +1924,7 @@ function sfx(name) {
     case 'plant': tone(1150, 880, 0.14, 'sine', 0.26); tone(1725, 1320, 0.14, 'sine', 0.09, 0.02); break;
     case 'drain': tone(330, 330, 0.4, 'sine', 0.42); tone(495, 495, 0.4, 'sine', 0.16, 0.03); tone(165, 165, 0.45, 'sine', 0.28, 0.02); break;
     case 'counter': tone(880, 110, 0.22, 'sawtooth', 0.22); break;
+    case 'draw': tone(620, 940, 0.07, 'triangle', 0.22); noiseBurst(0.05, 0.14, 2600); break;
     case 'victory': [523, 659, 784, 1046].forEach(function (f, i) { tone(f, f, 0.22, 'triangle', 0.42, i * 0.11); }); break;
     case 'defeat': [392, 330, 262, 196].forEach(function (f, i) { tone(f, f, 0.25, 'triangle', 0.38, i * 0.13); }); break;
   }
@@ -1920,12 +1939,49 @@ function toggleMute() {
    get their sounds AND visual effects without threading hooks through the engine. */
 var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null };
 function sfxPlant(n) {
+  /* Jesse's player-memory spec (2026-10-31): one smoke stream per Nightmare,
+     all at once, EACH stream with its own sound — a layered rush, not one tick.
+     Sound layers cap at 8 for sanity; the visual streams cap at 12. */
   if (!AC || muted) return;
-  var c = Math.min(Math.max(n, 1), 4);
+  var c = Math.min(Math.max(n, 1), 8);
   for (var k = 0; k < c; k++) {
-    tone(1150 - k * 70, 860 - k * 50, 0.15, 'sine', 0.27, k * 0.09);
-    tone(1725 - k * 80, 1300, 0.12, 'sine', 0.09, k * 0.09);
+    var detune = (Math.random() * 220) - 110 - k * 30;
+    tone(1120 + detune, 820 + detune * 0.6, 0.16, 'sine', 0.24, k * 0.045);
+    tone(1680 + detune, 1240, 0.12, 'sine', 0.08, k * 0.045 + 0.02);
   }
+}
+/* M21: smoke streams fly from the sowing hero to the afflicted deck —
+   one stream per Nightmare planted, launched as a single volley. */
+function anchorPoint(elId, fallback) {
+  try {
+    var el = document.querySelector ? document.querySelector('#' + elId) : null;
+    if (el && el.getBoundingClientRect) {
+      var r = el.getBoundingClientRect();
+      if (r.width > 0 || r.height > 0) return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+  } catch (e) {}
+  return fallback;
+}
+function spawnStreams(fromIdx, toIdx, n) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var H = window.innerHeight || 700, W = window.innerWidth || 400;
+    var fromFoe = fromIdx === aiIdx, toFoe = toIdx === aiIdx;
+    var src = anchorPoint('herobar-' + fromIdx, { x: fromFoe ? W * 0.78 : W * 0.22, y: fromFoe ? H * 0.16 : H * 0.84 });
+    var dst = anchorPoint('pile-' + toIdx, { x: toFoe ? W * 0.16 : W * 0.84, y: toFoe ? H * 0.07 : H * 0.93 });
+    var count = Math.min(Math.max(n, 1), 12);
+    for (var k = 0; k < count; k++) {
+      var node = document.createElement('div');
+      node.className = 'fx-stream'; node.textContent = '🌑';
+      var jx = (Math.random() * 36) - 18, jy = (Math.random() * 24) - 12;
+      node.style.left = (src.x + jx) + 'px'; node.style.top = (src.y + jy) + 'px';
+      node.style.setProperty('--dx', ((dst.x - src.x) + jx) + 'px');
+      node.style.setProperty('--dy', ((dst.y - src.y) + jy) + 'px');
+      node.style.animationDelay = (k * 0.05) + 's';
+      document.body.appendChild(node);
+      setTimeout((function (nd) { return function () { if (nd.parentNode) nd.parentNode.removeChild(nd); }; })(node), 2400);
+    }
+  } catch (e) {}
 }
 /* Floating nightmare wisps (plant: rise from mid-screen toward the enemy;
    drain: fall over the afflicted hero). Count scales with the event size. */
@@ -1947,12 +2003,27 @@ function soundWatch() {
   if (!G) return;
   var s = G.stats;
   if (sndSnap.life) {
-    G.players.forEach(function (p) { if (p.life < sndSnap.life[p.idx]) figFx.hurt[p.idx] = true; });
+    G.players.forEach(function (p) {
+      if (p.life < sndSnap.life[p.idx]) {
+        figFx.hurt[p.idx] = true;
+        if (!speechFlags['hurt' + p.idx] && p.life > 0 && p.life <= Math.ceil(p.hero.life / 4)) {
+          speechFlags['hurt' + p.idx] = true;
+          heroSay(p.idx, heroLine(p.idx, 'hurt'));
+        }
+      }
+    });
   }
   var dPlant = s.nightmaresPlanted - sndSnap.planted;
   if (dPlant > 0) {
     sfxPlant(dPlant);
-    spawnFx('fx-wisp', Math.min(dPlant + 1, 6));
+    var wvPl = G.players.find(function (p) { return p.hero.passive === 'weave'; });
+    if (wvPl) {
+      spawnStreams(wvPl.idx, G.opp(wvPl.idx), dPlant);
+      if (dPlant >= 3 && !speechFlags.sowAt) speechFlags.sowAt = 0;
+      if (dPlant >= 3 && Date.now() - (speechFlags.sowAt || 0) > 20000) { speechFlags.sowAt = Date.now(); heroSay(wvPl.idx, heroLine(wvPl.idx, 'sow')); }
+    } else {
+      spawnFx('fx-wisp', Math.min(dPlant + 1, 6));
+    }
     var total = 0;
     G.players.forEach(function (p) { if (G.players[G.opp(p.idx)].hero.passive === 'weave') total = Math.max(total, nightmaresIn(p.deck)); });
     say('🌑 ' + dPlant + ' Nightmare' + (dPlant > 1 ? 's' : '') + ' planted — ' + total + ' now growing in the afflicted deck.', 'drain');
@@ -1962,7 +2033,7 @@ function soundWatch() {
   else if (s.trapsTriggered > sndSnap.traps) sfx('trapFire');
   var seen = sndSnap.winnerSeen;
   sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }) };
-  if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); }
+  if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
 }
 /* M4.3 battlefield staging: one-shot figure animations computed by the
    stats watcher (hurt / weaver flare) or set by actions (player lunge). */
@@ -2156,6 +2227,55 @@ function emblemHtml(inst, ownerIdx, opts) {
     '<div class="emblem-name">' + esc(d.name) + '</div>' +
     '<div class="emblem-badges">' + badges(inst, ownerIdx) + '</div></div>';
 }
+/* ---------- M21 speech: small cream bubble beside the corner portrait,
+   a few seconds, one short ORIGINAL line — the original game's own format
+   (footage-verified: no talking heads). Triggers: match start, a big sow,
+   first time a hero falls to a quarter life, victory/defeat. ---------- */
+var HERO_LINES = {
+  weaver:     { start: "Sleep well. You won't.", hurt: 'The dark is patient.', win: 'Dream of me again.', lose: 'Even nightmares fade… for now.', sow: 'Another bad dream, buried deep.' },
+  controller: { start: 'Every step is watched.', hurt: 'A ward holds. Barely.', win: 'Order, restored.', lose: 'The watch… falters.' },
+  bruiser:    { start: 'Come on then. Break.', hurt: "Good. Now I'm awake.", win: 'Unbroken.', lose: '…Get up. Again.' },
+  keeper:     { start: 'Grow where you stand.', hurt: 'Roots run deep.', win: 'The grove endures.', lose: 'Even forests fall quiet.' },
+  torchbearer:{ start: 'The first flame is mine.', hurt: 'Still burning.', win: 'Carry the fire onward.', lose: 'Embers… remember me.' },
+  banneret:   { start: 'Form up. For the banner.', hurt: 'Hold the line!', win: 'The charge prevails.', lose: 'Lower the banner… gently.' },
+  graven:     { start: 'The dead are listening.', hurt: 'One more for the grave.', win: 'What rises, serves.', lose: 'Back to earth, then.' },
+  unchained:  { start: 'No chains. No masters.', hurt: 'Freedom stings.', win: 'Unchained, always.', lose: 'The spirit slips free…' },
+  unbridled:  { start: 'Hooves down. Heads up.', hurt: 'That just winds me up.', win: 'A proper stampede.', lose: 'The herd… scatters.' },
+  sibilance:  { start: 'Sssay your prayers.', hurt: 'A hiss, not a whimper.', win: 'An exit, centre stage.', lose: 'The curtain… falls.' },
+  hammer:     { start: "Strike while they're bleeding.", hurt: 'Hammer meets anvil.', win: 'Struck true.', lose: 'The forge cools.' },
+  tidemother: { start: 'The tide decides.', hurt: 'The sea does not kneel.', win: 'Washed away.', lose: 'The tide goes out…' }
+};
+var speech = {}, speechFlags = {};
+function heroLine(idx, kind) {
+  if (!G) return null;
+  var p = G.players[idx];
+  var set = HERO_LINES[p.heroId];
+  return set ? set[kind] : null;
+}
+function heroSay(idx, text) {
+  if (!text) return;
+  speech[idx] = { text: text, until: Date.now() + 3600 };
+  try {
+    setTimeout(function () {
+      if (speech[idx] && speech[idx].until <= Date.now() + 80) { delete speech[idx]; if (G && mode !== 'menu' && mode !== 'collection' && mode !== 'builder') render(); }
+    }, 3700);
+  } catch (e) {}
+}
+function speechHtml(p) {
+  var s = speech[p.idx];
+  if (!s || s.until <= Date.now()) return '';
+  return '<div class="speech-bubble">' + esc(s.text) + '</div>';
+}
+/* M21 deck inspect — Jesse's player memory: inspect a deck to see its card
+   count and how many Nightmares are buried inside it. */
+function showDeck(idx) {
+  if (!G) return;
+  var p = G.players[idx];
+  var n = nightmaresIn(p.deck);
+  msg = '🂠 ' + p.hero.name + "'s deck: " + p.deck.length + ' cards left · ✋ ' + p.hand.length + ' in hand · 🌑 ' +
+    (n ? n + ' Nightmare' + (n === 1 ? '' : 's') + ' buried inside' : 'no Nightmares inside') + '.';
+  render();
+}
 function heroBarHtml(p, isMe) {
   var other = G.players[G.opp(p.idx)];
   var nightmareLine = '';
@@ -2176,11 +2296,11 @@ function heroBarHtml(p, isMe) {
     if (p.school && SCHOOLS[p.school]) loadLine += questLine(p.school, false);
     Object.keys(p.questDone || {}).filter(function (s) { return s !== p.school && SCHOOLS[s]; }).sort().forEach(function (s) { loadLine += ' ' + questLine(s, true); });
   }
-  return '<div class="herobar' + (isMe ? ' me' : ' foe') + '"' + click + '>' +
-    '<div class="portrait">' + heroPortrait(p.heroId) + '</div>' +
+  return '<div class="herobar' + (isMe ? ' me' : ' foe') + '" id="herobar-' + p.idx + '"' + click + '>' +
+    '<div class="portrait">' + heroPortrait(p.heroId) + '</div>' + speechHtml(p) +
     '<div><div class="hero-name">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (isMe ? ' (you)' : '') + '</div>' +
     '<div class="hero-sub">' + esc(p.hero.blurb) + '</div></div><div class="spacer"></div>' + gems +
-    '<div class="pile">🂠 ' + p.deck.length + ' · ✋ ' + p.hand.length + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div>' +
+    '<div class="pile clickable" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ✋ ' + p.hand.length + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div>' +
     '<div class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + ' ♥</div></div>';
 }
 function stanceEmblemHtml(p) {
@@ -2296,7 +2416,8 @@ function render() {
     }
   }
   if (mode === 'targeting') html += '<div class="banner info">Choose a target (highlighted), or <button class="ghost" onclick="cancelTarget()">cancel</button></div>';
-  if (mode === 'aiTurn') html += '<div class="banner info">Enemy turn…</div>';
+  if (mode === 'aiTurn') html += '<div class="banner info">THEIR TURN — the enemy is playing…</div>';
+  if (mode === 'main') html += '<div class="banner info">YOUR TURN — play cards, attack once if you wish, then Pass.</div>';
   html += '<div class="board-label">YOUR CREATURES</div>' + boardHtml(me, true) + chipsHtml(me, true);
   html += '</div>';
   html += heroBarHtml(me, true);
@@ -2307,7 +2428,7 @@ function render() {
   html += '<div class="actions">';
   if (mode === 'main') {
     if (!me.combatDone) html += '<button onclick="startAttackSelect()">⚔️ Attack</button>';
-    html += '<button class="danger" onclick="endTurn()">End turn</button>';
+    html += '<button class="danger" onclick="endTurn()" title="Pass — hand the turn to the enemy">⏭ Pass</button>';
   }
   if (mode === 'attackSelect') {
     html += '<button onclick="declareAttack()">Declare attack (' + attackSet.size + ')</button>';
@@ -2354,7 +2475,9 @@ function gameOverHtml() {
       '<button class="big" onclick="startClimb()">Try the Climb again</button>' +
       '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
   }
-  return box(won ? '🏆 Victory' : '💀 Defeat', won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.',
+  var endLine = heroLine(G.winner, 'win');
+  var endQuote = endLine ? '<br><i>“' + esc(endLine) + '” — ' + esc(G.players[G.winner].hero.name) + '</i>' : '';
+  return box(won ? '🏆 Victory' : '💀 Defeat', (won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.') + endQuote,
     '<button class="big" onclick="rematch()">Rematch</button>' +
     '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
 }
@@ -2381,7 +2504,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M20 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M21 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
@@ -2405,7 +2528,7 @@ function renderMenu() {
     '<div class="panel"><details><summary>How it plays (60 seconds)</summary>' +
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
-    'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10.<br><br>' +
+    'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10. <b>Tap either deck pile</b> (the 🂠 count on a hero bar) to inspect it: cards left, and how many Nightmares are buried inside. When you are done, <b>⏭ Pass</b> hands the turn over.<br><br>' +
     '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. Stage 1 waits inside the <b>top 3 cards</b> of your deck at game start; playing a stage slips the next stage into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
     '</details></div></div>';
 }
@@ -2575,6 +2698,7 @@ function startMatch() {
   G = new Game(gameOpts);
   if (climbBonus) G.players[aiIdx].life += climbBonus;
   uiLog = []; lastEngineLog = 0; msg = ''; recordCounted = false;
+  speech = {}; speechFlags = {};
   lastLurking = {}; nmPopIdx = -1;
   redrawSet = new Set(); blockMap = {}; attackSet = new Set();
   // AI mulligan: throw back pricey cards.
@@ -2588,13 +2712,15 @@ function startMatch() {
 function rematch() { startMatch(); }
 function backToMenu() { climb = null; mode = 'menu'; render(); }
 function confirmMulligan() {
+  heroSay(aiIdx, heroLine(aiIdx, 'start'));
+  heroSay(humanIdx, heroLine(humanIdx, 'start'));
   if (redrawSet.size) G.mulligan(humanIdx, Array.from(redrawSet));
   redrawSet = new Set();
   if (humanIdx === 0) startHumanTurn(); else { mode = 'aiTurn'; render(); runAiTurn(); }
 }
 function startHumanTurn() {
   if (G.winner !== null) return finishCheck();
-  G.startTurn(humanIdx); flushEngineLog();
+  G.startTurn(humanIdx); flushEngineLog(); sfx('draw');
   msg = 'Your turn — ' + G.availableMana(G.players[humanIdx]) + ' mana.';
   mode = 'main'; finishCheck(); render();
 }

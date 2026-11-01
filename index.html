@@ -1000,7 +1000,7 @@ const DECKS = {
     'creeping_doom', 'pilfer_dream', 'pilfer_dream', 'pluck_dread', 'pluck_dread', 'quick_study',
     'quick_study', 'bring_down', 'recall', 'recall', 'dread_herald', 'dread_herald',
     'echo_familiar', 'echo_familiar', 'scatter_mind', 'scatter_mind', 'shadowsmith_saboteur', 'shadowsmith_saboteur',
-    'strange_gift', 'strange_gift', 'deep_breath', 'deep_breath', 'dream_thief', 'dream_thief',
+    'strange_gift', 'strange_gift', 'tidewing_familiar', 'deep_breath', 'dream_thief', 'dream_thief',
     'lore_drifter', 'lore_drifter', 'quiet_snare', 'drown_in_dreams', 'void_harvest', 'void_harvest',
   ],
   controller: [
@@ -3519,7 +3519,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M44 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M45 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

@@ -356,6 +356,20 @@
   @keyframes tlMarch { to { stroke-dashoffset:-15; } }
   .emblem-zz { position:absolute; top:-5px; right:-3px; z-index:4; font-size:11px; font-weight:900; font-style:italic;
     color:#d9c8ff; text-shadow:0 1px 3px rgba(0,0,0,.9); transform:rotate(14deg); }
+  /* --- M27.1 playtest fixes: stance mini in the hero panel, doom badge,
+     effective-cost colors, slim banners (confirmation lives on the
+     floating arena-edge control now) --- */
+  .banner { padding:6px 10px; font-size:12.5px; margin:5px 0; }
+  .stance-mini { display:flex; flex-direction:column; align-items:center; gap:1px; flex:none; cursor:pointer; }
+  .sm-shield { display:flex; align-items:center; justify-content:center; width:27px; height:33px;
+    clip-path:polygon(50% 0%, 86% 5%, 100% 13%, 100% 56%, 80% 84%, 50% 100%, 20% 84%, 0% 56%, 0% 13%, 14% 5%);
+    background:linear-gradient(165deg,#c9b083,#8a6d35 55%,#b08d4a); box-shadow:0 1px 3px rgba(0,0,0,.5); }
+  .sm-glyph { font-size:14px; line-height:1; }
+  .sm-name { font-size:8.5px; color:#cbbcf2; letter-spacing:.04em; }
+  .emblem-doom { position:absolute; top:-6px; left:-4px; z-index:4; font-size:10.5px; font-weight:800; color:#ffb3c1;
+    background:rgba(40,4,16,.85); border:1px solid #ae4f7d; border-radius:999px; padding:1px 5px; text-shadow:0 1px 2px rgba(0,0,0,.8); }
+  .card .cost.disc { background-image:none; background-color:#2e7d4f; color:#dcffe6; border-color:#14532d; }
+  .card .cost.taxed { background-image:none; background-color:#8e2f3c; color:#ffe0e4; border-color:#5e1f28; }
   @media (max-width:560px){ .hcluster{ width:66px } .hcluster .portrait{ width:52px; height:52px } .hcluster .hname{ max-width:66px } .herobar.me .speech-bubble{ left:76px } .herobar.foe .speech-bubble{ right:76px } }
 </style>
 </head>
@@ -2421,8 +2435,17 @@ function cardHtml(inst, ownerIdx, opts) {
   var foot = '<div class="ctext">' + esc(effectText(d)) + '</div>';
   if (d.type === 'creature') foot += '<div class="cstats"><span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span></div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '');
+  /* M27.1: a card in hand shows its EFFECTIVE cost — green when discounted,
+     red when taxed — not just the printed number. */
+  var effCost = d.cost, costCls = '';
+  try {
+    if (typeof G !== 'undefined' && G && G.players[ownerIdx] && G.players[ownerIdx].hand.indexOf(inst) >= 0) {
+      effCost = G.effectiveCost(G.players[ownerIdx], inst);
+      if (effCost < d.cost) costCls = ' disc'; else if (effCost > d.cost) costCls = ' taxed';
+    }
+  } catch (e) {}
   return '<div class="' + cls + '" data-uid="' + inst.uid + '"' + sigStyle(d) + ' ' + (opts.onclick ? 'onclick="' + opts.onclick + '"' : '') + '>' +
-    '<div class="cost">' + d.cost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') +
+    '<div class="cost' + costCls + '">' + effCost + '</div>' + (d.signatureFor ? '<span class="siggem"></span>' : '') +
     '<div class="cname">' + esc(d.name) + '</div>' + art +
     '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type + ' · ' : '') + (d.cardSchool ? SCHOOL_META[d.cardSchool].icon : '') + '</span><span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
     foot + '</div>';
@@ -2436,7 +2459,7 @@ function emblemHtml(inst, ownerIdx, opts) {
   return '<div class="emblem' + (opts.cls || '') + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' +
     '<span class="emblem-pow">' + (d.power + inst.permPower) + '⚔</span>' +
-    '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + '</div>' +
+    '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + (inst.doom > 0 ? '<span class="emblem-doom" title="Doomed — dies when the counter runs out">💀' + inst.doom + '</span>' : '') + '</div>' +
     (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') +
     '<div class="emblem-name">' + esc(d.name) + '</div>' +
     '<div class="emblem-badges">' + badges(inst, ownerIdx) + '</div></div>';
@@ -2524,6 +2547,7 @@ function heroBarHtml(p, isMe) {
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + '</span></div>' +
     '<div class="hname">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div></div>' + speechHtml(p) +
     '<div class="gems-col" title="Mana — lit gems are ready">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b></div>' +
+    stanceMiniHtml(p) +
     '<div class="spacer"></div>' + gems +
     '<div class="pile clickable" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ' + handBit + (loadLine ? '<br><span class="loadline">' + loadLine + '</span>' : '') + nightmareLine + '</div></div>';
 }
@@ -2537,6 +2561,14 @@ function stanceEmblemHtml(p) {
     '<div class="emblem-head stance-head"><div class="emblem-rim stance-rim"></div><div class="emblem-face stance-face"><span class="emblem-glyph">' + st.icon + '</span></div></div>' +
     '<div class="emblem-name">' + esc(st.name.replace(' Stance', '')) + '</div></div>';
 }
+/* M27.1: the stance lives in the hero panel as a small emblem — it no
+   longer takes a slot at the head of the creature row. */
+function stanceMiniHtml(p) {
+  var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘', blurb: '' };
+  return '<div class="stance-mini clickable" onclick="showStance(' + p.idx + ')" title="' + esc(st.name) + ' — tap to read">' +
+    '<span class="sm-shield"><span class="sm-glyph">' + st.icon + '</span></span>' +
+    '<span class="sm-name">' + esc(st.name.replace(' Stance', '')) + '</span></div>';
+}
 function showStance(idx) {
   var p = G.players[idx];
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', blurb: '' };
@@ -2544,7 +2576,7 @@ function showStance(idx) {
   render();
 }
 function boardHtml(p, isMe) {
-  var out = '<div class="board">' + stanceEmblemHtml(p);
+  var out = '<div class="board">';
   if (!p.board.length) out += '<div class="empty-board">— no creatures —</div>';
   p.board.forEach(function (inst) {
     var opts = {};
@@ -2631,9 +2663,9 @@ function render() {
   html += heroBarHtml(foe, false);
   html += '<div class="field"' + ((typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:linear-gradient(rgba(15,9,27,.16), rgba(15,9,27,.32)), url(' + PORTRAITS.arena + ')"' : '') + '>';
   html += '<div class="board-label">ENEMY CREATURES</div>' + boardHtml(foe, false) + chipsHtml(foe, false);
-  if (mode === 'blocking') html += '<div class="banner blocking">⚔️ The enemy attacks with ' + aiAttackers.length + ' creature' + (aiAttackers.length > 1 ? 's' : '') + '! Tap an attacker (orange), then tap one of your creatures to block it — one blocker each. Blocking is your choice: you may also take the hits.<br><button onclick="confirmBlocks()" style="margin-top:8px">Confirm blocks</button> <button class="ghost" onclick="clearBlocks()">Clear</button></div>';
+  if (mode === 'blocking') html += '<div class="banner blocking">⚔️ ' + aiAttackers.length + ' attacker' + (aiAttackers.length > 1 ? 's' : '') + ' — tap an attacker, then your blocker. Taking the hits is allowed.</div>';
   if (mode === 'attackSelect') {
-    html += '<div class="banner">Choose your attackers — tap ready creatures, then declare. Combat happens once per turn.</div>';
+    html += '<div class="banner">⚔️ Choose your attackers, then Declare.</div>';
     if (attackSet.size) {
       var q = Array.from(attackSet).map(function (uid) { return me.board.find(function (c) { return c.uid === uid; }); }).filter(Boolean);
       html += '<div class="queue"><span class="q-label">⚔️ QUEUE</span>' + q.map(function (c, i) { return '<span class="qchip">' + (i + 1) + ' · ' + (D(c).icon || '') + ' ' + esc(D(c).name) + '</span>'; }).join('') + '<span class="q-note">they strike in this order</span></div>';
@@ -2653,6 +2685,10 @@ function render() {
   if (mode === 'attackSelect') {
     html += '<button onclick="declareAttack()">Declare attack (' + attackSet.size + ')</button>';
     html += '<button class="ghost" onclick="cancelAttack()">Cancel</button>';
+  }
+  if (mode === 'blocking') {
+    html += '<button onclick="confirmBlocks()">✓ Blocks</button>';
+    html += '<button class="ghost" onclick="clearBlocks()">Clear</button>';
   }
   html += '</div>';
   html += '</div>';
@@ -2730,7 +2766,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M27 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M27.1 · all names and art original</p>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +

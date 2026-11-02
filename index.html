@@ -903,6 +903,21 @@
   .foehand.thinking i:nth-child(2n) { animation-delay:.18s; } .foehand.thinking i:nth-child(3n) { animation-delay:.36s; }
   @keyframes foeThink { 0%,100% { box-shadow: inset 0 0 6px rgba(150,90,255,.35), 0 2px 4px rgba(0,0,0,.45); } 50% { box-shadow: inset 0 0 10px rgba(190,140,255,.75), 0 2px 6px rgba(120,70,220,.5); } }
   .play-reveal.legendary .card { box-shadow: 0 0 0 3px rgba(255,209,102,.95), 0 0 34px 8px rgba(255,190,60,.55) !important; }
+
+  /* ===== M85: fifth compare-and-polish batch ===== */
+  .blockchip.allblocked { border-color: rgba(120,230,150,.6); color:#c9f5d4; }
+  .sigminis { display:flex; gap:6px; justify-content:center; margin:8px 0 2px; }
+  .sigminis .card { width:86px; height:142px; font-size:9px; }
+  .sigminis .card .cart { height:40px; }
+  .faceoff { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
+  .faceoff .portrait { width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto; }
+  .faceoff .portrait img { width:100%; height:100%; object-fit:cover; }
+  .faceoff .fo-side small { display:block; margin-top:3px; color:#c4b6e8; font-size:11px; }
+  .faceoff .fo-x { font-size:18px; }
+  @media (prefers-reduced-motion: reduce) {
+    .motes, .winburst { display:none !important; }
+    .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand.thinking i, .log-btn.hasnews { animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -3250,6 +3265,7 @@ function heroProfileHtml() {
     '<div class="profile-portrait">' + heroPortrait(p.heroId) + '</div>' +
     '<h2>' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</h2>' +
     '<div class="profile-life">❤️ ' + p.life + ' / ' + p.hero.life + ' life · 💎 ' + Math.max(0, G.availableMana(p)) + '/' + p.maxMana + ' mana</div>' +
+    (function () { var sigs = Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }); return sigs.length ? '<div class="sigminis">' + sigs.map(function (id) { return cardHtml(fakeInst(id), p.idx, {}); }).join('') + '</div>' : ''; })() +
     '<div style="font-size:12.5px;color:#c4b6e8;margin-top:2px">◆ Signatures: ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }).map(function (id) { return esc(CARDS[id].name); }).join(' · ') + '</div>' +
     '<p class="profile-blurb">' + esc(p.hero.blurb) + '</p>' +
     '<div class="profile-rows"><div>🏫 ' + schools + '</div>' +
@@ -3270,7 +3286,9 @@ function graveHtml() {
     var d = CARDS[id];
     return '<div class="brow" style="border-left:3px solid ' + schoolHex(d) + '"><span class="bcost">' + d.cost + '</span><div class="bmain"><div class="bname">' + (d.icon || '') + ' ' + esc(d.name) + (gcounts[id] > 1 ? ' <span class="bcount">×' + gcounts[id] + '</span>' : '') + '</div><div class="btext">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div></div></div>';
   }).join('') : '<p style="color:#a793d6">The graveyard is empty.</p>';
-  return '<div class="overlay" onclick="closeGrave()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">🪦 ' + esc(p.hero.name) + "'s graveyard</h2>" + rows + (graveIdx === humanIdx ? '<button class="ghost big" onclick="closeGrave();showDeck(' + humanIdx + ')">🂠 See my deck</button>' : '') + '<button class="big" onclick="closeGrave()">Close</button></div></div>';
+  var gtypes = {}; p.graveyard.forEach(function (c) { var t = D(c).type; gtypes[t] = (gtypes[t] || 0) + 1; });
+  var gsub = p.graveyard.length ? '<p style="text-align:center;color:#a793d6;font-size:12.5px;margin:2px 0 8px">' + p.graveyard.length + ' cards · ' + Object.keys(gtypes).map(function (t) { return gtypes[t] + ' ' + t + (gtypes[t] === 1 ? '' : 's'); }).join(' · ') + '</p>' : '';
+  return '<div class="overlay" onclick="closeGrave()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">🪦 ' + esc(p.hero.name) + "'s graveyard</h2>" + gsub + rows + (graveIdx === humanIdx ? '<button class="ghost big" onclick="closeGrave();showDeck(' + humanIdx + ')">🂠 See my deck</button>' : '') + '<button class="big" onclick="closeGrave()">Close</button></div></div>';
 }
 var prevBoardUids = null, prevBoardGame = null, pendingArrivals = [];
 function boardFxWatch() {
@@ -4182,7 +4200,8 @@ function inspectHtml() {
   var d = D(inst);
   var owner = inspectCardId ? humanIdx : (G.players[0].board.includes(inst) || G.players[0].hand.includes(inst) ? 0 : 1);
   var stats = '';
-  if (d.type === 'creature') stats = '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
+  var inGrave = false; try { inGrave = G && G.players.some(function (pp) { return pp.graveyard.indexOf(inst) >= 0; }); } catch (e) {}
+  if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span style="color:#ffd28a">' + d.power + '⚔</span><span style="color:#9df0b6">' + d.health + '♥</span></div>' : '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
   return '<div class="overlay" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + '"' + sigStyle(d) + '>' +
     '<div class="cost">' + d.cost + '</div>' + typeTabHtml(d) + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '') +
@@ -4199,6 +4218,7 @@ function inspectHtml() {
       if (d.flipsTo && CARDS[d.flipsTo]) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 Transforms into ' + esc(CARDS[d.flipsTo].name) + (d.flipOnSpells ? ' after you cast ' + d.flipOnSpells + ' spells in one turn.' : ' when you end your turn with exactly 2 mana available.') + '</div>');
       if (d.afterFlip) { var baseId = Object.keys(CARDS).find(function (k) { return CARDS[k].flipsTo === inst.cardId; }); if (baseId) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 The transformed face of ' + esc(CARDS[baseId].name) + '.</div>'); }
       if (inst.temporary) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">⏳ Temporary — this copy dissolves at end of turn.</div>');
+      if (d.type === 'artifact' && inst.charges != null) bits.push('<div style="font-size:12.5px;color:#9ec9ff;margin-top:4px">🔵 Charges left: ' + inst.charges + (inst.usedThisTurn ? ' · already used this turn' : '') + '</div>');
       return bits.join('');
     })() +
     '<div class="inspect-emblems">' + emblemIcons(inst, owner) + '</div>' + stats +
@@ -4355,7 +4375,7 @@ function renderBody() {
     }
     if (mode === 'blocking') {
       var through = aiAttackers.filter(function (a) { return !blockMap[a.uid]; }).reduce(function (s, a) { var c = G.players[aiIdx].board.find(function (x) { return x.uid === a.uid; }); return s + (c ? D(c).power + c.permPower : 0); }, 0);
-      html += '<div class="blockchip">' + (through ? '⚠ ' + through + ' damage still gets through' : '🛡️ Everything is blocked') + '</div>';
+      html += '<div class="blockchip' + (through ? '' : ' allblocked') + '">' + (through ? '⚠ ' + through + ' damage still gets through' : '🛡️ Everything is blocked') + '</div>';
       var pairBits = Object.keys(blockMap).map(function (auid) {
         var a = G.players[aiIdx].board.find(function (x) { return x.uid === +auid; });
         var b = me.board.find(function (x) { return x.uid === blockMap[auid]; });
@@ -4386,6 +4406,7 @@ function renderBody() {
   if (mode === 'aiTurn') html += '<button disabled>⏳ Their turn</button>';
   else if (mode === 'targeting') html += '<button class="danger" onclick="cancelTarget()">✕ Cancel cast</button>';
   else if (mode === 'attackSelect') {
+    if (mode === 'attackSelect') { var readyN = me.board.filter(function (c) { return G.canAttack(c, me); }); var allIn = readyN.length && readyN.every(function (c) { return attackSet.has(c.uid); }); html += '<button class="ghost" onclick="attackAllToggle()">' + (allIn ? '✕ Clear attackers' : '⚔️ All attackers') + '</button>'; }
     if (attackSet.size) { var totPow = 0; attackSet.forEach(function (u) { var c = me.board.find(function (x) { return x.uid === u; }); if (c) totPow += D(c).power + c.permPower; }); html += '<button class="pass-ready" onclick="declareAttack()">⚔️ Declare (' + attackSet.size + ') · ' + totPow + ' power</button>';
     html += '<button class="ghost" onclick="endTurn()" title="Pass without attacking — your creatures hold their ground">⏭ End Turn</button>'; }
     else html += '<button class="danger" onclick="endTurn()">⏭ End Turn</button>';
@@ -4491,7 +4512,7 @@ function gameOverHtml() {
     ' · Life drained by Nightmares: ' + s.nightmareLifeDrained + ' · Traps triggered: ' + s.trapsTriggered +
     ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + turnLine;
   function box(title, text, buttons) {
-    return '<div class="overlay"><div class="box">' + (title === 'Victory' ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<p>' + text + '</p>' +
+    return '<div class="overlay"><div class="box">' + (title === 'Victory' ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<div class="faceoff"><div class="fo-side"><div class="portrait">' + heroPortrait(G.players[humanIdx].heroId) + '</div><small>' + esc(G.players[humanIdx].hero.name) + '</small></div><span class="fo-x">⚔️</span><div class="fo-side"><div class="portrait">' + heroPortrait(G.players[aiIdx].heroId) + '</div><small>' + esc(G.players[aiIdx].hero.name) + '</small></div></div><p>' + text + '</p>' +
       '<p style="color:#c4b6e8;font-size:13.5px">' + statsLine + '</p>' + buttons + '</div></div>';
   }
   if (climb) {
@@ -4544,7 +4565,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M84 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M85 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4830,6 +4851,7 @@ function rematchSwapped() { setup.seat = setup.seat === 'second' ? 'first' : 'se
 function rematchAsFoe() { var t = setup.me; setup.me = setup.foe; setup.foe = t; startMatch(); }
 function backToMenu() { climb = null; mode = 'menu'; render(); }
 function confirmMulligan() {
+  try { sfx('shuffle'); } catch (e) {}
   heroSay(aiIdx, heroLine(aiIdx, 'start'));
   heroSay(humanIdx, heroLine(humanIdx, 'start'));
   if (redrawSet.size) G.mulligan(humanIdx, Array.from(redrawSet));

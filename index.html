@@ -959,6 +959,12 @@
   @keyframes psPulse { 0%,100% { opacity:.4; } 50% { opacity:1; } }
   .titlever { margin-top:46px; font-size:11.5px; color:#8f83b8; letter-spacing:.04em; }
   @media (prefers-reduced-motion: reduce) { .pressstart { animation:none; } }
+
+  /* ---- M95: the heroes wear their life as a ring ---- */
+  .lifering { padding:3px; border-radius:50%; flex:none; display:inline-block; line-height:0; box-shadow:0 1px 5px rgba(0,0,0,.45); }
+  .herobar.active-turn .lifering { box-shadow:0 0 10px rgba(255,215,106,.55), 0 1px 5px rgba(0,0,0,.45); }
+  .portrait .life.warn { background:#8a6414; color:#ffe9a8; }
+  .portrait .life.crit { background:#7e2019; color:#ffc4bc; }
   .faceoff { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
   .faceoff .portrait { width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto; }
   .faceoff .portrait img { width:100%; height:100%; object-fit:cover; }
@@ -4071,9 +4077,14 @@ function heroBarHtml(p, isMe) {
         var bN = Math.min(p.hand.length, 8), bOff = bi - (bN - 1) / 2;
         return '<i style="transform:rotate(' + (bOff * 7).toFixed(1) + 'deg) translateY(' + (Math.abs(bOff) * 1.1).toFixed(1) + 'px)' + (bi ? ';margin-left:-6px' : '') + ';z-index:' + (bi + 1) + '"></i>';
       }).join('') + '</span> ' + p.hand.length;
+  var maxLife = (p.hero && p.hero.life) || p.life || 1;
+  var lifeFrac = Math.max(0, Math.min(1, p.life / maxLife));
+  var ringCol = lifeFrac > 0.5 ? '#7dc95e' : (lifeFrac > 0.25 ? '#e8b93e' : '#e5534b');
+  var ringStyle = 'background:conic-gradient(' + ringCol + ' ' + Math.round(lifeFrac * 100) + '%, rgba(255,255,255,.10) 0)';
+  var lifeBand = lifeFrac > 0.5 ? '' : (lifeFrac > 0.25 ? ' warn' : ' crit');
   return '<div class="herobar' + (isMe ? ' me' : ' foe') + (G && G.current === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
-    '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (((isMe && p.life <= 8) || (!isMe && p.life <= 6)) && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="portrait">' + heroPortrait(p.heroId) +
-    '<span class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div>' +
+    '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (((isMe && p.life <= 8) || (!isMe && p.life <= 6)) && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="lifering" style="' + ringStyle + '"><div class="portrait">' + heroPortrait(p.heroId) +
+    '<span class="life' + (p.life > p.hero.life ? ' good' : '') + lifeBand + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div></div>' +
     '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
     '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + (G.reservedMana(p) ? '<span class="held-num">' + G.reservedMana(p) + ' held</span>' : '') + '</div>' +
     stanceMiniHtml(p) + '</div>' +
@@ -4699,7 +4710,7 @@ function renderTitle() {
     '<h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div>' +
-    '<div class="titlever">playable slice M94 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M95 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {

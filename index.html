@@ -934,6 +934,24 @@ const CARDS = {
   hellrider: { icon: "🏇", name: 'Hellrider', cost: 5, type: 'creature', power: 4, health: 3, keywords: ['haste'], attackEffect: { kind: 'damageHeroPerAttacker' } , orig: "Hellrider", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Haste. Attack: Deal 1 damage to your opponent for each attacker'" },
   predator_ooze: { icon: "🟢", name: 'Predator Ooze', cost: 3, type: 'creature', power: 2, health: 2, attackEffect: { kind: 'selfGrowth' }, copyIfBlocked: true , orig: "Predator Ooze", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Attack: Gets +1/+1. If this is blocked, summon a Predator Ooze after combat'" },
   vaultlight: { icon: "🏛️", name: 'Light of the Vault', cost: 3, type: 'spell', effect: { kind: 'destroyAllExceptSubtype', subtype: 'angel' } , orig: "Light of the Helvault", src: "Helvault record: 'destroy all creatures except Angels' (cost 3, Dawn) — Angels carry subtype 'angel' since M67; renamed off the MTG place-name" },
+
+
+  // ===== M79 — the F2Piko wave (video digest 4A): full faces from gameplay, raw format =====
+  pyroclasm: { icon: "🌋", name: 'Pyroclasm', cost: 3, type: 'spell', effect: { kind: 'damageAllCreatures', amount: 2 }, text: 'Deal 2 damage to each creature.', cardSchool: 'ember', orig: "Pyroclasm", src: "Video digest 4A F13 (Ral match, full inspect face): cost 3, text verbatim. Spellslingers original." },
+  warding_flame: { icon: "🕯️", name: 'Warding Flame', cost: 1, type: 'spell', effect: { kind: 'damageAny', amount: 1 }, miracle: { kind: 'damageRandomEnemy', amount: 1 }, text: 'Deal 1 damage to an enemy. Miracle: Deal 1 damage to a random enemy.', cardSchool: 'ember', orig: "Warding Flame", src: "Video digest 4A F18 (draft screen, full face): cost 1, both lines verbatim — a clean Miracle face. School: FORGE ASSIGNMENT Ember (flame; ran in Ral lists per wave 4B) — flagged." },
+  exiles_road: { icon: "🛤️", name: "Exile's Road", cost: 3, type: 'spell', effect: { kind: 'pathExile' }, text: 'Destroy an enemy creature. Your opponent gets an empty mana gem.', cardSchool: 'dawn', orig: "Path to Exile", src: "Video digest 4A F16 (full inspect face): cost 3, text verbatim. Renamed (the original title is a famous Magic card)." },
+  jarring_insight: { icon: "💡", name: 'Jarring Insight', cost: 1, type: 'spell', effect: { kind: 'millDrawBoth' }, text: 'Each player mills a card, then draws a card.', cardSchool: 'tides', orig: "Jarring Insight", src: "Video digest 4A F18 (draft screen, full face): cost 1, text verbatim." },
+  dawns_judgment: { icon: "⚖️", name: "Dawn's Judgment", cost: 3, type: 'spell', effect: { kind: 'pacify' }, text: "Give an enemy creature can't attack.", cardSchool: 'dawn', orig: "Serra's Judgment", src: "Video digest 4A F12 (full face): cost 3, text verbatim. Renamed (Serra is a Magic planeswalker). Pacify = a permanent cantAttack keyword grant." },
+  aether_figment: { icon: "🫧", name: 'Aether Figment', cost: 3, type: 'creature', power: 3, health: 2, subtype: 'illusion', freeIfDrafted: true, text: "Costs 0 if you've drafted this turn.", cardSchool: 'tides', orig: "Aether Figment", src: "Video digest 4A F9 (draft screen, full face): cost 3, 3/2 Illusion, text verbatim." },
+  greatwood_tusker: { icon: "🦣", name: 'Greatwood Tusker', cost: 2, type: 'creature', power: 4, health: 3, subtype: 'beast', cardSchool: 'worldroot', orig: "Kalonian Tusker", src: "Video digest 4A F9 (draft screen, full face): cost 2, 4/3, vanilla. Renamed (Kalonian is a Magic plane name)." },
+  overgrown_iguana: { icon: "🦎", name: 'Overgrown Iguana', cost: 2, type: 'creature', power: 4, health: 2, subtype: 'beast', keywords: ['trample'], text: 'Trample', cardSchool: 'worldroot', orig: "Overgrown Iguana", src: "Video digest 4A F14 (full face): cost 2, 4/2 Beast, Trample is its whole text." },
+  soul_of_the_wood: { icon: "🌲", name: 'Soul of the Wood', cost: 3, type: 'creature', power: 3, health: 3, keywords: ['reach'], finale: { kind: 'healSelf', amount: 3 }, text: 'Reach. Finale: Heal yourself for 3.', cardSchool: 'worldroot', orig: "Soul of the Wood", src: "Video digest 4A F10 (draft screen, full face): cost 3, 3/3, text verbatim." },
+  gravestitcher: { icon: "🧵", name: 'Gravestitcher', cost: 2, type: 'creature', power: 2, health: 3, debut: { kind: 'millCreaturesToGrave', count: 2 }, finale: { kind: 'millCreaturesToGrave', count: 2 }, text: 'Debut & Finale: Add 2 random creatures to your graveyard.', cardSchool: 'grave', orig: "Stitcher's Supplier", src: "Video digest 4A F10 (draft screen, full face): cost 2, 2/3, text verbatim. Renamed (the original title is a Magic card)." },
+  briarback: { icon: "🌿", name: 'Briarback', cost: 5, type: 'creature', power: 5, health: 5, subtype: 'beast', debut: { kind: 'buffCreature', power: 3, health: 3 }, text: 'Debut: Give a friendly creature +3/+3.', cardSchool: 'worldroot', orig: "Briarhorn", src: "Video digest 4A F8 (opponent Vivien play, full face): cost 5, 5/5, text verbatim. Renamed (the original is a Magic card)." },
+  looting_lizard: { icon: "🦎", name: 'Looting Lizard', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'beast', debut: { kind: 'discardHandDraw', draw: 3 }, text: 'Debut: Discard your hand, then draw 3 cards.', cardSchool: 'ember', orig: "Looting Lizard", src: "Video digest 4A F16 (mulligan face): cost 4, 4/4, text \u2014 the face line carries no trigger word; on a creature the only mechanically possible reading is Debut — FLAGGED as inferred." },
+  mind_magnifier: { icon: "🔍", name: 'Mind Magnifier', cost: 5, type: 'artifact', charges: 2, effect: { kind: 'copyLastSpell' }, text: 'Activate: Add a temporary copy of the last spell you played this turn to your hand. Change its cost to 1.', cardSchool: 'tides', orig: "Mind Magnifier", src: "Video digest 4A F13 (full face): printed cost 5 (two deck views), 2 charges, text verbatim — closes the long-held charges question. The copy is temporary with costOverride 1." },
+  demonic_priest: { icon: "😈", name: 'Demonic Priest', cost: 2, type: 'creature', power: 2, health: 2, subtype: 'demon', generatedOnly: true, healOnDealtDamage: true, text: 'After this deals damage, heal yourself for that much.', cardSchool: 'grave', orig: "Demonic Priest", src: "Token of Profane Palace. Video digest 4A F8 (full face): cost 2, 2/2, text verbatim. Wave 4B O6 spoiler sheet read 3/2 — the gameplay face governs (spoiler sheets are pre-release; Awoken Horror precedent). healOnDealtDamage is the M51 priest mechanic." },
+
   thing_beneath_the_ice: { icon: "🧊", name: 'Thing Beneath the Ice', cost: 2, type: 'creature', power: 0, health: 3, subtype: 'monster', flipsTo: 'awoken_horror', flipOnSpells: 3 , orig: "Thing in the Ice", src: "Hipsters gallery + csv: cost 2, 0/3 — 'After you play your third or more spell in a turn, this flips into Awoken Horror' (the numeral closed by VIDEO-DIGEST-4B's O6 sheet); renamed off the MTG card" },
   awoken_horror: { icon: "👹", name: 'Awoken Horror', cost: 0, type: 'creature', power: 5, health: 4, subtype: 'monster', generatedOnly: true, afterFlip: { kind: 'stunStrongest' } , orig: "Awoken Horror (flip side)", src: "csv (Hipsters + v1.04 notes): 'final 5/4' — the O6 spoiler sheet read 6/5 (pre-release era); patch-final 5/4 governs. Printed cost 4; flip sides carry cost 0 in-engine like the Moonlight family. 'After this flips, stun the strongest enemy creature'" },
 
@@ -1050,7 +1068,7 @@ const CARDS = {
   // every turn start; hero life loss only — a guardian taking the blow for
   // you does not count as damage dealt to you). Cost was never recorded:
   // FORGE-COSTED at 4, argued in files/COSTING.md (Batch 8). Name is ours.
-  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', subtype: 'angel', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } , orig: "Eminent Archangel", src: "COSTING.md B8 \u2014 cost Forge-assigned" },
+  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 5, type: 'creature', subtype: 'angel', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 10 } , orig: "Eminent Archangel", src: "Video digest 4A F12 (full inspect face): cost 5 RECORDED, heal equal to damage dealt last turn, MAX 10 — supersedes the M67 Forge cost 4 / cap 7 (costForge retired M79; COSTING.md updated)" },
   // ——— Conversion batch 9 (M24, sprint): the second NEEDS-ENGINE conversion ———
   // The Ravenous Pit Lord of the record (no colour recorded, 7/5 final stats,
   // CONVERSION-AUDIT §3): Debut — raise the cost of all cards in your
@@ -1600,6 +1618,7 @@ class Game {
     const [chosen] = this.pendingDraft.options.splice(oi, 1);
     this.pendingDraft = null;
     this.addToHand(i, chosen, 'Signature Weaving');
+    this.players[i].draftedThisTurn = true; // M79
     this.log.push(`${this.players[i].hero.name} drafts ${def(chosen).name}`);
     this.cleanupDeaths(); this.checkWin();
     return chosen;
@@ -1624,6 +1643,8 @@ class Game {
     if (inst.discount) cost = Math.max(0, cost - inst.discount);
     if (inst.miracleDiscount && inst.miracleTurn === this.turnNumber) cost = Math.max(0, cost - inst.miracleDiscount);
     if (def(inst).selfDamageDiscount && p.selfDamageThisTurn > 0) cost = Math.max(0, cost - def(inst).selfDamageDiscount); // M70 Paincast Demon
+    if (def(inst).freeIfDrafted && p.draftedThisTurn) cost = 0; // M79 Aether Figment: drafted this turn -> free
+    if (inst.costOverride != null) cost = inst.costOverride; // M79 Mind Magnifier copies: cost changed TO this, absolute
     return cost;
   }
 
@@ -1678,6 +1699,7 @@ class Game {
     else if (m.kind === 'discountSelf') { inst.miracleDiscount = m.amount; inst.miracleTurn = this.turnNumber; this.log.push(`\u2728 Miracle! ${def(inst).name} was drawn \u2014 it costs ${m.amount} less this turn`); }
     else if (m.kind === 'summonSoldier') { if (p.board.length < 5) { this.summonToken(p, 'soldier'); this.log.push(`\u2728 Miracle! ${def(inst).name} was drawn \u2014 a Soldier takes the field`); } else this.log.push(`\u2728 Miracle! ${def(inst).name} was drawn \u2014 but the field is full`); }
     else if (m.kind === 'millSelf') { this.log.push(`\u2728 Miracle! ${def(inst).name} was drawn \u2014 ${p.hero.name} mills ${m.amount}`); for (let k = 0; k < m.amount; k++) this.drawCard(i, { mill: true }); }
+    else if (m.kind === 'damageRandomEnemy') { const foe = this.players[this.opp(i)]; const pickT = foe.board.length ? this.rng.pick(foe.board) : null; if (pickT) { pickT.damage += (m.amount || 1); this.log.push(`\u2728 Miracle! ${def(inst).name} was drawn \u2014 it strikes ${def(pickT).name} for ${m.amount || 1}`); this.cleanupDeaths(); } else { this.hurtHero(foe.idx, m.amount || 1, i); this.log.push(`\u2728 Miracle! ${def(inst).name} was drawn \u2014 it strikes ${foe.hero.name} for ${m.amount || 1}`); } }
   }
   // The ONLY way cards enter a hand. Weaver passive fires here for foreign/generated cards.
   addToHand(i, inst, createdBy) {
@@ -1710,7 +1732,7 @@ class Game {
     this.active = i; this.turnNumber++;
     p.ownTurns++;
     p.gainedMana = 0; // M67: last turn's gained mana is spent or gone (bonusMana = ramp pool, never reset)
-    p.selfDamageThisTurn = 0; p.spellsCastThisTurn = 0; // M70: the Paincast ledger is per-turn
+    p.selfDamageThisTurn = 0; p.spellsCastThisTurn = 0; p.draftedThisTurn = false; p.lastSpellId = null; // M79: Figment window + Magnifier memory reset each turn // M70: the Paincast ledger is per-turn
     this.turnDeaths = 0; // M68: the death ledger is per-turn
     if (p.spellTaxPending) { p.spellTax = p.spellTaxPending; p.spellTaxPending = 0; } // M50: the Tollwarden's toll applies for this turn only
     for (const q of this.players) if (q.bondTurn !== this.turnNumber) q._bondLife = q.life; // M53: the pact's ledger resets as turns roll
@@ -1878,6 +1900,7 @@ class Game {
       this.afterSpellPlayed(i);
       // M75 (Thing Beneath the Ice): spell-count flips — the third spell in a turn wakes what sleeps below.
       p.spellsCastThisTurn = (p.spellsCastThisTurn || 0) + 1;
+      p.lastSpellId = inst.cardId; // M79: the Magnifier remembers the last spell cast
       if (p.spellsCastThisTurn >= 3) for (const c of p.board.slice()) if (def(c).flipOnSpells && def(c).flipsTo) this.flipCreature(i, c);
     }
     this.advanceSchool(p, d);
@@ -2031,7 +2054,7 @@ class Game {
     if (!effect) return;
     const p = this.players[i]; const foe = this.players[this.opp(i)];
     // Ward: a warded enemy creature cannot be singled out by spells or effects.
-    if (target && target.kind === 'creature' && ['damageAny', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom'].includes(effect.kind)) {
+    if (target && target.kind === 'creature' && ['damageAny', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'pathExile', 'pacify'].includes(effect.kind)) {
       const ownerIdx = this.players.findIndex((q) => q.board.includes(target.inst));
       if (ownerIdx >= 0 && ownerIdx !== i && keywordsOf(target.inst).includes('ward')) {
         this.log.push(`${def(target.inst).name}'s Ward turns aside ${def(sourceInst).name}`);
@@ -2138,7 +2161,7 @@ class Game {
       case 'summonPerCount': { const n = effect.count === 'foeCreatures' ? this.players[this.opp(i)].board.length : p.board.filter((c) => def(c).subtype === effect.subtype).length; let s = 0; for (let k = 0; k < n && p.board.length < 5; k++) { this.summonToken(p, effect.token); s++; } if (s) this.log.push(`${def(sourceInst).name}: ${s} ${def(effect.token) ? '' : ''}thrall${s === 1 ? '' : 's'} answer${s === 1 ? 's' : ''} the call`); break; }
       case 'debuffAll': for (const q of this.players) for (const c of q.board) { c.permPower += effect.power; c.permHealth += effect.health; } this.cleanupDeaths(); break;
       case 'generateSpells': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly); for (let k = 0; k < effect.count; k++) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
-      case 'draftSpell': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
+      case 'draftSpell': { p.draftedThisTurn = true; const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
       case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === effect.subtype && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'debuffAndAdd': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.cleanupDeaths(); } this.addToHand(i, makeInstance(effect.cardId, null), srcName); break; }
@@ -2175,7 +2198,15 @@ class Game {
       case 'damageHeroPerAttacker': { const n = this._combatCount || 1; this.hurtHero(foe.idx, n, i); foe.tookDamageThisTurn = true; this.log.push(`${def(sourceInst).name}: ${n} damage to ${foe.hero.name} — one for each attacker`); break; }
       case 'shuffleSecondSun': { const sun = makeInstance('second_sun', null); const pos = this.rng.int(p.deck.length + 1); p.deck.splice(pos, 0, sun); this.log.push(`${p.hero.name} shuffles The Second Sun into their deck`); break; }
       case 'healCreatureAll': for (const c of p.board) c.damage = Math.max(0, c.damage - effect.amount); break;
-      case 'draftTrap': this.addToHand(i, makeInstance(this.rng.pick(TRAP_POOL), null), srcName); break;
+      case 'draftTrap': p.draftedThisTurn = true; this.addToHand(i, makeInstance(this.rng.pick(TRAP_POOL), null), srcName); break;
+      case 'healSelf': p.life += effect.amount; this.log.push(`${def(sourceInst).name}: ${p.hero.name} heals ${effect.amount}`); break;
+      case 'damageAllCreatures': { for (const q of this.players) for (const c of q.board) c.damage += effect.amount; this.log.push(`${def(sourceInst).name}: ${effect.amount} damage to EVERY creature`); break; }
+      case 'pathExile': { if (target && target.kind === 'creature') { target.inst.damage = 999; foe.bonusMana += 1; this.log.push(`${def(sourceInst).name}: ${def(target.inst).name} is destroyed — ${foe.hero.name} gains an empty mana gem in compensation`); } break; }
+      case 'pacify': { if (target && target.kind === 'creature') { target.inst.gainedKeywords = target.inst.gainedKeywords || []; if (!target.inst.gainedKeywords.includes('cantAttack')) target.inst.gainedKeywords.push('cantAttack'); this.log.push(`${def(sourceInst).name}: ${def(target.inst).name} is judged — it can no longer attack`); } break; }
+      case 'millDrawBoth': { for (const q of this.players) this.drawCard(q.idx, { mill: true }); for (const q of this.players) this.drawCard(q.idx); this.log.push(`${def(sourceInst).name}: each player mills a card, then draws a card`); break; }
+      case 'millCreaturesToGrave': { const creatures = p.deck.filter((c) => def(c).type === 'creature'); let moved = 0; for (let k = 0; k < (effect.count || 2) && creatures.length; k++) { const pickC = this.rng.pick(creatures); p.deck.splice(p.deck.indexOf(pickC), 1); p.graveyard.push(pickC); creatures.splice(creatures.indexOf(pickC), 1); moved++; } if (moved) this.log.push(`${def(sourceInst).name}: ${moved} creature(s) stitched straight into ${p.hero.name}'s graveyard`); break; }
+      case 'discardHandDraw': { const n = p.hand.length; p.graveyard.push(...p.hand); p.hand = []; for (let k = 0; k < (effect.draw || 3); k++) this.drawCard(i); this.log.push(`${def(sourceInst).name}: ${p.hero.name} discards ${n} and draws ${effect.draw || 3} fresh`); break; }
+      case 'copyLastSpell': { if (p.lastSpellId) { const cpy = makeInstance(p.lastSpellId, null); cpy.temporary = true; cpy.costOverride = 1; this.addToHand(i, cpy, srcName); this.log.push(`${def(sourceInst).name}: a fleeting copy of ${def(cpy).name}, its cost changed to 1`); } else this.log.push(`${def(sourceInst).name} finds no spell cast this turn to copy`); break; }
       case 'addCard': this.addToHand(i, makeInstance(effect.cardId, null), srcName); break;
       // --- school stage effects ---
       case 'discountSpell': {
@@ -2663,7 +2694,7 @@ function targetFor(game, i, inst) {
     if (!mine.length) return undefined;
     return { kind: 'creature', inst: mine.slice().sort((a, b) => powerOf(b) - powerOf(a))[0] };
   }
-  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage' || eff.kind === 'drainCreatureOrDamage' || eff.kind === 'markCreature') {
+  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage' || eff.kind === 'drainCreatureOrDamage' || eff.kind === 'markCreature' || eff.kind === 'pathExile' || eff.kind === 'pacify') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
@@ -2710,7 +2741,7 @@ function playMainPhase(game, i) {
     if (k === 'stealFromGrave' && game.players[game.opp(i)].graveyard.length === 0) return false;
     if (k === 'transformBoard' && p.board.length === 0) return false;
     if (k === 'destroyFlyer' && !game.players[game.opp(i)].board.some((c) => (def(c).keywords || []).includes('flying'))) return false;
-    if ((k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature') && !foeBoard()) return false;
+    if ((k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify') && !foeBoard()) return false;
     if ((k === 'transformFriendly' || k === 'buffAndDoom') && !p.board.length) return false;
     if (k === 'grimEchoes' && p.board.length === 0) return false;
     if (k === 'summonPerCount' && eff2.count === 'foeCreatures' && !foeBoard()) return false;
@@ -3043,7 +3074,7 @@ function drawTargetLine(x1, y1, x2, y2, ok) {
 function clearTargetLine() { try { if (tlSvg) tlSvg.style.display = 'none'; } catch (e) {} }
 function defNeedsTarget(d) {
   var eff = d && (d.effect || d.debut);
-  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom'].indexOf(eff.kind) >= 0);
+  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify'].indexOf(eff.kind) >= 0);
 }
 /* Floating nightmare wisps (plant: rise from mid-screen toward the enemy;
    drain: fall over the afflicted hero). Count scales with the event size. */
@@ -3480,6 +3511,14 @@ function effectText(d) {
       case 'draw': return 'Draw ' + e.count + ' card' + (e.count > 1 ? 's' : '') + '.';
       case 'millOpponent': return 'Mill ' + e.count + ' cards from the enemy deck.';
       case 'damageAny': return 'Deal ' + e.amount + ' damage to a creature or the enemy hero.' + (e.heroBonus ? ' Deals ' + (e.amount + e.heroBonus) + ' to the enemy hero instead.' : '');
+      case 'damageAllCreatures': return 'Deal ' + e.amount + ' damage to each creature.';
+      case 'pathExile': return 'Destroy an enemy creature. Your opponent gets an empty mana gem.';
+      case 'pacify': return "Give an enemy creature can't attack.";
+      case 'millDrawBoth': return 'Each player mills a card, then draws a card.';
+      case 'millCreaturesToGrave': return 'Add ' + (e.count || 2) + ' random creatures from your deck to your graveyard.';
+      case 'discardHandDraw': return 'Discard your hand, then draw ' + (e.draw || 3) + ' cards.';
+      case 'copyLastSpell': return 'Add a temporary copy of the last spell you played this turn to your hand. Change its cost to 1.';
+      case 'healSelf': return 'Heal yourself for ' + e.amount + '.';
       case 'damageHero': return 'Deal ' + e.amount + ' damage to the enemy hero.';
       case 'healHero': return 'Gain ' + e.amount + ' life.';
       case 'healFromWounds': return 'Gain life equal to the damage you were dealt last turn (max ' + (e.cap || 7) + ').';
@@ -3595,10 +3634,11 @@ function effectText(d) {
   if (d.flipOnSpells) parts.push('After you play your third or more spell in a turn, this flips into ' + (CARDS[d.flipsTo] ? CARDS[d.flipsTo].name : 'its other face') + '.');
   if (d.afterFlip) parts.push('After this flips: ' + eff(d.afterFlip));
   if (d.graveExitDouble) parts.push('After this leaves your graveyard, double its power.');
-  if (d.selfDamageDiscount) parts.push('Costs ' + d.selfDamageDiscount + ' less if you\'ve dealt damage to yourself this turn.');
+  if (d.selfDamageDiscount) parts.push('Costs ' + d.selfDamageDiscount + ' less if you’ve dealt damage to yourself this turn.');
   if (d.charges) parts.push('Activate (' + d.charges + ' charges): ' + eff(d.effect));
   if (d.emptyDeckWin) parts.push('If your deck is empty, you win the game.');
-  if (d.miracle) parts.push('\u2728 Miracle: ' + (d.miracle.kind === 'healSelf' ? 'Heal yourself for ' + d.miracle.amount + '.' : d.miracle.kind === 'discountSelf' ? 'Costs ' + d.miracle.amount + ' less this turn.' : d.miracle.kind === 'summonSoldier' ? 'Summon a Soldier.' : 'Mill yourself for ' + d.miracle.amount + '.') + ' (Resolves free when you draw this card.)');
+  if (d.freeIfDrafted) parts.push('Costs 0 if you’ve drafted this turn.');
+  if (d.miracle) parts.push('\u2728 Miracle: ' + (d.miracle.kind === 'healSelf' ? 'Heal yourself for ' + d.miracle.amount + '.' : d.miracle.kind === 'discountSelf' ? 'Costs ' + d.miracle.amount + ' less this turn.' : d.miracle.kind === 'summonSoldier' ? 'Summon a Soldier.' : d.miracle.kind === 'damageRandomEnemy' ? 'Deal ' + d.miracle.amount + ' damage to a random enemy.' : 'Mill yourself for ' + d.miracle.amount + '.') + ' (Resolves free when you draw this card.)');
   if (d.copyIfBlocked) parts.push('If this is blocked, summon a copy of it after combat.');
   if (d.drainAmp) parts.push('Drain effects you control drain ' + d.drainAmp + ' more.');
   if (d.activateCost) parts.push('Activate: pay ' + d.activateCost + ' mana.');
@@ -3903,7 +3943,7 @@ function boardHtml(p, isMe) {
       var k = (d.effect || d.debut) && (d.effect || d.debut).kind;
       var warded = (D(inst).keywords || []).indexOf('ward') >= 0;
       var flying = (D(inst).keywords || []).indexOf('flying') >= 0;
-      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && (k === 'buffCreature' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly' || k === 'buffAndDoom')) || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
+      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && (k === 'buffCreature' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly' || k === 'buffAndDoom')) || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
     }
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
     window.__faces = window.__faces || {};
@@ -4335,7 +4375,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M78 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M79 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4674,7 +4714,7 @@ function clickHand(uid) {
     flushEngineLog(); render(); return;
   }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
-  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom'].indexOf(targetedEff.kind) >= 0) {
+  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify'].indexOf(targetedEff.kind) >= 0) {
     var k = targetedEff.kind;
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'damageAny' || k === 'bounce') ? true : (k === 'grimEchoes' ? me.board.length > 0 : (k === 'buffCreature' ? me.board.length > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0)));

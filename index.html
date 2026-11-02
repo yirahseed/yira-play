@@ -185,6 +185,7 @@
   .q-note { font-size:10px; color:#8f83ad; }
   .hitflash { animation:hitFlash .38s ease-out; }
   @keyframes hitFlash { 30% { filter:brightness(1.9) saturate(2.2) hue-rotate(-45deg); } }
+  .floatnum.heal { color:#8bf5a8; }
   .floatnum { position:absolute; left:50%; top:4px; transform:translateX(-50%); font-size:17px; font-weight:900; color:#ff8fa3;
               text-shadow:0 1px 4px rgba(0,0,0,.9); animation:floatUp .95s ease-out forwards; z-index:6; pointer-events:none; }
   @keyframes floatUp { to { transform:translate(-50%,-28px); opacity:0; } }
@@ -2949,6 +2950,7 @@ var uiLog = [], lastEngineLog = 0, msg = '';
 var redrawSet = new Set(), pendingUid = null;
 var attackSet = new Set(), blockMap = {}, blockPick = null, aiAttackers = [];
 var blockResolver = null, recordCounted = false, inspectUid = null, inspectCardId = null;
+var matchStartedAt = 0;
 var handOpen = false;
 var lastManaPop = -1, logOpen = false, sheetOpen = false;
 var setup = { me: 'weaver', foe: 'bruiser', seat: 'first' };
@@ -3237,6 +3239,18 @@ function spawnPlayReveal(cardId) {
   } catch (e) {}
 }
 if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    try {
+      if ((typeof inspectUid !== 'undefined' && inspectUid !== null) || (typeof inspectCardId !== 'undefined' && inspectCardId !== null)) { closeInspect(); return; }
+      if (typeof logOpen !== 'undefined' && logOpen) { closeLog(); return; }
+      if (typeof sheetOpen !== 'undefined' && sheetOpen) { closeSheet(); return; }
+      if (typeof profileIdx !== 'undefined' && profileIdx !== null) { closeProfile(); return; }
+      if (typeof graveIdx !== 'undefined' && graveIdx !== null) { closeGrave(); return; }
+      if (typeof deckIdx !== 'undefined' && deckIdx !== null) { closeDeck(); return; }
+      if (typeof mode !== 'undefined' && mode === 'main' && typeof G !== 'undefined' && G && G.winner === null) showSheet();
+    } catch (err) {}
+    return;
+  }
   if (e.code !== 'Space' && e.key !== ' ') return;
   if (typeof mode === 'undefined' || typeof G === 'undefined' || !G) return;
   var b = document.querySelector ? document.querySelector('.actions button:not([disabled])') : null;
@@ -3295,7 +3309,7 @@ function heroProfileHtml() {
     '<button class="big" onclick="closeProfile()">Close</button></div></div>';
 }
 var graveSort = 'recent';
-function toggleGraveSort() { graveSort = graveSort === 'recent' ? 'cost' : 'recent'; render(); }
+function toggleGraveSort() { try { sfx('click'); } catch (e) {} graveSort = graveSort === 'recent' ? 'cost' : 'recent'; render(); }
 function showGraveyard(idx) { graveIdx = idx; render(); }
 function closeGrave() { graveIdx = null; render(); }
 function graveHtml() {
@@ -4159,7 +4173,7 @@ function sheetHtml() {
     '<button class="ghost big" onclick="sheetOpen=false;startMatch()">↻ Restart match</button>' +
     '<button class="ghost big" onclick="sheetConcede()">' + (concedeArmed ? '🏳 Tap again to yield the match' : '🏳 Concede') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;backToMenu()">🚪 Abandon match — back to menu</button>' +
-    '<p style="font-size:12px;color:#a793d6;text-align:center">Turn ' + (typeof G !== 'undefined' && G ? G.turnNumber : '—') + (typeof G !== 'undefined' && G && G.winner === null ? (G.active === humanIdx ? ' · your move' : ' · their move') : '') + ' · ❤️ you ' + (typeof G !== 'undefined' && G ? G.players[humanIdx].life : '—') + ' · foe ' + (typeof G !== 'undefined' && G ? G.players[aiIdx].life : '—') + '<br>The foe waits. Nothing moves while you are here.</p></div></div>';
+    '<p style="font-size:12px;color:#a793d6;text-align:center">Turn ' + (typeof G !== 'undefined' && G ? G.turnNumber : '—') + (typeof G !== 'undefined' && G && G.winner === null ? (G.active === humanIdx ? ' · your move' : ' · their move') : '') + ' · ❤️ you ' + (typeof G !== 'undefined' && G ? G.players[humanIdx].life : '—') + ' · foe ' + (typeof G !== 'undefined' && G ? G.players[aiIdx].life : '—') + (typeof climb !== 'undefined' && climb ? ' · ⛰️ Climb rung ' + climb.rung + ' of 5' : '') + '<br>The foe waits. Nothing moves while you are here.</p></div></div>';
 }
 function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
@@ -4312,6 +4326,20 @@ function m84Watch() {
       }
     });
     window.__dmgSnap = fresh;
+    if (!((window.__combatAge || 0) <= 1)) {
+      var lifeSnap = window.__lifeSnap || {}, freshLife = {};
+      G.players.forEach(function (p) { freshLife[p.idx] = p.life; });
+      G.players.forEach(function (p) {
+        var beforeL = lifeSnap[p.idx];
+        if (beforeL != null && freshLife[p.idx] !== beforeL) {
+          var bars = document.querySelectorAll('.hcluster');
+          var hel = bars && bars[p.idx === aiIdx ? 0 : 1];
+          var dl = freshLife[p.idx] - beforeL;
+          if (hel) floatNum(hel, (dl > 0 ? '+' : '') + dl, dl > 0 ? 'heal' : '');
+        }
+      });
+      window.__lifeSnap = freshLife;
+    }
     var foeTraps = G.players[aiIdx].traps.length;
     if (window.__foeTraps != null && foeTraps > window.__foeTraps) { var fds = document.querySelectorAll('.facedown'); var last = fds && fds[fds.length - 1]; if (last) last.classList.add('justarmed'); }
     window.__foeTraps = foeTraps;
@@ -4560,12 +4588,13 @@ function gameOverHtml() {
   var raceSvg = '';
   if (lifeSeries.length > 1) { var mxL = 30, WL = 280, HL = 46;
     var lpts = function (k) { return lifeSeries.map(function (sv, i) { return (6 + i * (WL - 12) / (lifeSeries.length - 1)).toFixed(1) + ',' + (HL - 4 - (Math.max(0, sv[k]) / mxL) * (HL - 8)).toFixed(1); }).join(' '); };
+    var durLine = matchStartedAt ? '<br>⏱ Match length: ' + Math.floor((Date.now() - matchStartedAt) / 60000) + ':' + ('0' + Math.floor(((Date.now() - matchStartedAt) % 60000) / 1000)).slice(-2) : '';
     raceSvg = '<br><svg width="' + WL + '" height="' + HL + '" viewBox="0 0 ' + WL + ' ' + HL + '" style="margin-top:6px;background:rgba(0,0,0,.25);border-radius:8px"><polyline points="' + lpts(0) + '" fill="none" stroke="#ffd76a" stroke-width="2"/><polyline points="' + lpts(1) + '" fill="none" stroke="#b79cff" stroke-width="2"/></svg>'; }
   var concedeLine = window.__conceded ? '<p style="color:#e8a0b4;font-size:13px">You yielded the match.</p>' : ''; window.__conceded = false;
   var s = G.stats;
   var statsLine = ('Turns: ' + G.players[humanIdx].ownTurns + ' · Nightmares planted: ' + s.nightmaresPlanted +
     ' · Life drained by Nightmares: ' + s.nightmareLifeDrained + ' · Traps triggered: ' + s.trapsTriggered +
-    ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + raceSvg + turnLine;
+    ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + raceSvg + durLine + turnLine;
   function box(title, text, buttons) {
     return '<div class="overlay"><div class="box">' + (title === 'Victory' ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<div class="faceoff"><div class="fo-side"><div class="portrait">' + heroPortrait(G.players[humanIdx].heroId) + '</div><small>' + esc(G.players[humanIdx].hero.name) + '</small></div><span class="fo-x">⚔️</span><div class="fo-side"><div class="portrait">' + heroPortrait(G.players[aiIdx].heroId) + '</div><small>' + esc(G.players[aiIdx].hero.name) + '</small></div></div><p>' + text + '</p>' +
       '<p style="color:#c4b6e8;font-size:13.5px">' + statsLine + '</p>' + buttons + '</div></div>';
@@ -4601,7 +4630,7 @@ function versusHtml() {
   function card(id, role) {
     var pos = (PORTRAIT_POS[id] || ['50% 15%', '50% 15%'])[1];
     return '<div class="vcard"><img src="' + PORTRAITS[id] + '" style="object-position:' + pos + '" alt="">' +
-      '<div class="vname">' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</div><div class="vrole">' + role + '</div></div>';
+      '<div class="vname">' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</div><div class="vrole">' + role + '</div><div style="font-size:11px;color:#c4b6e8;padding:2px 10px 9px;line-height:1.35">' + esc(HEROES[id].blurb || '') + '</div></div>';
   }
   return '<div class="versus">' + card(setup.me, 'You play · ' + HEROES[setup.me].life + ' life') + '<div class="vvs">⚔️</div>' + card(setup.foe, 'Enemy AI · ' + HEROES[setup.foe].life + ' life') + '</div>';
 }
@@ -4620,7 +4649,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M88 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M89 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4634,7 +4663,7 @@ function renderMenu() {
     versusHtml() +
     '<button class="big" onclick="startMatch()">Start match</button>' +
     '<button class="ghost big" onclick="openIntro()">🎓 How to play — 30 seconds</button>' +
-    '<div class="record">Your record on this device: ' + rec.w + ' wins · ' + rec.l + ' losses</div></div>' +
+    '<div class="record">Your record on this device: ' + rec.w + ' wins · ' + rec.l + ' losses' + ((rec.w + rec.l) > 0 ? ' · ' + Math.round(rec.w / (rec.w + rec.l) * 100) + '% win rate' : '') + '</div></div>' +
     '<div class="panel"><h2>🧗 The Climb</h2>' +
     '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Five rungs with the hero you picked above. You lead every rung; each enemy starts with more bonus life than the last. Karg guards the base — and Umbra waits at the summit. Lose once and the climb ends.</p>' +
     '<div class="ladder">' + CLIMB_RUNGS.map(function (r, i) { var done = climbBest() > i; return '<span class="rung' + (done ? ' done' : '') + '">' + (done ? '✓ ' : '') + (i + 1) + ' · ' + (SIGILS[r.hero] || '') + ' ' + esc(HEROES[r.hero].name.split(' ')[0]) + (r.bonus ? ' +' + r.bonus + '♥' : '') + '</span>'; }).join('<span class="pip-sep">›</span>') + '</div>' +
@@ -4719,7 +4748,7 @@ function collectionGroupsHtml() {
     if (collectionArt === 'painted') ids = ids.filter(function (id) { return typeof CARD_ART !== 'undefined' && CARD_ART[id]; });
     if (collectionArt === 'glyph') ids = ids.filter(function (id) { return !(typeof CARD_ART !== 'undefined' && CARD_ART[id]); });
     if (!ids.length) return '';
-    return '<div class="board-label" style="margin-top:14px">' + title + '</div><div class="hand">' +
+    return '<div class="board-label" style="margin-top:14px">' + title + ' · ' + ids.length + '</div><div class="hand">' +
       ids.map(function (id) { return cardHtml(fakeInst(id), 0, { showType: true, ribbon: !!NEW_CARDS[id] }); }).join('') + '</div>';
   }
   var ids = Object.keys(CARDS);
@@ -4758,7 +4787,7 @@ function chosenSchool(heroId) { try { var v = localStorage.getItem('yira_school_
 function chosenStance(heroId) { try { var v = localStorage.getItem('yira_stance_' + heroId); if (v && STANCES[v]) return v; } catch (e) {} return 'open'; }
 function loadoutLine(heroId) { var s = chosenSchool(heroId), t = chosenStance(heroId); return 'Schools: ' + (HERO_SCHOOLS[heroId] || []).map(function (x) { return SCHOOL_META[x].icon + ' ' + SCHOOL_META[x].name; }).join(' · ') + '<br>🏫 ' + (s ? SCHOOLS[s].icon + ' ' + esc(SCHOOLS[s].name) : 'No school') + ' · ' + (STANCES[t] ? STANCES[t].icon + ' ' + esc(STANCES[t].name) : '') + ' — set both in the deck builder.'; }
 function builderSetSchool(v) { try { localStorage.setItem('yira_school_' + builderHero, v); } catch (e) {} render(); }
-function builderSetStance(v) { try { localStorage.setItem('yira_stance_' + builderHero, v); } catch (e) {} render(); }
+function builderSetStance(v) { try { sfx('click'); } catch (e) {} try { localStorage.setItem('yira_stance_' + builderHero, v); } catch (e) {} render(); }
 /* M9.2: the default decks changed materially in M9 — retire custom decks
    saved against the old defaults once, so the new default is what plays. */
 try {
@@ -4788,7 +4817,7 @@ function deckErrors(heroId, ids) {
 }
 function activeDeckFor(heroId) { var c = loadCustomDeck(heroId); return (c && !deckErrors(heroId, c).length) ? c : null; }
 function openBuilder() { try { sfx('click'); } catch (e) {} builderHero = setup.me; builderDeck = (loadCustomDeck(builderHero) || DECKS[builderHero]).slice(); mode = 'builder'; render(); }
-function builderSetHero(h) { builderHero = h; builderDeck = (loadCustomDeck(h) || DECKS[h]).slice(); render(); }
+function builderSetHero(h) { try { sfx('click'); } catch (e) {} builderHero = h; builderDeck = (loadCustomDeck(h) || DECKS[h]).slice(); render(); }
 function builderAdd(id) { var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.length >= 30) return; if (builderDeck.filter(function (x) { return x === id; }).length >= cap) return; builderDeck.push(id); render(); }
 function builderRemove(id) { var i = builderDeck.indexOf(id); if (i >= 0) builderDeck.splice(i, 1); render(); }
 function builderReset() { builderDeck = DECKS[builderHero].slice(); render(); }
@@ -4875,6 +4904,7 @@ function renderBuilder() {
 
 /* ---------- match flow ---------- */
 function startMatch() {
+  matchStartedAt = Date.now();
   soundInit();
   sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null }; prevLife = {}; lifeSeries = []; lastSeriesTurn = -1; prevHandUids = {}; prevHandCount = -1; concedeArmed = false; reviewField = false;
   var seat = climb ? 'first' : setup.seat;
@@ -5049,10 +5079,10 @@ var busyAnim = false;
 function emblemEl(uid) {
   try { return (typeof document !== 'undefined' && document.querySelector) ? document.querySelector('.emblem[data-uid="' + uid + '"]') : null; } catch (e) { return null; }
 }
-function floatNum(el, txt) {
+function floatNum(el, txt, cls) {
   try {
     if (!el || !el.appendChild || typeof document === 'undefined' || !document.createElement) return;
-    var s = document.createElement('span'); s.className = 'floatnum'; s.textContent = txt; el.appendChild(s);
+    var s = document.createElement('span'); s.className = 'floatnum' + (cls ? ' ' + cls : ''); s.textContent = txt; el.appendChild(s);
     setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 950);
   } catch (e) {}
 }

@@ -814,7 +814,7 @@
 @keyframes amedalGlow { 0%, 100% { box-shadow: 0 3px 10px rgba(0,0,0,.55); } 50% { box-shadow: 0 0 13px 3px rgba(255,209,102,.6); } }
 .amedal.used { opacity: .45; filter: grayscale(.75); }
 .amedal-pips { margin-top: 2px; display: flex; gap: 3px; justify-content: center; min-height: 8px; }
-.amedal-pips i { width: 8px; height: 8px; border-radius: 50%; background: #ffd166; box-shadow: 0 0 4px rgba(255,209,102,.85); }
+.amedal-pips i { width: 8px; height: 8px; border-radius: 50%; background: #6db3ff; box-shadow: 0 0 5px rgba(109,179,255,.9); }
 .amedal-pips i.off { background: #4c4361; box-shadow: none; }
 .amedal-eye { position: absolute; top: -7px; right: -7px; font-size: 10px; background: rgba(20,14,34,.92); border: 1px solid rgba(200,170,255,.55); border-radius: 50%; width: 18px; height: 18px; line-height: 17px; text-align: center; }
 /* M71: the scrubbed card lifts in place — no clone while sliding */
@@ -853,6 +853,20 @@
   .mull-overlay { position:absolute; inset:0; z-index:20; background:rgba(7,4,15,.58); backdrop-filter:blur(2.5px); overflow-y:auto; display:flex; align-items:flex-start; justify-content:center; padding:18px 10px 30px; }
   .mullpage { width:100%; max-width:560px; }
   .mullpage .panel { background:rgba(19,13,34,.92); }
+
+  /* ===== M82: second compare-and-polish batch ===== */
+  .fragile-gem { font-size: 13px; display: inline-block; animation: medalPulse 1.8s ease-in-out infinite; border-radius: 50%; }
+  .foehand { position:absolute; top:2px; left:50%; transform:translateX(-50%); display:flex; z-index:4; pointer-events:none; }
+  .foehand i { width:17px; height:24px; margin-left:-7px; border-radius:4px; background:linear-gradient(160deg,#3d2a63,#1d1332); border:1px solid rgba(190,150,255,.5); box-shadow:inset 0 0 6px rgba(150,90,255,.35), 0 2px 4px rgba(0,0,0,.45); }
+  .foehand i:first-child { margin-left:0; }
+  .chip.trapchip { background:linear-gradient(165deg, rgba(75,42,114,.85), rgba(36,18,57,.85)); border-color:rgba(190,140,255,.55); color:#e2d2ff; }
+  .field .actions { background:radial-gradient(ellipse 130% 120% at 70% 50%, rgba(10,6,20,.55), rgba(10,6,20,0) 72%); border-radius:16px; padding:6px 4px; }
+  .shell.stage.bigcast::after { content:''; position:absolute; inset:0; z-index:15; pointer-events:none; background:radial-gradient(circle at 50% 42%, rgba(255,225,160,.38), rgba(255,180,80,.12) 42%, rgba(0,0,0,0) 68%); animation: bigcastFade .48s ease-out forwards; }
+  @keyframes bigcastFade { from { opacity:0; } 25% { opacity:1; } to { opacity:0; } }
+  .turn-sweep { font-family: Georgia, 'Times New Roman', serif !important; letter-spacing: 4px !important; text-transform: none !important; }
+  #turnbanner { font-family: Georgia, 'Times New Roman', serif; letter-spacing: 5px; }
+  .logo { font-family: Georgia, 'Times New Roman', serif; letter-spacing: 10px; background: linear-gradient(180deg, #ffe9a8, #c9a227); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+  .card.miracled { box-shadow: 0 0 0 2px rgba(255,225,150,.9), 0 0 18px 3px rgba(255,210,110,.55) !important; }
 </style>
 </head>
 <body>
@@ -2960,6 +2974,8 @@ function sfx(name) {
     case 'draw': tone(620, 940, 0.07, 'triangle', 0.22); noiseBurst(0.05, 0.14, 2600); break;
     case 'flip': tone(280, 940, 0.20, 'sine', 0.24); tone(1560, 1560, 0.14, 'sine', 0.10, 0.09); noiseBurst(0.10, 0.10, 1800); break;
     case 'stun': tone(620, 620, 0.07, 'square', 0.14); tone(520, 520, 0.07, 'square', 0.14, 0.09); tone(430, 380, 0.10, 'square', 0.13, 0.18); break;
+    case 'miracle': tone(880, 880, 0.12, 'sine', 0.16); tone(1174, 1174, 0.14, 'sine', 0.15, 0.08); tone(1568, 1568, 0.22, 'sine', 0.14, 0.16); break;
+    case 'death': tone(140, 55, 0.28, 'sine', 0.30); noiseBurst(0.16, 0.12, 300); break;
     case 'heal': tone(523, 523, 0.12, 'sine', 0.20); tone(784, 784, 0.16, 'sine', 0.18, 0.07); break;
     case 'victory': [523, 659, 784, 1046].forEach(function (f, i) { tone(f, f, 0.22, 'triangle', 0.42, i * 0.11); }); break;
     case 'defeat': [392, 330, 262, 196].forEach(function (f, i) { tone(f, f, 0.25, 'triangle', 0.38, i * 0.13); }); break;
@@ -3288,7 +3304,7 @@ function emblemIcons(inst, ownerIdx) {
   if (d.legendary) out += '<span class="eicon" title="legendary">👑</span>';
   /* M67: no ◆ here — a signature is carried by its two-school border (M64 law). */
   if (inst.starterOwner !== ownerIdx) out += '<span class="eicon" title="Generated — this card did not start in a deck">✦</span>';
-  (d.keywords || []).forEach(function (k) { out += '<span class="eicon" title="' + esc(k) + '">' + (KW_ICONS[k] || '•') + '</span>'; });
+  (d.keywords || []).concat(inst.gainedKeywords || []).forEach(function (k) { out += '<span class="eicon" title="' + esc(k) + '">' + (KW_ICONS[k] || '•') + '</span>'; });
   if (d.moonlight) out += '<span class="eicon' + ((typeof G !== 'undefined' && G && G.active === ownerIdx && G.availableMana(G.players[ownerIdx]) === 2) ? ' moonready' : '') + '" title="moonlight — flips if you end your turn with exactly 2 mana available">🌙</span>';
   if (d.afterFlip) out += '<span class="eicon" title="the flipped face">🌙</span>';
   return out;
@@ -3370,7 +3386,7 @@ function checkPhaseSweep() {
     if (first) return;
     var node = document.createElement('div');
     node.className = 'turn-sweep ' + phase;
-    node.textContent = phase === 'me' ? 'YOUR TURN' : 'THEIR TURN';
+    node.textContent = phase === 'me' ? 'Your Turn' : "Opponent's Turn";
     document.body.appendChild(node);
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1300);
   } catch (e) {}
@@ -3469,9 +3485,13 @@ function soundWatch() {
   var flipN = 0, stunN = 0;
   G.players.forEach(function (p) { p.board.forEach(function (c) { var dc = D(c); if (dc.afterFlip) flipN++; if (c.stunned) stunN++; }); });
   if (sndSnap.flips != null && flipN > sndSnap.flips) sfx('flip');
+  var graveC = 0; G.players.forEach(function (p) { p.graveyard.forEach(function (c) { if (D(c).type === 'creature') graveC++; }); });
+  if (sndSnap.graveC != null && graveC > sndSnap.graveC) sfx('death');
+  var mirN = 0; G.log.forEach(function (l) { if (String(l).indexOf('Miracle!') >= 0) mirN++; });
+  if (sndSnap.mirN != null && mirN > sndSnap.mirN) sfx('miracle');
   if (sndSnap.stuns != null && stunN > sndSnap.stuns) sfx('stun');
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, mirN: mirN };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
 }
 /* M4.3 battlefield staging: one-shot figure animations computed by the
@@ -3741,7 +3761,7 @@ function typeTabHtml(d) {
 function cardHtml(inst, ownerIdx, opts) {
   opts = opts || {};
   var d = D(inst);
-  var cls = 'card ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.power === undefined ? ' nostats' : '') + (opts.cls || '');
+  var cls = 'card ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.power === undefined ? ' nostats' : '') + (inst.miracleDiscount && typeof G !== 'undefined' && G && inst.miracleTurn === G.turnNumber ? ' miracled' : '') + (opts.cls || '');
   if (inst.stunned) cls += ' stunned';
   if (inst.miracleDiscount && typeof G !== 'undefined' && G && inst.miracleTurn === G.turnNumber) cls += ' miracle-live';
   if (inst.temporary) cls += ' temporary';
@@ -3887,7 +3907,7 @@ function heroBarHtml(p, isMe) {
   var gpips = '';
   for (var gk = 0; gk < Math.min(p.maxMana, 12); gk++) gpips = '<i class="' + (gk < heldN ? 'held' : (gk < p.maxMana - avail ? 'off' : '')) + '"></i>' + gpips;
   if (isMe && p.maxMana < 12 && G.winner === null) gpips = '<i class="nextpip"></i>' + gpips;
-  var held = '';
+  var held = (isMe && p.fragileGem) ? '<span class="fragile-gem" title="Fragile gem — +1 mana this turn; it is spent the first turn you use mana">\uD83D\uDC8E</span>' : '';
   var ghost = '';
   try {
     // M31 repair: keyed on the real state (attackSet / aiAttackers /
@@ -3997,7 +4017,7 @@ function d2type(inst) { return D(inst).type; }
 function chipsHtml(p, isMe) {
   var out = '<div class="chips">';
   p.traps.forEach(function (t) {
-    if (isMe) out += '<span class="chip" onclick="disarm(' + t.uid + ')" title="click to disarm">🪤 ' + esc(D(t).name) + ' (reserved ' + t.reservedCost + ') <span class="chip-eye" onclick="event.stopPropagation();openInspect(null,' + t.uid + ')" title="Read this trap">👁</span> ✕</span>';
+    if (isMe) out += '<span class="chip trapchip" onclick="disarm(' + t.uid + ')" title="click to disarm">🪤 ' + esc(D(t).name) + ' (reserved ' + t.reservedCost + ') <span class="chip-eye" onclick="event.stopPropagation();openInspect(null,' + t.uid + ')" title="Read this trap">👁</span> ✕</span>';
     // opponent traps are shown face-down on their board instead
   });
   /* M71: artifacts left the chip row — they live as medallions beside the
@@ -4138,7 +4158,7 @@ function inspectHtml() {
 function captureScroll() { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; return n ? n.scrollTop : 0; } catch (e) { return 0; } }
 function restoreScroll(y) { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; if (n) n.scrollTop = y; } catch (e) {} }
 var concedeArmed = false;
-function concede() { if (!G || G.winner !== null) return; if (!concedeArmed) { concedeArmed = true; msg = 'Concede? Tap the flag again to yield the match.'; render(); return; } concedeArmed = false; G.winner = aiIdx; try { finishCheck(); } catch (e) {} render(); }
+function concede() { if (!G || G.winner !== null) return; if (!concedeArmed) { concedeArmed = true; msg = 'Concede? Tap the flag again to yield the match.'; render(); return; } concedeArmed = false; window.__conceded = true; G.winner = aiIdx; try { finishCheck(); } catch (e) {} render(); }
 var endArmed = false, endArmFresh = false;
 /* M64 (Jesse): titles and descriptions are MEASURED after every render and
    shrunk until fully visible — the full card title and the full description,
@@ -4173,7 +4193,7 @@ function m81Watch() {
       return; }
     // spell-cast dim: the newest play event is a spell -> the arena dims so the moment owns the screen
     var evs = G.playEvents || [];
-    if (evs.length && evs[evs.length - 1] !== m81Watch._lastEv) { m81Watch._lastEv = evs[evs.length - 1]; var dd = D({ cardId: evs[evs.length - 1].cardId }); if (dd && dd.type === 'spell') { var sh = document.querySelector('.shell.stage'); if (sh) { sh.classList.add('casting'); setTimeout(function () { try { sh.classList.remove('casting'); } catch (e) {} }, 480); } } }
+    if (evs.length && evs[evs.length - 1] !== m81Watch._lastEv) { m81Watch._lastEv = evs[evs.length - 1]; var dd = D({ cardId: evs[evs.length - 1].cardId }); if (dd && dd.type === 'spell') { var sh = document.querySelector('.shell.stage'); if (sh) { sh.classList.add('casting'); if ((dd.cost || 0) >= 6) sh.classList.add('bigcast'); setTimeout(function () { try { sh.classList.remove('casting'); sh.classList.remove('bigcast'); } catch (e) {} }, 480); } } }
     // deck peril pills (the original's own notices)
     for (var pi = 0; pi < 2; pi++) { var now = G.players[pi].deck.length, was = __m81Decks[pi]; __m81Decks[pi] = now;
       if (was > 3 && now <= 3 && now > 0) m81Pill((pi === humanIdx ? 'Your deck: ' : 'Enemy deck: ') + now + ' card' + (now === 1 ? '' : 's') + ' left!');
@@ -4201,7 +4221,7 @@ function render() {
   try {
     if (typeof G !== 'undefined' && G && typeof mode !== 'undefined' && mode !== 'menu' && mode !== 'collection' && G.winner === null) {
       if (window.__bannerGame !== G) { window.__bannerGame = G; window.__bannerActive = G.active; }
-      else if (window.__bannerActive !== G.active) { window.__bannerActive = G.active; showTurnBanner(G.active === humanIdx ? 'YOUR TURN' : 'THEIR TURN', G.active !== humanIdx); }
+      else if (window.__bannerActive !== G.active) { window.__bannerActive = G.active; showTurnBanner(G.active === humanIdx ? 'Your Turn' : "Opponent's Turn", G.active !== humanIdx); }
     }
   } catch (e) {}
 }
@@ -4234,6 +4254,7 @@ function renderBody() {
   html += heroBarHtml(foe, false);
   html += '<div class="field">';
   html += artDockHtml(foe, false) + artDockHtml(me, true);
+  html += '<div class="foehand" title="' + esc(foe.hero.name) + ' holds ' + foe.hand.length + ' cards">' + foe.hand.map(function () { return '<i></i>'; }).join('') + '</div>';
   html += boardHtml(foe, false) + chipsHtml(foe, false);
   html += '<div class="field-sp"></div>';
   /* M55 (Jesse): no phase text in the arena's center — the buttons and
@@ -4379,12 +4400,13 @@ function gameOverHtml() {
   var turnLine = '';
   if (lifeSeries.length > 2) { var wi = G.winner === humanIdx ? 0 : 1; var lastNotAhead = -1; lifeSeries.forEach(function (s2, i2) { if (!(s2[wi] > s2[1 - wi])) lastNotAhead = i2; }); turnLine = '<br>' + (lastNotAhead < 0 ? '🏁 Wire to wire: the winner led from the very first turn.' : lastNotAhead >= lifeSeries.length - 1 ? '🏁 Decided at the death — the lead changed hands on the final turn.' : '🏁 Turning point: turn ' + (lastNotAhead + 2) + ' — from there, the winner never trailed again.'); }
   var raceLine = lifeSeries.length > 1 ? '<br>Life race — you: ' + lifeSeries.map(function (s) { return s[0]; }).join(' → ') + ' · foe: ' + lifeSeries.map(function (s) { return s[1]; }).join(' → ') : '';
+  var concedeLine = window.__conceded ? '<p style="color:#e8a0b4;font-size:13px">You yielded the match.</p>' : ''; window.__conceded = false;
   var s = G.stats;
   var statsLine = ('Turns: ' + G.players[humanIdx].ownTurns + ' · Nightmares planted: ' + s.nightmaresPlanted +
     ' · Life drained by Nightmares: ' + s.nightmareLifeDrained + ' · Traps triggered: ' + s.trapsTriggered +
     ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + turnLine;
   function box(title, text, buttons) {
-    return '<div class="overlay"><div class="box"><div class="ribbon"><span>' + title + '</span></div><p>' + text + '</p>' +
+    return '<div class="overlay"><div class="box"><div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<p>' + text + '</p>' +
       '<p style="color:#c4b6e8;font-size:13.5px">' + statsLine + '</p>' + buttons + '</div></div>';
   }
   if (climb) {
@@ -4437,7 +4459,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M81 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M82 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

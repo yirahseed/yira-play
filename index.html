@@ -581,6 +581,7 @@
     .gems-col span { width:11px; height:11px; }
     .hand.fan { padding:14px 2px 4px; }
     .hand.fan .card { scale:.6; }
+    .shell.stage .scrollzone { padding-bottom:196px; }
     .hand.fan.engaged { --spread:1.35; }
     .hand.fan.engaged .card { scale:.8; }
     .hand.fan.mini { height:52px; padding-top:4px; }
@@ -692,12 +693,17 @@
      pips, pile — never hide under cards again; touches still ghost
      through), unaffordable fan cards fade by light not by translucency,
      mana failures shake instead of speaking. --- */
-  .shell.stage .mybar-wrap { position:relative; z-index:9; transition:margin-bottom .32s ease; }
+  .shell.stage .mybar-wrap { position:relative; z-index:9; }
   /* M73 (Jesse, screenshot ruling): when the hand opens, the player's hero
      bar RISES out of the fan's footprint — the HUD is never buried under
      the cards. The fan owns the bottom band alone; the hero cluster sits
      at its left shoulder, the way the reference games stage it. */
-  .shell.handopen .mybar-wrap { margin-bottom:136px; }
+  /* M91 (Jesse): the hero bar NEVER moves and is never covered — in
+     either hand state. The scrollzone permanently reserves the open
+     fan's full height at the stage's foot, so the bar's home sits above
+     the fan's reach at rest and open alike; the field's middle absorbs
+     the space, the way an arena does. (Supersedes the M73 rise.) */
+  .shell.stage .scrollzone { padding-bottom:224px; }
   .shell.stage .hand.fan .card { scale:.76; }
   .hand.fan .card.unaffordable { filter:saturate(.5) brightness(.74); }
   @keyframes cardShake { 0%,100% { margin-top:0 } 25% { margin-top:-5px } 55% { margin-top:2px } 80% { margin-top:-2px } }
@@ -4654,7 +4660,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M90 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M91 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -5315,6 +5321,12 @@ render();
      drags the very card you were just reading. */
   function liftClear() { if (scrubEl) { scrubEl.classList.remove('lifted'); scrubEl = null; } }
   function scrubPick(e) {
+    /* M91 (Jesse): once the finger has risen 26px with a card lifted, the
+       pick is LOCKED — horizontal drift no longer re-targets a neighbour.
+       Diagonal drags used to hand the drag to whatever card sat under the
+       exit X; only a perfectly straight push kept the grabbed card. */
+    if (scrubFrozen) return;
+    if (scrubEl && startY - e.clientY > 26) { scrubFrozen = true; return; }
     var fanEl = document.querySelector ? document.querySelector('.hand.fan') : null;
     if (!fanEl) return;
     var cards = fanEl.querySelectorAll('.card');
@@ -5349,6 +5361,13 @@ render();
       if (hoverTimer) clearTimeout(hoverTimer);
       hideHover(); suppressClickUntil = Date.now() + 300;
       toggleHand(true);
+      /* M91 (Jesse): the SAME stroke that opens the hand can keep going —
+         slide to browse, push up to lift a card out. The old code spent
+         the stroke on opening alone and made him start over. fanTop is
+         measured off the handzone (no bloom transform on it) + its pad. */
+      handTouch = true; startX = e.clientX; startY = e.clientY; scrubCenters = null; scrubFrozen = false;
+      var hzN = e.target.closest('.handzone');
+      if (hzN) { try { fanTopY = hzN.getBoundingClientRect().top + 14; } catch (err) {} }
       return;
     }
     /* M71: a touch ANYWHERE in the open hand's band arms the scrub — the
@@ -5356,7 +5375,7 @@ render();
     var hzT = e.target.closest('.handzone');
     if (hzT && hzT.querySelector) {
       var fanQ = hzT.querySelector('.hand.fan');
-      if (fanQ && !fanQ.classList.contains('mini')) { handTouch = true; startX = e.clientX; startY = e.clientY; try { fanTopY = fanQ.getBoundingClientRect().top; } catch (err) {} }
+      if (fanQ && !fanQ.classList.contains('mini')) { handTouch = true; scrubFrozen = false; startX = e.clientX; startY = e.clientY; try { fanTopY = fanQ.getBoundingClientRect().top; } catch (err) {} }
     }
     var card = e.target.closest('.hand.fan .card');
     if (!card) {
@@ -5378,14 +5397,14 @@ render();
       toggleHand(true);
       return;
     }
-    pressEl = card; pressUid = Number(card.getAttribute('data-uid')); startX = e.clientX; startY = e.clientY;
+    pressEl = card; pressUid = Number(card.getAttribute('data-uid')); startX = e.clientX; startY = e.clientY; scrubFrozen = false;
     var fanEl = card.closest('.hand.fan'); if (fanEl) { fanEl.classList.add('engaged'); try { fanTopY = fanEl.getBoundingClientRect().top; } catch (err) {} }
     hideHover();
     var held = card;
     hoverTimer = setTimeout(function () { if (pressEl === held && !scrubbing) showHover(held); }, 200);
   }, true);
   var dirLock = null, scrolled = false, lastX = 0, dragSrcX = 0, dragSrcY = 0;
-  var scrubbing = false, scrubEl = null, handTouch = false, fanTopY = 0, scrubCenters = null;
+  var scrubbing = false, scrubEl = null, handTouch = false, fanTopY = 0, scrubCenters = null, scrubFrozen = false;
   document.addEventListener('pointermove', function (e) {
     if (!pressEl && !handTouch) return;
     /* M71 hand v3 (the LoR model): any slide inside the hand band scrubs —
@@ -5393,12 +5412,12 @@ render();
        of the band converts the lifted card into the play drag. No
        direction lock to fight, no clone to rebuild per card. */
     if (scrubbing) {
-      if (pressEl && e.clientY < fanTopY - 34) { liftClear(); scrubbing = false; scrubCenters = null; }
+      if (pressEl && e.clientY < fanTopY + 26) { liftClear(); scrubbing = false; scrubCenters = null; }
       else { scrubPick(e); return; }
     }
     if (!dragging && (pressEl || handTouch)) {
       var mdx = e.clientX - startX, mdy = e.clientY - startY;
-      if (Math.sqrt(mdx * mdx + mdy * mdy) > 6 && e.clientY > fanTopY - 34) { scrubbing = true; scrubCenters = null; hideHover(); scrubPick(e); return; }
+      if (Math.sqrt(mdx * mdx + mdy * mdy) > 6 && e.clientY > fanTopY + 26) { scrubbing = true; scrubCenters = null; hideHover(); scrubPick(e); return; }
     }
     var dx = e.clientX - startX, dy = e.clientY - startY;
     if (!dragging && pressEl && Math.sqrt(dx * dx + dy * dy) > 10) {
@@ -5433,7 +5452,7 @@ render();
   }, true);
   document.addEventListener('pointerup', function (e) {
     document.querySelectorAll('.hand.fan.engaged').forEach(function (n) { n.classList.remove('engaged'); });
-    if (scrubbing) { scrubbing = false; scrubCenters = null; handTouch = false; liftClear(); hideHover(); suppressClickUntil = Date.now() + 300; pressEl = null; return; }
+    if (scrubbing) { scrubbing = false; scrubFrozen = false; scrubCenters = null; handTouch = false; liftClear(); hideHover(); suppressClickUntil = Date.now() + 300; pressEl = null; return; }
     handTouch = false; dirLock = null;
     if (!dragging && pressEl && hovering) { hideHover(); suppressClickUntil = Date.now() + 400; pressEl = null; return; }
     if (overlayPress) { if (hovering) suppressClickUntil = Date.now() + 400; hideHover(); overlayPress = null; }

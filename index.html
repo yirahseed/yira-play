@@ -930,6 +930,9 @@
   .bigcard.legendary { position:relative; overflow:hidden; }
   .bigcard.legendary::after { content:''; position:absolute; inset:-40%; background:linear-gradient(115deg, transparent 42%, rgba(255,230,160,.20) 50%, transparent 58%); animation: foilSweep 3.4s ease-in-out infinite; pointer-events:none; }
   @keyframes foilSweep { 0%, 55% { transform: translateX(-55%); } 90%, 100% { transform: translateX(55%); } }
+
+  /* ===== M87: seventh compare-and-polish batch ===== */
+  .amedal.justarmed { animation: trapArmIn .8s ease both; }
 </style>
 </head>
 <body>
@@ -3296,7 +3299,7 @@ function graveHtml() {
   p.graveyard.slice().reverse().forEach(function (inst) { if (!gcounts[inst.cardId]) { gcounts[inst.cardId] = 0; gorder.push(inst.cardId); } gcounts[inst.cardId]++; });
   var rows = p.graveyard.length ? gorder.map(function (id) {
     var d = CARDS[id];
-    return '<div class="brow" style="border-left:3px solid ' + schoolHex(d) + '"><span class="bcost">' + d.cost + '</span><div class="bmain"><div class="bname">' + (d.icon || '') + ' ' + esc(d.name) + (gcounts[id] > 1 ? ' <span class="bcount">×' + gcounts[id] + '</span>' : '') + '</div><div class="btext">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div></div></div>';
+    return '<div class="brow" style="border-left:3px solid ' + schoolHex(d) + ';cursor:pointer" onclick="openInspectCard(\'' + id + '\')"><span class="bcost">' + d.cost + '</span><div class="bmain"><div class="bname">' + (d.icon || '') + ' ' + esc(d.name) + (gcounts[id] > 1 ? ' <span class="bcount">×' + gcounts[id] + '</span>' : '') + '</div><div class="btext">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div></div></div>';
   }).join('') : '<p style="color:#a793d6">The graveyard is empty.</p>';
   var gtypes = {}; p.graveyard.forEach(function (c) { var t = D(c).type; gtypes[t] = (gtypes[t] || 0) + 1; });
   var gsub = p.graveyard.length ? '<p style="text-align:center;color:#a793d6;font-size:12.5px;margin:2px 0 8px">' + p.graveyard.length + ' cards · ' + Object.keys(gtypes).map(function (t) { return gtypes[t] + ' ' + t + (gtypes[t] === 1 ? '' : 's'); }).join(' · ') + '</p>' : '';
@@ -3465,7 +3468,7 @@ function spawnDrawFlight(idx, delay) {
     var H = window.innerHeight || 700, W = window.innerWidth || 400;
     var src = anchorPoint('pile-' + idx, { x: W * 0.8, y: idx === aiIdx ? H * 0.08 : H * 0.9 });
     var dst = { x: W / 2, y: idx === aiIdx ? H * 0.1 : H * 0.92 };
-    var handEl = document.querySelector ? document.querySelector(idx === humanIdx ? '.hand' : '.herobar.foe') : null;
+    var handEl = document.querySelector ? (idx === humanIdx ? document.querySelector('.hand') : (document.querySelector('.foehand') || document.querySelector('.herobar.foe'))) : null;
     if (handEl && handEl.getBoundingClientRect) { var r = handEl.getBoundingClientRect(); dst = { x: r.left + r.width / 2, y: r.top + (idx === aiIdx ? r.height / 2 : 26) }; }
     var node = document.createElement('div');
     node.className = 'fx-drawback';
@@ -3939,7 +3942,7 @@ function deckHtml() {
   var nm = nightmaresIn(p.deck);
   return '<div class="overlay" onclick="closeDeck()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">🂠 Your deck — ' + p.deck.length + ' left</h2>' +
     '<p style="text-align:center;color:#c4b6e8;font-size:13px">' + (nm ? '🌑 ' + nm + ' Nightmare' + (nm === 1 ? '' : 's') + ' buried inside' : 'No Nightmares inside') + ' · composition, not order</p>' +
-    rows.map(function (r) { return '<div style="display:flex;justify-content:space-between;padding:3px 2px;border-bottom:1px solid rgba(200,170,255,.09);font-size:13.5px"><span>' + (r.d.icon || '') + ' ' + esc(r.d.name) + '</span><span style="color:#a793d6">💧' + r.d.cost + ' · ×' + r.n + '</span></div>'; }).join('') +
+    rows.map(function (r) { return '<div style="display:flex;justify-content:space-between;padding:3px 2px;border-bottom:1px solid rgba(200,170,255,.09);font-size:13.5px;cursor:pointer" onclick="openInspectCard(\'' + r.id + '\')"><span>' + (r.d.icon || '') + ' ' + esc(r.d.name) + '</span><span style="color:#a793d6">💧' + r.d.cost + ' · ×' + r.n + '</span></div>'; }).join('') +
     '<button class="ghost big" onclick="closeDeck();showGraveyard(' + humanIdx + ')">🪦 See my graveyard</button><button class="big" onclick="closeDeck()">Close</button></div></div>';
 }
 function showDeck(idx) {
@@ -4000,7 +4003,7 @@ function heroBarHtml(p, isMe) {
         return '<i style="transform:rotate(' + (bOff * 7).toFixed(1) + 'deg) translateY(' + (Math.abs(bOff) * 1.1).toFixed(1) + 'px)' + (bi ? ';margin-left:-6px' : '') + ';z-index:' + (bi + 1) + '"></i>';
       }).join('') + '</span> ' + p.hand.length;
   return '<div class="herobar' + (isMe ? ' me' : ' foe') + (G && G.current === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
-    '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (isMe && p.life <= 8 && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="portrait">' + heroPortrait(p.heroId) +
+    '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (((isMe && p.life <= 8) || (!isMe && p.life <= 6)) && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="portrait">' + heroPortrait(p.heroId) +
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div>' +
     '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
     '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + (G.reservedMana(p) ? '<span class="held-num">' + G.reservedMana(p) + ' held</span>' : '') + '</div>' +
@@ -4143,16 +4146,17 @@ function sheetConcede() { if (concedeArmed) { sheetOpen = false; concede(); } el
 function sheetHtml() {
   return '<div class="overlay" onclick="closeSheet()"><div class="box" style="max-width:340px" onclick="event.stopPropagation()"><h2 style="text-align:center">⏸ Paused</h2>' +
     '<button class="big" onclick="closeSheet()">▶ Resume</button>' +
+    '<button class="ghost big" onclick="toggleMute();showSheet()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;showLog()">📜 Battle log</button>' +
     '<button class="ghost big" onclick="sheetConcede()">' + (concedeArmed ? '🏳 Tap again to yield the match' : '🏳 Concede') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;backToMenu()">🚪 Abandon match — back to menu</button>' +
-    '<p style="font-size:12px;color:#a793d6;text-align:center">The foe waits. Nothing moves while you are here.</p></div></div>';
+    '<p style="font-size:12px;color:#a793d6;text-align:center">Turn ' + (typeof G !== 'undefined' && G ? G.turnNumber : '—') + (typeof G !== 'undefined' && G && G.winner === null ? (G.active === humanIdx ? ' · your move' : ' · their move') : '') + ' · ❤️ you ' + (typeof G !== 'undefined' && G ? G.players[humanIdx].life : '—') + ' · foe ' + (typeof G !== 'undefined' && G ? G.players[aiIdx].life : '—') + '<br>The foe waits. Nothing moves while you are here.</p></div></div>';
 }
 function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
 function logHtml() {
-  return '<div class="overlay" onclick="closeLog()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">📜 Recent events</h2><div style="font-size:13px;line-height:1.55">' +
-    (uiLog.length ? uiLog.map(function (l) { return esc(l); }).join('<br>') : 'Nothing has happened yet.') +
+  return '<div class="overlay" onclick="closeLog()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">📜 Recent events</h2><div id="log" style="font-size:13px;line-height:1.55">' +
+    (uiLog.length ? uiLog.slice().reverse().map(function (l) { return l; }).join('<br>') : 'Nothing has happened yet.') +
     '</div><button class="big" onclick="closeLog()">Close</button></div></div>';
 }
 /* M39: the matchup splash — every top card game frames the duel before
@@ -4230,7 +4234,7 @@ function inspectHtml() {
   var stats = '';
   var inGrave = false; try { inGrave = G && G.players.some(function (pp) { return pp.graveyard.indexOf(inst) >= 0; }); } catch (e) {}
   if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span style="color:#ffd28a">' + d.power + '⚔</span><span style="color:#9df0b6">' + d.health + '♥</span></div>' : '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
-  return '<div class="overlay" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.legendary ? ' legendary' : '') + '"' + sigStyle(d) + '>' +
+  return '<div class="overlay" style="background:radial-gradient(ellipse at 50% 36%, ' + schoolHex(d) + '2e, rgba(6,4,12,.84) 62%)" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.legendary ? ' legendary' : '') + '"' + sigStyle(d) + '>' +
     '<div class="cost">' + d.cost + '</div>' + typeTabHtml(d) + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '') +
     '<div class="ctype">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div><div class="ctext">' + esc(effectText(d)) + '</div>' +
@@ -4302,6 +4306,9 @@ function m84Watch() {
     var foeTraps = G.players[aiIdx].traps.length;
     if (window.__foeTraps != null && foeTraps > window.__foeTraps) { var fds = document.querySelectorAll('.facedown'); var last = fds && fds[fds.length - 1]; if (last) last.classList.add('justarmed'); }
     window.__foeTraps = foeTraps;
+    var foeArts = G.players[aiIdx].artifacts.length;
+    if (window.__foeArts != null && foeArts > window.__foeArts) { var ms = document.querySelectorAll('.artdock.foe .amedal'); var lm = ms && ms[ms.length - 1]; if (lm) lm.classList.add('justarmed'); }
+    window.__foeArts = foeArts;
     var me = G.players[humanIdx];
     if (G.active === humanIdx && G.winner === null && window.__perilTurn !== G.turnNumber) {
       window.__perilTurn = G.turnNumber;
@@ -4599,7 +4606,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M86 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M87 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4729,7 +4736,8 @@ function renderCollection() {
 
 
 /* ---------- M5: deck builder (custom 30-card decks per hero, saved on device) ---------- */
-var builderHero = null, builderDeck = null;
+var builderHero = null, builderDeck = null, builderQuery = '';
+function setBuilderQuery(v) { builderQuery = v; render(); try { var inp = document.getElementById('bq'); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } } catch (e) {} }
 /* ---------- M6: school + stance choices per hero, saved on device ---------- */
 var CHAIN_SCHOOL = { wizard: 'tides', warlock: 'grave', paladin: 'dawn', barbarian: 'ember', druid: 'worldroot' };
 function chosenSchool(heroId) { try { var v = localStorage.getItem('yira_school_' + heroId); if (v === 'none') return null; if (v && SCHOOLS[v] && (HERO_SCHOOLS[heroId] || []).includes(CHAIN_SCHOOL[v])) return v; } catch (e) {} return (typeof DEFAULT_SCHOOL !== 'undefined' && DEFAULT_SCHOOL[heroId]) || null; }
@@ -4817,6 +4825,7 @@ function renderBuilder() {
     return '<h3 style="color:#a793d6;margin:14px 0 4px;font-size:12px;letter-spacing:.15em">' + title + '</h3>' + sorted.map(function (id) { return row(id, true); }).join('');
   }
   var pool = heroPool(heroId);
+  if (builderQuery) { var bq = builderQuery.toLowerCase(); pool = pool.filter(function (id) { var c = CARDS[id]; var hay = c.name + ' ' + effectText(c) + ' ' + (c.keywords || []).join(' ') + ' ' + (c.cardSchool ? SCHOOL_META[c.cardSchool].name : ''); return hay.toLowerCase().indexOf(bq) >= 0; }); }
   var deckIds = Object.keys(counts).sort(function (a, b) { return CARDS[a].cost - CARDS[b].cost || CARDS[a].name.localeCompare(CARDS[b].name); });
   $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">deck builder · build your own 30</p>' +
     '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
@@ -4841,7 +4850,7 @@ function renderBuilder() {
     (saved ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
     '</div></div>' +
     '<div class="panel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty — add cards from the pool below.</p>') + '</div>' +
-    '<div class="panel"><h2>Card pool</h2>' +
+    '<div class="panel"><h2>Card pool</h2><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:14px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') +
     group('SIGNATURES', pool.filter(function (id) { return CARDS[id].signatureFor === heroId; })) +
     group('CREATURES', pool.filter(function (id) { return CARDS[id].type === 'creature' && !CARDS[id].signatureFor; })) +
     group('SPELLS', pool.filter(function (id) { return CARDS[id].type === 'spell' && !CARDS[id].signatureFor; })) +

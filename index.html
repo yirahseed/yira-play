@@ -3247,6 +3247,8 @@ if (typeof document !== 'undefined' && document.addEventListener) document.addEv
       if (typeof profileIdx !== 'undefined' && profileIdx !== null) { closeProfile(); return; }
       if (typeof graveIdx !== 'undefined' && graveIdx !== null) { closeGrave(); return; }
       if (typeof deckIdx !== 'undefined' && deckIdx !== null) { closeDeck(); return; }
+      if (typeof mode !== 'undefined' && mode === 'targeting') { cancelTarget(); return; }
+      if (typeof mode !== 'undefined' && mode === 'attackSelect') { attackSet.clear(); mode = 'main'; render(); return; }
       if (typeof mode !== 'undefined' && mode === 'main' && typeof G !== 'undefined' && G && G.winner === null) showSheet();
     } catch (err) {}
     return;
@@ -4168,6 +4170,8 @@ function sheetHtml() {
   return '<div class="overlay" onclick="closeSheet()"><div class="box" style="max-width:340px" onclick="event.stopPropagation()"><h2 style="text-align:center">⏸ Paused</h2>' +
     '<button class="big" onclick="closeSheet()">▶ Resume</button>' +
     '<button class="ghost big" onclick="toggleMute();showSheet()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px"><span style="font-size:13px;color:#c4b6e8">Volume</span><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" style="flex:1;accent-color:#8b5cf6"></div>' +
+    '<button class="ghost big" onclick="toggleCalm()">' + (calm ? '🍃 Motion: calm (animations near-instant)' : '🎞️ Motion: full') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;showLog()">📜 Battle log</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;openIntro()">🎓 How to play</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;startMatch()">↻ Restart match</button>' +
@@ -4212,7 +4216,8 @@ function introHtml() {
   var steps = [
     ['🃏', 'Your hand lives at the bottom', 'Tap anywhere along the bottom edge of the field to bring your hand up. <b>Tap</b> a card to read it, <b>hold</b> to inspect it — and <b>drag</b> it onto the field to play it. Dragging is the only way to play.'],
     ['⚔️', 'Combat, the Coliseum way', 'Play creatures, then attack when you are ready. The <b>defender chooses the blockers</b>, one for one — and damage is <b>permanent</b>: a wounded creature stays wounded. Attackers never tap, so your creatures can attack and still block next turn.'],
-    ['🪤', 'Traps, mana, and falling', 'Mana grows and refills every turn. <b>Traps</b> are armed face-down on your turn and fire themselves when their moment comes; their mana stays reserved until they do. A hero falls at 0 life — or by ending their own turn with an empty deck.']
+    ['🪤', 'Traps, mana, and falling', 'Mana grows and refills every turn. <b>Traps</b> are armed face-down on your turn and fire themselves when their moment comes; their mana stays reserved until they do. A hero falls at 0 life — or by ending their own turn with an empty deck.'],
+    ['🗿', 'Artifacts hold their ground', 'Some cards are <b>artifacts</b> — they do not fight. They take a dock along the field\'s right edge and stay there. Tap yours on your turn to fire its effect: most hold a few <b>charges</b>, work <b>once per turn</b>, and break when the charges run dry.']
   ];
   var st = steps[introStep];
   return '<div class="overlay"><div class="box" style="text-align:center;max-width:430px">' +
@@ -4649,7 +4654,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M89 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M90 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

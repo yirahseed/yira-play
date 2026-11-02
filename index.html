@@ -949,6 +949,16 @@
   .bigcard .cost { border-radius:50%; }
   .bigcard .cart { height:auto; }
   .bigcard .cart img { height:170px; }
+
+  /* ---- M94: the press-start landing ---- */
+  .titlepage { min-height:100dvh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; cursor:pointer; padding:24px 16px;
+    background: radial-gradient(ellipse at 50% 36%, rgba(201,162,39,.15), rgba(0,0,0,0) 55%), radial-gradient(ellipse at 50% 112%, rgba(139,92,246,.20), rgba(0,0,0,0) 62%); }
+  .titlepage .logo { font-size:86px; margin:0; }
+  .titlepage .tagline { font-size:16px; margin-top:6px; }
+  .pressstart { margin-top:44px; font-size:17px; letter-spacing:3px; color:#ffd76a; animation:psPulse 1.7s ease-in-out infinite; }
+  @keyframes psPulse { 0%,100% { opacity:.4; } 50% { opacity:1; } }
+  .titlever { margin-top:46px; font-size:11.5px; color:#8f83b8; letter-spacing:.04em; }
+  @media (prefers-reduced-motion: reduce) { .pressstart { animation:none; } }
   .faceoff { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
   .faceoff .portrait { width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto; }
   .faceoff .portrait img { width:100%; height:100%; object-fit:cover; }
@@ -2979,6 +2989,7 @@ const CARD_ART = {"aether_extractor":"data:image/webp;base64,UklGRqLyAABXRUJQVlA
    the AI attacks; the AI uses chooseBlockers when the human attacks. */
 var G = null, humanIdx = 0, aiIdx = 1;
 var mode = 'menu'; // menu | mulligan | main | targeting | attackSelect | blocking | aiTurn | over
+var titleDismissed = false; // M94: the press-start landing stands until the first tap or key
 var uiLog = [], lastEngineLog = 0, msg = '';
 var redrawSet = new Set(), pendingUid = null;
 var attackSet = new Set(), blockMap = {}, blockPick = null, aiAttackers = [];
@@ -3273,6 +3284,7 @@ function spawnPlayReveal(cardId) {
   } catch (e) {}
 }
 if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) {
+  if (typeof titleDismissed !== 'undefined' && !titleDismissed && typeof mode !== 'undefined' && mode === 'menu') { enterTitle(); return; }
   if (e.key === 'Escape') {
     try {
       if ((typeof inspectUid !== 'undefined' && inspectUid !== null) || (typeof inspectCardId !== 'undefined' && inspectCardId !== null)) { closeInspect(); return; }
@@ -4449,7 +4461,7 @@ function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
-  if (mode === 'menu') { crowdStop(); renderMenu(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
+  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
@@ -4676,6 +4688,20 @@ function versusHtml() {
 
 var LEAGUE_TIERS = [[0, '🌱', 'Seedling'], [3, '🛡️', 'Bronze'], [6, '⚔️', 'Silver'], [10, '🏅', 'Gold'], [15, '💠', 'Platinum'], [25, '👑', 'Mythic']];
 function leagueOf(wins) { var cur = LEAGUE_TIERS[0], next = null; for (var i = 0; i < LEAGUE_TIERS.length; i++) { if (wins >= LEAGUE_TIERS[i][0]) { cur = LEAGUE_TIERS[i]; next = LEAGUE_TIERS[i + 1] || null; } } return { icon: cur[1], name: cur[2], next: next }; }
+function renderTitle() {
+  /* M94 (Jesse): a landing page, the old way — the game's name up front,
+     press start, THEN the menu opens and you pick everything. Kept
+     deliberately plain: logo, subtitle, the prompt, the version line.
+     The mode stays 'menu' throughout (a dismissed-flag, not a mode), so
+     nothing downstream of the menu ever has to know it exists — and
+     Back-to-menu never returns here; it is a boot ritual only. */
+  $app.innerHTML = '<div class="titlepage" onclick="enterTitle()">' +
+    '<h1 class="logo">YIRA</h1>' +
+    '<p class="tagline">the Enchanted Coliseum</p>' +
+    '<div class="pressstart">✦ PRESS START ✦</div>' +
+    '<div class="titlever">playable slice M94 · all names and art original</div></div>';
+}
+function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {
   var rec = record();
   function heroOptions(sel) {
@@ -4688,7 +4714,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M93 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

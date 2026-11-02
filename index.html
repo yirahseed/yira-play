@@ -927,6 +927,28 @@
   .sigminis { display:flex; gap:6px; justify-content:center; margin:8px 0 2px; }
   .sigminis .card { width:86px; height:142px; font-size:9px; }
   .sigminis .card .cart { height:40px; }
+
+  /* ---- M93: CARD FACE v3 (Jesse: the cards still read "funky") ----
+     Three generations of layout (M43's fixed stack, M46's trim, M76's
+     art window) were fighting in the cascade: the art alone was set to
+     38/52/54/60/82px in five places, and the inspect's art box (198px)
+     didn't match its image (150px), leaving a dead band. This block is
+     the ONE stack, placed last so it wins: slim title band, art at a
+     true 58px everywhere a hand or grid shows the card, round cost
+     orb, a text box that flexes instead of sitting at a fixed height,
+     orbs in their own row. Draft offers (120px art) and signature
+     minis (40px) keep their intentional sizes via specificity. */
+  .card .cname { height:21px; line-height:17px; font-size:12px; margin:0 0 2px; padding:2px 6px 2px 17px; }
+  .card .cost { border-radius:50%; }
+  .card .cart { height:58px; margin:2px 0 3px; }
+  .hand.fan .card .cart { height:58px; }
+  .card .ctyperow { height:11px; min-height:11px; margin:0 0 2px; }
+  .card .ctext { flex:1 1 auto; height:auto; min-height:40px; margin:0; padding:4px 6px; }
+  .card.sigcard .ctext { height:auto; }
+  .card .cstats { height:25px; margin:2px 0 0; padding:0 2px; }
+  .bigcard .cost { border-radius:50%; }
+  .bigcard .cart { height:auto; }
+  .bigcard .cart img { height:170px; }
   .faceoff { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
   .faceoff .portrait { width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto; }
   .faceoff .portrait img { width:100%; height:100%; object-fit:cover; }
@@ -2993,6 +3015,7 @@ applyTheme();
 var muted = false; try { muted = localStorage.getItem('yira_muted') === '1'; } catch (e) {}
 var volume = 16; try { volume = parseInt(localStorage.getItem('yira_vol') || '16', 10); if (isNaN(volume)) volume = 16; } catch (e) {}
 function setVolume(v) { volume = Math.max(0, Math.min(100, +v || 0)); try { localStorage.setItem('yira_vol', String(volume)); } catch (e) {} if (masterGain) masterGain.gain.value = volume / 100; }
+function volTick() { try { sfx('click'); } catch (e) {} }
 var calm = false; try { calm = localStorage.getItem('yira_calm') === '1'; } catch (e) {}
 function applyCalm() { try { if (document.body) document.body.classList.toggle('calm', calm); } catch (e) {} }
 function toggleCalm() { calm = !calm; try { localStorage.setItem('yira_calm', calm ? '1' : '0'); } catch (e) {} applyCalm(); render(); }
@@ -4181,7 +4204,7 @@ function sheetHtml() {
   return '<div class="overlay" onclick="closeSheet()"><div class="box" style="max-width:340px" onclick="event.stopPropagation()"><h2 style="text-align:center">⏸ Paused</h2>' +
     '<button class="big" onclick="closeSheet()">▶ Resume</button>' +
     '<button class="ghost big" onclick="toggleMute();showSheet()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +
-    '<div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px"><span style="font-size:13px;color:#c4b6e8">Volume</span><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" style="flex:1;accent-color:#8b5cf6"></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px"><span style="font-size:13px;color:#c4b6e8">Volume</span><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="flex:1;accent-color:#8b5cf6"></div>' +
     '<button class="ghost big" onclick="toggleCalm()">' + (calm ? '🍃 Motion: calm (animations near-instant)' : '🎞️ Motion: full') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;showLog()">📜 Battle log</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;openIntro()">🎓 How to play</button>' +
@@ -4665,7 +4688,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M92 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M93 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4675,7 +4698,7 @@ function renderMenu() {
     '<label>Theme (skin)</label><select id="selTheme" onchange="setTheme(this.value)">' + themeOptions() + '</select>' +
     '<label>Sound</label><button class="ghost" onclick="toggleMute()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +
     '<label>Motion</label><button class="ghost" onclick="toggleCalm()">' + (calm ? '🍃 Calm: on (animations near-instant)' : '🎞️ Calm: off') + '</button>' +
-    '<label>Volume</label><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" style="flex:1;accent-color:#8b5cf6">' +
+    '<label>Volume</label><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="flex:1;accent-color:#8b5cf6">' +
     versusHtml() +
     '<button class="big" onclick="startMatch()">Start match</button>' +
     '<button class="ghost big" onclick="openIntro()">🎓 How to play — 30 seconds</button>' +
@@ -5052,7 +5075,7 @@ function disarm(uid) {
   render();
 }
 function activateArtifact(uid) {
-  try { G.activateArtifact(humanIdx, uid); say('Artifact activated.'); } catch (e) { msg = errMsg(e, uid); }
+  try { G.activateArtifact(humanIdx, uid); try { sfx('spell'); } catch (e2) {} say('Artifact activated.'); } catch (e) { msg = errMsg(e, uid); }
   flushEngineLog(); if (!finishCheck()) render();
 }
 function startAttackSelect() { attackSet = new Set(); mode = 'attackSelect'; msg = 'Tap your attackers — hold any creature to read it.'; render(); }

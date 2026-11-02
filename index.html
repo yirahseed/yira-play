@@ -867,6 +867,28 @@
   #turnbanner { font-family: Georgia, 'Times New Roman', serif; letter-spacing: 5px; }
   .logo { font-family: Georgia, 'Times New Roman', serif; letter-spacing: 10px; background: linear-gradient(180deg, #ffe9a8, #c9a227); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
   .card.miracled { box-shadow: 0 0 0 2px rgba(255,225,150,.9), 0 0 18px 3px rgba(255,210,110,.55) !important; }
+
+  /* ===== M83: third compare-and-polish batch ===== */
+  .card.sick { filter: saturate(.55) brightness(.92); }
+  .sickchip { position:absolute; top:22px; right:3px; font-size:10px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); z-index:5; }
+  .card.canblock-hint { box-shadow: 0 0 0 2px rgba(87,182,255,.45), 0 4px 10px rgba(0,0,0,.4); }
+  .shell.stage.peril-life::before { content:''; position:absolute; inset:0; z-index:13; pointer-events:none; box-shadow: inset 0 0 64px 18px rgba(200,30,45,.4); animation: perilPulse 1.15s ease-in-out infinite; }
+  @keyframes perilPulse { 0%,100% { opacity:.35; } 50% { opacity:.85; } }
+  .gems-col.spentpop i:not(.off) { animation: gemIn .35s ease both; }
+  .respip { color:#b18cff; font-size:9px; margin-left:2px; text-shadow:0 0 4px rgba(150,90,255,.8); }
+  .speech { position: relative; }
+  .speech::after { content:''; position:absolute; left:-5px; top:55%; border:5px solid transparent; border-right-color: rgba(24,16,44,.92); border-left:0; }
+  .winburst { position:absolute; inset:0; overflow:visible; pointer-events:none; }
+  .winburst i { position:absolute; left:50%; top:26px; width:6px; height:10px; border-radius:2px; background:#ffd166; opacity:0; animation: burstFly 1.5s ease-out forwards; }
+  .winburst i:nth-child(3n) { background:#fff0b8; } .winburst i:nth-child(4n) { background:#c9a227; }
+  .winburst i:nth-child(1) { --bx:-120px; --by:120px; --br:-160deg; } .winburst i:nth-child(2) { --bx:-70px; --by:170px; --br:120deg; animation-delay:.06s; }
+  .winburst i:nth-child(3) { --bx:-30px; --by:200px; --br:200deg; animation-delay:.12s; } .winburst i:nth-child(4) { --bx:15px; --by:185px; --br:-90deg; animation-delay:.03s; }
+  .winburst i:nth-child(5) { --bx:60px; --by:210px; --br:150deg; animation-delay:.09s; } .winburst i:nth-child(6) { --bx:115px; --by:140px; --br:-210deg; animation-delay:.15s; }
+  .winburst i:nth-child(7) { --bx:-145px; --by:60px; --br:80deg; animation-delay:.1s; } .winburst i:nth-child(8) { --bx:140px; --by:70px; --br:-60deg; animation-delay:.05s; }
+  .winburst i:nth-child(9) { --bx:-95px; --by:190px; --br:240deg; animation-delay:.14s; } .winburst i:nth-child(10) { --bx:95px; --by:195px; --br:-240deg; animation-delay:.08s; }
+  .winburst i:nth-child(11) { --bx:-10px; --by:150px; --br:40deg; animation-delay:.16s; } .winburst i:nth-child(12) { --bx:40px; --by:130px; --br:-30deg; animation-delay:.02s; }
+  @keyframes burstFly { 0% { opacity:0; transform: translate(0,0) rotate(0); } 12% { opacity:1; } 100% { opacity:0; transform: translate(var(--bx), var(--by)) rotate(var(--br)); } }
+  button.pass-ready { animation: medalPulse 1.6s ease-in-out infinite; }
 </style>
 </head>
 <body>
@@ -3228,9 +3250,11 @@ function closeGrave() { graveIdx = null; render(); }
 function graveHtml() {
   var p = G.players[graveIdx];
   if (!p) return '';
-  var rows = p.graveyard.length ? p.graveyard.slice().reverse().map(function (inst) {
-    var d = D(inst);
-    return '<div class="brow"><span class="bcost">' + d.cost + '</span><div class="bmain"><div class="bname">' + (d.icon || '') + ' ' + esc(d.name) + '</div><div class="btext">' + d.type + '</div></div></div>';
+  var gcounts = {}, gorder = [];
+  p.graveyard.slice().reverse().forEach(function (inst) { if (!gcounts[inst.cardId]) { gcounts[inst.cardId] = 0; gorder.push(inst.cardId); } gcounts[inst.cardId]++; });
+  var rows = p.graveyard.length ? gorder.map(function (id) {
+    var d = CARDS[id];
+    return '<div class="brow"><span class="bcost">' + d.cost + '</span><div class="bmain"><div class="bname">' + (d.icon || '') + ' ' + esc(d.name) + (gcounts[id] > 1 ? ' <span class="bcount">×' + gcounts[id] + '</span>' : '') + '</div><div class="btext">' + d.type + '</div></div></div>';
   }).join('') : '<p style="color:#a793d6">The graveyard is empty.</p>';
   return '<div class="overlay" onclick="closeGrave()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">🪦 ' + esc(p.hero.name) + "'s graveyard</h2>" + rows + (graveIdx === humanIdx ? '<button class="ghost big" onclick="closeGrave();showDeck(' + humanIdx + ')">🂠 See my deck</button>' : '') + '<button class="big" onclick="closeGrave()">Close</button></div></div>';
 }
@@ -3812,7 +3836,7 @@ function emblemHtml(inst, ownerIdx, opts) {
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' +
     '<span class="emblem-pow">' + (d.power + inst.permPower) + '⚔</span>' +
     '<span class="emblem-hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + (inst.doom > 0 ? '<span class="emblem-doom" title="Doomed — dies when the counter runs out">💀' + inst.doom + '</span>' : '') + '</div>' +
-    (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') +
+    (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') + (opts.sick ? '<div class="sickchip" title="Summoned this turn — it can attack next turn">⏳</div>' : '') +
     '<div class="emblem-name" style="font-size:' + Math.max(7.5, Math.min(9.5, Math.round(300 / Math.max(8, d.name.length)) / 2)) + 'px">' + esc(d.name) + '</div>' +
     '<div class="emblem-badges">' + emblemIcons(inst, ownerIdx) + '</div></div>';
 }
@@ -3908,6 +3932,7 @@ function heroBarHtml(p, isMe) {
   for (var gk = 0; gk < Math.min(p.maxMana, 12); gk++) gpips = '<i class="' + (gk < heldN ? 'held' : (gk < p.maxMana - avail ? 'off' : '')) + '"></i>' + gpips;
   if (isMe && p.maxMana < 12 && G.winner === null) gpips = '<i class="nextpip"></i>' + gpips;
   var held = (isMe && p.fragileGem) ? '<span class="fragile-gem" title="Fragile gem — +1 mana this turn; it is spent the first turn you use mana">\uD83D\uDC8E</span>' : '';
+  if (isMe && p.traps && p.traps.length) { var res = p.traps.reduce(function (a2, t) { return a2 + (D(t).cost || 0); }, 0); for (var ri = 0; ri < res; ri++) held += '<span class="respip" title="Mana held in reserve by your armed traps">◆</span>'; }
   var ghost = '';
   try {
     // M31 repair: keyed on the real state (attackSet / aiAttackers /
@@ -4001,6 +4026,8 @@ function boardHtml(p, isMe) {
     window.__faces[inst.uid] = inst.cardId;
     if (!G.canAttack(inst, p) && d2type(inst) === 'creature' && inst.summonedTurn === G.turnNumber) { opts.cls = (opts.cls || '') + ' ready-dim'; opts.zz = true; }
     if (isMe && (mode === 'main' || mode === 'attackSelect') && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' ready-glow';
+    if (d2type(inst) === 'creature' && G.active === p.idx && inst.summonedTurn === G.turnNumber && !G.canAttack(inst, p) && !inst.stunned && (D(inst).keywords || []).indexOf('cantAttack') < 0) { opts.cls = (opts.cls || '') + ' sick'; opts.sick = true; }
+    if (!isMe && mode === 'attackSelect' && d2type(inst) === 'creature' && (D(inst).keywords || []).indexOf('cantBlock') < 0) opts.cls = (opts.cls || '') + ' canblock-hint';
     if (!isMe && mode === 'main' && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' foe-ready';
     out += (d2type(inst) === 'creature') ? emblemHtml(inst, p.idx, opts) : cardHtml(inst, p.idx, opts);
   });
@@ -4028,6 +4055,11 @@ function chipsHtml(p, isMe) {
 }
 /* M81 (Jesse): the artifacts dock on the battlefield's RIGHT BORDER,
    flanking the action button — out of the hero bars entirely. */
+function medAct(uid) {
+  var a = null; G.players[humanIdx].artifacts.forEach(function (x) { if (x.uid === uid) a = x; });
+  if (a && G.active === humanIdx && !a.usedThisTurn && (a.charges || 0) > 0) activateArtifact(uid);
+  else openInspect(null, uid);
+}
 function artDockHtml(p, isMe) {
   var inner = artifactMedalHtml(p, isMe);
   if (!inner) return '';
@@ -4041,7 +4073,7 @@ function artifactMedalHtml(p, isMe) {
     var pips = '';
     for (var k = 0; k < max; k++) pips += '<i class="' + (k < a.charges ? 'on' : 'off') + '"></i>';
     var face = (typeof CARD_ART !== 'undefined' && CARD_ART[a.cardId]) ? '<img src="' + CARD_ART[a.cardId] + '" alt="">' : '<span>' + (d.icon || '🏺') + '</span>';
-    var click = isMe ? ' onclick="event.stopPropagation();activateArtifact(' + a.uid + ')"' : '';
+    var click = isMe ? ' onclick="event.stopPropagation();medAct(' + a.uid + ')"' : '';
     var eye = '<span class="amedal-eye" onclick="event.stopPropagation();openInspect(null,' + a.uid + ')" title="Read this artifact">👁</span>';
     return '<div class="amedal' + (a.usedThisTurn ? ' used' : '') + (isMe && !a.usedThisTurn && a.charges > 0 ? ' ready' : '') + '"' + click + ' title="' + esc(d.name) + ' · ' + a.charges + ' charge' + (a.charges === 1 ? '' : 's') + (isMe ? ' · tap to activate' : '') + '"><div class="amedal-face">' + face + '</div><div class="amedal-pips">' + pips + '</div>' + eye + '</div>';
   }).join('');
@@ -4148,6 +4180,8 @@ function inspectHtml() {
       if (inst.miracleDiscount && G && inst.miracleTurn === G.turnNumber) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">✨ Miracle live — this copy costs ' + inst.miracleDiscount + ' less, this turn only.</div>');
       if (inst.stunned) bits.push('<div style="font-size:12.5px;color:#b8c8ff;margin-top:4px">💤 Stunned — it cannot attack on its controller\u2019s next turn.</div>');
       if (d.debut && d.debut.kind === 'markedCopy' && G) { var holder = G.players.find(function (pp) { return pp.hand.indexOf(inst) >= 0; }); if (holder) { var mspells = holder.graveyard.filter(function (c) { return D(c).type === 'spell'; }); bits.push('<div style="font-size:12.5px;color:#9df0e8;margin-top:4px">' + (mspells.length ? '🔖 Marking: ' + esc(D(mspells[mspells.length - 1]).name) + ' — play this creature to gain a temporary copy of it.' : '🔖 No spell in the graveyard to mark yet.') + '</div>'); } }
+      if (d.flipsTo && CARDS[d.flipsTo]) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 Transforms into ' + esc(CARDS[d.flipsTo].name) + (d.flipOnSpells ? ' after you cast ' + d.flipOnSpells + ' spells in one turn.' : ' when you end your turn with exactly 2 mana available.') + '</div>');
+      if (d.afterFlip) { var baseId = Object.keys(CARDS).find(function (k) { return CARDS[k].flipsTo === inst.cardId; }); if (baseId) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 The transformed face of ' + esc(CARDS[baseId].name) + '.</div>'); }
       if (inst.temporary) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">⏳ Temporary — this copy dissolves at end of turn.</div>');
       return bits.join('');
     })() +
@@ -4185,6 +4219,19 @@ function fitAllText() {
   } catch (e) {}
 }
 var __m81Game = null, __m81Decks = [99, 99], __m81LogLen = 0;
+function m83Watch() {
+  try {
+    if (!G || !document.querySelector) return;
+    var me = G.players[humanIdx];
+    var sh = document.querySelector('.shell.stage');
+    if (sh) { var peril = G.winner === null && me.life <= 6; if (peril && !sh.classList.contains('peril-life')) sh.classList.add('peril-life'); if (!peril && sh.classList.contains('peril-life')) sh.classList.remove('peril-life'); }
+    if (G.active === humanIdx && G.winner === null) {
+      var av = G.availableMana(me);
+      if (window.__m83av != null && av < window.__m83av) { var cols = document.querySelectorAll('.gems-col'); var col = cols && cols[cols.length - 1]; if (col) { col.classList.remove('spentpop'); void col.offsetWidth; col.classList.add('spentpop'); } }
+      window.__m83av = av;
+    } else window.__m83av = null;
+  } catch (e) {}
+}
 function m81Watch() {
   try {
     if (!G || !document.body || !document.createElement) return;
@@ -4236,7 +4283,7 @@ function renderBody() {
     $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field"></div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>'; return; }
   if (G.winner !== null) crowdStop(); else crowdStart();
   var me = G.players[humanIdx], foe = G.players[aiIdx];
-  soundWatch(); turnWatch(); m81Watch();
+  soundWatch(); turnWatch(); m81Watch(); m83Watch();
   computeNmPops();
   var foeTint = 'rgba(0,0,0,0)';
   if (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[foe.heroId]) {
@@ -4254,7 +4301,7 @@ function renderBody() {
   html += heroBarHtml(foe, false);
   html += '<div class="field">';
   html += artDockHtml(foe, false) + artDockHtml(me, true);
-  html += '<div class="foehand" title="' + esc(foe.hero.name) + ' holds ' + foe.hand.length + ' cards">' + foe.hand.map(function () { return '<i></i>'; }).join('') + '</div>';
+  if (foe.hand.length) html += '<div class="foehand" title="' + esc(foe.hero.name) + ' holds ' + foe.hand.length + ' cards">' + foe.hand.map(function () { return '<i></i>'; }).join('') + '</div>';
   html += boardHtml(foe, false) + chipsHtml(foe, false);
   html += '<div class="field-sp"></div>';
   /* M55 (Jesse): no phase text in the arena's center — the buttons and
@@ -4319,7 +4366,7 @@ function renderBody() {
        beside Attack even when creatures are ready, so holding a creature
        (the Shadowsmith, say) never requires attacking or deselecting first. */
     var canPlay = me.hand.some(function (c) { return G.effectiveCost(me, c) <= G.availableMana(me); });
-    html += '<button class="danger' + ((me.combatDone && !canPlay) ? ' pass-ready' : '') + '" onclick="endTurn()" title="End turn — hand it to the enemy">' + (endArmed ? '⏭ End turn? Tap again' : '⏭ End Turn') + '</button>';
+    html += '<button class="danger' + (((me.combatDone || !me.board.some(function (c) { return G.canAttack(c, me); })) && !canPlay) ? ' pass-ready' : '') + '" onclick="endTurn()" title="End turn — hand it to the enemy">' + (endArmed ? '⏭ End turn? Tap again' : '⏭ End Turn') + '</button>';
     /* M74 (Jesse): no separate All button — double-tap the arena (M73) or tap creatures; the cluster stays ONE primary button. */
   }
   /* M74: sound lives on the menu screen now — the stage cluster is the phase button alone. */
@@ -4406,7 +4453,7 @@ function gameOverHtml() {
     ' · Life drained by Nightmares: ' + s.nightmareLifeDrained + ' · Traps triggered: ' + s.trapsTriggered +
     ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + turnLine;
   function box(title, text, buttons) {
-    return '<div class="overlay"><div class="box"><div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<p>' + text + '</p>' +
+    return '<div class="overlay"><div class="box">' + (title === 'Victory' ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<p>' + text + '</p>' +
       '<p style="color:#c4b6e8;font-size:13.5px">' + statsLine + '</p>' + buttons + '</div></div>';
   }
   if (climb) {
@@ -4459,7 +4506,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M82 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M83 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

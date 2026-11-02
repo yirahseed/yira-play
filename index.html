@@ -965,6 +965,21 @@
   .herobar.active-turn .lifering { box-shadow:0 0 10px rgba(255,215,106,.55), 0 1px 5px rgba(0,0,0,.45); }
   .portrait .life.warn { background:#8a6414; color:#ffe9a8; }
   .portrait .life.crit { background:#7e2019; color:#ffc4bc; }
+
+  /* ---- M96 (Jesse's hands-on pass): my hero docks to the very bottom
+     corner; the hand centers but yields right to clear it; artifacts
+     leave the middle of the field for its corners; the foe's class
+     stays theirs (ui.js). The bar leaves the flow entirely — fixed to
+     the screen's bottom edge, portrait cluster at the left corner,
+     mana at the right — over a soft shade so it stays legible over
+     the fan behind it. The scroll reserve still guards the boards. */
+  .shell.stage .mybar-wrap { position:fixed; left:0; right:0; bottom:0; z-index:9; margin:0; padding:3px 8px calc(4px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg, rgba(10,6,20,0), rgba(10,6,20,.52) 34%); }
+  .shell.stage .hand.fan { padding-left:88px; }
+  .shell.stage .hand.fan.mini { padding-left:88px; }
+  .artdock.foe { top:54px; right:6px; }
+  .artdock.me { top:auto; bottom:238px; right:6px; }
+  @media (orientation: landscape) and (max-height: 540px) { .artdock.me { bottom:196px; } }
   .faceoff { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
   .faceoff .portrait { width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto; }
   .faceoff .portrait img { width:100%; height:100%; object-fit:cover; }
@@ -3346,6 +3361,7 @@ function closeProfile() { profileIdx = null; render(); }
 function heroProfileHtml() {
   var p = G.players[profileIdx];
   if (!p) return '';
+  var mineP = profileIdx === humanIdx; // M96 (Jesse): you should NOT learn the foe's class from their portrait — schools, stance and the deck peek are mine-only
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘' };
   var schools = ((typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[p.heroId]) || []).map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' · ');
   return '<div class="overlay" onclick="closeProfile()"><div class="box">' +
@@ -3355,11 +3371,10 @@ function heroProfileHtml() {
     (function () { var sigs = Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }); return sigs.length ? '<div class="sigminis">' + sigs.map(function (id) { return cardHtml(fakeInst(id), p.idx, {}); }).join('') + '</div>' : ''; })() +
     '<div style="font-size:12.5px;color:#c4b6e8;margin-top:2px">◆ Signatures: ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }).map(function (id) { return esc(CARDS[id].name); }).join(' · ') + '</div>' +
     '<p class="profile-blurb">' + esc(p.hero.blurb) + '</p>' +
-    '<div class="profile-rows"><div>🏫 ' + schools + '</div>' +
-    '<div>' + st.icon + ' ' + esc(st.name) + '</div>' +
+    '<div class="profile-rows">' + (mineP ? '<div>🏫 ' + schools + '</div>' + '<div>' + st.icon + ' ' + esc(st.name) + '</div>' : '') +
     '<div>🂠 ' + p.deck.length + ' in deck · ✋ ' + p.hand.length + ' in hand · 🪦 ' + p.graveyard.length + ' in graveyard · ⚔️ ' + p.board.length + ' on the field</div>' +
     (function () { var nm = (typeof nightmaresIn === 'function') ? nightmaresIn(p.deck) : 0; var bits = []; if (nm) bits.push('<div>🌑 ' + nm + ' Nightmare' + (nm === 1 ? '' : 's') + ' buried in this deck</div>'); if (p.traps && p.traps.length) bits.push('<div>❓ ' + p.traps.length + ' trap' + (p.traps.length === 1 ? '' : 's') + ' armed</div>'); return bits.join(''); })() + '</div>' +
-    '<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button class="ghost" onclick="event.stopPropagation();closeProfile();showGraveyard(' + p.idx + ')">🪦 Graveyard</button><button class="ghost" onclick="event.stopPropagation();closeProfile();showDeck(' + p.idx + ')">🂠 Deck</button></div>' +
+    '<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button class="ghost" onclick="event.stopPropagation();closeProfile();showGraveyard(' + p.idx + ')">🪦 Graveyard</button>' + (mineP ? '<button class="ghost" onclick="event.stopPropagation();closeProfile();showDeck(' + p.idx + ')">🂠 Deck</button>' : '') + '</div>' +
     '<button class="big" onclick="closeProfile()">Close</button></div></div>';
 }
 var graveSort = 'recent';
@@ -4087,7 +4102,7 @@ function heroBarHtml(p, isMe) {
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + lifeBand + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div></div>' +
     '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
     '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + (G.reservedMana(p) ? '<span class="held-num">' + G.reservedMana(p) + ' held</span>' : '') + '</div>' +
-    stanceMiniHtml(p) + '</div>' +
+    (isMe ? stanceMiniHtml(p) : '') + '</div>' +
     '<div class="spacer"></div>' + gems +
     '</div>';
 }
@@ -4710,7 +4725,7 @@ function renderTitle() {
     '<h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div>' +
-    '<div class="titlever">playable slice M95 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M96 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {

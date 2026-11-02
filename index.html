@@ -98,7 +98,7 @@
   .card.selected-blocktarget { outline:3px solid #ffb84d; }
   .card.blocking { outline:3px solid #57b6ff; }
   .card.targetable { outline:3px solid #ffd94d; animation:pulse 1s infinite; }
-  .card.redraw-pick { outline:3px solid #ff5d73; opacity:.75; }
+  .card.redraw-pick { outline:3px solid #ff5d73; opacity:.8; transform:translateY(6px); filter:saturate(.35); }
   @keyframes pulse { 0%,100%{outline-offset:0} 50%{outline-offset:2px} }
   .card .cost { position:absolute; top:-9px; left:-9px; background-color:var(--metalDk); background-image:var(--metal); color:#221503; font-weight:800;
                 width:27px; height:27px; border-radius:60% 40% 55% 45% / 55% 45% 55% 45%; text-align:center; line-height:24px; font-size:13.5px;
@@ -770,7 +770,12 @@
      hand, a mulligan grid with no fan rotation, a pulsing chip when a
      play waits. --- */
   .shell.stage .handtap { position:absolute; left:16%; right:0; bottom:0; height:92px; z-index:6; cursor:pointer; }
-  .mullgrid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:10px 0 12px; }
+  .mullgrid { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin:14px 0 12px; }
+  .mullpage { text-align:center; width:100%; max-width:560px; }
+  .mullpage.mull-in { animation:mullIn .32s ease both; }
+  .mull-title { font-family:Georgia,'Times New Roman',serif; letter-spacing:2px; color:#ffd76a; font-size:19px; margin-top:4px; }
+  .mull-hint { color:#a793d6; font-size:12px; margin-top:3px; }
+  .mull-gem { color:#9fd8ff; font-size:12px; margin-top:3px; }
   .mullgrid .card { flex:none; }
   .fan-chip.hasplay { animation:chipPulse 1.7s ease-in-out infinite; }
   @keyframes chipPulse { 0%,100% { box-shadow:0 0 0 0 rgba(255,210,120,0); border-color:rgba(200,170,255,.3) } 50% { box-shadow:0 0 10px 2px rgba(255,210,120,.35); border-color:rgba(255,210,120,.75); color:#ffe9bb } }
@@ -4660,7 +4665,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M91 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M92 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4697,22 +4702,26 @@ function renderMenu() {
     '</details></div></div>';
 }
 function renderMulligan() {
+  /* M92 (Jesse): the mulligan is JUST THE CARDS — full size on the dimmed
+     arena, one quiet hint line, the confirm, nothing else talking. The
+     instructions essay, both hero blurbs and the foe strip are gone (the
+     blurbs live on the VS splash; the foe's bar is right there behind). */
   var me = G.players[humanIdx];
-  return '<div class="mullpage"><div class="panel mull-in"><h2>Opening hand — mulligan</h2>' +
-    '<p style="color:#c4b6e8;font-size:13.5px">Tap any cards you want to throw back. You\'ll draw replacements, then the thrown cards shuffle into your deck. <b>Hold</b> a card to read it big — a quick tap is what marks it.</p>' +
-    (humanIdx === 1 ? '<p style="color:#9fd8ff;font-size:13px;margin-top:-2px">💎 You go second — the fragile gem gives you +1 mana on your first turn only.</p>' : '') +
-    '<div class="mull-foe"><span class="mf-portrait">' + heroPortrait(G.players[aiIdx].heroId) + '</span><span>' + esc(G.players[aiIdx].hero.name) + ' holds ' + G.players[aiIdx].hand.length + ' cards</span><span class="mf-backs">' + G.players[aiIdx].hand.map(function () { return '🂠'; }).join('') + '</span></div>' +
-    '<p style="color:#a793d6;font-size:12px;text-align:center;margin:-2px 0 6px">You: ' + esc(HEROES[G.players[humanIdx].heroId].blurb || '') + '<br>Foe: ' + esc(HEROES[G.players[aiIdx].heroId].blurb || '') + '</p>' +
+  return '<div class="mullpage mull-in">' +
+    '<div class="mull-title">Opening hand</div>' +
+    '<div class="mull-hint">Tap to throw back · hold to read</div>' +
+    (humanIdx === 1 ? '<div class="mull-gem">💎 +1 mana on your first turn</div>' : '') +
     '<div class="mullgrid">' + me.hand.map(function (inst) {
       return cardHtml(inst, humanIdx, { cls: ' clickable' + (redrawSet.has(inst.uid) ? ' redraw-pick' : ''), onclick: 'toggleRedraw(' + inst.uid + ')', onpd: 'mullPressStart(' + inst.uid + ')' });
     }).join('') + '</div>' +
     (redrawSet.size ? '<p style="text-align:center;color:#e8a0b4;font-size:12.5px;margin:-4px 0 8px">\u21a9 ' + redrawSet.size + ' marked to redraw</p>' : '') +
-    '<button class="big" onclick="confirmMulligan()">' + (redrawSet.size ? 'Redraw ' + redrawSet.size + ' · Keep ' + (G.players[humanIdx].hand.length - redrawSet.size) : 'Keep this hand') + '</button></div></div>';
+    '<button class="big" onclick="confirmMulligan()">' + (redrawSet.size ? 'Redraw ' + redrawSet.size + ' · Keep ' + (me.hand.length - redrawSet.size) : 'Keep this hand') + '</button>' +
+    '<button class="ghost" style="display:block;margin:10px auto 0;font-size:12px;opacity:.75" onclick="backToMenu()">✕ Abandon match</button></div>';
 }
 var mullHoldTimer = null, mullHoldAt = 0;
 function mullPressStart(uid) { mullPressEnd(); mullHoldTimer = setTimeout(function () { mullHoldAt = Date.now(); openInspect(null, uid); }, 320); }
 function mullPressEnd() { if (mullHoldTimer) { clearTimeout(mullHoldTimer); mullHoldTimer = null; } }
-function toggleRedraw(uid) { if (Date.now() - mullHoldAt < 700) return; redrawSet.has(uid) ? redrawSet.delete(uid) : redrawSet.add(uid); render(); }
+function toggleRedraw(uid) { if (Date.now() - mullHoldAt < 700) return; try { sfx('click'); } catch (e) {} redrawSet.has(uid) ? redrawSet.delete(uid) : redrawSet.add(uid); render(); }
 
 /* ---------- The Climb: 5-rung gauntlet, escalating enemy bonus life ---------- */
 var CLIMB_RUNGS = [

@@ -473,6 +473,9 @@
   .held-num { display:block; color:#ff9dd1; font-size:9.5px; font-weight:700; text-align:center; }
   /* --- M35: frameless HUD, smaller hand, rebalanced faces --- */
   .shell.stage .herobar { background:transparent; border-color:transparent; box-shadow:none; padding:4px 6px; }
+  /* M74: the battle-log button — a small round seal at the arena's top-left,
+     the corner the foe's pile strip vacated. */
+  .shell.stage .log-btn { position:absolute; top:8px; left:8px; z-index:11; width:38px; height:38px; border-radius:50%; padding:0; font-size:17px; line-height:38px; text-align:center; background:rgba(16,10,28,.78); border:1.5px solid rgba(220,180,100,.55); box-shadow:0 2px 8px rgba(0,0,0,.5); }
   .shell.stage .pile { font-size:12px; }
   .shell.stage .msg { align-self:center; background:rgba(16,10,28,.55); border:1px solid rgba(200,170,255,.25); border-radius:999px; padding:2px 14px; margin:2px auto; position:relative; z-index:8; }
   .shell.stage #log { position:absolute; top:106px; left:50%; transform:translateX(-50%); width:min(440px,88%); max-height:42px; overflow:hidden; pointer-events:none; background:linear-gradient(rgba(10,6,18,.55), rgba(10,6,18,.18)); border:none; border-radius:10px; z-index:9; font-size:11px; text-align:center; }
@@ -884,7 +887,7 @@ const CARDS = {
   heartswap_tree: { icon: "🌳", name: 'Heartswap Tree', cost: 5, type: 'creature', power: 0, health: 13, debut: { kind: 'swapHeroLifeWithHealth' }, cardSchool: 'worldroot' , orig: "Tree of Redemption", src: "verified record" }, // original: Tree of Redemption
   quakehoof_behemoth: { icon: "🐃", name: 'Quakehoof Behemoth', cost: 8, type: 'creature', power: 5, health: 5, keywords: ['haste'], debut: { kind: 'buffCreaturesAndHand', power: 2, health: 2 }, cardSchool: 'worldroot' , orig: "Craterhoof Behemoth", src: "verified record" }, // original: Craterhoof Behemoth
   // --- M50: Sweep-4 conversions, second wave (verified card faces) ---
-  returnwing_angel: { icon: "🕊️", name: 'Returnwing Angel', cost: 4, type: 'creature', power: 3, health: 3, keywords: ['flying'], debut: { kind: 'bounceOwnSetCost', setCost: 1 }, cardSchool: 'dawn' , orig: "Restoration Angel", src: "verified card face" }, // original: Restoration Angel
+  returnwing_angel: { icon: "🕊️", name: 'Returnwing Angel', cost: 4, type: 'creature', subtype: 'angel', power: 3, health: 3, keywords: ['flying'], debut: { kind: 'bounceOwnSetCost', setCost: 1 }, cardSchool: 'dawn' , orig: "Restoration Angel", src: "verified card face" }, // original: Restoration Angel
   archwing_ravager: { icon: "🐉", name: 'Archwing Ravager', cost: 5, type: 'creature', power: 3, health: 3, keywords: ['flying'], attackEffect: { kind: 'destroyRandomArtifactDouble' }, cardSchool: 'ember' , orig: "Archwing Ravager", src: "Recovery Sweep 4 \u2014 Helvault gallery face" },
   tollwarden_captain: { icon: "🛡️", name: 'Tollwarden Captain', cost: 2, type: 'creature', power: 3, health: 2, debut: { kind: 'taxFoeSpellsNextTurn', amount: 2 }, cardSchool: 'dawn' , orig: "Thalia, Guardian of Thraben", src: "verified card face" }, // original: Thalia, Guardian of Thraben
   thirteenth_hour: { icon: "🕐", name: 'The Thirteenth Hour', cost: 3, type: 'spell', effect: { kind: 'armTriska' }, cardSchool: 'grave' , orig: "Triskaidekaphobia", src: "verified card face" }, // original: Triskaidekaphobia
@@ -921,6 +924,15 @@ const CARDS = {
   vindictive_retort: { icon: "🎯", name: 'Vindictive Retort', cost: 2, type: 'trap', trigger: { kind: 'vindictive' } , orig: "Vindictive Shot", src: "M20 record" },
   raise_the_guard: { icon: "🛡️", name: 'Raise the Guard', cost: 3, type: 'trap', trigger: { kind: 'foeEndSummon' }, effect: { kind: 'summonTokens', token: 'soldier', count: 3 } , orig: "Raise the Guard", src: "Hipsters Helvault gallery face (csv): 'Trap: at the end of your opponent's turn, summon 3 Soldiers' — the Soldier token (1-cost 1/1) closed by VIDEO-DIGEST-4C's Knight Militant tooltip" },
   captain_of_the_guard: { icon: "⚔️", name: 'Captain of the Guard', cost: 5, type: 'creature', power: 4, health: 6, attackEffect: { kind: 'summonToken', cardId: 'soldier' }, miracle: { kind: 'summonSoldier' } , orig: "Captain of the Guard", src: "Hipsters Helvault gallery face (csv): 'Attack: Summon a Soldier. Miracle: Summon a Soldier.' Epic cycle — value grows the more you attack" },
+  blitzing_minotaur: { icon: "🐂", name: 'Blitzing Minotaur', cost: 3, type: 'creature', power: 3, health: 3, keywords: ['haste'] , orig: "Blitzing Minotaur", src: "VIDEO-DIGEST-4B O12 Domri faces: 3-cost 3/3 Haste" },
+  vicious_mongrel: { icon: "🐕", name: 'Vicious Mongrel', cost: 4, type: 'creature', power: 4, health: 5, keywords: ['haste'] , orig: "Vicious Mongrel", src: "VIDEO-DIGEST-4B O12 Domri faces: 4-cost 4/5 Haste" },
+  forest_patrol: { icon: "🌲", name: 'Forest Patrol', cost: 2, type: 'spell', effect: { kind: 'summonTokens', token: 'elf', count: 2 } , orig: "Forest Patrol", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Summon 2 Elves' (Elf token 1/1 per the same sidebar)" },
+  goblin_fieldrusher: { icon: "👺", name: 'Goblin Fieldrusher', cost: 4, type: 'creature', power: 2, health: 2, keywords: ['haste'], debut: { kind: 'summonToken', cardId: 'raging_goblin' } , orig: "Goblin Fieldrusher", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Haste. Debut: Summon a Raging Goblin' (token 2/1 Haste)" },
+  sword_cannoneer: { icon: "🗡️", name: 'Sword Cannoneer', cost: 2, type: 'creature', power: 2, health: 2, debut: { kind: 'buffCreature', power: 2, health: 0 } , orig: "Sword Cannoneer", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Debut: Give a friendly creature +2/+0' (targeted debut)" },
+  trumpet_blast: { icon: "🎺", name: 'Trumpet Blast', cost: 3, type: 'spell', effect: { kind: 'tempBuffAll', power: 2 } , orig: "Trumpet Blast", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Give all friendly creatures +2/+0' — read as THIS TURN (the original instant's shape); a permanent reading is flagged, not shipped" },
+  hellrider: { icon: "🏇", name: 'Hellrider', cost: 5, type: 'creature', power: 4, health: 3, keywords: ['haste'], attackEffect: { kind: 'damageHeroPerAttacker' } , orig: "Hellrider", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Haste. Attack: Deal 1 damage to your opponent for each attacker'" },
+  predator_ooze: { icon: "🟢", name: 'Predator Ooze', cost: 3, type: 'creature', power: 2, health: 2, attackEffect: { kind: 'selfGrowth' }, copyIfBlocked: true , orig: "Predator Ooze", src: "VIDEO-DIGEST-4B O12 Domri faces: 'Attack: Gets +1/+1. If this is blocked, summon a Predator Ooze after combat'" },
+  vaultlight: { icon: "🏛️", name: 'Light of the Vault', cost: 3, type: 'spell', effect: { kind: 'destroyAllExceptSubtype', subtype: 'angel' } , orig: "Light of the Helvault", src: "Helvault record: 'destroy all creatures except Angels' (cost 3, Dawn) — Angels carry subtype 'angel' since M67; renamed off the MTG place-name" },
 
   // --- M20 board-swing spells (Second Dawn pair + the great verdict) ---
   second_suns_dawn: { icon: "🌄", name: "Second Sun's Dawn", cost: 6, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'healHero', amount: 7, who: 'self' }, { kind: 'shuffleSecondSun' } ] } , orig: "Second Sun's Dawn", src: "VIDEO-DIGEST batch 2B (YouTube face-verified), 2026-11-01 \u2014 name, cost 6 and text all confirmed against the M20 conversion, which had them right" },
@@ -1035,7 +1047,7 @@ const CARDS = {
   // every turn start; hero life loss only — a guardian taking the blow for
   // you does not count as damage dealt to you). Cost was never recorded:
   // FORGE-COSTED at 4, argued in files/COSTING.md (Batch 8). Name is ours.
-  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } , orig: "Eminent Archangel", src: "COSTING.md B8 \u2014 cost Forge-assigned" },
+  radiant_intercessor: { icon: "🪽", name: 'Radiant Intercessor', cost: 4, costForge: true, type: 'creature', subtype: 'angel', power: 3, health: 4, debut: { kind: 'healFromWounds', cap: 7 } , orig: "Eminent Archangel", src: "COSTING.md B8 \u2014 cost Forge-assigned" },
   // ——— Conversion batch 9 (M24, sprint): the second NEEDS-ENGINE conversion ———
   // The Ravenous Pit Lord of the record (no colour recorded, 7/5 final stats,
   // CONVERSION-AUDIT §3): Debut — raise the cost of all cards in your
@@ -1078,6 +1090,8 @@ const CARDS = {
   // ---------- M67: the Helvault vampire court + the Aven dawnflight (EN Spoilers full rows) ----------
   vampire_thrall: { icon: "\uD83E\uDDDB", name: 'Vampire Thrall', cost: 1, type: 'creature', power: 1, health: 1, subtype: 'vampire', generatedOnly: true, orig: "Vampire (token)", src: "the 1/1 Vampire body summoned across the Olivia block, EN Spoilers sheet" },
   soldier: { icon: "🪖", name: 'Soldier', cost: 1, type: 'creature', power: 1, health: 1, generatedOnly: true , orig: "Soldier (token)", src: "VIDEO-DIGEST-4C: Knight Militant inspect tooltip — 'Soldier — 1-cost, 1/1 Creature' (frame knight-militant-soldier-tooltip.jpg)" },
+  elf: { icon: "🧝", name: 'Elf', cost: 1, type: 'creature', power: 1, health: 1, generatedOnly: true , orig: "Elf (token)", src: "VIDEO-DIGEST-4B O12: Forest Patrol's sidebar — Elf token 1/1" },
+  raging_goblin: { icon: "👺", name: 'Raging Goblin', cost: 1, type: 'creature', power: 2, health: 1, keywords: ['haste'], generatedOnly: true , orig: "Raging Goblin (token)", src: "VIDEO-DIGEST-4B O12: token 2/1 Haste (its printed cost is unrecorded — set 1)" },
   crypt_pup: { icon: "\uD83D\uDC3A", name: 'Crypt Pup', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'vampire', orig: "Vampire Pup", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
   sanguine_imp: { icon: "\uD83E\uDD87", name: 'Sanguine Imp', cost: 1, type: 'creature', power: 1, health: 1, subtype: 'vampire', orig: "Bloodthirsty Imp", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
   crypt_noble: { icon: "\uD83C\uDF77", name: 'Crypt Noble', cost: 3, type: 'creature', power: 2, health: 3, subtype: 'vampire', orig: "Vampire Noble", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
@@ -1282,8 +1296,8 @@ const DECKS = {
   ],
   unbridled: [
     'beastcall_arrow', 'fury_of_the_wilds', 'pouncing_lemur', 'bearer_of_the_curse', 'pouncing_lemur', 'venom_grub',
-    'venom_grub', 'flame_shot', 'flame_shot', 'grove_sentinel', 'grove_sentinel', 'embermaw_devil',
-    'embermaw_devil', 'rushhorn_minotaur', 'rushhorn_minotaur', 'beastkeeper', 'beastkeeper', 'thornwood_archer',
+    'venom_grub', 'flame_shot', 'flame_shot', 'grove_sentinel', 'forest_patrol', 'embermaw_devil',
+    'embermaw_devil', 'rushhorn_minotaur', 'rushhorn_minotaur', 'beastkeeper', 'goblin_fieldrusher', 'thornwood_archer',
     'thornwood_archer', 'ember_deathraider', 'ember_deathraider', 'kindling_pyromancer', 'kindling_pyromancer', 'veilcursed_hunter',
     'duskmane_stag', 'archwing_ravager', 'archwing_ravager', 'quakehoof_behemoth', 'ravaging_tyrant', 'firstroot_titan',
   ],
@@ -1362,7 +1376,7 @@ const SCHOOL_OF = {
   widow_matron:'grave', old_bonegnaw:'grave', creeping_doom:'grave', shadowsmith_saboteur:'grave', void_harvest:'grave', unchained_spirit:'grave',
   sepulcher_titan:'grave', hollowgrin_giant:'grave', grave_gladiator:'grave',
   // First Dawn
-  stay_thy_hand:'dawn', desperate_prayer:'dawn', day_of_reckoning:'dawn', banner_of_courage:'dawn', bearer_of_the_curse:'worldroot', fury_of_the_wilds:'worldroot', sudden_growth:'worldroot', veilcursed_hunter:'worldroot', pouncing_lemur:'worldroot', hermit_of_the_flock:'worldroot', protector_of_the_meek:'worldroot', gatstaf_agitators:'worldroot', gatstaf_plunderers:'worldroot', daybreak_ranger:'worldroot', nightfall_predator:'worldroot', fangblade_brigand:'worldroot', fangblade_eviscerator:'worldroot', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn', raise_the_guard:'dawn', captain_of_the_guard:'dawn', soldier:'dawn',
+  stay_thy_hand:'dawn', desperate_prayer:'dawn', day_of_reckoning:'dawn', banner_of_courage:'dawn', bearer_of_the_curse:'worldroot', fury_of_the_wilds:'worldroot', sudden_growth:'worldroot', veilcursed_hunter:'worldroot', pouncing_lemur:'worldroot', hermit_of_the_flock:'worldroot', protector_of_the_meek:'worldroot', gatstaf_agitators:'worldroot', gatstaf_plunderers:'worldroot', daybreak_ranger:'worldroot', nightfall_predator:'worldroot', fangblade_brigand:'worldroot', fangblade_eviscerator:'worldroot', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn', raise_the_guard:'dawn', captain_of_the_guard:'dawn', soldier:'dawn', vaultlight:'dawn', blitzing_minotaur:'ember', goblin_fieldrusher:'ember', raging_goblin:'ember', sword_cannoneer:'ember', trumpet_blast:'ember', hellrider:'ember', vicious_mongrel:'worldroot', forest_patrol:'worldroot', elf:'worldroot', predator_ooze:'worldroot',
   daybreak_verdict:'dawn', dawn_steed:'dawn', dawns_smite:'dawn', aura_of_valor:'dawn', stance_recruit:'dawn', evenhand_paragon:'dawn',
   wardens_acolyte:'dawn', wardens_staff:'dawn', vainglorious_hero:'dawn', banneret_avatar:'dawn', dawn_titan:'dawn', radiant_intercessor:'dawn',
   // Worldroot
@@ -2148,6 +2162,10 @@ class Game {
       case 'damageAllEnemyCreatures': { for (const c of foe.board) c.damage += effect.amount; if (effect.heroDamage) { this.hurtHero(foe.idx, effect.heroDamage, i); foe.tookDamageThisTurn = true; } if (effect.requiem && p.deathsThisTurn > 0) { this.hurtHero(foe.idx, effect.requiem, i); foe.tookDamageThisTurn = true; this.log.push(`Curtain Call's requiem strikes ${foe.hero.name} for ${effect.requiem}`); } break; }
       case 'damageAllEnemies': { for (const c of foe.board) c.damage += effect.amount; this.hurtHero(foe.idx, effect.amount, i); foe.tookDamageThisTurn = true; break; }
       case 'destroyAllCreatures': { for (const q of this.players) for (const c of q.board) c.damage = 999; this.log.push(`${def(sourceInst).name} falls: every creature is destroyed`); break; }
+      case 'destroyAllExceptSubtype': { for (const q of this.players) for (const c of q.board) if (def(c).subtype !== effect.subtype) c.damage = 999; this.log.push(`${def(sourceInst).name}: every creature except the ${effect.subtype}s is destroyed`); break; }
+      case 'tempBuffAll': { for (const c of p.board) { c.tempPower += (effect.power || 0); c.tempHealth += (effect.health || 0); } if (p.board.length) this.log.push(`${def(sourceInst).name}: your creatures surge +${effect.power || 0}/+${effect.health || 0} this turn`); break; }
+      case 'selfGrowth': { sourceInst.permPower += 1; sourceInst.permHealth += 1; this.log.push(`${def(sourceInst).name} grows (+1/+1, now ${powerOf(sourceInst)}/${healthOf(sourceInst)})`); break; }
+      case 'damageHeroPerAttacker': { const n = this._combatCount || 1; this.hurtHero(foe.idx, n, i); foe.tookDamageThisTurn = true; this.log.push(`${def(sourceInst).name}: ${n} damage to ${foe.hero.name} — one for each attacker`); break; }
       case 'shuffleSecondSun': { const sun = makeInstance('second_sun', null); const pos = this.rng.int(p.deck.length + 1); p.deck.splice(pos, 0, sun); this.log.push(`${p.hero.name} shuffles The Second Sun into their deck`); break; }
       case 'healCreatureAll': for (const c of p.board) c.damage = Math.max(0, c.damage - effect.amount); break;
       case 'draftTrap': this.addToHand(i, makeInstance(this.rng.pick(TRAP_POOL), null), srcName); break;
@@ -2406,6 +2424,7 @@ class Game {
       if (spells.length) { const [d] = spells.splice(this.rng.int(spells.length), 1); dfn.hand.splice(dfn.hand.indexOf(d), 1); dfn.graveyard.push(d); this.log.push(`${def(a).name}: ${dfn.hero.name} discards ${def(d).name}`); }
     }
     // Attack triggers (e.g. Drownscale mills its own deck as it lunges).
+    this._combatCount = liveAttackers.length;
     for (const a of liveAttackers) { const ae = def(a).attackEffect; if (ae) this.resolveEffect(atkIdx, ae, a, null); }
     const stampede = atk.hero.passive === 'stampede' && liveAttackers.length >= 3;
     // Aura of Valor (recorded face, Wayback D&D Icons Preview): after each
@@ -2455,6 +2474,9 @@ class Game {
     for (const q of this.players) for (const c of q.board) { if (c._dealtDmg) { const dd = def(c); if (dd.healFlatOnDamage) { q.life += dd.healFlatOnDamage; this.log.push(`${dd.name}: ${q.hero.name} gains ${dd.healFlatOnDamage} life from the blow`); } if (dd.drawOnDamage) for (let k = 0; k < dd.drawOnDamage; k++) this.drawCard(q.idx); delete c._dealtDmg; } }
     this.cleanupDeaths();
     if (atk.auraValor) for (const a of liveAttackers) if (atk.board.includes(a)) { a.permPower += 1; a.permHealth += 1; this.log.push(`${def(a).name} grows under the Aura of Valor (+1/+1, now ${powerOf(a)}/${healthOf(a)})`); }
+    // M74 (Predator Ooze): a blocked ooze that survives buds a copy after combat.
+    // (the blocker need not survive — 'if this WAS blocked' is the condition)
+    for (const a of liveAttackers) if (def(a).copyIfBlocked && blockerMap[a.uid] != null && atk.board.includes(a) && atk.board.length < 5) { const t2 = this.summonToken(atk, a.cardId); this.log.push(`${def(a).name} buds: a new ${def(t2).name} oozes forth`); }
     this.checkWin();
     return true;
   }
@@ -3111,7 +3133,9 @@ function heroProfileHtml() {
     '<p class="profile-blurb">' + esc(p.hero.blurb) + '</p>' +
     '<div class="profile-rows"><div>🏫 ' + schools + '</div>' +
     '<div>' + st.icon + ' ' + esc(st.name) + '</div>' +
-    '<div>🂠 ' + p.deck.length + ' in deck · ✋ ' + p.hand.length + ' in hand · 🪦 ' + p.graveyard.length + ' in graveyard · ⚔️ ' + p.board.length + ' on the field</div></div>' +
+    '<div>🂠 ' + p.deck.length + ' in deck · ✋ ' + p.hand.length + ' in hand · 🪦 ' + p.graveyard.length + ' in graveyard · ⚔️ ' + p.board.length + ' on the field</div>' +
+    (function () { var nm = (typeof nightmaresIn === 'function') ? nightmaresIn(p.deck) : 0; var bits = []; if (nm) bits.push('<div>🌑 ' + nm + ' Nightmare' + (nm === 1 ? '' : 's') + ' buried in this deck</div>'); if (p.traps && p.traps.length) bits.push('<div>❓ ' + p.traps.length + ' trap' + (p.traps.length === 1 ? '' : 's') + ' armed</div>'); return bits.join(''); })() + '</div>' +
+    '<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button class="ghost" onclick="event.stopPropagation();closeProfile();showGraveyard(' + p.idx + ')">🪦 Graveyard</button><button class="ghost" onclick="event.stopPropagation();closeProfile();showDeck(' + p.idx + ')">🂠 Deck</button></div>' +
     '<button class="big" onclick="closeProfile()">Close</button></div></div>';
 }
 function showGraveyard(idx) { graveIdx = idx; render(); }
@@ -3489,6 +3513,10 @@ function effectText(d) {
       case 'transformFriendly': return 'Transform a friendly creature into a ' + (CARDS[e.into] ? CARDS[e.into].name : 'token') + '.';
       case 'summonToken': return 'Summon a ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'token') + '.';
       case 'summonTokens': return 'Summon ' + (e.count || 1) + ' ' + (CARDS[e.token] ? CARDS[e.token].name : 'token') + 's.';
+      case 'tempBuffAll': return 'Give all friendly creatures +' + (e.power || 0) + '/+' + (e.health || 0) + ' this turn.';
+      case 'destroyAllExceptSubtype': return 'Destroy all creatures except ' + e.subtype + 's.';
+      case 'selfGrowth': return 'Gets +1/+1.';
+      case 'damageHeroPerAttacker': return 'Deal 1 damage to your opponent for each attacker.';
       case 'gainFragileGem': return 'Get a fragile mana gem.';
       case 'markCreature': return 'Mark an enemy creature.';
       case 'damageMarked': return 'Deal damage to the marked creature equal to this creature\'s power.';
@@ -3556,6 +3584,7 @@ function effectText(d) {
   if (d.charges) parts.push('Activate (' + d.charges + ' charges): ' + eff(d.effect));
   if (d.emptyDeckWin) parts.push('If your deck is empty, you win the game.');
   if (d.miracle) parts.push('\u2728 Miracle: ' + (d.miracle.kind === 'healSelf' ? 'Heal yourself for ' + d.miracle.amount + '.' : d.miracle.kind === 'discountSelf' ? 'Costs ' + d.miracle.amount + ' less this turn.' : d.miracle.kind === 'summonSoldier' ? 'Summon a Soldier.' : 'Mill yourself for ' + d.miracle.amount + '.') + ' (Resolves free when you draw this card.)');
+  if (d.copyIfBlocked) parts.push('If this is blocked, summon a copy of it after combat.');
   if (d.drainAmp) parts.push('Drain effects you control drain ' + d.drainAmp + ' more.');
   if (d.activateCost) parts.push('Activate: pay ' + d.activateCost + ' mana.');
   if (d.afterSpellPing) parts.push('After you play a spell, deal ' + d.afterSpellPing + ' damage to the enemy hero.');
@@ -3803,7 +3832,7 @@ function heroBarHtml(p, isMe) {
     '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + (G.reservedMana(p) ? '<span class="held-num">' + G.reservedMana(p) + ' held</span>' : '') + '</div>' +
     stanceMiniHtml(p) + '</div>' +
     '<div class="spacer"></div>' + gems +
-    '<div class="pile clickable' + (p.deck.length <= 2 ? ' deck-critical' : p.deck.length <= 5 ? ' deck-low' : '') + '" id="pile-' + p.idx + '" onclick="showDeck(' + p.idx + ')" title="Inspect this deck — cards left and Nightmares inside">🂠 ' + p.deck.length + ' · ' + handBit + ' · <span class="grave-chip" onclick="event.stopPropagation();showGraveyard(' + p.idx + ')" title="Open the graveyard">🪦 ' + p.graveyard.length + (p.graveyard.length ? ' ' + (D(p.graveyard[p.graveyard.length - 1]).icon || '') : '') + '</span>' + (!isMe && p.traps.length ? ' · ❓ ' + p.traps.length + ' armed' : '') + nightmareLine + '</div></div>';
+    '</div>';
 }
 function stanceEmblemHtml(p) {
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘', blurb: '' };
@@ -4082,6 +4111,7 @@ function renderBody() {
   var shellStyle = (typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.20), rgba(15,9,27,.38)), url(' + PORTRAITS.arena + ')"' : '';
   if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
   var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep"></div>' : '');
+  html += '<button class="log-btn" onclick="showLog()" title="Battle log — recent events">📜</button>';
   sweepPending = false;
   html += heroBarHtml(foe, false);
   html += '<div class="field">';
@@ -4148,16 +4178,17 @@ function renderBody() {
        (the Shadowsmith, say) never requires attacking or deselecting first. */
     var canPlay = me.hand.some(function (c) { return G.effectiveCost(me, c) <= G.availableMana(me); });
     html += '<button class="danger' + ((me.combatDone && !canPlay) ? ' pass-ready' : '') + '" onclick="endTurn()" title="End turn — hand it to the enemy">' + (endArmed ? '⏭ End turn? Tap again' : '⏭ End Turn') + '</button>';
-    if (!me.combatDone && readyN) html += '<button class="ghost" onclick="attackAllToggle()" title="Select or recall every ready attacker">⚔️ All</button>';
+    /* M74 (Jesse): no separate All button — double-tap the arena (M73) or tap creatures; the cluster stays ONE primary button. */
   }
-  html += '<button class="ghost mute-btn" onclick="toggleMute()" title="Sound on/off">' + (muted ? '🔇' : '🔊') + '</button>';
+  /* M74: sound lives on the menu screen now — the stage cluster is the phase button alone. */
   html += '</div>';
   html += '<div class="passive-emblem" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + (me.hero.passive === 'trapDraw' ? '<span class="pe-count">' + (me.trapsArmedCount % 3) + '/3</span>' : '') + (me.hero.passive === 'unbridled' ? '<span class="pe-count">' + (me.summonCount % 5) + '/5</span>' : '') + '</div>';
   html += '</div>';
   html += '<div class="mybar-wrap">' + heroBarHtml(me, true) + '</div>';
   html += msg ? '<div class="msg">' + esc(msg) + '</div>' : '';
-  /* M39: no log band on the stage (Jesse) — history lives behind the 📜
-     chip on your pile now. */
+  /* M74 (Jesse, from the original's portrait footage): no pile strips on
+     the bars — deck/hand/grave counts live behind the portrait tap, and
+     the battle log behind the 📜 button at the arena's top-left. */
   html += '</div><div class="handzone' + (handOpen ? ' open' : ' closed') + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>';
   var hn = me.hand.length, hMid = (hn - 1) / 2;
   /* M34: a real held fan (Jesse) — cards overlap, and whatever part of a
@@ -4285,7 +4316,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M73 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M74 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +

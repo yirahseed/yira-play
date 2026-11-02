@@ -783,6 +783,15 @@
 @keyframes justPlayed { 0% { transform: translateY(10px) scale(1.04); filter: brightness(1.5); } 100% { transform: none; filter: none; } }
 .endscreen .bigemoji { animation: victoryBloom 1.6s ease-out; display: inline-block; }
 @keyframes victoryBloom { 0% { transform: scale(.4); filter: brightness(2); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+/* M70: turn banner (the original's grammar), moonlight-ready pulse, flip shimmer */
+#turnbanner { position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 90; pointer-events: none; font-size: 44px; font-weight: 900; letter-spacing: 3px; color: #f3e9ff; text-shadow: 0 2px 18px rgba(124,80,220,.85), 0 0 2px #000; opacity: 0; animation: turnBanner 1.15s ease-out forwards; }
+#turnbanner.foe { font-size: 30px; color: #ffb3ab; text-shadow: 0 2px 14px rgba(190,60,40,.8), 0 0 2px #000; }
+@keyframes turnBanner { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.82); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.02); } }
+.eicon.moonready { animation: moonPulse 1s ease-in-out infinite; filter: drop-shadow(0 0 5px #cfe4ff); }
+@keyframes moonPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
+.justflipped { animation: flipShimmer 1.2s ease-out; }
+@keyframes flipShimmer { 0% { filter: brightness(2.1) saturate(.4); transform: rotateY(70deg) scale(.94); } 100% { filter: none; transform: none; } }
 </style>
 </head>
 <body>
@@ -954,7 +963,7 @@ const CARDS = {
   eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 4, type: 'creature', power: 2, health: 2, keywords: ['flying'], phoenixReturn: true , orig: "Eternal Phoenix", src: "Wayback Hipsters gallery face - cost 4, 2/2 Flying recorded; end-of-turn graveyard return implemented; its Miracle random-upgrade rider stays unimplemented (upgrade system undefined)" },
   mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } , orig: "Hlaavin, Lord of the Unseen", src: "CONVERSION-AUDIT S4" },
   vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } , orig: "Vainglorious Hero", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
-  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 1, type: 'creature', power: 3, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "Patch notes v0.12 (research corpus) - the crab is a one-mana creature; final line 2/3 cant-attack. The charter cost of 2 was superseded by the record in M64." },
+  runeshell_crab: { icon: "🦀", name: 'Runeshell Crab',     cost: 1, type: 'creature', power: 3, health: 3, keywords: ['cantAttack'] , orig: "Runeshell Crab", src: "Patch notes v0.12 (research corpus) - the crab is a one-mana creature; final line 3/3 cant-attack (v0.20.00 — the 2/3 was the v0.15 intermediate). The charter cost of 2 was superseded by the record in M64." },
   tasty_morsel:   { icon: "🍖", name: 'Tasty Morsel',       cost: 1, costForge: true, type: 'creature', power: 2, health: 1, finale: { kind: 'buffRandomCreature', power: 1, health: 1 } , orig: "Tasty Morsel", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
   flame_shot:     { icon: "🔥", name: 'Flame Shot',         cost: 2, costForge: true, type: 'spell', effect: { kind: 'damageAny', amount: 3 } , orig: "Flame Shot", src: "COSTING.md tracker \u2014 cost Forge-assigned; 3 damage recorded" }, // 3 damage is the final recorded value
   ash_dragon:     { icon: "🐉", name: 'Ash Dragon',         cost: 5, type: 'creature', power: 4, health: 4, keywords: ['flying'], generatedOnly: true , orig: "Darigaaz's dragon token", src: "effect verified via Darigaaz; 4/4 body Forge-assigned (COSTING.md labeled call)" },
@@ -1089,6 +1098,22 @@ const CARDS = {
   crimson_raid: { icon: "\uD83E\uDE78", name: 'Crimson Raid', cost: 4, type: 'spell', effect: { kind: 'drainCreatureOrDamage', amount: 5, subtype: 'vampire' }, orig: "Crimson Raid", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   cranial_consultant: { icon: "\uD83E\uDDE0", name: 'Cranial Consultant', cost: 1, type: 'creature', power: 2, health: 2, subtype: 'zombie', discardSpellWhenBlocked: true, orig: "Cranial Consultant", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   shell_game: { icon: "\uD83D\uDC1A", name: 'Shell Game', cost: 4, type: 'spell', effect: { kind: 'transformFriendly', into: 'stone_turtle' }, orig: "Shell Game", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — cost read 4 (R9) vs 3 (R8) across two videos, likely a balance change between eras; 4 shipped, conflict flagged" },
+  // ---------- M70: Moonlight + the Davriel set completed ----------
+  hermit_of_the_flock: { icon: "\uD83D\uDC11", name: 'Hermit of the Flock', cost: 3, type: 'creature', power: 1, health: 4, subtype: 'civilian', moonlight: true, flipsTo: 'protector_of_the_meek', debut: { kind: 'summonToken', cardId: 'sheep' }, orig: "Hermit of the Flock", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — its in-game tooltip DEFINES Moonlight: 'Flips if you end your turn with 2 available mana'" },
+  protector_of_the_meek: { icon: "\uD83D\uDEE1\uFE0F", name: 'Protector of the Meek', cost: 0, type: 'creature', power: 4, health: 4, generatedOnly: true, afterFlip: { kind: 'healPerSheep' }, orig: "Protector of the Meek (flip side)", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
+  gatstaf_agitators: { icon: "\uD83C\uDF11", name: 'Gatstaf Agitators', cost: 3, type: 'creature', power: 3, health: 1, subtype: 'civilian', moonlight: true, flipsTo: 'gatstaf_plunderers', debut: { kind: 'gainFragileGem' }, orig: "Gatstaf Agitators", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
+  gatstaf_plunderers: { icon: "\uD83C\uDF11", name: 'Gatstaf Plunderers', cost: 0, type: 'creature', power: 5, health: 1, generatedOnly: true, afterFlip: { kind: 'gainFragileGem' }, orig: "Gatstaf Plunderers (flip side)", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
+  daybreak_ranger: { icon: "\uD83C\uFF39", name: 'Daybreak Ranger', cost: 4, type: 'creature', power: 4, health: 3, subtype: 'ranger', keywords: ['reach', 'ward'], moonlight: true, flipsTo: 'nightfall_predator', debut: { kind: 'markCreature' }, orig: "Daybreak Ranger", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — the library's first Reach carrier" },
+  nightfall_predator: { icon: "\uD83D\uDC3A", name: 'Nightfall Predator', cost: 0, type: 'creature', power: 5, health: 4, keywords: ['reach'], generatedOnly: true, afterFlip: { kind: 'damageMarked' }, orig: "Nightfall Predator (flip side)", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
+  fangblade_brigand: { icon: "\uD83C\uDF11", name: 'Fangblade Brigand', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'werewolf', moonlight: true, flipsTo: 'fangblade_eviscerator', orig: "Fangblade Brigand", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
+  fangblade_eviscerator: { icon: "\uD83D\uDC3A", name: 'Fangblade Eviscerator', cost: 0, type: 'creature', power: 5, health: 4, subtype: 'werewolf', keywords: ['cantBlock'], generatedOnly: true, afterFlip: { kind: 'flipDamageNonWerewolf', amount: 2 }, orig: "Fangblade Eviscerator (flip side)", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
+  paincast_demon: { icon: "\uD83D\uDE08", name: 'Paincast Demon', cost: 3, type: 'creature', power: 3, health: 3, subtype: 'demon', keywords: ['trample'], signatureFor: 'unchained', selfDamageDiscount: 2, orig: "Paincast Demon", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — Davriel signature; the self-damage ledger counts Fury recoils, Whisper costs and kindred self-harm" },
+  nights_whisper: { icon: "\uD83E\uDD2B", name: "Night's Whisper", cost: 2, type: 'spell', signatureFor: 'unchained', effect: { kind: 'drawSpells', count: 2, selfDamage: 2 }, orig: "Night's Whisper", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — Davriel signature; 'draw 2 spells from your deck' read as: take the top 2 spells of your deck into hand (interpretation flagged)" },
+  morvanes_goliath: { icon: "\uD83E\uDEB5", name: "Morvane's Goliath", cost: 4, type: 'creature', power: 4, health: 2, subtype: 'zombie', keywords: ['relentless'], signatureFor: 'graven', graveExitDouble: true, orig: "Liliana's Goliath", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — Liliana signature; power doubles as it leaves the graveyard (the hook lives in leaveGraveyard)" },
+  grave_scour: { icon: "\uD83D\uDD73\uFE0F", name: 'Grave Scour', cost: 6, type: 'spell', effect: { kind: 'copyFromFoeGrave' }, orig: "Scour the Void", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — cost 6 final (v1.01.02 bullet: 5 \u2192 6)" },
+  banner_of_courage: { icon: "\uD83D\uDEA9", name: 'Banner of Courage', cost: 4, type: 'spell', effect: { kind: 'auraValor' }, orig: "Aura of Courage", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — 'For the rest of the game, after a friendly creature attacks, it gets +1/+1' (rides the auraValor flag, cost 4 final per v1.01.02)" },
+  aether_extractor: { icon: "\u2697\uFE0F", name: 'Aether Extractor', cost: 7, type: 'artifact', charges: 1, effect: { kind: 'refillMana' }, orig: "Energy Extractor", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — charges read as 1 (PARTIAL detail on the face)" },
+  cruel_mindflayer: { icon: "\uD83D\uDC19", name: 'Cruel Mindflayer', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'wizard', debut: { kind: 'buffAndDoom', power: 4, health: 4 }, orig: "Sadistic Mindflayer", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — final stats 4/4 (v1.01.02 bullet: 2/3 \u2192 4/4); school assigned Tides (illithid blue), flagged" },
   stone_turtle: { icon: "\uD83D\uDC22", name: 'Stone Turtle', cost: 0, type: 'creature', power: 0, health: 6, generatedOnly: true, orig: "Stone Turtle (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
 };
 const TRAP_POOL = ['quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil']; // M62 purge: only verified traps remain
@@ -1156,12 +1181,12 @@ const DECKS = {
     'tidewing_familiar',
     'runeshell_crab', 'runeshell_crab',
     'shadowsmith_saboteur', 'shadowsmith_saboteur',
-    'warp_of_agony', 'wound_priest',
+    'warp_of_agony', 'echo_scepter',
     'pilfer_dream',
     'recall', 'recall',
     'fatetwist', 'fatetwist',
     'void_harvest', 'void_harvest',
-    'bring_down', 'bring_down',
+    'echo_scepter', 'bring_down',
     'infectious_scorpion', 'infectious_scorpion',
     'wrong_turn',
     'countersign', 'countersign',
@@ -1206,17 +1231,17 @@ const DECKS = {
   ],
   graven: [
     'beastcall_arrow', 'widow_matron', 'widow_matron', 'tasty_morsel', 'tasty_morsel', 'venom_grub',
-    'venom_grub', 'gravemaw', 'gravemaw', 'grave_cantor', 'wound_priest', 'creeping_doom',
+    'venom_grub', 'gravemaw', 'gravemaw', 'grave_cantor', 'morvanes_goliath', 'creeping_doom',
     'creeping_doom', 'oakenhide', 'oakenhide', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'grave_gladiator',
     'grave_gladiator', 'vein_drainlord', 'vein_drainlord', 'court_command', 'sanguine_pact', 'thirteenth_hour',
     'grim_echoes', 'duskmane_stag', 'void_harvest', 'void_harvest', 'sepulcher_titan', 'hollowgrin_giant',
   ],
   unchained: [
-    'tempest_giant', 'widow_matron', 'widow_matron', 'runeshell_crab', 'runeshell_crab', 'gravemaw',
+    'tempest_giant', 'widow_matron', 'widow_matron', 'runeshell_crab', 'runeshell_crab', 'paincast_demon',
     'gravemaw', 'wound_priest', 'wound_priest', 'cerulean_dragon', 'cerulean_dragon', 'vein_drainlord',
     'vein_drainlord', 'shadowsmith_saboteur', 'shadowsmith_saboteur', 'bring_down', 'bring_down', 'scourge_of_the_pact',
     'drownscale', 'recall', 'recall', 'thirteenth_hour', 'fatetwist', 'fatetwist',
-    'sanguine_pact', 'sanguine_pact', 'void_harvest', 'void_harvest', 'gazemaw', 'nightscale_revenant',
+    'nights_whisper', 'sanguine_pact', 'void_harvest', 'void_harvest', 'gazemaw', 'nightscale_revenant',
   ],
   unbridled: [
     'beastcall_arrow', 'fury_of_the_wilds', 'tasty_morsel', 'bearer_of_the_curse', 'sheep', 'venom_grub',
@@ -1286,7 +1311,7 @@ const SCHOOL_META = {
 };
 const SCHOOL_OF = {
   // Tides
-  gazemaw:'tides', deepbreach_serpent:'tides', fatetwist:'tides', hollow_fathomer:'tides', twinfeather_sparrow:'tides', river_dragon:'tides', dawnkite_scholar:'tides', dawnkite_apprentice:'tides', countersign:'tides', broken_focus:'tides', extract_fear:'tides', get_ahead:'tides', shell_game:'tides', stone_turtle:'tides', flood_of_ideas:'tides', spark_of_insight:'tides', frostgrip_mage:'tides', chill_wind:'tides', snapshell_turtle:'tides', echo_scepter:'tides', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
+  gazemaw:'tides', deepbreach_serpent:'tides', fatetwist:'tides', hollow_fathomer:'tides', twinfeather_sparrow:'tides', river_dragon:'tides', dawnkite_scholar:'tides', dawnkite_apprentice:'tides', countersign:'tides', broken_focus:'tides', extract_fear:'tides', get_ahead:'tides', shell_game:'tides', stone_turtle:'tides', aether_extractor:'tides', cruel_mindflayer:'tides', flood_of_ideas:'tides', spark_of_insight:'tides', frostgrip_mage:'tides', chill_wind:'tides', snapshell_turtle:'tides', echo_scepter:'tides', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides',
   quiet_snare:'tides', iron_verdict:'tides', sunmirror_glare:'tides', vindictive_retort:'tides', tidewing_familiar:'tides', signature_weaving:'tides',
   mastery_of_currents:'tides', tide_elemental:'tides', recall:'tides', tempest_giant:'tides', bring_down:'tides', frostreaver:'tides',
   cerulean_dragon:'tides', mindveil_sovereign:'tides', runeshell_crab:'tides', reef_fish:'tides', rime_titan:'tides', flockguard_vigil:'tides',
@@ -1296,11 +1321,11 @@ const SCHOOL_OF = {
   eternal_phoenix:'ember', flame_shot:'ember', ash_dragon:'ember', cinder_elemental:'ember', cinder_titan:'ember', rushhorn_minotaur:'ember',
   // Hollow Grave
   deathshade:'grave', thirteenth_hour:'grave', wound_priest:'grave', vein_drainlord:'grave', sanguine_pact:'grave', gravebound_imp:'grave',
-  withering_edict:'grave', whispers_of_grave:'grave', wrong_turn:'grave', grim_echoes:'grave', vampire_thrall:'grave', crypt_pup:'grave', sanguine_imp:'grave', crypt_noble:'grave', crypt_assassin:'grave', crypt_adept:'grave', crypt_warrior:'grave', crypt_elder:'grave', court_messenger:'grave', pale_stalker:'grave', stalking_revenant:'grave', crypt_lord:'grave', crypt_sorcerer:'grave', crimson_knight:'grave', veiled_confidant:'grave', grave_cantor:'grave', court_command:'grave', night_revel:'grave', withering_blight:'grave', counterfeiter:'grave', scourge_of_the_pact:'grave', infectious_scorpion:'grave', fatal_infection:'grave', warp_of_agony:'grave', agonys_twist:'grave', bloodline_sire:'grave', falkenrath_duchess:'grave', crimson_raid:'grave', cranial_consultant:'grave', grimwulf:'grave', gravemaw:'grave', drownscale:'grave', nightscale_revenant:'grave',
+  withering_edict:'grave', whispers_of_grave:'grave', wrong_turn:'grave', grim_echoes:'grave', vampire_thrall:'grave', crypt_pup:'grave', sanguine_imp:'grave', crypt_noble:'grave', crypt_assassin:'grave', crypt_adept:'grave', crypt_warrior:'grave', crypt_elder:'grave', court_messenger:'grave', pale_stalker:'grave', stalking_revenant:'grave', crypt_lord:'grave', crypt_sorcerer:'grave', crimson_knight:'grave', veiled_confidant:'grave', grave_cantor:'grave', court_command:'grave', night_revel:'grave', withering_blight:'grave', counterfeiter:'grave', scourge_of_the_pact:'grave', infectious_scorpion:'grave', fatal_infection:'grave', warp_of_agony:'grave', agonys_twist:'grave', bloodline_sire:'grave', falkenrath_duchess:'grave', crimson_raid:'grave', cranial_consultant:'grave', paincast_demon:'grave', nights_whisper:'grave', morvanes_goliath:'grave', grave_scour:'grave', grimwulf:'grave', gravemaw:'grave', drownscale:'grave', nightscale_revenant:'grave',
   widow_matron:'grave', old_bonegnaw:'grave', creeping_doom:'grave', shadowsmith_saboteur:'grave', void_harvest:'grave', unchained_spirit:'grave',
   sepulcher_titan:'grave', hollowgrin_giant:'grave', grave_gladiator:'grave',
   // First Dawn
-  stay_thy_hand:'dawn', desperate_prayer:'dawn', day_of_reckoning:'dawn', bearer_of_the_curse:'worldroot', fury_of_the_wilds:'worldroot', sudden_growth:'worldroot', veilcursed_hunter:'worldroot', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn',
+  stay_thy_hand:'dawn', desperate_prayer:'dawn', day_of_reckoning:'dawn', banner_of_courage:'dawn', bearer_of_the_curse:'worldroot', fury_of_the_wilds:'worldroot', sudden_growth:'worldroot', veilcursed_hunter:'worldroot', hermit_of_the_flock:'worldroot', protector_of_the_meek:'worldroot', gatstaf_agitators:'worldroot', gatstaf_plunderers:'worldroot', daybreak_ranger:'worldroot', nightfall_predator:'worldroot', fangblade_brigand:'worldroot', fangblade_eviscerator:'worldroot', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn',
   daybreak_verdict:'dawn', dawn_steed:'dawn', dawns_smite:'dawn', aura_of_valor:'dawn', stance_recruit:'dawn', evenhand_paragon:'dawn',
   wardens_acolyte:'dawn', wardens_staff:'dawn', vainglorious_hero:'dawn', banneret_avatar:'dawn', dawn_titan:'dawn', radiant_intercessor:'dawn',
   // Worldroot
@@ -1378,7 +1403,7 @@ class Game {
         maxMana: 0, manaSpent: 0, ownTurns: 0, bonusMana: 0, gainedMana: 0,
         trapsTriggeredCount: 0, trapsArmedCount: 0, hurtBy: [], combatDone: false, doublerAttacks: 0,
         damageTakenPrevTurn: 0, damageTakenCurrTurn: 0, // M23: hero life lost per half-turn (rotated in startTurn)
-        nextTrapDiscount: 0, fragileGem: false, tookDamageThisTurn: false,
+        nextTrapDiscount: 0, fragileGem: false, tookDamageThisTurn: false, selfDamageThisTurn: 0,
         spellManaTurn: 0, deathsThisTurn: 0, playsThisGame: 0, damageTakenGame: 0, creaturesToGraveThisTurn: 0,
         summonCount: 0, damageDealtThisTurn: 0, spiritThreshold: 3, beckonClaimed: [],
         mastery: false, graveWhispers: false, auraValor: false, unbrokenMight: false,
@@ -1466,6 +1491,7 @@ class Game {
   // and whatever comes back comes back stronger.
   leaveGraveyard(inst) {
     if (def(inst).type === 'creature') { inst.permPower += 1; inst.permHealth += 1; }
+    if (def(inst).graveExitDouble) { inst.permPower += powerOf(inst); this.log.push(`${def(inst).name} leaves the graveyard doubled in power (${powerOf(inst)})`); } // M70 Liliana's Goliath
     for (const q of this.players) if (q.hero.passive === 'graveAmbition') { q.life += 1; this.log.push(`${q.hero.name}'s Grave Ambition stirs: +1 life`); }
   }
   // Sura's Beckon: crossing a mana milestone calls a great beast to hand.
@@ -1543,6 +1569,7 @@ class Game {
     if (def(inst).type === 'trap' && p.nextTrapDiscount) cost = Math.max(0, cost - p.nextTrapDiscount);
     if (inst.discount) cost = Math.max(0, cost - inst.discount);
     if (inst.miracleDiscount && inst.miracleTurn === this.turnNumber) cost = Math.max(0, cost - inst.miracleDiscount);
+    if (def(inst).selfDamageDiscount && p.selfDamageThisTurn > 0) cost = Math.max(0, cost - def(inst).selfDamageDiscount); // M70 Paincast Demon
     return cost;
   }
 
@@ -1628,6 +1655,7 @@ class Game {
     this.active = i; this.turnNumber++;
     p.ownTurns++;
     p.gainedMana = 0; // M67: last turn's gained mana is spent or gone (bonusMana = ramp pool, never reset)
+    p.selfDamageThisTurn = 0; // M70: the Paincast ledger is per-turn
     this.turnDeaths = 0; // M68: the death ledger is per-turn
     if (p.spellTaxPending) { p.spellTax = p.spellTaxPending; p.spellTaxPending = 0; } // M50: the Tollwarden's toll applies for this turn only
     for (const q of this.players) if (q.bondTurn !== this.turnNumber) q._bondLife = q.life; // M53: the pact's ledger resets as turns roll
@@ -1667,6 +1695,10 @@ class Game {
   }
   endTurn(i) {
     { const p0 = this.players[i]; if (this.turnDeaths > 0) for (const c of p0.board) if (def(c).deathGrowth) { c.permPower += 1; c.permHealth += 1; this.log.push(`${def(c).name} feeds on the day's deaths (+1/+1)`); } } // M68 Cursebearer
+    // M70 MOONLIGHT: end your turn with exactly 2 mana available and the creature flips.
+    { const p0 = this.players[i]; if (this.availableMana(p0) === 2) for (const c of p0.board.slice()) if (def(c).flipsTo) this.flipCreature(i, c); }
+    // M70: creatures doomed at end of turn (the Mindflayer's gift) are destroyed.
+    { const p0 = this.players[i]; let doomed = false; for (const c of p0.board) if (c.doomedEOT) { c.damage = 9999; doomed = true; } if (doomed) this.cleanupDeaths(); }
     const p = this.players[i];
     p.spellTax = 0;
     if (p.fragileGem && p.ownTurns >= 1 && p.manaSpent > 0) p.fragileGem = false;
@@ -1824,6 +1856,15 @@ class Game {
     art.usedThisTurn = true; art.charges--;
     this.resolveEffect(i, def(art).effect, art, null);
     if (art.charges <= 0) { p.artifacts = p.artifacts.filter((a) => a !== art); p.graveyard.push(art); }
+  }
+  // M70: a Moonlight flip — same creature, new face; damage and growth carry over.
+  flipCreature(i, inst) {
+    const p = this.players[i];
+    const to = def(inst).flipsTo; if (!to) return;
+    inst.cardId = to; inst.tempPower = 0; inst.tempHealth = 0;
+    this.log.push(`${p.hero.name}'s creature flips under the moonlight: it is now ${def(inst).name}`);
+    const af = def(inst).afterFlip;
+    if (af) this.resolveEffect(i, af, inst, null);
   }
   // Counter traps: fire on opponent playing a card costing >= minCost.
   tryCounterTrap(trapOwnerIdx, playedInst) {
@@ -2023,13 +2064,23 @@ class Game {
       case 'debuffAll': for (const q of this.players) for (const c of q.board) { c.permPower += effect.power; c.permHealth += effect.health; } this.cleanupDeaths(); break;
       case 'generateSpells': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly); for (let k = 0; k < effect.count; k++) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'draftSpell': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
-      case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
+      case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
       case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === effect.subtype && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'debuffAndAdd': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.cleanupDeaths(); } this.addToHand(i, makeInstance(effect.cardId, null), srcName); break; }
       case 'draftFromFoeStart': { const foe = this.players[this.opp(i)]; const zones = [foe.deck, foe.hand, foe.board, foe.graveyard, foe.traps]; const ids = []; for (const z of zones) for (const c of z) if (c.starterOwner === this.opp(i) && !ids.includes(c.cardId)) ids.push(c.cardId); if (ids.length) { const pick = this.rng.pick(ids); this.addToHand(i, makeInstance(pick, null), srcName); this.log.push(`${srcName}: drafts a copy of ${CARDS[pick].name} from ${foe.hero.name}'s starting deck`); } break; }
       case 'stealDeckBottom': { const foe = this.players[this.opp(i)]; if (foe.deck.length) { const taken = foe.deck.pop(); this.addToHand(i, taken, srcName); this.log.push(`${srcName}: ${p.hero.name} takes the bottom card of ${foe.hero.name}'s deck (${def(taken).name})`); } break; }
       case 'fightWeakest': { const me = sourceInst; for (let round = 0; round < 8; round++) { const foe = this.players[this.opp(i)]; if (!foe.board.length || !p.board.includes(me) || me.damage >= healthOf(me)) break; const prey = foe.board.slice().sort((x, y) => powerOf(x) - powerOf(y))[0]; prey.damage += powerOf(me); me.damage += powerOf(prey); this.log.push(`${def(me).name} fights ${def(prey).name}`); this.cleanupDeaths(); if (!p.board.includes(me)) break; } break; }
       case 'drainCreatureOrDamage': { if (target && target.kind === 'creature') { const hasKin = p.board.some((c) => def(c).subtype === effect.subtype); target.inst.damage += effect.amount; if (hasKin) { p.life += effect.amount; this.log.push(`${srcName}: drains ${effect.amount} from ${def(target.inst).name}`); } this.cleanupDeaths(); } break; }
+      case 'summonToken': this.summonToken(p, effect.cardId); break;
+      case 'gainFragileGem': if (!p.fragileGem) { p.fragileGem = true; this.log.push(`${p.hero.name} gains a fragile mana gem`); } break;
+      case 'markCreature': if (target && target.kind === 'creature') { sourceInst.markUid = target.inst.uid; this.log.push(`${srcName}: marks ${def(target.inst).name}`); } break;
+      case 'damageMarked': { const foe = this.players[this.opp(i)]; const marked = foe.board.find((c) => c.uid === sourceInst.markUid); if (marked) { marked.damage += powerOf(sourceInst); this.log.push(`${def(sourceInst).name} strikes its marked prey ${def(marked).name} for ${powerOf(sourceInst)}`); this.cleanupDeaths(); } break; }
+      case 'flipDamageNonWerewolf': for (const q of this.players) for (const c of q.board) if (def(c).subtype !== 'werewolf') c.damage += effect.amount; this.cleanupDeaths(); break;
+      case 'healPerSheep': { const n = p.board.filter((c) => c.cardId === 'sheep').length; if (n) { p.life += 2 * n; this.log.push(`${def(sourceInst).name}: the flock shelters ${p.hero.name} (+${2 * n} life)`); } break; }
+      case 'drawSpells': { let drawn = 0; for (let k = 0; k < p.deck.length && drawn < effect.count;) if (def(p.deck[k]).type === 'spell') { const [s] = p.deck.splice(k, 1); this.addToHand(i, s, srcName); drawn++; } else k++; if (effect.selfDamage) { p.life -= effect.selfDamage; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + effect.selfDamage; p.damageTakenCurrTurn += effect.selfDamage; this.log.push(`${srcName}: the whisper costs ${effect.selfDamage} life`); this.checkWin(); } break; }
+      case 'copyFromFoeGrave': { const foe = this.players[this.opp(i)]; if (foe.graveyard.length) { const src = this.rng.pick(foe.graveyard); this.addToHand(i, makeInstance(src.cardId, null), srcName); this.log.push(`${srcName}: copies ${def(src).name} from ${foe.hero.name}'s graveyard`); } break; }
+      case 'refillMana': p.manaSpent = 0; this.log.push(`${p.hero.name}'s mana gems refill`); break;
+      case 'buffAndDoom': if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; target.inst.doomedEOT = true; this.log.push(`${def(target.inst).name} swells with borrowed might — and is doomed at turn's end`); } break;
       case 'transformFriendly': { if (target && target.kind === 'creature') { target.inst.cardId = effect.into; target.inst.damage = 0; target.inst.permPower = 0; target.inst.permHealth = 0; target.inst.tempPower = 0; target.inst.tempHealth = 0; this.log.push(`${srcName}: becomes a ${CARDS[effect.into].name}`); } break; }
       case 'buffSubtype': for (const c of p.board) if (c !== sourceInst && def(c).subtype === effect.subtype) { c.permPower += effect.power; c.permHealth += effect.health; } break;
       case 'buffOtherCreatures': { for (const c of p.board) if (c !== sourceInst) { c.permPower += effect.power; c.permHealth += effect.health; } this.log.push(`${def(sourceInst).name}: the others rise +${effect.power}/+${effect.health}`); break; }
@@ -2519,7 +2570,12 @@ function targetFor(game, i, inst) {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
-  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage' || eff.kind === 'drainCreatureOrDamage') {
+  if (eff.kind === 'buffAndDoom') {
+    const mine = g.players[i].board;
+    if (!mine.length) return undefined;
+    return { kind: 'creature', inst: mine.slice().sort((a, b) => powerOf(b) - powerOf(a))[0] };
+  }
+  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage' || eff.kind === 'drainCreatureOrDamage' || eff.kind === 'markCreature') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
@@ -2566,8 +2622,8 @@ function playMainPhase(game, i) {
     if (k === 'stealFromGrave' && game.players[game.opp(i)].graveyard.length === 0) return false;
     if (k === 'transformBoard' && p.board.length === 0) return false;
     if (k === 'destroyFlyer' && !game.players[game.opp(i)].board.some((c) => (def(c).keywords || []).includes('flying'))) return false;
-    if ((k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage') && !foeBoard()) return false;
-    if (k === 'transformFriendly' && !p.board.length) return false;
+    if ((k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature') && !foeBoard()) return false;
+    if ((k === 'transformFriendly' || k === 'buffAndDoom') && !p.board.length) return false;
     if (k === 'grimEchoes' && p.board.length === 0) return false;
     if (k === 'summonPerCount' && eff2.count === 'foeCreatures' && !foeBoard()) return false;
     if (k === 'summonPerCount' && eff2.count === 'yourVampires' && !p.board.some((c) => def(c).subtype === eff2.subtype)) return false;
@@ -2897,7 +2953,7 @@ function drawTargetLine(x1, y1, x2, y2, ok) {
 function clearTargetLine() { try { if (tlSvg) tlSvg.style.display = 'none'; } catch (e) {} }
 function defNeedsTarget(d) {
   var eff = d && (d.effect || d.debut);
-  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly'].indexOf(eff.kind) >= 0);
+  return !!(eff && ['damageAny', 'buffCreature', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom'].indexOf(eff.kind) >= 0);
 }
 /* Floating nightmare wisps (plant: rise from mid-screen toward the enemy;
    drain: fall over the afflicted hero). Count scales with the event size. */
@@ -3081,6 +3137,8 @@ function emblemIcons(inst, ownerIdx) {
   /* M67: no ◆ here — a signature is carried by its two-school border (M64 law). */
   if (inst.starterOwner !== ownerIdx) out += '<span class="eicon" title="Generated — this card did not start in a deck">✦</span>';
   (d.keywords || []).forEach(function (k) { out += '<span class="eicon" title="' + esc(k) + '">' + (KW_ICONS[k] || '•') + '</span>'; });
+  if (d.moonlight) out += '<span class="eicon' + ((typeof G !== 'undefined' && G && G.active === ownerIdx && G.availableMana(G.players[ownerIdx]) === 2) ? ' moonready' : '') + '" title="moonlight — flips if you end your turn with exactly 2 mana available">🌙</span>';
+  if (d.afterFlip) out += '<span class="eicon" title="the flipped face">🌙</span>';
   return out;
 }
 function spawnHeroFloat(idx, text, cls) {
@@ -3370,6 +3428,16 @@ function effectText(d) {
       case 'fightWeakest': return 'Fights the enemy creature with the least power. If this survives, repeat.';
       case 'drainCreatureOrDamage': return 'Deal ' + e.amount + ' damage to an enemy creature. If you control a ' + e.subtype + ', instead Drain ' + e.amount + ' from it.';
       case 'transformFriendly': return 'Transform a friendly creature into a ' + (CARDS[e.into] ? CARDS[e.into].name : 'token') + '.';
+      case 'summonToken': return 'Summon a ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'token') + '.';
+      case 'gainFragileGem': return 'Get a fragile mana gem.';
+      case 'markCreature': return 'Mark an enemy creature.';
+      case 'damageMarked': return 'Deal damage to the marked creature equal to this creature\'s power.';
+      case 'flipDamageNonWerewolf': return 'Deal ' + e.amount + ' damage to each non-Werewolf creature.';
+      case 'healPerSheep': return 'Heal yourself for 2 for each friendly Sheep.';
+      case 'drawSpells': return 'Draw ' + e.count + ' spells from your deck and deal ' + e.selfDamage + ' damage to yourself.';
+      case 'copyFromFoeGrave': return 'Add a copy of a random card in your opponent\'s graveyard to your hand.';
+      case 'refillMana': return 'Refill your mana gems.';
+      case 'buffAndDoom': return 'Give another friendly creature +' + e.power + '/+' + e.health + ' and destroy it at the end of the turn.';
       case 'summonPerCount': return e.count === 'foeCreatures' ? 'Summon a 1/1 Vampire Thrall for each enemy creature.' : 'Summon a 1/1 Vampire Thrall for each of your Vampires.';
       case 'summonCopy': return 'Summon a copy of this creature.';
       case 'drain': return 'Drain ' + e.amount + ': the enemy hero loses ' + e.amount + ' life and you gain ' + e.amount + '.';
@@ -3420,6 +3488,10 @@ function effectText(d) {
   if (d.trapGrowth) parts.push('After you play a trap, this gets +1/+0.');
   if (d.deathGrowth) parts.push('Trample. At the end of your turn, if a creature died, this gets +1/+1.');
   if (d.discardSpellWhenBlocked) parts.push('After this is blocked, your opponent discards a random spell.');
+  if (d.moonlight) parts.push('Moonlight: if you end your turn with exactly 2 mana available, this flips into ' + (CARDS[d.flipsTo] ? CARDS[d.flipsTo].name : 'its other face') + '.');
+  if (d.afterFlip) parts.push('After this flips: ' + eff(d.afterFlip));
+  if (d.graveExitDouble) parts.push('After this leaves your graveyard, double its power.');
+  if (d.selfDamageDiscount) parts.push('Costs ' + d.selfDamageDiscount + ' less if you\'ve dealt damage to yourself this turn.');
   if (d.charges) parts.push('Activate (' + d.charges + ' charges): ' + eff(d.effect));
   if (d.emptyDeckWin) parts.push('If your deck is empty, you win the game.');
   if (d.miracle) parts.push('\u2728 Miracle: ' + (d.miracle.kind === 'healSelf' ? 'Heal yourself for ' + d.miracle.amount + '.' : d.miracle.kind === 'discountSelf' ? 'Costs ' + d.miracle.amount + ' less this turn.' : 'Mill yourself for ' + d.miracle.amount + '.') + ' (Resolves free when you draw this card.)');
@@ -3715,9 +3787,12 @@ function boardHtml(p, isMe) {
       var k = (d.effect || d.debut) && (d.effect || d.debut).kind;
       var warded = (D(inst).keywords || []).indexOf('ward') >= 0;
       var flying = (D(inst).keywords || []).indexOf('flying') >= 0;
-      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && (k === 'buffCreature' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly')) || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
+      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature') && !warded) || (k === 'destroyFlyer' && flying && !warded))) || (isMe && (k === 'buffCreature' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly' || k === 'buffAndDoom')) || k === 'bounce') { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
     }
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
+    window.__faces = window.__faces || {};
+    if (window.__faces[inst.uid] && window.__faces[inst.uid] !== inst.cardId && CARDS[inst.cardId] && CARDS[inst.cardId].afterFlip) opts.cls = (opts.cls || '') + ' justflipped';
+    window.__faces[inst.uid] = inst.cardId;
     if (!G.canAttack(inst, p) && d2type(inst) === 'creature' && inst.summonedTurn === G.turnNumber) { opts.cls = (opts.cls || '') + ' ready-dim'; opts.zz = true; }
     if (isMe && (mode === 'main' || mode === 'attackSelect') && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' ready-glow';
     if (!isMe && mode === 'main' && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' foe-ready';
@@ -3873,7 +3948,26 @@ function fitAllText() {
     document.querySelectorAll('.bigcard .ctext').forEach(function (el) { fitTextEl(el, 10.5); });
   } catch (e) {}
 }
-function render() { renderBody(); fitAllText(); }
+function showTurnBanner(txt, foe) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var b = document.getElementById('turnbanner');
+    if (!b) { b = document.createElement('div'); b.id = 'turnbanner'; document.body.appendChild(b); }
+    b.textContent = txt;
+    b.className = foe ? 'turnbanner foe' : 'turnbanner';
+    b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+  } catch (e) {}
+}
+function render() {
+  renderBody(); fitAllText();
+  // M70: the original's banner grammar — quiet between actions, loud at the turn change.
+  try {
+    if (typeof G !== 'undefined' && G && typeof mode !== 'undefined' && mode !== 'menu' && mode !== 'collection' && G.winner === null) {
+      if (window.__bannerGame !== G) { window.__bannerGame = G; window.__bannerActive = G.active; }
+      else if (window.__bannerActive !== G.active) { window.__bannerActive = G.active; showTurnBanner(G.active === humanIdx ? 'YOUR TURN' : 'THEIR TURN', G.active !== humanIdx); }
+    }
+  } catch (e) {}
+}
 function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
@@ -4096,7 +4190,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M69 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M70 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4435,7 +4529,7 @@ function clickHand(uid) {
     flushEngineLog(); render(); return;
   }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
-  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly'].indexOf(targetedEff.kind) >= 0) {
+  if (targetedEff && ['damageAny', 'buffCreature', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom'].indexOf(targetedEff.kind) >= 0) {
     var k = targetedEff.kind;
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'damageAny' || k === 'bounce') ? true : (k === 'grimEchoes' ? me.board.length > 0 : (k === 'buffCreature' ? me.board.length > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0)));

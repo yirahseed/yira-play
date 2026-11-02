@@ -824,6 +824,35 @@
 /* M72: temporary copies wear a small hourglass flag and a dashed gold edge */
 .card.temporary { outline: 2px dashed rgba(255,209,102,.85); outline-offset: -2px; }
 .tempflag { position: absolute; top: 24px; right: 4px; font-size: 8.5px; font-weight: 700; color: #241a3d; background: #ffd166; border-radius: 6px; padding: 1px 5px; z-index: 5; }
+
+  /* ===== M81: side-rail artifacts + polish batch (Jesse's border ruling) ===== */
+  .artdock { position:absolute; right:4px; z-index:5; display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .artdock.foe { top:calc(50% - 128px); }
+  .artdock.me { top:calc(50% + 58px); }
+  .artdock .amedal { margin:0; }
+  .amedal.ready .amedal-face { animation: medalPulse 2.1s ease-in-out infinite; }
+  @keyframes medalPulse { 0%,100% { box-shadow:0 3px 10px rgba(0,0,0,.55), 0 0 0 0 rgba(255,209,102,.0);} 50% { box-shadow:0 3px 10px rgba(0,0,0,.55), 0 0 14px 2px rgba(255,209,102,.45);} }
+  .movepill { position:absolute; left:50%; top:6px; transform:translateX(-50%); z-index:6; background:rgba(16,10,30,.82); border:1px solid rgba(255,209,102,.5); color:#f3e9ff; font-size:12.5px; font-weight:700; letter-spacing:.4px; padding:5px 14px; border-radius:999px; pointer-events:none; box-shadow:0 4px 14px rgba(0,0,0,.5); }
+  .movepill.move { border-color:rgba(255,120,120,.55); }
+  #perilpill { position:fixed; left:50%; bottom:24%; transform:translateX(-50%); z-index:91; background:rgba(30,8,14,.88); border:1px solid rgba(255,120,120,.65); color:#ffd9d9; font-size:14px; font-weight:800; letter-spacing:.5px; padding:7px 18px; border-radius:999px; pointer-events:none; animation: perilIn 2.1s ease-out forwards; }
+  @keyframes perilIn { 0% { opacity:0; transform:translateX(-50%) translateY(8px);} 12% { opacity:1; transform:translateX(-50%) translateY(0);} 82% { opacity:1;} 100% { opacity:0;} }
+  #turnbanner.splash { font-family: Georgia, 'Times New Roman', serif; font-size:52px; letter-spacing:8px; color:#ffd166; text-shadow:0 2px 22px rgba(255,180,60,.75), 0 0 3px #20140a; animation: turnBanner 1.25s ease-out forwards; }
+  .shell.stage.casting .field, .shell.stage.casting .herobar { filter:brightness(.68) saturate(.88); transition:filter .16s ease; }
+  .shell.stage .field, .shell.stage .herobar { transition:filter .3s ease; }
+  .createdby { font-size:8px; line-height:1.15; color:#d9b8ff; text-align:center; font-style:italic; padding:0 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .log-btn.hasnews { animation: medalPulse 1.4s ease-in-out infinite; border-color:rgba(255,209,102,.85); }
+  .ribbon { position:relative; margin:2px auto 12px; max-width:92%; background:linear-gradient(180deg,#8a6a1f,#6d5316); color:#ffe9a8; font-family:Georgia,'Times New Roman',serif; font-size:21px; font-weight:800; letter-spacing:2.5px; text-align:center; padding:9px 18px; border:1px solid rgba(255,220,130,.65); box-shadow:0 6px 18px rgba(0,0,0,.55); }
+  .ribbon::before, .ribbon::after { content:''; position:absolute; top:6px; border-style:solid; }
+  .ribbon::before { left:-13px; border-width:13px 13px 13px 0; border-color:transparent #54400f transparent transparent; }
+  .ribbon::after { right:-13px; border-width:13px 0 13px 13px; border-color:transparent transparent transparent #54400f; }
+  .facedown { background:linear-gradient(165deg,#4b2a72,#241239 70%); border:1.5px solid rgba(190,140,255,.55); border-radius:9px; color:#cdb2ff; box-shadow:inset 0 0 0 3px rgba(20,10,36,.65), inset 0 0 18px rgba(150,90,255,.35), 0 4px 10px rgba(0,0,0,.5); min-height:104px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; font-size:10px; letter-spacing:.6px; }
+  .stage.won .herobar.me .portrait { box-shadow:0 0 22px 4px rgba(255,209,102,.65); }
+  .stage.lost .herobar.me .portrait { filter:grayscale(.75) brightness(.75); }
+  .stage.lost .herobar.foe .portrait { box-shadow:0 0 22px 4px rgba(255,209,102,.5); }
+  .mullstage { position:relative; min-height:100dvh; }
+  .mull-overlay { position:absolute; inset:0; z-index:20; background:rgba(7,4,15,.58); backdrop-filter:blur(2.5px); overflow-y:auto; display:flex; align-items:flex-start; justify-content:center; padding:18px 10px 30px; }
+  .mullpage { width:100%; max-width:560px; }
+  .mullpage .panel { background:rgba(19,13,34,.92); }
 </style>
 </head>
 <body>
@@ -3721,6 +3750,7 @@ function cardHtml(inst, ownerIdx, opts) {
      so the text panel above it is the same fixed size on every card and the
      orbs never overlap it. Art-less cards get a proper art window too. */
   var foot = '<div class="ctext">' + esc(effectText(d)) + '</div>';
+  if (inst.createdBy) foot += '<div class="createdby">\u2726 Created by ' + esc(inst.createdBy) + '</div>';
   foot += '<div class="cstats">' + (d.type === 'creature' ? '<span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span>' : '') + '</div>';
   if (inst.temporary) foot += '<div class="tempflag">⏳ temporary</div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '<div class="cart glyphbox">' + (d.icon || '') + '</div>';
@@ -3883,7 +3913,7 @@ function heroBarHtml(p, isMe) {
   return '<div class="herobar' + (isMe ? ' me' : ' foe') + (G && G.current === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
     '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (isMe && p.life <= 8 && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="portrait">' + heroPortrait(p.heroId) +
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div>' +
-    '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + artifactMedalHtml(p, isMe) + speechHtml(p) +
+    '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
     '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + (G.reservedMana(p) ? '<span class="held-num">' + G.reservedMana(p) + ' held</span>' : '') + '</div>' +
     stanceMiniHtml(p) + '</div>' +
     '<div class="spacer"></div>' + gems +
@@ -3976,6 +4006,13 @@ function chipsHtml(p, isMe) {
   out += '</div>';
   return out;
 }
+/* M81 (Jesse): the artifacts dock on the battlefield's RIGHT BORDER,
+   flanking the action button — out of the hero bars entirely. */
+function artDockHtml(p, isMe) {
+  var inner = artifactMedalHtml(p, isMe);
+  if (!inner) return '';
+  return '<div class="artdock ' + (isMe ? 'me' : 'foe') + '">' + inner + '</div>';
+}
 function artifactMedalHtml(p, isMe) {
   if (!p.artifacts || !p.artifacts.length) return '';
   return p.artifacts.map(function (a) {
@@ -3998,7 +4035,7 @@ function closeInspect() { inspectUid = null; inspectCardId = null; render(); }
 function openInspectCard(cardId) { inspectCardId = cardId; inspectUid = null; render(); }
 var fanBloom = false, fanSettle = false;
 function toggleHand(v) { if (v && !handOpen) fanBloom = true; if (!v && handOpen) fanSettle = true; handOpen = v; render(); }
-function showLog() { logOpen = true; render(); }
+function showLog() { logOpen = true; try { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
 function logHtml() {
   return '<div class="overlay" onclick="closeLog()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">📜 Recent events</h2><div style="font-size:13px;line-height:1.55">' +
@@ -4127,6 +4164,27 @@ function fitAllText() {
     document.querySelectorAll('.draftrow .ctext').forEach(function (el) { fitTextEl(el, 6.5); });
   } catch (e) {}
 }
+var __m81Game = null, __m81Decks = [99, 99], __m81LogLen = 0;
+function m81Watch() {
+  try {
+    if (!G || !document.body || !document.createElement) return;
+    if (__m81Game !== G) { __m81Game = G; __m81Decks = [G.players[0].deck.length, G.players[1].deck.length]; __m81LogLen = G.log.length;
+      var b0 = document.createElement('div'); b0.id = 'turnbanner'; b0.className = 'turnbanner splash'; b0.textContent = 'Battle!'; document.body.appendChild(b0); setTimeout(function () { try { b0.remove(); } catch (e) {} }, 1250);
+      return; }
+    // spell-cast dim: the newest play event is a spell -> the arena dims so the moment owns the screen
+    var evs = G.playEvents || [];
+    if (evs.length && evs[evs.length - 1] !== m81Watch._lastEv) { m81Watch._lastEv = evs[evs.length - 1]; var dd = D({ cardId: evs[evs.length - 1].cardId }); if (dd && dd.type === 'spell') { var sh = document.querySelector('.shell.stage'); if (sh) { sh.classList.add('casting'); setTimeout(function () { try { sh.classList.remove('casting'); } catch (e) {} }, 480); } } }
+    // deck peril pills (the original's own notices)
+    for (var pi = 0; pi < 2; pi++) { var now = G.players[pi].deck.length, was = __m81Decks[pi]; __m81Decks[pi] = now;
+      if (was > 3 && now <= 3 && now > 0) m81Pill((pi === humanIdx ? 'Your deck: ' : 'Enemy deck: ') + now + ' card' + (now === 1 ? '' : 's') + ' left!');
+      if (was > 0 && now === 0) m81Pill(pi === humanIdx ? 'Your deck is empty!' : 'The enemy deck is empty!'); }
+    // log pulse: events landed while you weren't looking
+    if (G.log.length > __m81LogLen) { __m81LogLen = G.log.length; if (mode === 'aiTurn' && !logOpen) { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.add('hasnews'); } }
+  } catch (e) {}
+}
+function m81Pill(txt) {
+  try { var old = document.getElementById('perilpill'); if (old) old.remove(); var el = document.createElement('div'); el.id = 'perilpill'; el.textContent = txt; document.body.appendChild(el); setTimeout(function () { try { el.remove(); } catch (e) {} }, 2100); } catch (e) {}
+}
 function showTurnBanner(txt, foe) {
   try {
     if (!document.body || !document.createElement) return;
@@ -4154,10 +4212,11 @@ function renderBody() {
   if (mode === 'menu') { crowdStop(); renderMenu(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
-  if (mode === 'mulligan') return renderMulligan();
+  if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
+    $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field"></div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>'; return; }
   if (G.winner !== null) crowdStop(); else crowdStart();
   var me = G.players[humanIdx], foe = G.players[aiIdx];
-  soundWatch(); turnWatch();
+  soundWatch(); turnWatch(); m81Watch();
   computeNmPops();
   var foeTint = 'rgba(0,0,0,0)';
   if (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[foe.heroId]) {
@@ -4169,11 +4228,12 @@ function renderBody() {
      the field; there are no separate sections anymore. */
   var shellStyle = (typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.20), rgba(15,9,27,.38)), url(' + PORTRAITS.arena + ')"' : '';
   if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
-  var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep"></div>' : '');
+  var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep"></div>' : '');
   html += '<button class="log-btn" onclick="showLog()" title="Battle log — recent events">📜</button>';
   sweepPending = false;
   html += heroBarHtml(foe, false);
   html += '<div class="field">';
+  html += artDockHtml(foe, false) + artDockHtml(me, true);
   html += boardHtml(foe, false) + chipsHtml(foe, false);
   html += '<div class="field-sp"></div>';
   /* M55 (Jesse): no phase text in the arena's center — the buttons and
@@ -4202,6 +4262,8 @@ function renderBody() {
       if (pairBits) html += '<div class="blockchip pairs">' + pairBits + '</div>';
     }
   })();
+  if (mode === 'targeting') html += '<div class="movepill">\uD83C\uDFAF Choose a target</div>';
+  if (mode === 'blocking') html += '<div class="movepill move">\u2694\uFE0F Your Move \u2014 choose your blockers</div>';
   if (mode === 'attackSelect') {
     if (attackSet.size) {
       var q = Array.from(attackSet).map(function (uid) { return me.board.find(function (c) { return c.uid === uid; }); }).filter(Boolean);
@@ -4322,7 +4384,7 @@ function gameOverHtml() {
     ' · Life drained by Nightmares: ' + s.nightmareLifeDrained + ' · Traps triggered: ' + s.trapsTriggered +
     ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + turnLine;
   function box(title, text, buttons) {
-    return '<div class="overlay"><div class="box"><h2>' + title + '</h2><p>' + text + '</p>' +
+    return '<div class="overlay"><div class="box"><div class="ribbon"><span>' + title + '</span></div><p>' + text + '</p>' +
       '<p style="color:#c4b6e8;font-size:13.5px">' + statsLine + '</p>' + buttons + '</div></div>';
   }
   if (climb) {
@@ -4375,7 +4437,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M80 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M81 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4413,7 +4475,7 @@ function renderMenu() {
 }
 function renderMulligan() {
   var me = G.players[humanIdx];
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><div class="panel mull-in"><h2>Opening hand — mulligan</h2>' +
+  return '<div class="mullpage"><div class="panel mull-in"><h2>Opening hand — mulligan</h2>' +
     '<p style="color:#c4b6e8;font-size:13.5px">Tap any cards you want to throw back. You\'ll draw replacements, then the thrown cards shuffle into your deck. <b>Hold</b> a card to read it big — a quick tap is what marks it.</p>' +
     (humanIdx === 1 ? '<p style="color:#9fd8ff;font-size:13px;margin-top:-2px">💎 You go second — the fragile gem gives you +1 mana on your first turn only.</p>' : '') +
     '<div class="mull-foe"><span class="mf-portrait">' + heroPortrait(G.players[aiIdx].heroId) + '</span><span>' + esc(G.players[aiIdx].hero.name) + ' holds ' + G.players[aiIdx].hand.length + ' cards</span><span class="mf-backs">' + G.players[aiIdx].hand.map(function () { return '🂠'; }).join('') + '</span></div>' +

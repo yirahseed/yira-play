@@ -476,6 +476,8 @@
   .shell.stage .herobar { background:transparent; border-color:transparent; box-shadow:none; padding:4px 6px; }
   /* M74: the battle-log button — a small round seal at the arena's top-left,
      the corner the foe's pile strip vacated. */
+  body { touch-action: manipulation; }
+  .shell.stage .pause-btn { left:auto; right:8px; }
   .shell.stage .log-btn { position:absolute; top:8px; left:8px; z-index:11; width:38px; height:38px; border-radius:50%; padding:0; font-size:17px; line-height:38px; text-align:center; background:rgba(16,10,28,.78); border:1.5px solid rgba(220,180,100,.55); box-shadow:0 2px 8px rgba(0,0,0,.5); }
   .shell.stage .pile { font-size:12px; }
   .shell.stage .msg { align-self:center; background:rgba(16,10,28,.55); border:1px solid rgba(200,170,255,.25); border-radius:999px; padding:2px 14px; margin:2px auto; position:relative; z-index:8; }
@@ -918,6 +920,16 @@
     .motes, .winburst { display:none !important; }
     .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand.thinking i, .log-btn.hasnews { animation: none !important; }
   }
+
+  /* ===== M86: sixth compare-and-polish batch ===== */
+  .card.hurtish { box-shadow: 0 0 0 2px rgba(255,70,80,.55), inset 0 0 18px rgba(200,20,40,.45) !important; }
+  .draftpick { display:flex; flex-direction:column; align-items:center; }
+  .draftcap { margin-top:5px; font-size:11.5px; color:#ffd9a0; letter-spacing:.4px; }
+  .facedown.justarmed { animation: trapArmIn .8s ease both; }
+  @keyframes trapArmIn { 0% { transform: translateY(-14px) scale(.85); filter:brightness(2); } 100% { transform: none; filter:none; } }
+  .bigcard.legendary { position:relative; overflow:hidden; }
+  .bigcard.legendary::after { content:''; position:absolute; inset:-40%; background:linear-gradient(115deg, transparent 42%, rgba(255,230,160,.20) 50%, transparent 58%); animation: foilSweep 3.4s ease-in-out infinite; pointer-events:none; }
+  @keyframes foilSweep { 0%, 55% { transform: translateX(-55%); } 90%, 100% { transform: translateX(55%); } }
 </style>
 </head>
 <body>
@@ -2931,7 +2943,7 @@ var redrawSet = new Set(), pendingUid = null;
 var attackSet = new Set(), blockMap = {}, blockPick = null, aiAttackers = [];
 var blockResolver = null, recordCounted = false, inspectUid = null, inspectCardId = null;
 var handOpen = false;
-var lastManaPop = -1, logOpen = false;
+var lastManaPop = -1, logOpen = false, sheetOpen = false;
 var setup = { me: 'weaver', foe: 'bruiser', seat: 'first' };
 var $app = document.getElementById('app');
 var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
@@ -4060,6 +4072,7 @@ function boardHtml(p, isMe) {
     if (isMe && (mode === 'main' || mode === 'attackSelect') && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' ready-glow';
     if (d2type(inst) === 'creature' && G.active === p.idx && inst.summonedTurn === G.turnNumber && !G.canAttack(inst, p) && !inst.stunned && (D(inst).keywords || []).indexOf('cantAttack') < 0) { opts.cls = (opts.cls || '') + ' sick'; opts.sick = true; }
     if (!isMe && mode === 'attackSelect' && d2type(inst) === 'creature' && (D(inst).keywords || []).indexOf('cantBlock') < 0) opts.cls = (opts.cls || '') + ' canblock-hint';
+    if (d2type(inst) === 'creature' && inst.damage > 0 && (D(inst).health + inst.permHealth - inst.damage) <= 2) opts.cls = (opts.cls || '') + ' hurtish';
     if (!isMe && mode === 'main' && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' foe-ready';
     out += (d2type(inst) === 'creature') ? emblemHtml(inst, p.idx, opts) : cardHtml(inst, p.idx, opts);
   });
@@ -4076,7 +4089,7 @@ function d2type(inst) { return D(inst).type; }
 function chipsHtml(p, isMe) {
   var out = '<div class="chips">';
   p.traps.forEach(function (t) {
-    if (isMe) out += '<span class="chip trapchip" onclick="disarm(' + t.uid + ')" title="click to disarm">🪤 ' + esc(D(t).name) + ' (reserved ' + t.reservedCost + ') <span class="chip-eye" onclick="event.stopPropagation();openInspect(null,' + t.uid + ')" title="Read this trap">👁</span> ✕</span>';
+    if (isMe) out += '<span class="chip trapchip" onclick="disarm(' + t.uid + ')" title="click to disarm">' + trapGlyph(t) + ' ' + esc(D(t).name) + ' (reserved ' + t.reservedCost + ') <span class="chip-eye" onclick="event.stopPropagation();openInspect(null,' + t.uid + ')" title="Read this trap">👁</span> ✕</span>';
     // opponent traps are shown face-down on their board instead
   });
   /* M71: artifacts left the chip row — they live as medallions beside the
@@ -4089,6 +4102,9 @@ function chipsHtml(p, isMe) {
    flanking the action button — out of the hero bars entirely. */
 var SCHOOL_HEX = { tides: '#4d9fff', ember: '#ff7a4d', grave: '#b18cff', dawn: '#ffd166', worldroot: '#7dd87d', none: '#8d84a8' };
 function schoolHex(d) { return SCHOOL_HEX[(d && d.cardSchool) || 'none'] || '#8d84a8'; }
+var TRAP_GLYPHS = { afterAttackDeclared: '⚔️', foeEndSummon: '🌟', foePlaysCard: '✋', foePlaysCreature: '🐾', foePlaysSpell: '🔮', turnStart: '🌅' };
+function trapGlyph(t) { var tr = D(t).trigger; return (tr && TRAP_GLYPHS[tr.kind]) || '⚡'; }
+function inGraveBits(inst) { try { return G && G.players.some(function (pp) { return pp.graveyard.indexOf(inst) >= 0; }); } catch (e) { return false; } }
 function medAct(uid) {
   var a = null; G.players[humanIdx].artifacts.forEach(function (x) { if (x.uid === uid) a = x; });
   if (a && G.active === humanIdx && !a.usedThisTurn && (a.charges || 0) > 0) activateArtifact(uid);
@@ -4121,6 +4137,17 @@ function closeInspect() { inspectUid = null; inspectCardId = null; render(); }
 function openInspectCard(cardId) { inspectCardId = cardId; inspectUid = null; render(); }
 var fanBloom = false, fanSettle = false;
 function toggleHand(v) { if (v && !handOpen) fanBloom = true; if (!v && handOpen) fanSettle = true; handOpen = v; render(); }
+function showSheet() { try { sfx('click'); } catch (e) {} sheetOpen = true; render(); }
+function closeSheet() { sheetOpen = false; render(); }
+function sheetConcede() { if (concedeArmed) { sheetOpen = false; concede(); } else concede(); }
+function sheetHtml() {
+  return '<div class="overlay" onclick="closeSheet()"><div class="box" style="max-width:340px" onclick="event.stopPropagation()"><h2 style="text-align:center">⏸ Paused</h2>' +
+    '<button class="big" onclick="closeSheet()">▶ Resume</button>' +
+    '<button class="ghost big" onclick="sheetOpen=false;showLog()">📜 Battle log</button>' +
+    '<button class="ghost big" onclick="sheetConcede()">' + (concedeArmed ? '🏳 Tap again to yield the match' : '🏳 Concede') + '</button>' +
+    '<button class="ghost big" onclick="sheetOpen=false;backToMenu()">🚪 Abandon match — back to menu</button>' +
+    '<p style="font-size:12px;color:#a793d6;text-align:center">The foe waits. Nothing moves while you are here.</p></div></div>';
+}
 function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
 function logHtml() {
@@ -4138,7 +4165,8 @@ function showVsSplash() {
     node.className = 'vs-splash';
     var TIPS = ['Traps fire on their own — arm one and hold the mana in reserve.', 'Damage is permanent. A wounded creature stays wounded.', 'Attackers do not tap: your creatures can attack, then block next turn.', 'You only lose to an empty deck if your turn ENDS with it empty.', 'Hold any card to read it big. Drag is the only way to play.', 'A card that did not start in Umbra\'s deck plants a Nightmare when it reaches his hand — and again when played.', 'Sneak creatures cannot be blocked on their first attack — if a block was possible.', 'Playing your class card starts its chain: each stage slips the next into the top of your deck.', 'The second player starts with a fragile gem: +1 mana for their first turn only.'];
     var stOf = function (p) { var s = p && (p.stanceId || p.stance); return (s && STANCES[s]) ? STANCES[s] : STANCES.open; };
-    node.innerHTML = '<div class="vs-row"><div class="vs-side"><div class="portrait">' + heroPortrait(me.heroId) + '</div><b>' + esc(me.hero.name) + '</b><small>' + esc(me.hero.blurb || '') + '<br>' + HERO_SCHOOLS[me.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div><div class="vs-x">⚔️</div><div class="vs-side"><div class="portrait">' + heroPortrait(foe.heroId) + '</div><b>' + esc(foe.hero.name) + '</b><small>' + esc(foe.hero.blurb || '') + '<br>' + HERO_SCHOOLS[foe.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div></div><div class="vs-meta">' + (humanIdx === 0 ? 'You lead — the foe starts with the fragile gem' : 'The foe leads — you start with the fragile gem') + ' · your stance ' + stOf(me).icon + ' ' + esc(stOf(me).name) + ' · foe ' + stOf(foe).icon + ' ' + esc(stOf(foe).name) + '</div><div class="vs-tip">💡 ' + TIPS[Math.floor(Math.random() * TIPS.length)] + '</div><div class="vs-tap">tap anywhere to begin</div>';
+    var climbBit = (typeof climb !== 'undefined' && climb) ? ' · ⛰️ Climb rung ' + climb.rung + ' of 5' : '';
+    node.innerHTML = '<div class="vs-row"><div class="vs-side"><div class="portrait">' + heroPortrait(me.heroId) + '</div><b>' + esc(me.hero.name) + '</b><small>' + esc(me.hero.blurb || '') + '<br>' + HERO_SCHOOLS[me.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div><div class="vs-x">⚔️</div><div class="vs-side"><div class="portrait">' + heroPortrait(foe.heroId) + '</div><b>' + esc(foe.hero.name) + '</b><small>' + esc(foe.hero.blurb || '') + '<br>' + HERO_SCHOOLS[foe.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div></div><div class="vs-meta">' + (humanIdx === 0 ? 'You lead — the foe starts with the fragile gem' : 'The foe leads — you start with the fragile gem') + ' · your stance ' + stOf(me).icon + ' ' + esc(stOf(me).name) + ' · foe ' + stOf(foe).icon + ' ' + esc(stOf(foe).name) + climbBit + '</div><div class="vs-tip">💡 ' + TIPS[Math.floor(Math.random() * TIPS.length)] + '</div><div class="vs-tap">tap anywhere to begin</div>';
     document.body.appendChild(node);
     sfx('legendary');
     var vsGone = false;
@@ -4202,7 +4230,7 @@ function inspectHtml() {
   var stats = '';
   var inGrave = false; try { inGrave = G && G.players.some(function (pp) { return pp.graveyard.indexOf(inst) >= 0; }); } catch (e) {}
   if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span style="color:#ffd28a">' + d.power + '⚔</span><span style="color:#9df0b6">' + d.health + '♥</span></div>' : '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
-  return '<div class="overlay" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + '"' + sigStyle(d) + '>' +
+  return '<div class="overlay" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.legendary ? ' legendary' : '') + '"' + sigStyle(d) + '>' +
     '<div class="cost">' + d.cost + '</div>' + typeTabHtml(d) + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '') +
     '<div class="ctype">' + d.type + (d.cardSchool ? ' · ' + SCHOOL_META[d.cardSchool].icon + ' ' + SCHOOL_META[d.cardSchool].name : '') + '</div><div class="ctext">' + esc(effectText(d)) + '</div>' +
@@ -4218,6 +4246,7 @@ function inspectHtml() {
       if (d.flipsTo && CARDS[d.flipsTo]) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 Transforms into ' + esc(CARDS[d.flipsTo].name) + (d.flipOnSpells ? ' after you cast ' + d.flipOnSpells + ' spells in one turn.' : ' when you end your turn with exactly 2 mana available.') + '</div>');
       if (d.afterFlip) { var baseId = Object.keys(CARDS).find(function (k) { return CARDS[k].flipsTo === inst.cardId; }); if (baseId) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 The transformed face of ' + esc(CARDS[baseId].name) + '.</div>'); }
       if (inst.temporary) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">⏳ Temporary — this copy dissolves at end of turn.</div>');
+      if ((inst.permPower || inst.permHealth) && !inGraveBits(inst)) bits.push('<div style="font-size:12.5px;color:#9df0b6;margin-top:4px">📈 Lasting effects: ' + (inst.permPower ? (inst.permPower > 0 ? '+' : '') + inst.permPower + ' power' : '') + (inst.permPower && inst.permHealth ? ' · ' : '') + (inst.permHealth ? (inst.permHealth > 0 ? '+' : '') + inst.permHealth + ' health' : '') + '.</div>');
       if (d.type === 'artifact' && inst.charges != null) bits.push('<div style="font-size:12.5px;color:#9ec9ff;margin-top:4px">🔵 Charges left: ' + inst.charges + (inst.usedThisTurn ? ' · already used this turn' : '') + '</div>');
       return bits.join('');
     })() +
@@ -4270,6 +4299,9 @@ function m84Watch() {
       }
     });
     window.__dmgSnap = fresh;
+    var foeTraps = G.players[aiIdx].traps.length;
+    if (window.__foeTraps != null && foeTraps > window.__foeTraps) { var fds = document.querySelectorAll('.facedown'); var last = fds && fds[fds.length - 1]; if (last) last.classList.add('justarmed'); }
+    window.__foeTraps = foeTraps;
     var me = G.players[humanIdx];
     if (G.active === humanIdx && G.winner === null && window.__perilTurn !== G.turnNumber) {
       window.__perilTurn = G.turnNumber;
@@ -4355,6 +4387,7 @@ function renderBody() {
   if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
   var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep"></div>' : '');
   html += '<button class="log-btn" onclick="showLog()" title="Battle log — recent events">📜</button>';
+  html += '<button class="log-btn pause-btn" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
   sweepPending = false;
   html += heroBarHtml(foe, false);
   html += '<div class="field"><div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
@@ -4486,6 +4519,7 @@ function renderBody() {
   if (graveIdx !== null) html += graveHtml();
   if (deckIdx !== null && G) html += deckHtml();
   if (logOpen) html += logHtml();
+  if (sheetOpen) html += sheetHtml();
   if (mode === 'draftPick') html += draftHtml();
   if (G.winner !== null) html += gameOverHtml();
   $app.innerHTML = html;
@@ -4565,7 +4599,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M85 · all names and art original</p>' +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread · playable slice M86 · all names and art original</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
     '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -4925,7 +4959,7 @@ function draftHtml() {
   if (!pd) return '';
   return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">Draft a signature — pick one</div>' +
     '<div class="ctext">Three signature cards from across every hero\'s set. The other two are gone.</div>' +
-    '<div class="draftrow">' + pd.options.map(function (inst) { return cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }); }).join('') + '</div></div></div>';
+    '<div class="draftrow">' + pd.options.map(function (inst) { var dd = D(inst); return '<div class="draftpick">' + cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }) + '<div class="draftcap">' + (dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : 'Signature') + '</div></div>'; }).join('') + '</div></div></div>';
 }
 function targetCreature(uid) {
   var all = G.players[0].board.concat(G.players[1].board);

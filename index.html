@@ -1047,6 +1047,23 @@
   .herochip .chipglyph { font-size:24px; line-height:44px; }
   .herochip .chipname { font-size:9px; line-height:1.12; text-align:center; white-space:normal; }
   .herochip.sel { border-color:#ffd76a; box-shadow:0 0 0 2px rgba(255,215,106,.55), 0 4px 14px rgba(0,0,0,.5); color:#ffe9a8; }
+
+  /* M100 (Jesse hands-on, 2026-11-03): the whole bottom stack is FIXED
+     geometry, out of scroll flow for good — the hero bar docked to the
+     screen bottom, the hand docked directly above it (the portrait can
+     never be covered again), and the artifact medals fixed on the right
+     edge above the hand where a thumb can find them. Card titles start
+     8px in (the old 17px reserve was for a cost orb that no longer
+     intrudes) and keep 17px clear on the right for the type tab. */
+  .shell.stage .handzone { position:fixed; left:0; right:0; bottom:calc(148px + env(safe-area-inset-bottom)); z-index:8; margin:0; padding:0 4px; }
+  .shell.stage .scrollzone { padding-bottom:272px; }
+  .shell.stage .artdock { position:fixed; z-index:10; margin:0; }
+  .shell.stage .artdock.foe { top:calc(64px + env(safe-area-inset-top)); right:8px; bottom:auto; }
+  .shell.stage .artdock.me { top:auto; right:8px; bottom:calc(272px + env(safe-area-inset-bottom)); }
+  .shell.stage .amedal { width:50px; min-height:60px; }
+  .shell.stage .hand.fan, .shell.stage .hand.fan.mini { padding:0 2px; gap:0; } /* the .mini twin matters: the old 88px rule was written for .mini too, at higher specificity than the plain fan rule */
+  .card .cname { padding:2px 17px 2px 8px; }
+  .bigcard .cname { padding:4px 20px 4px 12px; }
 </style>
 </head>
 <body>
@@ -4715,7 +4732,7 @@ function renderBody() {
      hand of real cards. The visible sliver shrinks as the hand grows so
      ten cards still fit the stage width. */
   var iw = (typeof window !== 'undefined' && window.innerWidth) || 390;
-  var cardW = iw < 560 ? 102 : 112;
+  var cardW = iw < 560 ? 102 : 112; /* M100: matches the CSS exactly (102 under the 560px media query, 112 above). The fan overflow was never this number — it was the fan's own unaccounted CSS: an 88px left padding left over from the beside-the-portrait era and an 8px flex gap the fit formula never knew about. Both are pinned to zero in the M100 CSS block; fanGap here is the only spacing. */
   var availW = Math.min(iw, iw > window.innerHeight ? 900 : 560) - 8;
   /* M36: the fan is CONTAINED (Jesse) — a centered cluster, never an
      edge-to-edge strip: its width is capped, and the visible sliver is
@@ -4724,7 +4741,7 @@ function renderBody() {
   /* M71 (Jesse + LoR/HS study): the fan breathes — full stage width, a
      wider visible sliver per card, a gentler arc, so titles and art read
      at rest instead of hiding under the next card. */
-  var fanW = Math.min(availW, iw < 560 ? 440 : (iw > window.innerHeight ? 720 : 460));
+  var fanW = Math.min(availW, iw < 560 ? Math.min(440, iw - 16) : (iw > window.innerHeight ? 720 : 460)); /* M100: the fan may never be wider than the phone — the old flat 440 cap overflowed a 390px screen on BOTH sides and slid the edge cards over the hero portrait */
   /* M97 (Jesse's full-card law): every card in the hand is WHOLLY visible
      in both states — no slivers, no neighbour ever covering a title. The
      fan scales DOWN to fit the stage width instead of overlapping: the
@@ -4733,7 +4750,7 @@ function renderBody() {
      card grows past its slot. */
   var fanGap = 5;
   var fitScale = hn > 0 ? Math.min(1, (fanW - 4 - (hn - 1) * fanGap) / (hn * cardW)) : 1;
-  var fanScale = handOpen ? Math.max(0.3, fitScale) : Math.min(0.58, Math.max(0.3, fitScale));
+  var fanScale = handOpen ? Math.max(0.26, fitScale) : Math.min(0.58, Math.max(0.26, fitScale)); /* M100: floor 0.26 so even a 10-card hand's ink stays on the phone */
   var stepPx = Math.round(cardW * fanScale) + fanGap;
   var hStep = hn > 1 ? Math.min(1.8, Math.max(0.5, 8 / hn)) : 0;
   /* M39 (Jesse): the resting hand is the hand itself, only small — the
@@ -4851,7 +4868,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M99.1 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M100 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {

@@ -635,7 +635,7 @@
   .pip-sep { color:#6f5ea6; font-size:10px; }
   .league-banner { text-align:center; font-size:14.5px; color:#e7d9ff; background:linear-gradient(90deg, rgba(124,80,220,.12), rgba(124,80,220,.3), rgba(124,80,220,.12)); border:1px solid rgba(200,170,255,.35); border-radius:12px; padding:9px 12px; margin-bottom:10px; }
   /* M115: the hub — profile frame + mode tiles */
-  .profilebar { display:flex; align-items:center; gap:12px; background:linear-gradient(120deg, rgba(124,80,220,.22), rgba(216,180,84,.12)); border:1px solid rgba(216,180,84,.45); border-radius:14px; padding:10px 12px; margin-bottom:10px; }
+  .profilebar { display:flex; align-items:center; gap:12px; background:linear-gradient(120deg, rgba(46,30,84,.96), rgba(24,16,46,.97)); border:1px solid rgba(216,180,84,.45); border-radius:14px; padding:10px 12px; margin-bottom:10px; } /* M117: solid — the .22-alpha wash read as broken glass over the roster art (Jesse) */
   .profilebar .pava { width:52px; height:52px; border-radius:50%; overflow:hidden; border:2px solid #d8b454; flex:0 0 auto; background:#241640; display:flex; align-items:center; justify-content:center; font-size:26px; color:#efe9ff; }
   .profilebar .pava img { width:100%; height:100%; object-fit:cover; }
   .profilebar .pwho { flex:1; min-width:0; }
@@ -644,7 +644,8 @@
   .xpbar { height:6px; background:rgba(255,255,255,.12); border-radius:3px; margin-top:5px; overflow:hidden; }
   .xpbar i { display:block; height:100%; background:linear-gradient(90deg,#8b5cf6,#ffd166); border-radius:3px; }
   .hubtiles { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:2px 0 12px; }
-  .tile { text-align:left; background:linear-gradient(160deg, rgba(38,24,72,.92), rgba(20,12,40,.94)); border:1px solid rgba(200,170,255,.35); border-radius:14px; padding:13px; color:#efe9ff; cursor:pointer; font:inherit; width:100%; }
+  .tile { text-align:left; background:linear-gradient(160deg, rgba(38,24,72,.97), rgba(20,12,40,.98)); border:1px solid rgba(200,170,255,.35); border-radius:14px; padding:13px; color:#efe9ff; cursor:pointer; font:inherit; width:100%; touch-action:manipulation; }
+  .tile > * { pointer-events:none; } /* M117: iOS Safari swallows taps that land on children inside a <button> — the Deck Builder tile read as dead on Jesse's iPhone while desktop clicks worked. Children never take the tap now; the button always does. */
   .tile:active { transform:scale(.98); }
   .tile .tico { font-size:27px; line-height:1; }
   .tile .tt { font-size:16px; font-weight:700; margin-top:6px; color:#fff; }
@@ -1038,7 +1039,7 @@
   .titlepage .tagline { color:#e9defc; text-shadow:0 2px 10px rgba(0,0,0,.9); }
   .titlepage .pressstart { margin-top:30px; text-shadow:0 2px 12px rgba(0,0,0,.95); }
   .titlepage .titlever { position:absolute; left:0; right:0; bottom:calc(10px + env(safe-area-inset-bottom)); margin:0; z-index:2; color:#b7a8dd; text-shadow:0 1px 8px rgba(0,0,0,.9); }
-  .menubg { position:fixed; inset:0; background-size:cover; background-position:50% 32%; opacity:.45; z-index:0; pointer-events:none; }
+  .menubg { position:fixed; inset:0; background-size:cover; background-position:50% 32%; opacity:.30; filter:brightness(.72) saturate(.92); z-index:0; pointer-events:none; } /* M117: dimmed — the art stays the landing's soul but stops washing out the hub (Jesse: 'it's all translucent') */
   .pagescroll.menupage { position:relative; z-index:1; background:transparent; }
   .menupage .panel { background:rgba(17,11,32,.87); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border-color:rgba(216,180,84,.38); box-shadow:0 10px 30px rgba(0,0,0,.45); animation:menuRise .45s ease both; }
   .menupage .panel:nth-of-type(3) { animation-delay:.06s; }
@@ -1434,7 +1435,7 @@ const CARDS = {
   agonys_twist: { icon: "\uD83E\uDE22", name: 'Agony Twist', cost: 3, type: 'spell', generatedOnly: true, effect: { kind: 'buffCreature', power: 0, health: -3 }, orig: "Agony Twist (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   bloodline_sire: { icon: "\uD83E\uDDDB", name: 'Bloodline Creator', cost: 1, type: 'creature', power: 2, health: 1, subtype: 'vampire', finale: { kind: 'addRandomSubtype', subtype: 'vampire' }, orig: "Bloodline Creator", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Sorin signature set member (hero panel), face-verified" },
   snapshell_turtle: { icon: "\uD83D\uDC22", name: 'Snapshell Turtle', cost: 2, type: 'creature', power: 2, health: 4, subtype: 'beast', trapGrowth: true, orig: "Snapshell Turtle", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'After you play a trap, this gets +1/+0' (permanent, the game's growth language)" },
-  echo_scepter: { icon: "\uD83E\uDE84", name: 'Echo Scepter', cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftSpell', maxCost: 2 }, orig: "Isochron Scepter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Activate: Draft a spell that costs 2 or less'; draft resolves as a random pick, the family's standing simplification" },
+  echo_scepter: { icon: "\uD83E\uDE84", name: 'Echo Scepter', cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftSpell', maxCost: 2 }, orig: "Isochron Scepter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Activate: Draft a spell that costs 2 or less'; draft resolves as a random pick, the family's standing simplification. CONFIRMED 2026-11-03 by a clean enlarged face (cost 2, charges 2, text verbatim) after a rival skim-reading (cost 1 / draft <=5) was refuted — the 1 was a Tolarian-Academy-discounted cost" },
   bearer_of_the_curse: { icon: "\uD83D\uDC3B", name: 'Cursebearer', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'beast', keywords: ['trample'], signatureFor: 'unbridled', deathGrowth: true, orig: "Cursebearer", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature, hero panel + official render + face all agree" },
   fury_of_the_wilds: { icon: "\uD83C\uDF32", name: "Wildspeaker's Fury", cost: 3, type: 'spell', signatureFor: 'unbridled', effect: { kind: 'destroyAndSelfDamage' }, orig: "Wildspeaker's Fury", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature; two independent reads agree word-for-word" },
   falkenrath_duchess: { icon: "\uD83D\uDC78", name: 'Falkenrath Duchess', cost: 5, type: 'creature', power: 5, health: 4, subtype: 'vampire', debut: { kind: 'buffSubtype', subtype: 'vampire', power: 2, health: 0 }, orig: "Falkenrath Duchess", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — pack-opening face" },
@@ -5488,7 +5489,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M116 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M117 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;

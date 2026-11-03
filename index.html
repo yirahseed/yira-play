@@ -1577,10 +1577,10 @@ const DECKS = {
 // --- Schools (class chains): one per deck, chosen beside the deck itself ---
 const SCHOOLS = {
   wizard:    { name: 'School of Tides', icon: '🌊', stages: ['tidewing_familiar', 'signature_weaving', 'mastery_of_currents'], blurb: 'Spellcraft chain: a flying familiar, a drafted signature, then a tide that answers spell-heavy turns with a 5/5 Elemental.' },
-  warlock:   { name: 'Pact of the Hollow Grave', icon: '🕳️', stages: ['gravebound_imp', 'withering_edict', 'whispers_of_grave'], blurb: 'Death chain: a decaying imp, a withering curse, then a pact that drains the foe whenever your creatures die on your turn.' },
-  paladin:   { name: 'Oath of the First Dawn', icon: '🌅', stages: ['dawn_steed', 'dawns_smite', 'aura_of_valor'], blurb: 'Army chain: a faithful steed, a smite that grows with your board, then an aura that strengthens every attack.' },
+  warlock:   { name: 'Pact of the Grave', icon: '🕳️', stages: ['gravebound_imp', 'withering_edict', 'whispers_of_grave'], blurb: 'Death chain: a decaying imp, a withering curse, then a pact that drains the foe whenever your creatures die on your turn.' },
+  paladin:   { name: 'Oath of the Dawn', icon: '🌅', stages: ['dawn_steed', 'dawns_smite', 'aura_of_valor'], blurb: 'Army chain: a faithful steed, a smite that grows with your board, then an aura that strengthens every attack.' },
   barbarian: { name: 'Path of the Ember Wrath', icon: '🔥', stages: ['axe_of_pyre', 'reckless_wrath', 'unbroken_might'], blurb: 'Wrath chain: a burning axe, reckless damage from your strongest creature, then ruin for the foe when your giants attack.' },
-  druid:     { name: 'Circle of the Worldroot', icon: '🌳', stages: ['thornwolf', 'barkhide_bloom', 'worldroot_titanosaur'], blurb: 'Wild chain: a healing wolf, a blooming ramp, then a warded titanosaur that shields your life with its own.' },
+  druid:     { name: 'Circle of the Wilds', icon: '🌳', stages: ['thornwolf', 'barkhide_bloom', 'worldroot_titanosaur'], blurb: 'Wild chain: a healing wolf, a blooming ramp, then a warded titanosaur that shields your life with its own.' },
 };
 const DEFAULT_SCHOOL = { weaver: 'wizard', controller: 'wizard', bruiser: 'barbarian', keeper: 'druid', torchbearer: 'barbarian', banneret: 'paladin', graven: 'warlock', unchained: 'warlock', unbridled: 'barbarian', sibilance: 'warlock', hammer: 'barbarian', tidemother: 'druid' };
 
@@ -1603,12 +1603,12 @@ const LEGENDARY_POOL = Object.keys(CARDS).filter((id) => CARDS[id].legendary && 
 // schools; a deck may only run cards of its hero's schools, neutral cards,
 // and the hero's own signature cards. Quest chains belong to their school.
 const SCHOOL_META = {
-  tides:     { name: 'School of Tides',        icon: '🌊' },
-  ember:     { name: 'Path of the Ember Wrath', icon: '🔥' },
-  grave:     { name: 'Pact of the Hollow Grave', icon: '🪦' },
-  dawn:      { name: 'Oath of the First Dawn',  icon: '☀️' },
-  worldroot: { name: 'Circle of the Worldroot', icon: '🌿' },
-  none:      { name: 'Neutral',                 icon: '⚪' },
+  tides:     { name: 'Tides',      icon: '🌊' },
+  ember:     { name: 'Ember Wrath', icon: '🔥' },
+  grave:     { name: 'Grave',      icon: '🪦' },
+  dawn:      { name: 'Dawn',       icon: '☀️' },
+  worldroot: { name: 'Wilds',      icon: '🌿' },
+  none:      { name: 'Neutral',    icon: '⚪' },
 };
 const SCHOOL_OF = {
   // Tides
@@ -1620,16 +1620,16 @@ const SCHOOL_OF = {
   emberling:'ember', two_headed_hellhound:'ember', opening_salvo:'ember', kindling_pyromancer:'ember', cinder_court_embermage:'ember', archwing_ravager:'ember', axe_of_pyre:'ember', reckless_wrath:'ember',
   unbroken_might:'ember', ravaging_tyrant:'ember', embermaw_devil:'ember', ashwing_sovereign:'ember', draconic_transfiguration:'ember', ember_deathraider:'ember',
   eternal_phoenix:'ember', flame_shot:'ember', ash_dragon:'ember', cinder_elemental:'ember', cinder_titan:'ember', rushhorn_minotaur:'ember',
-  // Hollow Grave
+  // Grave
   deathshade:'grave', thirteenth_hour:'grave', wound_priest:'grave', vein_drainlord:'grave', sanguine_pact:'grave', gravebound_imp:'grave',
   withering_edict:'grave', whispers_of_grave:'grave', wrong_turn:'grave', grim_echoes:'grave', vampire_thrall:'grave', crypt_pup:'grave', sanguine_imp:'grave', crypt_noble:'grave', crypt_assassin:'grave', crypt_adept:'grave', crypt_warrior:'grave', crypt_elder:'grave', court_messenger:'grave', pale_stalker:'grave', stalking_revenant:'grave', crypt_lord:'grave', crypt_sorcerer:'grave', crimson_knight:'grave', veiled_confidant:'grave', grave_cantor:'grave', court_command:'grave', night_revel:'grave', withering_blight:'grave', counterfeiter:'grave', scourge_of_the_pact:'grave', infectious_scorpion:'grave', fatal_infection:'grave', warp_of_agony:'grave', agonys_twist:'grave', bloodline_sire:'grave', falkenrath_duchess:'grave', crimson_raid:'grave', cranial_consultant:'grave', paincast_demon:'grave', nights_whisper:'grave', morvanes_goliath:'grave', grave_scour:'grave', grimwulf:'grave', gravemaw:'grave', drownscale:'grave', nightscale_revenant:'grave',
   widow_matron:'grave', old_bonegnaw:'grave', creeping_doom:'grave', shadowsmith_saboteur:'grave', void_harvest:'grave', unchained_spirit:'grave',
   sepulcher_titan:'grave', hollowgrin_giant:'grave', grave_gladiator:'grave',
-  // First Dawn
+  // Dawn
   stay_thy_hand:'dawn', desperate_prayer:'dawn', day_of_reckoning:'dawn', banner_of_courage:'dawn', bearer_of_the_curse:'worldroot', fury_of_the_wilds:'worldroot', sudden_growth:'worldroot', veilcursed_hunter:'worldroot', pouncing_lemur:'worldroot', hermit_of_the_flock:'worldroot', protector_of_the_meek:'worldroot', gatstaf_agitators:'worldroot', gatstaf_plunderers:'worldroot', daybreak_ranger:'worldroot', nightfall_predator:'worldroot', fangblade_brigand:'worldroot', fangblade_eviscerator:'worldroot', dawnkite_soldier:'dawn', dawnkite_guard:'dawn', dawnkite_archon:'dawn', pilgrim_of_the_vault:'dawn', returnwing_angel:'dawn', tollwarden_captain:'dawn', vigil_acolyte:'dawn', second_suns_dawn:'dawn', second_sun:'dawn', raise_the_guard:'dawn', captain_of_the_guard:'dawn', soldier:'dawn', vaultlight:'dawn', thing_beneath_the_ice:'tides', awoken_horror:'tides', blitzing_minotaur:'ember', goblin_fieldrusher:'ember', raging_goblin:'ember', sword_cannoneer:'ember', trumpet_blast:'ember', hellrider:'ember', vicious_mongrel:'worldroot', forest_patrol:'worldroot', elf:'worldroot', predator_ooze:'worldroot',
   daybreak_verdict:'dawn', dawn_steed:'dawn', dawns_smite:'dawn', aura_of_valor:'dawn', stance_recruit:'dawn', evenhand_paragon:'dawn',
   wardens_acolyte:'dawn', wardens_staff:'dawn', vainglorious_hero:'dawn', banneret_avatar:'dawn', dawn_titan:'dawn', radiant_intercessor:'dawn',
-  // Worldroot
+  // Wilds
   sheep:'worldroot', beastkeeper:'worldroot', heartswap_tree:'worldroot', quakehoof_behemoth:'worldroot', thornwolf:'worldroot', barkhide_bloom:'worldroot',
   worldroot_titanosaur:'worldroot', duskmane_stag:'worldroot', beastcall_arrow:'worldroot', venom_grub:'worldroot', tusked_warboar:'worldroot', tasty_morsel:'worldroot',
   deep_rooting:'worldroot', firstroot_titan:'worldroot', grove_sentinel:'worldroot', thornwood_archer:'worldroot', oakenhide:'worldroot',
@@ -4851,7 +4851,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M99 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M99.1 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {
@@ -5000,7 +5000,7 @@ function renderCollection() {
   $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the collection · ' + ids.length + ' cards · of the 466-card original library · swipe a row sideways</p>' +
     '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
     '<input id="collSearch" type="text" placeholder="🔍 Search name or rules text…" value="' + esc(collectionQuery) + '" oninput="setCollectionQuery(this.value)">' +
-    '<div style="margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px">' + [['all', '🌐 All'], ['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Worldroot'], ['none', '⚪ Neutral']].map(function (sc) {
+    '<div style="margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px">' + [['all', '🌐 All'], ['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (sc) {
       return '<button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionSchool === sc[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionSchool(\'' + sc[0] + '\')">' + sc[1] + '</button>';
     }).join('') + '</div>' +
     '<div style="margin:8px 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#a793d6">Sort:</span>' + [['cost', '💧 Cost'], ['name', '🔤 Name'], ['new', '✨ Newest']].map(function (s) { return '<button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionSort === s[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionSort(\'' + s[0] + '\')">' + s[1] + '</button>'; }).join('') + '<span style="font-size:12px;color:#a793d6">' + ['tides', 'ember', 'grave', 'dawn', 'worldroot'].map(function (s) { return SCHOOL_META[s].icon + ' ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].cardSchool === s && !CARDS[id].generatedOnly; }).length; }).join(' · ') + ' playable</span><button class="ghost" style="padding:5px 11px;font-size:12.5px" onclick="setCollectionTokens(!collectionShowTokens)">' + (collectionShowTokens ? '🫥 Hide tokens' : '👀 Show tokens') + '</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionOnlySig ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'sig\')">◆ Signatures</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionOnlyLeg ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'leg\')">👑 Legendaries</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="setCollectionArt(collectionArt === \'all\' ? \'painted\' : collectionArt === \'painted\' ? \'glyph\' : \'all\')">' + (collectionArt === 'all' ? '🎨 Art: all' : collectionArt === 'painted' ? '🎨 Art: painted' : '✦ Art: glyphs') + '</button></div>' +
@@ -5091,7 +5091,7 @@ function renderBuilder() {
     var btn = inPool
       ? '<button onclick="builderAdd(\'' + id + '\')"' + (n >= cap || d.length >= 30 ? ' disabled' : '') + '>＋ Add</button>'
       : '<button class="ghost" onclick="builderRemove(\'' + id + '\')">− Remove</button>';
-    return '<div class="brow"><div class="bcost">' + c.cost + '</div><button class="ghost beye" onclick="event.stopPropagation();openInspectCard(\'' + id + '\')" title="Inspect">👁</button><div class="bmain"><div class="bname">' + (c.icon || '') + ' ' + esc(c.name) + (n && !inPool ? ' <span class="bcount">×' + n + '</span>' : '') + '</div><div class="btext">' + stats + c.type + (c.cardSchool ? ' · ' + SCHOOL_META[c.cardSchool].icon + ' ' + SCHOOL_META[c.cardSchool].name.split(' ').pop() : '') + (c.signatureFor ? ' · signature' : '') + (c.legendary ? ' · legendary' : '') + ' — ' + esc(effectText(c)) + '</div></div>' + (inPool ? '<div class="bcount">' + n + '/' + cap + '</div>' : '') + btn + '</div>';
+    return '<div class="brow"><div class="bcost">' + c.cost + '</div><button class="ghost beye" onclick="event.stopPropagation();openInspectCard(\'' + id + '\')" title="Inspect">👁</button><div class="bmain"><div class="bname">' + (c.icon || '') + ' ' + esc(c.name) + (n && !inPool ? ' <span class="bcount">×' + n + '</span>' : '') + '</div><div class="btext">' + stats + c.type + (c.cardSchool ? ' · ' + SCHOOL_META[c.cardSchool].icon + ' ' + SCHOOL_META[c.cardSchool].name : '') + (c.signatureFor ? ' · signature' : '') + (c.legendary ? ' · legendary' : '') + ' — ' + esc(effectText(c)) + '</div></div>' + (inPool ? '<div class="bcount">' + n + '/' + cap + '</div>' : '') + btn + '</div>';
   }
   function group(title, ids) {
     if (!ids.length) return '';

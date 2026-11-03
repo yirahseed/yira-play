@@ -1117,7 +1117,7 @@ const CARDS = {
   thirteenth_hour: { icon: "🕐", name: 'The Thirteenth Hour', cost: 3, type: 'spell', effect: { kind: 'armTriska' }, cardSchool: 'grave' , orig: "Triskaidekaphobia", src: "verified card face" }, // original: Triskaidekaphobia
   wound_priest: { icon: "🩸", name: 'Wound Priest', cost: 2, type: 'creature', power: 2, health: 2, healOnDealtDamage: true, cardSchool: 'grave' , orig: "Demonic Priest", src: "verified card face" }, // original: Demonic Priest — "After this deals damage, heal yourself for that much" (combat is its only damage source in this pool)
   vein_drainlord: { icon: "🧛", name: 'Vein Drainlord', cost: 6, type: 'creature', power: 3, health: 5, keywords: ['flying'], drainAmp: 1, cardSchool: 'grave' , orig: "Voldaren Drainlord", src: "Wayback Hipsters gallery face - cost 6, 3/5 recorded (supersedes the sweep-4 transcription of 3-cost 2/3)" }, // original: Voldaren Drainlord — drain effects you control drain 1 more (scope here: drain effects, Nightmare drains, grave whispers)
-  sanguine_pact: { icon: "🔗", name: 'The Sanguine Pact', cost: 3, type: 'artifact', charges: 3, activateCost: 2, effect: { kind: 'armBond' }, cardSchool: 'grave' , orig: "Sanguine Bond", src: "verified record - WORDING CONFLICT: one face transcription reads healing-instead-damages (replacement); ours implements the additive reading from the earlier record; under review" }, // original: Sanguine Bond — "Whenever you heal this turn, deal that much damage to your opponent. Activate: pay 2" (charges follow this game's artifact pattern)
+  sanguine_pact: { icon: "🔗", name: 'The Sanguine Pact', cost: 3, type: 'artifact', charges: 3, effect: { kind: 'armBond' }, cardSchool: 'grave', text: 'Activate: This turn, healing yourself instead damages your opponent.', orig: "Sanguine Bond", src: "Hipsters Helvault Unsealed spoilers (card-face image) — the settled face read (MERGE-20261102): Artifact, 3 charges, REPLACEMENT semantics. M99 corrects the M53 additive implementation and retires the invented pay-2 activation; the record carries no activation cost" },
 
 
 
@@ -1274,11 +1274,11 @@ const CARDS = {
   // of Bloodrush at any honest price).
   deep_rooting:       { icon: "🪴", name: 'Deep Rooting',       cost: 2, type: 'spell', signatureFor: 'keeper', effect: { kind: 'ramp' } , orig: "Rampant Growth", src: "Rampant Growth \u2014 cost 2 now RECORDED (VIDEO-DIGEST batch 1, 2026-11-01, deck view; the Forge cost matched it and retires). The same haul proves it a Nissa SIGNATURE, so Deep Rooting takes its signature place for the Keeper; other decks lose their copies." },
   oakenhide:      { icon: "🌰", name: 'Oakenhide',       cost: 2, type: 'spell', effect: { kind: 'buffCreature', power: 2, health: 2 }, orig: "Oakenhide", src: "recovered record — cost 2 recorded; held while its 1-mana twin Grow Fierce existed (Jesse parity rule), enters now that the twin is purged" },
-  firstroot_titan:    { icon: "🐘", name: 'Firstroot Titan',    cost: 8, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true, debut: { kind: 'ramp' }, attackEffect: { kind: 'ramp' } , orig: "Primeval Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
-  sepulcher_titan:    { icon: "🪦", name: 'Sepulcher Titan',    cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Grave Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
-  rime_titan:         { icon: "🧊", name: 'Rime Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Frost Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
-  dawn_titan:         { icon: "🌞", name: 'Dawn Titan',         cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Sun Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
-  cinder_titan:       { icon: "🌋", name: 'Cinder Titan',       cost: 7, costForge: true, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Inferno Titan", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
+  firstroot_titan:    { icon: "🐘", name: 'Firstroot Titan',    cost: 6, type: 'creature', power: 7, health: 7, behemoth: true, debut: { kind: 'ramp' }, attackEffect: { kind: 'ramp' } , orig: "Primeval Titan", src: "Official patch notes v1.04.00 — final-era RECORDED: cost 6, 7/7 (retires the COSTING.md B7 Forge cost 8, M99)" },
+  sepulcher_titan:    { icon: "🪦", name: 'Sepulcher Titan',    cost: 6, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Grave Titan", src: "Official patch notes v1.04.00 — final-era RECORDED: cost 6, 7/7 (retires the COSTING.md B7 Forge cost 7, M99). Era note: the merged CSV row still prints 7 (conflict-logged, MERGE-20261102) — the final-era value governs" },
+  rime_titan:         { icon: "🧊", name: 'Rime Titan',         cost: 6, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Frost Titan", src: "Official patch notes v1.04.00 — final-era RECORDED: cost 6, 7/7 (retires the COSTING.md B7 Forge cost 7, M99)" },
+  dawn_titan:         { icon: "🌞", name: 'Dawn Titan',         cost: 6, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Sun Titan", src: "Official patch notes v1.04.00 — final-era RECORDED: cost 6, 7/7 (retires the COSTING.md B7 Forge cost 7, M99)" },
+  cinder_titan:       { icon: "🌋", name: 'Cinder Titan',       cost: 6, type: 'creature', power: 7, health: 7, behemoth: true , orig: "Inferno Titan", src: "Official patch notes v1.04.00 — final-era RECORDED: cost 6, 7/7 (retires the COSTING.md B7 Forge cost 7, M99)" },
   hollowgrin_giant:   { icon: "👹", name: 'Hollowgrin Giant',   cost: 9, costForge: true, type: 'creature', power: 8, health: 7, behemoth: true , orig: "Grimgrin", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
   rushhorn_minotaur:  { icon: "🐃", name: 'Rushhorn Minotaur',  cost: 3, costForge: true, type: 'creature', power: 4, health: 3 , orig: "Blitzing Minotaur", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
   grove_sentinel:     { icon: "🍃", name: 'Grove Sentinel',     cost: 2, costForge: true, type: 'creature', power: 3, health: 2 , orig: "Elite Forest Guard", src: "COSTING.md B7 \u2014 cost Forge-assigned" },
@@ -1410,6 +1410,12 @@ const CARDS = {
   aether_extractor: { icon: "\u2697\uFE0F", name: 'Aether Extractor', cost: 7, type: 'artifact', charges: 1, effect: { kind: 'refillMana' }, orig: "Energy Extractor", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — charges read as 1 (PARTIAL detail on the face)" },
   cruel_mindflayer: { icon: "\uD83D\uDC19", name: 'Cruel Mindflayer', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'wizard', debut: { kind: 'buffAndDoom', power: 4, health: 4 }, orig: "Sadistic Mindflayer", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — final stats 4/4 (v1.01.02 bullet: 2/3 \u2192 4/4); school assigned Tides (illithid blue), flagged" },
   stone_turtle: { icon: "\uD83D\uDC22", name: 'Stone Turtle', cost: 0, type: 'creature', power: 0, health: 6, generatedOnly: true, orig: "Stone Turtle (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
+  // ---------- M99: Library Wave 1 (the merged record, MERGE-20261102) ----------
+  sunless_lord: { icon: "🧛", name: 'Cazimir, the Sunless Lord', cost: 10, type: 'creature', power: 10, health: 10, subtype: 'vampire', keywords: ['flying'], debut: { kind: 'setBothHealth', amount: 10 }, text: "Flying. Debut: Set both players' health to 10.", cardSchool: 'grave', orig: "Strahd, Lord of Ravenloft", src: "Hipsters D&D Icons preview; VIDEO-DIGEST wave 4A (F2Piko) full face read, 2026-11-01 — cost 10, 10/10, Flying, Vampire Wizard, text verbatim (the cards.csv row was corrected to this face read at M99; it previously carried a placeholder summary). Renamed (Strahd and Ravenloft are D&D proper names). Record colors WB — schooled Grave: the vampire court and the life-drain family live there; the W half shows in the effect's symmetry. FLAGGED" },
+  skymaster_sphinx: { icon: "🦁", name: 'Skymaster Sphinx', cost: 6, type: 'creature', power: 4, health: 5, subtype: 'monster', keywords: ['flying'], attackEffect: { kind: 'millOpponent', count: 1 }, text: 'Flying. Attack: Mill your opponent for 1.', cardSchool: 'tides', orig: "Skymaster Sphinx", src: "Fan sortable sheet (full text) + Video digest 4A (F2Piko wave, 2026-11-01) face-verified — cost 6, 4/5, Flying, Monster, text verbatim; the completed row unblocks the Sphinx line (MERGE-20261102)" },
+  millstone: { icon: "⚙️", name: 'Millstone', cost: 3, type: 'artifact', charges: 2, effect: { kind: 'millOpponent', count: 2 }, text: 'Activate: Mill your opponent for 2.', cardSchool: 'tides', orig: "Millstone", src: "mtgazone tier list; VIDEO-DIGEST batches 1-2 + wave 4A face-verified — cost 3, text verbatim; charges 3 → 2 per official patch notes v0.11.00 (MERGE-20261102)" },
+  repulse: { icon: "🌪️", name: 'Repulse', cost: 3, type: 'spell', effect: { kind: 'bounce', draw: 1 }, text: "Return a creature to its owner's hand. Draw a card.", cardSchool: 'tides', orig: "Repulse", src: "Official patch notes v0.11.00 (hunter fill, MERGE-20261102); VIDEO-DIGEST wave 3 (YouTube face/deck-view), 2026-11-01 — cost 3 and text recorded; type and colours are NOT in the record: shipped as a Spell, schooled Tides by function (bounce + draw is the Tides verb pair, M16 identity) — FLAGGED" },
+  malachar: { icon: "😈", name: 'Malachar, the Unleashed', cost: 8, type: 'creature', power: 7, health: 7, subtype: 'demon', keywords: ['flying', 'trample'], legendary: true, finale: { kind: 'giftPaincast', count: 7 }, text: 'Flying. Trample. Finale: Add 7 random Grave cards to your hand. Until the turn ends, they cost 0 and have paincast equal to their base cost.', cardSchool: 'grave', orig: "Griselbrand, Unleashed", src: "Hipsters Helvault Unsealed spoilers (card-face image) + Wayback Hipsters Helvault gallery 20221207 — cost 8, 7/7, Flying, Trample, Demon, Legendary (fan-sheet flag); paincast defined in official patch notes v1.02.00. Renamed (Griselbrand is a Magic proper name)" },
 };
 const TRAP_POOL = ['quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil', 'countersign', 'broken_focus', 'sudden_growth', 'opening_salvo', 'raise_the_guard']; // M73: Raise the Guard joins (Soldier token closed by wave 4C) // M62 purge: only verified traps remain — M72: the M68/M69/M72 verified traps join the draft pool
 
@@ -1867,6 +1873,7 @@ class Game {
     if (inst.miracleDiscount && inst.miracleTurn === this.turnNumber) cost = Math.max(0, cost - inst.miracleDiscount);
     if (def(inst).selfDamageDiscount && p.selfDamageThisTurn > 0) cost = Math.max(0, cost - def(inst).selfDamageDiscount); // M70 Paincast Demon
     if (def(inst).freeIfDrafted && p.draftedThisTurn) cost = 0; // M79 Aether Figment: drafted this turn -> free
+    if (inst.giftTurn != null && inst.giftTurn === this.turnNumber) cost = 0; // M99: Malachar's gifts cost 0 until the turn ends
     if (inst.costOverride != null) cost = inst.costOverride; // M79 Mind Magnifier copies: cost changed TO this, absolute
     return cost;
   }
@@ -2131,6 +2138,17 @@ class Game {
     this.checkWin();
     // M68 (Davriel's Scourge): after you play a spell, each of your scourges drains 1.
     if (d.type === 'spell') for (const c of p.board) if (def(c).spellDrain) { const foe = this.players[this.opp(i)]; foe.life -= def(c).spellDrain; p.life += def(c).spellDrain; this.log.push(`${def(c).name} drains ${def(c).spellDrain} from ${foe.hero.name}`); }
+    // M99 PAINCAST (official definition, patch notes v1.02.00): a gift card
+    // played from hand inside its gift turn deals its controller damage
+    // equal to its base cost, after it resolves. The pain feeds the same
+    // self-damage ledger as Night's Whisper (M70). A countered gift never
+    // resolves, so it exacts nothing (playCard returned above).
+    if (inst.paincast && inst.giftTurn === this.turnNumber) {
+      const pc = inst.paincast;
+      p.life -= pc; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + pc; p.damageTakenCurrTurn += pc; p.damageTakenGame = (p.damageTakenGame || 0) + pc;
+      this.log.push(`Paincast: ${def(inst).name} exacts ${pc} life from ${p.hero.name}`);
+      this.checkWin();
+    }
     return { countered: false };
   }
   armTrap(i, uid) {
@@ -2583,6 +2601,24 @@ class Game {
         }
         break;
       }
+      case 'setBothHealth': { for (const q of this.players) q.life = effect.amount; this.log.push(`${def(sourceInst).name}: both heroes' health is set to ${effect.amount}`); break; }
+      case 'giftPaincast': {
+        // M99 (Griselbrand, Unleashed — ours: Malachar): random Grave cards
+        // flood the hand, free and paincast until the turn ends. The gift
+        // stamp is this half-turn's number; effectiveCost and playCard
+        // both consult it, so the window closes itself as turns roll.
+        const pool = Object.keys(CARDS).filter((id) => { const cd = CARDS[id]; return !cd.generatedOnly && cd.cardSchool === 'grave'; });
+        let gifted = 0;
+        for (let k = 0; k < (effect.count || 7) && pool.length; k++) {
+          const gift = makeInstance(this.rng.pick(pool), null);
+          gift.paincast = def(gift).cost || 0;
+          gift.giftTurn = this.turnNumber;
+          this.addToHand(i, gift, srcName);
+          gifted++;
+        }
+        if (gifted) this.log.push(`${def(sourceInst).name}: ${gifted} Grave cards flood ${p.hero.name}'s hand — free, and paincast, until the turn ends`);
+        break;
+      }
       case 'sequence': for (const sub of effect.effects) this.resolveEffect(i, sub, sourceInst, target); break;
       case 'bounce': {
         if (target && target.kind === 'creature') {
@@ -2813,19 +2849,25 @@ class Game {
       }
     }
   }
-  // M53 (Sanguine Pact, verified): while the pact holds for this turn, life
-  // its controller gains is dealt as damage to the foe. Settled here, where
-  // every resolution path passes, on NET life gained since the last settle —
-  // a heal soaked by simultaneous hero damage in the same breath is missed
-  // (documented simplification; per-event sites were too scattered to trust).
+  // M53 (Sanguine Pact) as corrected at M99 to the settled face read:
+  // REPLACEMENT — while the pact holds for this turn, life its controller
+  // gains is instead dealt as damage to the foe (the controller does NOT
+  // keep the healing). Settled here, where every resolution path passes,
+  // on NET life gained since the last settle — a heal soaked by
+  // simultaneous hero damage in the same breath is missed (documented
+  // simplification; per-event sites were too scattered to trust).
   bondSettle() {
     if (this._bondSettling) return;
     this._bondSettling = true;
     for (const p of this.players) {
       if (p.bondTurn === this.turnNumber && p._bondLife !== undefined) {
         const gained = p.life - p._bondLife;
+        if (gained > 0 && this.winner === null) {
+          p.life -= gained; // the healing is replaced, never kept
+          const foe = this.players[this.opp(p.idx)]; this.hurtHero(foe.idx, gained, p.idx); foe.tookDamageThisTurn = true;
+          this.log.push(`The Sanguine Pact turns ${gained} healing into harm for ${foe.hero.name}`);
+        }
         p._bondLife = p.life;
-        if (gained > 0 && this.winner === null) { const foe = this.players[this.opp(p.idx)]; this.hurtHero(foe.idx, gained, p.idx); foe.tookDamageThisTurn = true; this.log.push(`The Sanguine Pact turns ${gained} healing into harm for ${foe.hero.name}`); }
       }
     }
     this._bondSettling = false;
@@ -2917,7 +2959,8 @@ function targetFor(game, i, inst) {
     if (!mine.length) return undefined;
     return { kind: 'creature', inst: mine.slice().sort((a, b) => powerOf(b) - powerOf(a))[0] };
   }
-  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage' || eff.kind === 'drainCreatureOrDamage' || eff.kind === 'markCreature' || eff.kind === 'pathExile' || eff.kind === 'pacify') {
+  // M99: 'bounce' aims like the other targeted answers (Repulse joins Recall on this line).
+  if (eff.kind === 'stunCreature' || eff.kind === 'destroyCreature' || eff.kind === 'debuffAndAdd' || eff.kind === 'destroyAndSelfDamage' || eff.kind === 'drainCreatureOrDamage' || eff.kind === 'markCreature' || eff.kind === 'pathExile' || eff.kind === 'pacify' || eff.kind === 'bounce') {
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
     return target ? { kind: 'creature', inst: target } : null;
   }
@@ -3781,7 +3824,9 @@ function effectText(d) {
       case 'bounceOwnSetCost': return 'Return another friendly creature to your hand. Change its cost to ' + (e.setCost || 1) + '.';
       case 'taxFoeSpellsNextTurn': return 'During your opponent\'s next turn, their spells cost ' + e.amount + ' more.';
       case 'armTriska': return 'At the end of your opponent\'s next turn, if they have exactly 13 life, they lose the game.';
-      case 'armBond': return 'This turn, whenever you heal, deal that much damage to your opponent.';
+      case 'armBond': return 'This turn, healing yourself instead damages your opponent.';
+      case 'setBothHealth': return 'Set both players\' health to ' + e.amount + '.';
+      case 'giftPaincast': return 'Add ' + e.count + ' random Grave cards to your hand. Until the turn ends, they cost 0 and have paincast equal to their base cost.';
       case 'destroyRandomArtifactDouble': return 'Destroy a random enemy artifact. If you do, double this creature\'s power and health.';
       case 'copyOpponentHand': return 'Replace your hand with a copy of your opponent\'s hand.';
       case 'buffCreaturesAndHand': return 'Give your other creatures, and the creatures in your hand, +' + e.power + '/+' + e.health + '.';
@@ -4806,7 +4851,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M98 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M99 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {
@@ -4912,7 +4957,7 @@ function fakeInst(cardId) {
 var collectionSchool = 'all';
 function setCollectionSchool(s) { collectionSchool = s; render(); }
 var collectionQuery = '';
-var NEW_CARDS = { sanguine_pact: 1 };
+var NEW_CARDS = { sunless_lord: 1, skymaster_sphinx: 1, millstone: 1, repulse: 1, malachar: 1 };
 var collectionSort = 'cost';
 var collectionShowTokens = true;
 var collectionArt = 'all';

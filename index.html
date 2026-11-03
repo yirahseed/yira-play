@@ -596,7 +596,7 @@
      gives up some height so all of that fits the 184px card:
      title 22 + art 56 + badges 12 + text 54 + stats 27 = 171 of 172. --- */
   .card .cname { height:19px; line-height:15px; font-size:12px; margin:0 0 3px; padding:2px 4px 2px 16px;
-                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:none; }
+                 white-space:nowrap; overflow:hidden; text-overflow:clip; flex:none; }
   .card .cart { height:54px; margin:0 0 2px; }
   .hand.fan .card .cart { height:54px; }
   .card .ctyperow { height:10px; min-height:10px; margin:0 0 2px; flex:none; }
@@ -1028,6 +1028,25 @@
   .shell.stage .hand.fan .card, .hand.fan .card { scale:var(--fs, .92); }
   .shell.stage .hand.fan.mini .card { scale:var(--fs, .5); }
   .shell.stage .hand.fan.mini { height:112px; }
+
+  /* ---- M98 (Jesse's screenshots): the WHOLE roster on the title
+     screen in any aspect — a blurred cover backdrop carries the
+     edges, the sharp art sits contained and complete; the logo goes
+     solid gold (the M97 drop-shadow filter broke the gradient text
+     into lavender on his phone); the version line lifts clear of
+     the home bar; menu heroes are picked by their faces. ---- */
+  .titleartbg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(22px) brightness(.5); transform:scale(1.18); }
+  .titleart { object-fit:contain; object-position:50% 50%; }
+  .titlepage .logo { background:none; -webkit-text-fill-color:#ffdf8e; color:#ffdf8e; filter:none; text-shadow:0 2px 0 rgba(122,84,16,.85), 0 6px 22px rgba(0,0,0,.85); }
+  .titlepage .titlever { bottom:calc(24px + env(safe-area-inset-bottom)); }
+  .titleshade { background:linear-gradient(180deg, rgba(5,3,12,.66) 0%, rgba(5,3,12,0) 26%, rgba(5,3,12,0) 74%, rgba(5,3,12,.72) 100%); }
+  .card .cname { letter-spacing:-.3px; }
+  .herochips { display:flex; flex-wrap:wrap; gap:7px; margin:2px 0 8px; }
+  .herochip { flex:0 0 auto; width:64px; padding:5px 3px 4px; border-radius:12px; border:1px solid rgba(216,180,84,.30); background:rgba(10,6,20,.55); color:#d9cdf5; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; font-family:inherit; }
+  .herochip img { width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 18%; display:block; }
+  .herochip .chipglyph { font-size:24px; line-height:44px; }
+  .herochip .chipname { font-size:9px; line-height:1.12; text-align:center; white-space:normal; }
+  .herochip.sel { border-color:#ffd76a; box-shadow:0 0 0 2px rgba(255,215,106,.55), 0 4px 14px rgba(0,0,0,.5); color:#ffe9a8; }
 </style>
 </head>
 <body>
@@ -3970,7 +3989,7 @@ function cardHtml(inst, ownerIdx, opts) {
       if (effCost < d.cost) costCls = ' disc'; else if (effCost > d.cost) costCls = ' taxed';
     }
   } catch (e) {}
-  var tfs = Math.max(6, Math.min(12.5, Math.round(276 / Math.max(8, d.name.length)) / 2));
+  var tfs = Math.max(6, Math.min(12.5, Math.round(246 / Math.max(8, d.name.length)) / 2));
   var styAttr = sigStyle(d);
   var extraVars = '';
   if (opts.fan) extraVars += '--fan:' + opts.fan + ';z-index:' + (opts.fz || 1) + ';';
@@ -4000,7 +4019,7 @@ function emblemHtml(inst, ownerIdx, opts) {
     '<span class="emblem-pow' + (inst.permPower > 0 ? ' buffed' : inst.permPower < 0 ? ' debuffed' : '') + '">' + (d.power + inst.permPower) + '⚔</span>' +
     '<span class="emblem-hp' + (inst.permHealth > 0 ? ' buffed' : inst.permHealth < 0 ? ' debuffed' : '') + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + (inst.doom > 0 ? '<span class="emblem-doom" title="Doomed — dies when the counter runs out">💀' + inst.doom + '</span>' : '') + '</div>' +
     (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') + (opts.sick ? '<div class="sickchip" title="Summoned this turn — it can attack next turn">⏳</div>' : '') + (opts.blocking ? '<div class="blockchip" title="Blocking">🛡️</div>' : '') +
-    '<div class="emblem-name" style="font-size:' + Math.max(7.5, Math.min(9.5, Math.round(300 / Math.max(8, d.name.length)) / 2)) + 'px">' + esc(d.name) + '</div>' +
+    '<div class="emblem-name" style="font-size:' + Math.max(7.5, Math.min(9.5, Math.round(258 / Math.max(8, d.name.length)) / 2)) + 'px">' + esc(d.name) + '</div>' +
     '<div class="emblem-badges">' + emblemIcons(inst, ownerIdx) + '</div></div>';
 }
 /* ---------- M21 speech: small cream bubble beside the corner portrait,
@@ -4396,11 +4415,38 @@ function fitTextEl(el, minPx) {
   if (!el || el.scrollWidth === undefined || !el.clientWidth) return;
   var fs = parseFloat(el.style.fontSize) || parseFloat(getComputedStyle(el).fontSize) || 12;
   var guard = 0;
-  while (guard++ < 28 && fs > minPx && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1)) { fs -= 0.5; el.style.fontSize = fs + 'px'; }
+  /* M98 (Jesse's iPhone): measure the TRUE text width with a probe span
+     and fit it inside the element's text area with 5px to spare.
+     scrollWidth cannot do this job — it never reports below
+     clientWidth, so a snug fit and a loose fit look identical to it,
+     and Safari's wider font metrics turned that invisible zero
+     headroom into 'Void Harv…' on his phone. The probe measures with
+     THIS device's THIS font, so the fit is right where it renders. */
+  var cs = null, probe = null, avail = 0;
+  try {
+    cs = getComputedStyle(el);
+    if (cs.whiteSpace === 'nowrap' && el.childNodes.length === 1 && el.firstChild.nodeType === 3) {
+      probe = fitTextEl._p;
+      if (!probe) {
+        probe = fitTextEl._p = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;top:-9999px;left:-9999px;';
+        document.body.appendChild(probe);
+      }
+      probe.style.fontStyle = cs.fontStyle; probe.style.fontWeight = cs.fontWeight;
+      probe.style.fontFamily = cs.fontFamily; probe.style.letterSpacing = cs.letterSpacing;
+      probe.textContent = el.firstChild.nodeValue;
+      avail = el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0) - 5;
+    }
+  } catch (e) { probe = null; }
+  function over() {
+    if (probe) { probe.style.fontSize = fs + 'px'; return probe.getBoundingClientRect().width > avail || el.scrollHeight > el.clientHeight + 1; }
+    return el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+  }
+  while (guard++ < 44 && fs > minPx && over()) { fs -= 0.5; el.style.fontSize = fs + 'px'; }
 }
 function fitAllText() {
   try {
-    document.querySelectorAll('.card .cname, .bigcard .cname').forEach(function (el) { fitTextEl(el, 7); });
+    document.querySelectorAll('.card .cname, .bigcard .cname').forEach(function (el) { fitTextEl(el, 6); });
     document.querySelectorAll('.card .ctext').forEach(function (el) { fitTextEl(el, 7.5); });
     document.querySelectorAll('.bigcard .ctext').forEach(function (el) { fitTextEl(el, 10.5); });
     /* M71: board emblem names and hero names join the fit pass — no more
@@ -4755,12 +4801,12 @@ function renderTitle() {
      The mode stays 'menu' throughout (a dismissed-flag, not a mode), so
      nothing downstream of the menu ever has to know it exists — and
      Back-to-menu never returns here; it is a boot ritual only. */
-  var titleArt = (typeof PORTRAITS !== 'undefined' && PORTRAITS['title-roster']) ? '<img class="titleart" src="' + PORTRAITS['title-roster'] + '" alt="">' : '';
+  var titleArt = (typeof PORTRAITS !== 'undefined' && PORTRAITS['title-roster']) ? '<img class="titleartbg" src="' + PORTRAITS['title-roster'] + '" alt=""><img class="titleart" src="' + PORTRAITS['title-roster'] + '" alt="">' : '';
   $app.innerHTML = '<div class="titlepage" onclick="enterTitle()">' + titleArt + '<div class="titleshade"></div>' +
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M97 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M98 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {
@@ -4770,6 +4816,16 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === sel ? ' selected' : '') + '>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + ' — ' + HEROES[id].life + ' life</option>';
     }).join('');
   }
+  /* M98 (Jesse, end-state menu): you pick heroes by their FACES — a row
+     of portrait medallions, gold ring on the chosen one — not by a
+     dropdown of names. The pick writes setup and re-renders, exactly
+     like the selects did. */
+  function heroChips(current, who) {
+    return '<div class="herochips">' + Object.keys(HEROES).map(function (id) {
+      var p = (typeof PORTRAITS !== 'undefined' && PORTRAITS[id]) ? '<img src="' + PORTRAITS[id] + '" alt="">' : '<span class="chipglyph">' + (SIGILS[id] || '✦') + '</span>';
+      return '<button class="herochip' + (id === current ? ' sel' : '') + '" title="' + esc(HEROES[id].name) + ' — ' + HEROES[id].life + ' life" onclick="setup.' + who + '=\'' + id + '\';renderMenu()">' + p + '<span class="chipname">' + esc(HEROES[id].name.split(',')[0].replace(/^The /, '')) + '</span></button>';
+    }).join('') + '</div>';
+  }
   function themeOptions() {
     return Object.keys(THEMES).map(function (id) {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
@@ -4778,9 +4834,9 @@ function renderMenu() {
   $app.innerHTML = '<div class="pagescroll menupage">' + (typeof PORTRAITS !== 'undefined' && PORTRAITS['title-roster'] ? '<div class="menubg" style="background-image:url(' + PORTRAITS['title-roster'] + ')"></div>' : '') + '<h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread</p>' +
     '<div class="league-banner">' + (function () { var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {} return lg.icon + ' <b>' + lg.name + ' League</b> · ' + rec.w + ' wins' + (stk >= 2 ? ' · 🔥 ' + stk + '-win streak' : '') + (lg.next ? ' · next tier ' + lg.next[1] + ' ' + lg.next[2] + ' at ' + lg.next[0] + ' wins' : ' · top tier'); })() + '</div>' +
     '<div class="panel"><h2>New match</h2>' +
-    '<label>You play</label><select id="selMe" onchange="setup.me=this.value;renderMenu()">' + heroOptions(setup.me) + '</select><div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
+    '<label>You play</label>' + heroChips(setup.me, 'me') + '<div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
-    '<label>Enemy (AI)</label><select id="selFoe" onchange="setup.foe=this.value;renderMenu()">' + heroOptions(setup.foe) + '</select><div class="herodesc">' + esc(HEROES[setup.foe].blurb) + '</div>' +
+    '<label>Enemy (AI)</label>' + heroChips(setup.foe, 'foe') + '<div class="herodesc">' + esc(HEROES[setup.foe].blurb) + '</div>' +
     '<label>Turn order</label><select id="selSeat" onchange="setup.seat=this.value"><option value="first"' + (setup.seat === 'first' ? ' selected' : '') + '>I go first (3-card hand)</option><option value="second"' + (setup.seat === 'second' ? ' selected' : '') + '>I go second (4-card hand + fragile gem)</option></select>' +
     '<label>Theme (skin)</label><select id="selTheme" onchange="setTheme(this.value)">' + themeOptions() + '</select>' +
     '<label>Sound</label><button class="ghost" onclick="toggleMute()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +

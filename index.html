@@ -1062,6 +1062,11 @@
   .shell.stage .artdock.me { top:auto; right:8px; bottom:calc(272px + env(safe-area-inset-bottom)); }
   .shell.stage .amedal { width:50px; min-height:60px; }
   .shell.stage .hand.fan, .shell.stage .hand.fan.mini { padding:0 2px; gap:0; } /* the .mini twin matters: the old 88px rule was written for .mini too, at higher specificity than the plain fan rule */
+  .shell.stage .handzone { display:flex; justify-content:center; }
+  .shell.stage .handzone.closed { justify-content:flex-end; padding-right:10px; }
+  /* M102 (Jesse): an armed trap stays in the hand and simply glows violet — the reserved mana shows in the pips by the hero portrait, never in words. */
+  .hand.fan .card.armed-glow { box-shadow:0 0 12px 2px rgba(177,140,255,.75), 0 0 26px 4px rgba(140,90,255,.35); animation:armedPulse 2.2s ease-in-out infinite; }
+  @keyframes armedPulse { 0%,100% { box-shadow:0 0 10px 2px rgba(177,140,255,.5), 0 0 20px 3px rgba(140,90,255,.22); } 50% { box-shadow:0 0 16px 3px rgba(177,140,255,.95), 0 0 32px 6px rgba(140,90,255,.45); } } /* M102: only the RESTED bunch tucks into the bottom-right corner — the open hand stays centered; the extra inset keeps the bunch's cap card off the screen edge */
   .card .cname { padding:2px 17px 2px 8px; }
   .bigcard .cname { padding:4px 20px 4px 12px; }
 </style>
@@ -1263,7 +1268,7 @@ const CARDS = {
   // (final patched forms, no recorded text — faithful vanillas), Mindveil
   // Sovereign 7 mana 8/8 (the recovered Hlaavin, renamed; debut text recorded).
   // Forge-costed cards carry costForge: true and are argued in files/COSTING.md.
-  cerulean_dragon: { icon: "🐉", name: 'Cerulean Dragon',  cost: 3, type: 'creature', power: 1, health: 2 , orig: "Cerulean Dragon", src: "CONVERSION-AUDIT S4 \u2014 same name" },
+  cerulean_dragon: { icon: "🐉", name: 'Cerulean Dragon',  cost: 3, type: 'creature', power: 1, health: 2, keywords: ['flying'], text: 'Flying.', orig: "Cerulean Dragon", src: "CONVERSION-AUDIT S4 \u2014 same name. Stats are the card's final form (official v1.04.00 patch notes via cards.csv: repeatedly reduced from 6-cost 4/4 to 3-cost 1/2 to strengthen blue control). FIX 2026-11-03: the conversion dropped its Flying keyword from the record — restored after Jesse flagged the card as a vanilla 1/2." },
   eternal_phoenix: { icon: "🦅", name: 'Eternal Phoenix',  cost: 4, type: 'creature', power: 2, health: 2, keywords: ['flying'], phoenixReturn: true , orig: "Eternal Phoenix", src: "Wayback Hipsters gallery face - cost 4, 2/2 Flying recorded; end-of-turn graveyard return implemented; its Miracle random-upgrade rider stays unimplemented (upgrade system undefined)" },
   mindveil_sovereign: { icon: "🧠", name: 'Mindveil Sovereign', cost: 7, type: 'creature', power: 8, health: 8, debut: { kind: 'gainKeywordsInPlay' } , orig: "Hlaavin, Lord of the Unseen", src: "CONVERSION-AUDIT S4" },
   vainglorious_hero: { icon: "🗡️", name: 'Vainglorious Hero', cost: 3, costForge: true, type: 'creature', power: 2, health: 2, debut: { kind: 'buffSelfPerCreature' } , orig: "Vainglorious Hero", src: "COSTING.md tracker \u2014 cost Forge-assigned" },
@@ -1430,7 +1435,7 @@ const CARDS = {
   // ---------- M99: Library Wave 1 (the merged record, MERGE-20261102) ----------
   sunless_lord: { icon: "🧛", name: 'Cazimir, the Sunless Lord', cost: 10, type: 'creature', power: 10, health: 10, subtype: 'vampire', keywords: ['flying'], debut: { kind: 'setBothHealth', amount: 10 }, text: "Flying. Debut: Set both players' health to 10.", cardSchool: 'grave', orig: "Strahd, Lord of Ravenloft", src: "Hipsters D&D Icons preview; VIDEO-DIGEST wave 4A (F2Piko) full face read, 2026-11-01 — cost 10, 10/10, Flying, Vampire Wizard, text verbatim (the cards.csv row was corrected to this face read at M99; it previously carried a placeholder summary). Renamed (Strahd and Ravenloft are D&D proper names). Record colors WB — schooled Grave: the vampire court and the life-drain family live there; the W half shows in the effect's symmetry. FLAGGED" },
   skymaster_sphinx: { icon: "🦁", name: 'Skymaster Sphinx', cost: 6, type: 'creature', power: 4, health: 5, subtype: 'monster', keywords: ['flying'], attackEffect: { kind: 'millOpponent', count: 1 }, text: 'Flying. Attack: Mill your opponent for 1.', cardSchool: 'tides', orig: "Skymaster Sphinx", src: "Fan sortable sheet (full text) + Video digest 4A (F2Piko wave, 2026-11-01) face-verified — cost 6, 4/5, Flying, Monster, text verbatim; the completed row unblocks the Sphinx line (MERGE-20261102)" },
-  vesskar: { icon: "\uD83E\uDDD9", name: 'Vesskar, the Archmage', cost: 8, type: 'creature', power: 5, health: 5, subtype: 'wizard', legendary: true, debut: { kind: 'arcanaDebut' }, text: "Debut: Add a Mystical Arcana to your hand and the remaining two to your deck.", cardSchool: 'tides', orig: "Arcanis, the Archmage", src: "VIDEO face-read: Logan Thorne 'SIMIC ARCANA SPAM!' (youtube LooaSfthTOQ) — deck-profile face + ~40:11 gameplay face: cost 8, 5/5 Wizard, text verbatim, recovered 2026-11-03 at Jesse's direction. Renamed (Arcanis is a Magic character). Legendary is a FORGE ruling (a named, unique archmage; the record's rarity cell is blank) — ledgered in LIBRARY-PROVENANCE." },
+  vesskar: { icon: "\uD83E\uDDD9", name: 'Vesskar, the Archmage', cost: 8, type: 'creature', power: 5, health: 5, subtype: 'wizard', legendary: true, debut: { kind: 'arcanaDebut' }, text: "Debut: Add a Mystical Arcana to your hand and the remaining two to your deck.", cardSchool: 'tides', orig: "Arcanis, the Archmage", src: "VIDEO face-read: Logan Thorne 'SIMIC ARCANA SPAM!' (youtube LooaSfthTOQ) — deck-profile face + ~40:11 gameplay face: cost 8, 5/5 Wizard, text verbatim, recovered 2026-11-03 at Jesse's direction. Renamed (Arcanis is a Magic character). Legendary CONFIRMED by Jesse 2026-11-03 (he ran the original — Arcanis is a legendary; the record's rarity cell was blank)." },
   concealing_arcana: { icon: "\uD83C\uDF2B\uFE0F", name: 'Concealing Arcana', cost: 5, type: 'spell', generatedOnly: true, effect: { kind: 'grantSneakAll' }, text: "Give all friendly creatures sneak.", cardSchool: 'tides', orig: "Concealing Arcana", src: "VIDEO face-read: Logan Thorne LooaSfthTOQ ~10:40 hover face, text verbatim, 2026-11-03. One of Vesskar's three Mystical Arcana — generated by his debut, never starts in a deck." },
   riddling_arcana: { icon: "\u2753", name: 'Riddling Arcana', cost: 5, type: 'spell', generatedOnly: true, effect: { kind: 'summonTokens', token: 'skymaster_sphinx', count: 3 }, text: "Summon 3 Skymaster Sphinxes.", cardSchool: 'tides', orig: "Riddling Arcana", src: "VIDEO face-read: Logan Thorne LooaSfthTOQ ~40:12 Arcana display, text verbatim, 2026-11-03. One of Vesskar's three Mystical Arcana — generated by his debut, never starts in a deck." },
   possessing_arcana: { icon: "\uD83C\uDF00", name: 'Possessing Arcana', cost: 5, type: 'spell', generatedOnly: true, effect: { kind: 'stealCreature' }, text: "Gain control of an enemy creature.", cardSchool: 'tides', orig: "Possessing Arcana", src: "VIDEO face-read: Logan Thorne LooaSfthTOQ ~40:12 Arcana display, text verbatim, 2026-11-03. One of Vesskar's three Mystical Arcana — generated by his debut, never starts in a deck. Control change arrives summoning-sick (FORGE ruling, ledgered)." },
@@ -1513,8 +1518,8 @@ const DECKS = {
     'wrong_turn',
     'countersign', 'countersign',
     'broken_focus', 'get_ahead', 'extract_fear',
-    'cerulean_dragon', 'gazemaw', 'frostgrip_mage',
-    'mindveil_sovereign', 'thing_beneath_the_ice', 'frostreaver',
+    'gazemaw', 'frostgrip_mage',
+    'mindveil_sovereign', 'thing_beneath_the_ice', 'frostreaver', 'vesskar',
   ],
   controller: [
     'iron_verdict', 'runeshell_crab', 'runeshell_crab', 'tollwarden_captain', 'tollwarden_captain', 'pilgrim_of_the_vault',
@@ -4194,12 +4199,12 @@ function heroBarHtml(p, isMe) {
     if (mode === 'attackSelect' && !isMe && attackSet.size) {
       var gp = 0;
       G.players[humanIdx].board.forEach(function (c) { if (attackSet.has(c.uid)) gp += D(c).power + c.permPower; });
-      if (gp > 0) ghost = ' <span class="ghost-dmg">−' + gp + ' if unblocked</span>';
+      if (gp > 0) ghost = ' <span class="ghost-dmg">−' + gp + '</span>';
     }
     if (mode === 'blocking' && isMe && aiAttackers.length) {
       var up = 0;
       aiAttackers.forEach(function (a) { if (!blockMap[a.uid]) up += D(a).power + a.permPower; });
-      if (up > 0) ghost = ' <span class="ghost-dmg">−' + up + ' unblocked</span>';
+      if (up > 0) ghost = ' <span class="ghost-dmg">−' + up + '</span>';
     }
   } catch (e) {}
   var popNow = isMe && mode === 'main' && G.turnNumber !== lastManaPop; if (popNow) lastManaPop = G.turnNumber;
@@ -4217,7 +4222,7 @@ function heroBarHtml(p, isMe) {
     '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (((isMe && p.life <= 8) || (!isMe && p.life <= 6)) && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="lifering" style="' + ringStyle + '"><div class="portrait">' + heroPortrait(p.heroId) +
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + lifeBand + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div></div>' +
     '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
-    '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + (G.reservedMana(p) ? '<span class="held-num">' + G.reservedMana(p) + ' held</span>' : '') + '</div>' +
+    '<div class="gems-wrap"><div class="gems-col' + (popNow ? ' mana-pop' : '') + '" title="Mana — lit gems are ready, pink gems are held for armed traps">' + held + gpips + '<b>' + avail + '/' + p.maxMana + '</b>' + '</div>' +
     (isMe ? stanceMiniHtml(p) : '') + '</div>' +
     '<div class="spacer"></div>' + gems +
     '</div>';
@@ -4227,7 +4232,7 @@ function stanceEmblemHtml(p) {
   var avail = Math.max(0, G.availableMana(p));
   var pips = '';
   for (var k = 0; k < Math.min(p.maxMana, 12); k++) pips += '<i class="' + (k < avail ? 'on' : 'off') + '"></i>';
-  var label = avail + '/' + p.maxMana + (G.reservedMana(p) ? ' · ' + G.reservedMana(p) + ' held' : '');
+  var label = avail + '/' + p.maxMana;
   return '<div class="emblem stance clickable" onclick="showStance(' + p.idx + ')" title="' + esc(st.name) + '">' +
     '<div class="emblem-head stance-head"><div class="emblem-rim stance-rim"></div><div class="emblem-face stance-face"><span class="emblem-glyph">' + st.icon + '</span></div></div>' +
     '<div class="emblem-name">' + esc(st.name.replace(' Stance', '')) + '</div></div>';
@@ -4468,6 +4473,7 @@ function inspectHtml() {
       if (inst.temporary) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">⏳ Temporary — this copy dissolves at end of turn.</div>');
       if ((inst.permPower || inst.permHealth) && !inGraveBits(inst)) bits.push('<div style="font-size:12.5px;color:#9df0b6;margin-top:4px">📈 Lasting effects: ' + (inst.permPower ? (inst.permPower > 0 ? '+' : '') + inst.permPower + ' power' : '') + (inst.permPower && inst.permHealth ? ' · ' : '') + (inst.permHealth ? (inst.permHealth > 0 ? '+' : '') + inst.permHealth + ' health' : '') + '.</div>');
       if (d.type === 'artifact' && inst.charges != null) bits.push('<div style="font-size:12.5px;color:#9ec9ff;margin-top:4px">🔵 Charges left: ' + inst.charges + (inst.usedThisTurn ? ' · already used this turn' : '') + '</div>');
+      if (G && G.players[humanIdx].traps.indexOf(inst) >= 0) bits.push('<button class="big" style="margin-top:6px" onclick="closeInspect();disarm(' + inst.uid + ')">Disarm — release the mana</button>');
       return bits.join('');
     })() +
     '<div class="inspect-emblems">' + emblemIcons(inst, owner) + '</div>' + stats +
@@ -4657,7 +4663,7 @@ function renderBody() {
   html += '<div class="field"><div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
   html += artDockHtml(foe, false) + artDockHtml(me, true);
   if (foe.hand.length) html += '<div class="foehand' + (mode === 'aiTurn' ? ' thinking' : '') + '" title="' + esc(foe.hero.name) + ' holds ' + foe.hand.length + ' cards">' + foe.hand.map(function () { return '<i></i>'; }).join('') + '</div>';
-  html += boardHtml(foe, false) + chipsHtml(foe, false);
+  html += boardHtml(foe, false);
   html += '<div class="field-sp"></div>';
   /* M55 (Jesse): no phase text in the arena's center — the buttons and
      available actions carry the phase. The AI's thinking dots move to
@@ -4686,14 +4692,13 @@ function renderBody() {
     }
   })();
   if (mode === 'targeting') html += '<div class="movepill">\uD83C\uDFAF Choose a target</div>';
-  if (mode === 'blocking') html += '<div class="movepill move">\u2694\uFE0F Your Move \u2014 choose your blockers</div>';
   if (mode === 'attackSelect') {
     if (attackSet.size) {
       var q = Array.from(attackSet).map(function (uid) { return me.board.find(function (c) { return c.uid === uid; }); }).filter(Boolean);
-      html += '<div class="queue"><span class="q-label">⚔️ QUEUE</span>' + q.map(function (c, i) { return '<span class="qchip">' + (i + 1) + ' · ' + (D(c).icon || '') + ' ' + esc(D(c).name) + '</span>'; }).join('') + '<span class="q-note">they strike in this order · ' + q.reduce(function (s, c) { return s + D(c).power + c.permPower; }, 0) + ' power striking · all of it reaches ' + esc(foe.hero.name) + ' if unblocked</span></div>';
+      html += '<div class="queue"><span class="q-label">⚔️ QUEUE</span>' + q.map(function (c, i) { return '<span class="qchip">' + (i + 1) + ' · ' + (D(c).icon || '') + ' ' + esc(D(c).name) + '</span>'; }).join('') + '</div>';
     }
   }
-  html += '<div class="myboard">' + boardHtml(me, true) + chipsHtml(me, true) + '</div>';
+  html += '<div class="myboard">' + boardHtml(me, true) + '</div>'; /* M102 (Jesse): no trap chips anywhere — armed traps glow in the hand */
   /* M27: the one big contextual control floats at the arena's right edge,
      like the original's angled PASS control. */
   /* M32: ONE phase button, like the original — it reads as whatever the
@@ -4712,7 +4717,7 @@ function renderBody() {
     var unblocked = aiAttackers.filter(function (a) { return !blockMap[a.uid]; });
     var faceDmg = unblocked.reduce(function (s, a) { var c = foe.board.find(function (x) { return x.uid === a.uid; }); return s + (c ? D(c).power + c.permPower : 0); }, 0);
     var anyBlock = aiAttackers.some(function (a) { var ac = foe.board.find(function (x) { return x.uid === a.uid; }); return ac && me.board.some(function (b) { return canBlockCreature(ac, b); }); });
-    html += '<button' + (aiAttackers.length && !unblocked.length ? ' class="pass-ready"' : '') + ' onclick="confirmBlocks()">' + (!anyBlock && aiAttackers.length ? 'No blocks possible — take ' + faceDmg : '✓ Done' + (Object.keys(blockMap).length ? ' (' + Object.keys(blockMap).length + ')' : '') + (unblocked.length ? ' — ' + unblocked.length + ' unblocked · ' + faceDmg + ' to you' : '')) + '</button>';
+    html += '<button' + (aiAttackers.length && !unblocked.length ? ' class="pass-ready"' : '') + ' onclick="confirmBlocks()">' + (!anyBlock && aiAttackers.length ? 'Take ' + faceDmg : '✓ Done' + (faceDmg > 0 ? ' · −' + faceDmg : '')) + '</button>'; /* M102 (Jesse): the button carries a verb and a number — the prose lives in the battle log */
   }
   else if (mode === 'main') {
     var readyN = me.board.filter(function (c) { return G.canAttack(c, me); }).length;
@@ -4735,7 +4740,7 @@ function renderBody() {
      the bars — deck/hand/grave counts live behind the portrait tap, and
      the battle log behind the 📜 button at the arena's top-left. */
   html += '</div><div class="handzone' + (handOpen ? ' open' : ' closed') + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>';
-  var hn = me.hand.length, hMid = (hn - 1) / 2;
+  var fanCards = me.hand.concat(me.traps); var hn = fanCards.length, hMid = (hn - 1) / 2; /* M102 (Jesse): armed traps stay IN the hand with a glow — no chip, no announcement; their reserved mana reads off the portrait pips */
   /* M34: a real held fan (Jesse) — cards overlap, and whatever part of a
      card sits under its neighbour is simply not visible, like a fanned
      hand of real cards. The visible sliver shrinks as the hand grows so
@@ -4759,8 +4764,8 @@ function renderBody() {
      card grows past its slot. */
   var fanGap = 5;
   var fitScale = hn > 0 ? Math.min(1, (fanW - 4 - (hn - 1) * fanGap) / (hn * cardW)) : 1;
-  var fanScale = handOpen ? Math.max(0.26, fitScale) : Math.min(0.58, Math.max(0.26, fitScale)); /* M100: floor 0.26 so even a 10-card hand's ink stays on the phone */
-  var stepPx = Math.round(cardW * fanScale) + fanGap;
+  var fanScale = handOpen ? Math.max(0.26, fitScale) : 0.34; /* M102 (Jesse): the RESTED hand is no longer a small fan — it is a minimized bunch, cards heavily overlapped and tucked away; the ACTIVE hand keeps the M97/M100 full-card fit (fitScale above) untouched. */
+  var stepPx = handOpen ? Math.round(cardW * fanScale) + fanGap : 20; /* M102: rested bunch step — each card shows a ~20px sliver of its left edge, the rest tucked under its neighbour */
   var hStep = hn > 1 ? Math.min(1.8, Math.max(0.5, 8 / hn)) : 0;
   /* M39 (Jesse): the resting hand is the hand itself, only small — the
      real cards fanned tiny, like the corner hand in his LoR clip. A tap
@@ -4776,15 +4781,15 @@ function renderBody() {
      (unaffordable cards fade); the hand count lives on the pile strip. */
   var fanPrevUids = prevHandUids;
   prevHandUids = {}; me.hand.forEach(function (c) { prevHandUids[c.uid] = 1; }); prevHandCount = me.hand.length;
-  html += '<div class="hand fan' + (handOpen ? (fanBloom ? ' bloom' : '') : ' mini' + (fanSettle ? ' settle' : '')) + '" style="--fs:' + fanScale.toFixed(3) + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + me.hand.map(function (inst, hi) {
+  html += '<div class="hand fan' + (handOpen ? (fanBloom ? ' bloom' : '') : ' mini' + (fanSettle ? ' settle' : '')) + '" style="--fs:' + fanScale.toFixed(3) + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + fanCards.map(function (inst, hi) { var isArmed = me.traps.indexOf(inst) >= 0;
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
     var off = hi - hMid;
     var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 0.6 : 0.85)).toFixed(1) + 'px)';
-    var opts = { cls: ' clickable' + (afford && mode === 'main' ? '' : ' unaffordable') + (!handOpen && afford && mode === 'main' ? ' mini-playable' : '') + (typeof fanPrevUids !== 'undefined' && fanPrevUids && !fanPrevUids[inst.uid] ? ' newdraw' : ''), fan: fanT, fz: hi + 1, ml: hi === 0 ? 0 : Math.round(stepPx - cardW), };
+    var opts = { cls: ' clickable' + (isArmed ? ' armed-glow' : (afford && mode === 'main' ? '' : ' unaffordable') + (!handOpen && afford && mode === 'main' ? ' mini-playable' : '') + (typeof fanPrevUids !== 'undefined' && fanPrevUids && !fanPrevUids[inst.uid] ? ' newdraw' : '')), fan: fanT, fz: hi + 1, ml: hi === 0 ? 0 : Math.round(stepPx - cardW), };
     // No onclick on hand cards since M10: the pointer controller owns the
     // hand — tap magnifies to read, drag onto the field plays.
     return cardHtml(inst, humanIdx, opts);
-  }).join('') + '</div>' + (handOpen ? '<button class="ghost hand-close" onclick="toggleHand(false)" title="Put the hand away">▾</button>' : '');
+  }).join('') + '</div>'; /* M102 (Jesse): no minimize button — tapping the battlefield puts the hand away (M38) */
   html += '</div></div>';
   fanBloom = false; fanSettle = false;
   if (inspectUid !== null || inspectCardId !== null) html += inspectHtml();
@@ -4877,7 +4882,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M101 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M102 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 function renderMenu() {
@@ -5245,7 +5250,7 @@ function clickHand(uid) {
   var d = D(inst);
   msg = '';
   if (d.type === 'trap') {
-    try { G.armTrap(humanIdx, uid); sfx('trapArm'); say('You arm ' + d.name + ' (' + 'mana reserved).'); } catch (e) { msg = errMsg(e, uid); }
+    try { G.armTrap(humanIdx, uid); sfx('trapArm'); /* M102 (Jesse): no announcement — the card glows in hand and the pips by the portrait hold the cost */ } catch (e) { msg = errMsg(e, uid); }
     flushEngineLog(); render(); return;
   }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
@@ -5285,14 +5290,15 @@ function resolveTarget(target) {
 }
 function cancelTarget() { clearTargetLine(); pendingUid = null; mode = 'main'; render(); }
 function disarm(uid) {
-  try { G.disarmTrap(humanIdx, uid); say('Trap disarmed — mana released.'); } catch (e) { msg = errMsg(e, uid); }
+  try { G.disarmTrap(humanIdx, uid); say('Trap disarmed.'); } catch (e) { msg = errMsg(e, uid); }
   render();
 }
 function activateArtifact(uid) {
   try { G.activateArtifact(humanIdx, uid); try { sfx('spell'); } catch (e2) {} say('Artifact activated.'); } catch (e) { msg = errMsg(e, uid); }
   flushEngineLog(); if (!finishCheck()) render();
 }
-function startAttackSelect() { attackSet = new Set(); mode = 'attackSelect'; msg = 'Tap your attackers — hold any creature to read it.'; render(); }
+var hintsShown = {}; function hintOnce(key, text) { if (hintsShown[key]) return ''; hintsShown[key] = 1; return text; } /* M102 (Jesse): a hint earns its place once, not every phase of every match */
+function startAttackSelect() { attackSet = new Set(); mode = 'attackSelect'; msg = hintOnce('atk', 'Tap your attackers — hold any creature to read it.'); render(); }
 /* M31: double-tap the field — everyone ready attacks (tap again to call
    them all back). The original's gesture, on our tap-safe terms. */
 function attackAllToggle() {
@@ -5455,7 +5461,7 @@ async function runAiTurn() {
   if (finishCheck()) return;
   var attackers = aiPickAttackers(G, aiIdx);
   if (attackers.length) {
-    aiAttackers = attackers; blockMap = {}; blockPick = null; mode = 'blocking'; msg = 'Hold any creature to read it.';
+    aiAttackers = attackers; blockMap = {}; blockPick = null; mode = 'blocking'; msg = hintOnce('block', 'Hold any creature to read it.');
     sfx('attack');
     say('Enemy attacks with ' + attackers.map(function (a) { return D(a).name; }).join(', ') + '!', 'bad');
     render();
@@ -5759,7 +5765,7 @@ render();
     if (!handOpen) return;
     if (Date.now() < suppressClickUntil) return;
     if (!e.target.closest) return;
-    if (e.target.closest('.handzone, .overlay, .herobar, button')) return;
+    if (e.target.closest('.handzone, .overlay, .herobar, button, .artdock')) return;
     handOpen = false; render();
   }, true);
   /* M27: in tap-targeting mode (a targeted cast is waiting for its target),

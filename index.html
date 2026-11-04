@@ -1715,7 +1715,7 @@ const DECK_NAMES = {
  "tidemother": "The Deep Behemoths"
 };
 const DECKS = {
-  weaver: ["runeshell_crab","runeshell_crab","lil_foggie","lil_foggie","snapshell_turtle","thing_beneath_the_ice","shadowsmith_saboteur","shadowsmith_saboteur","infectious_scorpion","infectious_scorpion","tidewing_familiar","pilfer_dream","extract_fear","get_ahead","recall","recall","repulse","void_harvest","fatetwist","warp_of_agony","divination","ray_of_enfeeblement","tragic_trip","creeping_doom","drain_blood","countersign","countersign","broken_focus","echo_scepter","echo_scepter"],
+  weaver: ["runeshell_crab","runeshell_crab","thing_beneath_the_ice","shadowsmith_saboteur","shadowsmith_saboteur","infectious_scorpion","infectious_scorpion","tidewing_familiar","frostgrip_mage","frostgrip_mage","spellmark_adept","spellmark_adept","pilfer_dream","pilfer_dream","extract_fear","extract_fear","get_ahead","get_ahead","repulse","repulse","warp_of_agony","warp_of_agony","flood_of_ideas","flood_of_ideas","drain_blood","void_harvest","withering_blight","countersign","echo_scepter","echo_scepter"],
   controller: ["iron_verdict","runeshell_crab","runeshell_crab","tollwarden_captain","pilgrim_of_the_vault","wardens_acolyte","wardens_staff","wardens_staff","quiet_snare","flockguard_vigil","flockguard_vigil","vindictive_retort","raise_the_guard","stay_thy_hand","countersign","vainglorious_hero","broken_focus","evenhand_paragon","recall","iron_verdict","sunmirror_glare","sunmirror_glare","snapshell_turtle","radiant_intercessor","returnwing_angel","returnwing_angel","second_suns_dawn","snare_of_no","ward_lens","vigil_acolyte"],
   keeper: ["beastcall_arrow","beastcall_arrow","tasty_morsel","tasty_morsel","sheep","sheep","venom_grub","venom_grub","deep_rooting","deep_rooting","grove_sentinel","grove_sentinel","beastkeeper","beastkeeper","thornwood_archer","thornwood_archer","desperate_prayer","desperate_prayer","tollwarden_captain","wardens_acolyte","wardens_acolyte","oakenhide","oakenhide","heartswap_tree","radiant_intercessor","returnwing_angel","quakehoof_behemoth","firstroot_titan","horncharge_lantern","daughter_of_runes"],
   bruiser: ["sheep","tasty_morsel","tasty_morsel","sheep","venom_grub","venom_grub","flame_shot","flame_shot","embermaw_devil","embermaw_devil","rushhorn_minotaur","rushhorn_minotaur","ember_deathraider","ember_deathraider","cinder_court_embermage","cinder_court_embermage","beastkeeper","beastkeeper","thornwood_archer","thornwood_archer","kindling_pyromancer","kindling_pyromancer","archwing_ravager","archwing_ravager","grove_sentinel","grove_sentinel","cinder_titan","quakehoof_behemoth","bag_of_tricks","spiked_baloth"],
@@ -1872,6 +1872,18 @@ class Game {
         stance: stanceOpt === undefined ? 'open' : stanceOpt,
       };
     });
+    // M120 (Jesse, 2026-11-04 — the original's guarantee, restored): if your
+    // deck runs your school's class card (the chain's stage 1), it ALWAYS
+    // starts within the top 3 of your deck. Each later stage likewise slips
+    // into the top 3 as the chain is played (insertStageCard). A deck that
+    // leaves the class card out (Jesse, Nov 1: never mandatory) starts no
+    // chain — the quest simply waits.
+    for (const p of this.players) {
+      if (!p.school || !SCHOOLS[p.school]) continue;
+      const stage1 = SCHOOLS[p.school].stages[0];
+      const at = p.deck.findIndex((c) => c.cardId === stage1);
+      if (at > 2) { const inst = p.deck.splice(at, 1)[0]; p.deck.splice(this.rng.int(3), 0, inst); }
+    }
     // Opening hands: first player 3, second 4 + fragile mana gem.
     this.drawOpening(0, 3);
     this.drawOpening(1, 4);
@@ -5424,7 +5436,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M119 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M120 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;
@@ -5542,7 +5554,7 @@ function renderMenu() {
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
     'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10. <b>Tap either deck pile</b> (the 🂠 count on a hero bar) to inspect it: cards left, and how many Nightmares are buried inside. When you are done, <b>⏭ Pass</b> hands the turn over.<br><br>' +
-    '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. The stage-1 class card is a normal card of its school — run it in your 30 (or don\'t); playing it starts the chain, and each stage played slips the next into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
+    '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. The stage-1 class card is a normal card of its school — run it in your 30 (or don\'t); if you run it, it always starts within the top 3 of your deck, and each stage played slips the next into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
     '</details></div></div>';
 }
 function renderMulligan() {

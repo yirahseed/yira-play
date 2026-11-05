@@ -112,8 +112,8 @@
   .card.sigcard { border-width:4px; padding:4px 5px; box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), inset 0 0 0 5px rgba(10,6,2,.55), inset 0 0 0 6.5px rgba(255,240,210,.38), 0 0 14px var(--metalDk); }
   .bigcard.sigcard { border-width:4px; padding:12.5px; box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), inset 0 0 0 5px rgba(10,6,2,.55), inset 0 0 0 6.5px rgba(255,240,210,.38), 0 0 18px var(--metalDk); }
   .emblem-face.sigface { border-width:3px; }
-  .draftrow { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-  .draftrow .card { width:31%; min-width:102px; height:308px; }
+  .draftrow { display:flex; gap:10px; justify-content:center; flex-wrap:nowrap; }
+  .draftrow .card { width:100%; min-width:0; height:308px; } /* M125: the picks share ONE row — the old 31%-of-an-auto-parent sizing wrapped them into a vertical stack taller than the phone, and the third pick was cut off (Jesse, live) */
   .draftrow .card .cart { height:120px; } /* M77: draft offers get full-size cards — the pick deserves the art and the whole text (Jesse screenshot: titles wrapped/clipped, text cut mid-sentence, orbs spilling out of 170px cards) */
   .card .ctyperow { display:flex; justify-content:space-between; align-items:center; min-height:16px; flex:none; margin-top:1px; gap:4px; flex-wrap:wrap; }
   .card .ctyperow .cbadges { height:15px; overflow:hidden; text-align:right; }
@@ -238,7 +238,7 @@
          font-size:12.5px; line-height:1.55; max-height:110px; overflow-y:auto; color:#cfc2ee; }
   #log .drain { color:#f0b3ff; font-weight:700; } #log .good { color:#9df0b6; } #log .bad { color:#ff9dab; }
   .msg { text-align:center; color:#ffe1a8; font-size:13.5px; min-height:20px; margin:4px 0; }
-  .overlay { position:fixed; inset:0; background:rgba(8,5,16,.86); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
+  .overlay { position:fixed; inset:0; background:rgba(8,5,16,.86); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; overflow-y:auto; } .overlay > * { margin:auto; } /* M125: a panel taller than the screen scrolls from its top instead of centering into the void */
   .overlay .box { background:var(--box); border:1.5px solid var(--title); border-radius:16px; padding:24px; max-width:440px; width:100%; text-align:center; }
   .overlay h2 { margin:4px 0 8px; color:#e7d9ff; }
   .record { text-align:center; color:#a793d6; font-size:12.5px; margin-top:10px; }
@@ -443,7 +443,7 @@
   .hcluster.lowlife .portrait { animation:lowPulse 1.15s ease-in-out infinite; }
   @keyframes lowPulse { 0%,100%{ box-shadow:0 0 0 2px rgba(255,70,70,.35) } 50%{ box-shadow:0 0 0 4px rgba(255,70,70,.9), 0 0 16px rgba(255,40,40,.55) } }
   @media (prefers-reduced-motion: reduce) {
-    .card, .emblem, .herobar, .turn-sweep, .marquee, .fx-herofloat, .play-reveal { animation-duration:.01s !important; transition-duration:.01s !important; }
+    .card, .emblem, .herobar, .turn-sweep, .marquee, .fx-herofloat, .play-reveal, .bfig, .bfig img { animation-duration:.01s !important; transition-duration:.01s !important; }
   }
   /* --- M33 batch --- */
   .hand.mullfan { overflow:visible; padding-top:26px; }
@@ -1016,7 +1016,8 @@
 
   /* ===== M86: sixth compare-and-polish batch ===== */
   .card.hurtish { box-shadow: 0 0 0 2px rgba(255,70,80,.55), inset 0 0 18px rgba(200,20,40,.45) !important; }
-  .draftpick { display:flex; flex-direction:column; align-items:center; }
+  .draftpick { display:flex; flex-direction:column; align-items:center; flex:1 1 0; min-width:0; max-width:210px; }
+  @media (max-height:500px) { .draftrow .card { height:214px; } .draftrow .card .cart { height:72px; } } /* M125: landscape phones — the pick still fits whole */
   .draftcap { margin-top:5px; font-size:11.5px; color:#ffd9a0; letter-spacing:.4px; }
   .facedown.justarmed { animation: trapArmIn .8s ease both; }
   @keyframes trapArmIn { 0% { transform: translateY(-14px) scale(.85); filter:brightness(2); } 100% { transform: none; filter:none; } }
@@ -4138,6 +4139,7 @@ function spawnHeroFloat(idx, text, cls) {
     document.body.appendChild(node);
     var bar = document.querySelector ? document.querySelector('#herobar-' + idx) : null;
     if (bar && bar.classList) { bar.classList.add('hero-hit'); setTimeout(function () { bar.classList.remove('hero-hit'); }, 480); }
+    if (cls === 'bad' && document.querySelector) { var fig = document.querySelector('.bfig.' + (idx === humanIdx ? 'me' : 'foe') + ' img'); if (fig && fig.classList) { fig.classList.add('hurt'); setTimeout(function () { fig.classList.remove('hurt'); }, 620); } } // M124: the figure flinches too
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1100);
     if (idx === humanIdx && cls === 'bad') {
       var vig = document.createElement('div');
@@ -4350,6 +4352,13 @@ var PORTRAIT_POS = {
   hammer: ['50% 8%', '50% 12%'],
   tidemother: ['50% 12%', '50% 16%']
 };
+// M124: battlefield hero figures — the M4.3 .bfig staging CSS shipped for
+// years with nothing rendering it. The figure is the hero's tall portrait
+// looming at the field's edge, behind the play (z-index 0, no pointer events).
+function heroFigure(heroId, side) {
+  if (typeof PORTRAITS === 'undefined' || !PORTRAITS[heroId]) return '';
+  return '<div class="bfig ' + side + '" data-hero="' + heroId + '"><img src="' + PORTRAITS[heroId] + '" alt=""></div>';
+}
 function heroPortrait(heroId) {
   if (typeof PORTRAITS !== 'undefined' && PORTRAITS[heroId]) {
     var pos = (PORTRAIT_POS[heroId] || ['50% 15%'])[0];
@@ -5216,7 +5225,7 @@ function renderBody() {
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
-    $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field"></div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>'; return; }
+    $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field">' + heroFigure(mf.heroId, 'foe') + heroFigure(mm.heroId, 'me') + '</div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>'; return; }
   if (G.winner !== null) crowdStop(); else crowdStart();
   var me = G.players[humanIdx], foe = G.players[aiIdx];
   soundWatch(); turnWatch(); m81Watch(); m83Watch(); m84Watch();
@@ -5236,7 +5245,7 @@ function renderBody() {
   html += '<button class="log-btn pause-btn" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
   sweepPending = false;
   html += heroBarHtml(foe, false);
-  html += '<div class="field"><div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
+  html += '<div class="field">' + heroFigure(foe.heroId, 'foe') + heroFigure(me.heroId, 'me') + '<div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
   html += artDockHtml(foe, false) + artDockHtml(me, true);
   if (foe.hand.length) html += '<div class="foehand' + (mode === 'aiTurn' ? ' thinking' : '') + '" title="' + esc(foe.hero.name) + ' holds ' + foe.hand.length + ' cards">' + foe.hand.map(function () { return '<i></i>'; }).join('') + '</div>';
   html += boardHtml(foe, false);
@@ -5465,7 +5474,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M123 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M125 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;

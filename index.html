@@ -1423,7 +1423,7 @@ const CARDS = {
   day_of_reckoning: { icon: "\u2600\uFE0F", name: 'Day of Judgment', cost: 7, type: 'spell', effect: { kind: 'destroyAllCreatures' }, orig: "Day of Judgment", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   withering_blight: { icon: "\uD83E\uDD40", name: 'Infest', cost: 4, type: 'spell', effect: { kind: 'debuffAll', power: -2, health: -2 }, orig: "Infest", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Give all creatures -2/-2' (permanent, the game's stat-change language)" },
   flood_of_ideas: { icon: "\uD83D\uDCA1", name: 'Jolt of Inspiration', cost: 4, type: 'spell', effect: { kind: 'generateSpells', count: 3 }, orig: "Jolt of Inspiration", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Add 3 random spells to your hand'" },
-  spark_of_insight: { icon: "\u2728", name: 'Spark of Genius', cost: 0, type: 'spell', effect: { kind: 'draftSpell' }, orig: "Spark of Genius", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — draft resolves as a random pick, the draft family's standing simplification" },
+  spark_of_insight: { icon: "\u2728", name: 'Spark of Genius', cost: 0, type: 'spell', effect: { kind: 'draftSpell' }, orig: "Spark of Genius", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — draft is pick-1-of-3 (the random-pick simplification was retired in M122, 2026-11-04, on Jesse's ruling that draft means choose between 3)" },
   counterfeiter: { icon: "\uD83C\uDFAD", name: 'Counterfeiter', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'rogue', keywords: ['sneak'], stealOnHeroDamage: true, orig: "Counterfeiter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — two independent face sightings agree exactly" },
   scourge_of_the_pact: { icon: "\uD83D\uDE08", name: 'Scourge of the Pact', cost: 3, type: 'creature', power: 2, health: 2, subtype: 'demon', keywords: ['flying'], signatureFor: 'unchained', spellDrain: 1, orig: "Davriel's Scourge", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — played-face values (3, 2/2); an official v1.05.00 render reads 2, 1/2 — conflict flagged, the played face governs" },
   infectious_scorpion: { icon: "\uD83E\uDD82", name: 'Infectious Scorpion', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'pest', finale: { kind: 'addCard', cardId: 'fatal_infection' }, orig: "Infectious Scorpion", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — face-verified twice (Roxora tech + Garruk deck); sits in the BLACK section of a played Ashiok deck view, hence Grave" },
@@ -1436,7 +1436,7 @@ const CARDS = {
   agonys_twist: { icon: "\uD83E\uDE22", name: 'Agony Twist', cost: 3, type: 'spell', generatedOnly: true, effect: { kind: 'buffCreature', power: 0, health: -3 }, orig: "Agony Twist (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   bloodline_sire: { icon: "\uD83E\uDDDB", name: 'Bloodline Creator', cost: 1, type: 'creature', power: 2, health: 1, subtype: 'vampire', finale: { kind: 'addRandomSubtype', subtype: 'vampire' }, orig: "Bloodline Creator", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Sorin signature set member (hero panel), face-verified" },
   snapshell_turtle: { icon: "\uD83D\uDC22", name: 'Snapshell Turtle', cost: 2, type: 'creature', power: 2, health: 4, subtype: 'beast', trapGrowth: true, orig: "Snapshell Turtle", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'After you play a trap, this gets +1/+0' (permanent, the game's growth language)" },
-  echo_scepter: { icon: "\uD83E\uDE84", name: 'Echo Scepter', cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftSpell', maxCost: 2 }, orig: "Isochron Scepter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Activate: Draft a spell that costs 2 or less'; draft resolves as a random pick, the family's standing simplification. CONFIRMED 2026-11-03 by a clean enlarged face (cost 2, charges 2, text verbatim) after a rival skim-reading (cost 1 / draft <=5) was refuted — the 1 was a Tolarian-Academy-discounted cost" },
+  echo_scepter: { icon: "\uD83E\uDE84", name: 'Echo Scepter', cost: 2, type: 'artifact', charges: 2, effect: { kind: 'draftSpell', maxCost: 2 }, orig: "Isochron Scepter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Activate: Draft a spell that costs 2 or less'; draft is pick-1-of-3 (the random-pick simplification was retired in M122, 2026-11-04, on Jesse's ruling that draft means choose between 3). CONFIRMED 2026-11-03 by a clean enlarged face (cost 2, charges 2, text verbatim) after a rival skim-reading (cost 1 / draft <=5) was refuted — the 1 was a Tolarian-Academy-discounted cost" },
   bearer_of_the_curse: { icon: "\uD83D\uDC3B", name: 'Cursebearer', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'beast', keywords: ['trample'], signatureFor: 'unbridled', deathGrowth: true, orig: "Cursebearer", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature, hero panel + official render + face all agree" },
   fury_of_the_wilds: { icon: "\uD83C\uDF32", name: "Wildspeaker's Fury", cost: 3, type: 'spell', signatureFor: 'unbridled', effect: { kind: 'destroyAndSelfDamage' }, orig: "Wildspeaker's Fury", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature; two independent reads agree word-for-word" },
   falkenrath_duchess: { icon: "\uD83D\uDC78", name: 'Falkenrath Duchess', cost: 5, type: 'creature', power: 5, health: 4, subtype: 'vampire', debut: { kind: 'buffSubtype', subtype: 'vampire', power: 2, health: 0 }, orig: "Falkenrath Duchess", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — pack-opening face" },
@@ -2082,14 +2082,37 @@ class Game {
   }
 
   opp(i) { return 1 - i; }
+  // M122 (Jesse's ruling, Nov 4): DRAFT ALWAYS MEANS PICK 1 OF 3 — every draft
+  // effect (signature, spell, trap) offers three distinct cards and the player
+  // chooses; the other two are gone. Auto-draft seats (the AI) take the
+  // priciest, as they always have. A second draft opening while one waits
+  // resolves instantly rather than overwriting the open choice.
+  offerDraft(i, poolIds, label, kind) {
+    const pool = [...new Set(poolIds)];
+    const picks = [];
+    for (let k = 0; k < 3 && pool.length; k++) picks.push(makeInstance(pool.splice(this.rng.int(pool.length), 1)[0], null));
+    if (!picks.length) return null;
+    this.players[i].draftedThisTurn = true;
+    if (this.autoDraft[i] || picks.length === 1 || this.pendingDraft) {
+      const best = picks.slice().sort((a, b) => CARDS[b.cardId].cost - CARDS[a.cardId].cost)[0];
+      this.addToHand(i, best, label);
+      this.log.push(`${this.players[i].hero.name} drafts ${def(best).name}`);
+      this.cleanupDeaths(); this.checkWin();
+      return best;
+    }
+    this.pendingDraft = { player: i, options: picks, label, kind };
+    this.log.push(`${this.players[i].hero.name} is drafting — pick 1 of 3`);
+    return null;
+  }
   // Resolve an open draft: the chosen card enters the player's hand.
   resolveDraft(i, uid) {
     if (!this.pendingDraft || this.pendingDraft.player !== i) throw new Error('no draft is waiting');
     const oi = this.pendingDraft.options.findIndex((c) => c.uid === uid);
     if (oi < 0) throw new Error('that card is not among the draft options');
     const [chosen] = this.pendingDraft.options.splice(oi, 1);
+    const label = this.pendingDraft.label;
     this.pendingDraft = null;
-    this.addToHand(i, chosen, 'Signature Weaving');
+    this.addToHand(i, chosen, label);
     this.players[i].draftedThisTurn = true; // M79
     this.log.push(`${this.players[i].hero.name} drafts ${def(chosen).name}`);
     this.cleanupDeaths(); this.checkWin();
@@ -2753,7 +2776,7 @@ class Game {
         for (const q of boards) for (const c of q.board) { c.permPower += effect.power; c.permHealth += effect.health; }
         this.cleanupDeaths(); break; }
       case 'generateSpells': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly); for (let k = 0; k < effect.count; k++) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
-      case 'draftSpell': { p.draftedThisTurn = true; const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
+      case 'draftSpell': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); this.offerDraft(i, pool, srcName, 'spell'); break; }
       case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
       case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === effect.subtype && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'debuffAndAdd': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.cleanupDeaths(); } this.addToHand(i, makeInstance(effect.cardId, null), srcName); break; }
@@ -2847,7 +2870,7 @@ class Game {
       case 'damageHeroPerAttacker': { const n = this._combatCount || 1; this.hurtHero(foe.idx, n, i); foe.tookDamageThisTurn = true; this.log.push(`${def(sourceInst).name}: ${n} damage to ${foe.hero.name} — one for each attacker`); break; }
       case 'shuffleSecondSun': { const sun = makeInstance('second_sun', null); const pos = this.rng.int(p.deck.length + 1); p.deck.splice(pos, 0, sun); this.log.push(`${p.hero.name} shuffles The Second Sun into their deck`); break; }
       case 'healCreatureAll': for (const c of p.board) c.damage = Math.max(0, c.damage - effect.amount); break;
-      case 'draftTrap': p.draftedThisTurn = true; this.addToHand(i, makeInstance(this.rng.pick(TRAP_POOL), null), srcName); break;
+      case 'draftTrap': this.offerDraft(i, TRAP_POOL, srcName, 'trap'); break;
       case 'healSelf': { const healed = this.gainLife(p, effect.amount); this.log.push(`${def(sourceInst).name}: ${p.hero.name} heals ${healed}`); break; }
       case 'damageAllCreatures': { for (const q of this.players) for (const c of q.board) this.hurtCreature(c, effect.amount); this.log.push(`${def(sourceInst).name}: ${effect.amount} damage to EVERY creature`); break; }
       case 'pathExile': { if (target && target.kind === 'creature') { target.inst.damage = 999; foe.bonusMana += 1; this.log.push(`${def(sourceInst).name}: ${def(target.inst).name} is destroyed — ${foe.hero.name} gains an empty mana gem in compensation`); } break; }
@@ -2877,18 +2900,8 @@ class Game {
         break;
       }
       case 'draftSignature': {
-        // Draft: 3 distinct signature cards from ANY hero's set; pick 1.
-        const pool = Object.keys(CARDS).filter((id) => CARDS[id].signatureFor);
-        const picks = [];
-        for (let k = 0; k < 3 && pool.length; k++) picks.push(makeInstance(pool.splice(this.rng.int(pool.length), 1)[0], null));
-        if (!picks.length) break;
-        if (this.autoDraft[i]) {
-          const best = picks.slice().sort((a, b) => CARDS[b.cardId].cost - CARDS[a.cardId].cost)[0];
-          this.addToHand(i, best);
-        } else {
-          this.pendingDraft = { player: i, options: picks };
-          this.log.push(`${p.hero.name} is drafting a signature card`);
-        }
+        // Draft: 3 distinct signature cards from ANY hero's set; pick 1 (M122 helper).
+        this.offerDraft(i, Object.keys(CARDS).filter((id) => CARDS[id].signatureFor), srcName, 'signature');
         break;
       }
       case 'mastery': p.mastery = true; this.log.push(`${p.hero.name} attains Mastery of Currents`); break;
@@ -2970,10 +2983,7 @@ class Game {
         break;
       }
       case 'draftTrap': {
-        const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'trap' && !CARDS[id].generatedOnly);
-        const inst2 = makeInstance(pool[this.rng.int(pool.length)], i);
-        this.log.push(`${def(inst2).name} is drafted into ${p.hero.name}'s hand`);
-        this.addToHand(i, inst2);
+        this.offerDraft(i, TRAP_POOL, srcName, 'trap');
         break;
       }
       case 'millSelf': for (let k = 0; k < effect.count; k++) this.drawCard(i, { mill: true }); break;
@@ -4397,7 +4407,7 @@ function effectText(d) {
       case 'destroyAllCreatures': return 'Destroy every creature.';
       case 'shuffleSecondSun': return 'Shuffle The Second Sun (10 mana: deal 10 to the enemy hero and each enemy creature) into your deck.';
       case 'healCreatureAll': return 'Heal all your creatures for ' + e.amount + '.';
-      case 'draftTrap': return 'Draft a random Trap into your hand.';
+      case 'draftTrap': return 'Draft a Trap \u2014 pick 1 of 3 to add to your hand.';
       case 'discountGenerated': return 'Cards in your hand that did not start in your deck cost 1 less.';
       case 'nextTrapDiscount': return 'The next Trap you arm costs ' + e.amount + ' less.';
       case 'drainCreature': return 'Drain ' + e.amount + ' from an enemy creature.';
@@ -4427,7 +4437,7 @@ function effectText(d) {
       case 'gainMana': return 'Gain ' + e.amount + ' mana this turn.';
       case 'debuffAll': return e.foesOnly ? 'Give each enemy creature ' + e.power + '/' + e.health + '.' : 'Give all creatures ' + e.power + '/' + e.health + '.';
       case 'generateSpells': return 'Add ' + e.count + ' random spells to your hand.';
-      case 'draftSpell': return e.maxCost != null ? 'Draft a spell that costs ' + e.maxCost + ' or less and add it to your hand.' : 'Draft a spell and add it to your hand.';
+      case 'draftSpell': return e.maxCost != null ? 'Draft a spell that costs ' + e.maxCost + ' or less \u2014 pick 1 of 3 to add to your hand.' : 'Draft a spell \u2014 pick 1 of 3 to add to your hand.';
       case 'destroyAndSelfDamage': return 'Destroy an enemy creature. Deal damage to yourself equal to its power unless a creature died this turn.';
       case 'debuffAndAdd': return 'Give an enemy creature ' + e.power + '/' + e.health + ' and add ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'a card') + ' to your hand.';
       case 'addRandomSubtype': return 'Add a random ' + e.subtype + ' to your hand.';
@@ -4467,7 +4477,7 @@ function effectText(d) {
       case 'stealFromGrave': return 'Add ' + e.count + ' random cards from your opponent\'s graveyard to your hand.';
       case 'transformBoard': return 'Destroy all your creatures. For each, summon a 4/4 Ash Dragon with flying.';
       case 'draftCreatureUpgrade': return 'Draft a random creature into your hand with a random upgrade (+1/+1, +3 health, or 1 cheaper).';
-      case 'draftTrap': return 'Draft a random Trap into your hand.';
+      case 'draftTrap': return 'Draft a Trap \u2014 pick 1 of 3 to add to your hand.';
       case 'mastery': return 'Mastery: for the rest of the game, at the end of your turn, if you spent 6 or more mana on spells that turn, summon a 5/5 Tide Elemental (once per turn).';
       case 'graveWhispers': return 'For the rest of the game, whenever one of your creatures dies during your turn, drain 1 life from the enemy hero.';
       case 'auraValor': return 'For the rest of the game, your creatures get +1/+1 when they attack.';
@@ -4606,13 +4616,13 @@ function cardHtml(inst, ownerIdx, opts) {
   if (inst.stunned) cls += ' stunned';
   if (inst.miracleDiscount && typeof G !== 'undefined' && G && inst.miracleTurn === G.turnNumber) cls += ' miracle-live';
   if (inst.temporary) cls += ' temporary';
-  var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth - inst.damage) : null;
+  var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) : null;
   /* M43 (Jesse): the stats row is ALWAYS rendered (empty on non-creatures)
      so the text panel above it is the same fixed size on every card and the
      orbs never overlap it. Art-less cards get a proper art window too. */
   var foot = '<div class="ctext">' + esc(effectText(d)) + '</div>';
   if (inst.createdBy) foot += '<div class="createdby">\u2726 Created by ' + esc(inst.createdBy) + '</div>';
-  foot += '<div class="cstats">' + (d.type === 'creature' ? '<span class="orb pow">' + (d.power + inst.permPower) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span>' : '') + '</div>';
+  foot += '<div class="cstats">' + (d.type === 'creature' ? '<span class="orb pow">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span><span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span>' : '') + '</div>';
   if (inst.temporary) foot += '<div class="tempflag">⏳ temporary</div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '<div class="cart glyphbox">' + (d.icon || '') + '</div>';
   /* M27.1: a card in hand shows its EFFECTIVE cost — green when discounted,
@@ -4639,7 +4649,7 @@ function cardHtml(inst, ownerIdx, opts) {
 function emblemHtml(inst, ownerIdx, opts) {
   opts = opts || {};
   var d = D(inst);
-  var hpLeft = d.health + inst.permHealth - inst.damage;
+  var hpLeft = d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage;
   var face = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<img src="' + CARD_ART[inst.cardId] + '" alt="">' : '<span class="emblem-glyph">' + (d.icon || '❓') + '</span>';
   var rimStyle = (d.signatureFor && HERO_ACCENT[d.signatureFor]) ? ' style="background:' + HERO_ACCENT[d.signatureFor][0] + '"' : '';
   var openHit = '';
@@ -4648,10 +4658,10 @@ function emblemHtml(inst, ownerIdx, opts) {
     // (M30 keyed on names that do not exist — the pulse never fired).
     if (mode === 'blocking' && aiAttackers.some(function (a) { return a.uid === inst.uid; }) && !blockMap[inst.uid]) openHit = ' open-hit';
   } catch (e) {}
-  var wounded = (inst.damage > 0 && inst.damage * 2 >= d.health + inst.permHealth) ? ' wounded' : '';
+  var wounded = (inst.damage > 0 && inst.damage * 2 >= d.health + inst.permHealth + (inst.tempHealth || 0)) ? ' wounded' : '';
   return '<div class="emblem' + (opts.cls || '') + openHit + wounded + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' +
-    '<span class="emblem-pow' + (inst.permPower > 0 ? ' buffed' : inst.permPower < 0 ? ' debuffed' : '') + '">' + (d.power + inst.permPower) + '⚔</span>' +
+    '<span class="emblem-pow' + (inst.permPower > 0 ? ' buffed' : inst.permPower < 0 ? ' debuffed' : '') + '">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span>' +
     '<span class="emblem-hp' + (inst.permHealth > 0 ? ' buffed' : inst.permHealth < 0 ? ' debuffed' : '') + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + (inst.doom > 0 ? '<span class="emblem-doom" title="Doomed — dies when the counter runs out">💀' + inst.doom + '</span>' : '') + '</div>' +
     (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') + (opts.sick ? '<div class="sickchip" title="Summoned this turn — it can attack next turn">⏳</div>' : '') + (opts.blocking ? '<div class="blockchip" title="Blocking">🛡️</div>' : '') +
     '<div class="emblem-name" style="font-size:' + Math.max(7.5, Math.min(9.5, Math.round(258 / Math.max(8, d.name.length)) / 2)) + 'px">' + esc(d.name) + '</div>' +
@@ -4846,7 +4856,7 @@ function boardHtml(p, isMe) {
     if (isMe && (mode === 'main' || mode === 'attackSelect') && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' ready-glow';
     if (d2type(inst) === 'creature' && G.active === p.idx && inst.summonedTurn === G.turnNumber && !G.canAttack(inst, p) && !inst.stunned && (D(inst).keywords || []).indexOf('cantAttack') < 0) { opts.cls = (opts.cls || '') + ' sick'; opts.sick = true; }
     if (!isMe && mode === 'attackSelect' && d2type(inst) === 'creature' && (D(inst).keywords || []).indexOf('cantBlock') < 0) opts.cls = (opts.cls || '') + ' canblock-hint';
-    if (d2type(inst) === 'creature' && inst.damage > 0 && (D(inst).health + inst.permHealth - inst.damage) <= 2) opts.cls = (opts.cls || '') + ' hurtish';
+    if (d2type(inst) === 'creature' && inst.damage > 0 && (D(inst).health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) <= 2) opts.cls = (opts.cls || '') + ' hurtish';
     if (!isMe && mode === 'main' && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' foe-ready';
     out += (d2type(inst) === 'creature') ? emblemHtml(inst, p.idx, opts) : cardHtml(inst, p.idx, opts);
   });
@@ -5020,7 +5030,7 @@ function inspectHtml() {
   var owner = inspectCardId ? humanIdx : (G.players[0].board.includes(inst) || G.players[0].hand.includes(inst) ? 0 : 1);
   var stats = '';
   var inGrave = false; try { inGrave = G && G.players.some(function (pp) { return pp.graveyard.indexOf(inst) >= 0; }); } catch (e) {}
-  if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span style="color:#ffd28a">' + d.power + '⚔</span><span style="color:#9df0b6">' + d.health + '♥</span></div>' : '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
+  if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span style="color:#ffd28a">' + d.power + '⚔</span><span style="color:#9df0b6">' + d.health + '♥</span></div>' : '<div class="stats"><span style="color:#ffd28a">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span><span style="color:#9df0b6">' + (d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
   return '<div class="overlay" style="background:radial-gradient(ellipse at 50% 36%, ' + schoolHex(d) + '2e, rgba(6,4,12,.84) 62%)" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.legendary ? ' legendary' : '') + '"' + sigStyle(d) + '>' +
     '<div class="cost">' + d.cost + '</div>' + typeTabHtml(d) + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '') +
@@ -5325,7 +5335,8 @@ function renderBody() {
   /* M71 (Jesse + LoR/HS study): the fan breathes — full stage width, a
      wider visible sliver per card, a gentler arc, so titles and art read
      at rest instead of hiding under the next card. */
-  var fanW = Math.min(availW, iw < 560 ? Math.min(440, iw - 16) : (iw > window.innerHeight ? 720 : 460)); /* M100: the fan may never be wider than the phone — the old flat 440 cap overflowed a 390px screen on BOTH sides and slid the edge cards over the hero portrait */
+  var dockReserve = (handOpen && iw < 560 && !(iw > window.innerHeight)) ? 56 : 0; /* M123: the OPEN fan must never slide under the right-hand dock column (passive emblem + artifact medallions) — Jesse's screenshot showed the nightmare badge sitting on his last card. The rested bunch keeps the corner by law; only the open fan reserves the column. */
+  var fanW = Math.min(availW, iw < 560 ? Math.min(440, iw - 16 - dockReserve) : (iw > window.innerHeight ? 720 : 460)); /* M100: the fan may never be wider than the phone — the old flat 440 cap overflowed a 390px screen on BOTH sides and slid the edge cards over the hero portrait */
   /* M97 (Jesse's full-card law): every card in the hand is WHOLLY visible
      in both states — no slivers, no neighbour ever covering a title. The
      fan scales DOWN to fit the stage width instead of overlapping: the
@@ -5351,7 +5362,7 @@ function renderBody() {
      (unaffordable cards fade); the hand count lives on the pile strip. */
   var fanPrevUids = prevHandUids;
   prevHandUids = {}; me.hand.forEach(function (c) { prevHandUids[c.uid] = 1; }); prevHandCount = me.hand.length;
-  html += '<div class="hand fan' + (handOpen ? (fanBloom ? ' bloom' : '') : ' mini' + (fanSettle ? ' settle' : '')) + '" style="--fs:' + fanScale.toFixed(3) + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + fanCards.map(function (inst, hi) { var isArmed = me.traps.indexOf(inst) >= 0;
+  html += '<div class="hand fan' + (handOpen ? (fanBloom ? ' bloom' : '') : ' mini' + (fanSettle ? ' settle' : '')) + '" style="--fs:' + fanScale.toFixed(3) + (dockReserve ? ';margin-right:' + dockReserve + 'px' : '') + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>' + fanCards.map(function (inst, hi) { var isArmed = me.traps.indexOf(inst) >= 0;
     var afford = G.effectiveCost(me, inst) <= G.availableMana(me);
     var off = hi - hMid;
     var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 0.6 : 0.85)).toFixed(1) + 'px)';
@@ -5454,7 +5465,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M121 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M123 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;
@@ -5807,7 +5818,7 @@ function renderBuilder() {
     '<label>🎚️ Stance (your land slot)</label><select onchange="builderSetStance(this.value)">' + Object.keys(STANCES).map(function (id) { return '<option value="' + id + '"' + (id === chosenStance(heroId) ? ' selected' : '') + '>' + STANCES[id].icon + ' ' + esc(STANCES[id].name) + '</option>'; }).join('') + '</select>' +
     '<div class="herodesc">' + esc(STANCES[chosenStance(heroId)].blurb) + '</div>' +
     '<div style="margin:10px 0 4px;font-size:15px">Deck: <b>' + esc(saved ? 'Custom deck' : ((typeof DECK_NAMES !== 'undefined' && DECK_NAMES[heroId]) || 'Default deck')) + '</b> · <b>' + d.length + ' / 30</b> cards' + (saved ? ' · a custom deck is saved for this hero' : ' · this hero is using the default deck') + '</div>' +
-    '<div class="curve">' + (function () { var byCost = {}, types = {}, sum = 0; d.forEach(function (id) { var c = CARDS[id]; if (!c) return; var b = Math.min(c.cost, 8); byCost[b] = (byCost[b] || 0) + 1; types[c.type] = (types[c.type] || 0) + 1; sum += c.cost; }); var max = 1; Object.keys(byCost).forEach(function (k) { if (byCost[k] > max) max = byCost[k]; }); var bars = ''; for (var b2 = 0; b2 <= 8; b2++) { var n2 = byCost[b2] || 0; bars += '<span class="cbar"><i style="height:' + Math.max(2, Math.round(n2 / max * 30)) + 'px"></i><em>' + (b2 === 8 ? '8+' : b2) + '</em></span>'; } return bars + '<span class="cmeta">' + (d.length ? 'avg ' + (sum / d.length).toFixed(1) + ' mana · ' : '') + Object.keys(types).map(function (t) { return types[t] + ' ' + t + 's'; }).join(' · ') + (function () { var pk = 0, pkn = 0; Object.keys(byCost).forEach(function (k) { if (byCost[k] > pkn) { pkn = byCost[k]; pk = k; } }); return d.length ? ' · curve peak 💧' + pk + ' (' + pkn + ')' : ''; })() + (function () { var sc = {}; d.forEach(function (id) { var s2 = CARDS[id] && CARDS[id].cardSchool; if (s2 && s2 !== 'none') sc[s2] = (sc[s2] || 0) + 1; }); var ks = Object.keys(sc); return ks.length ? ' · ' + ks.map(function (k) { return SCHOOL_META[k].icon + ' ' + sc[k]; }).join(' ') : ''; })() + '</span>'; })() + '</div>' +
+    '<div class="curve">' + (function () { var byCost = {}, types = {}, sum = 0; d.forEach(function (id) { var c = CARDS[id]; if (!c) return; var b = Math.min(c.cost, 8); byCost[b] = (byCost[b] || 0) + 1; types[c.type] = (types[c.type] || 0) + 1; sum += c.cost; }); var max = 1; Object.keys(byCost).forEach(function (k) { if (byCost[k] > max) max = byCost[k]; }); var bars = ''; for (var b2 = 0; b2 <= 8; b2++) { var n2 = byCost[b2] || 0; bars += '<span class="cbar"><i style="height:' + Math.max(2, Math.round(n2 / max * 30)) + 'px"></i><em>' + (b2 === 8 ? '8+' : b2) + '</em></span>'; } return bars + '<span class="cmeta">' + (d.length ? 'avg ' + (sum / d.length).toFixed(1) + ' mana · ' : '') + Object.keys(types).map(function (t) { return types[t] + ' ' + t + (types[t] === 1 ? '' : 's'); }).join(' · ') + (function () { var pk = 0, pkn = 0; Object.keys(byCost).forEach(function (k) { if (byCost[k] > pkn) { pkn = byCost[k]; pk = k; } }); return d.length ? ' · curve peak 💧' + pk + ' (' + pkn + ')' : ''; })() + (function () { var sc = {}; d.forEach(function (id) { var s2 = CARDS[id] && CARDS[id].cardSchool; if (s2 && s2 !== 'none') sc[s2] = (sc[s2] || 0) + 1; }); var ks = Object.keys(sc); return ks.length ? ' · ' + ks.map(function (k) { return SCHOOL_META[k].icon + ' ' + sc[k]; }).join(' ') : ''; })() + '</span>'; })() + '</div>' +
     (d.length >= 20 && !cheapN ? '<div class="berr" style="border-color:rgba(255,209,102,.5);color:#ffe9b0">⚠ No plays before turn 3 — this deck has nothing costing 2 or less.</div>' : '') +
     (errs.length ? errs.map(function (e) { return '<div class="berr">⚠ ' + esc(e) + '</div>'; }).join('') : '<div class="bok">✓ Legal deck' + (isSaved ? ' — saved and in use' : '') + '</div>') +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
@@ -5944,9 +5955,13 @@ function pickDraft(uid) {
 function draftHtml() {
   var pd = G.pendingDraft;
   if (!pd) return '';
-  return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">Draft a signature — pick one</div>' +
-    '<div class="ctext">Three signature cards from across every hero\'s set. The other two are gone.</div>' +
-    '<div class="draftrow">' + pd.options.map(function (inst) { var dd = D(inst); return '<div class="draftpick">' + cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }) + '<div class="draftcap">' + (dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : 'Signature') + '</div></div>'; }).join('') + '</div></div></div>';
+  // M122: every draft is a pick of 3 — the overlay speaks for its kind.
+  var dkind = pd.kind || 'signature';
+  var dtitle = dkind === 'signature' ? 'Draft a signature \u2014 pick one' : dkind === 'trap' ? 'Draft a trap \u2014 pick one' : 'Draft a spell \u2014 pick one';
+  var dsub = dkind === 'signature' ? 'Three signature cards from across every hero\'s set. The other two are gone.' : 'Choose one to add to your hand. The other two are gone.';
+  return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">' + dtitle + '</div>' +
+    '<div class="ctext">' + dsub + '</div>' +
+    '<div class="draftrow">' + pd.options.map(function (inst) { var dd = D(inst); var cap = dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : ((dd.cardSchool && SCHOOL_META[dd.cardSchool] ? SCHOOL_META[dd.cardSchool].name + ' ' : '') + dd.type); return '<div class="draftpick">' + cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }) + '<div class="draftcap">' + cap + '</div></div>'; }).join('') + '</div></div></div>';
 }
 function scryHtml() {
   var top = G.players[humanIdx].deck[0];
@@ -5993,6 +6008,7 @@ function activateArtifact(uid) {
   var ad = a ? D(a) : null;
   if (ad && ad.activateTarget) { artifactPick = uid; msg = ad.activateTarget === 'friendlyCreature' ? 'Choose one of your creatures.' : 'Choose an enemy to strike.'; render(); return; }
   try { G.activateArtifact(humanIdx, uid); try { sfx('spell'); } catch (e2) {} say('Artifact activated.'); } catch (e) { msg = errMsg(e, uid); }
+  if (G.pendingDraft && G.pendingDraft.player === humanIdx) mode = 'draftPick'; // M122: an activation can open a draft (Echo Scepter, Ward Lens)
   flushEngineLog(); if (!finishCheck()) render();
 }
 function resolveArtifactTarget(t) {

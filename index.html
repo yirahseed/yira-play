@@ -4400,6 +4400,13 @@ function effectText(d) {
       case 'draftTrap': return 'Draft a random Trap into your hand.';
       case 'discountGenerated': return 'Cards in your hand that did not start in your deck cost 1 less.';
       case 'nextTrapDiscount': return 'The next Trap you arm costs ' + e.amount + ' less.';
+      case 'drainCreature': return 'Drain ' + e.amount + ' from an enemy creature.';
+      case 'stunOrDestroyArtifact': return 'Stun an enemy creature or destroy an enemy artifact.';
+      case 'damageOrStripCharges': return 'Deal ' + e.amount + ' damage to an enemy creature or remove ' + e.amount + ' charges from an enemy artifact.';
+      case 'stunCreatures': return 'Stun up to ' + e.count + ' enemy creatures.';
+      case 'stunPermanent': return 'Stun an enemy creature for the rest of the game.';
+      case 'millPerZombieGrave': return 'Mill your opponent for 1 for each Zombie in your graveyard. Max ' + (e.max || 10) + '.';
+      case 'destroyCreature': return 'Destroy a creature.';
       case 'addCard': return 'Add ' + CARDS[e.cardId].name + ' to your hand.';
       case 'discountSpell': return 'A random spell in your hand costs ' + e.amount + ' less.';
       case 'draftSignature': return 'Draft a signature card: choose 1 of 3 signature cards drawn from every hero\'s set.';
@@ -4500,14 +4507,14 @@ function effectText(d) {
   if (d.stealOnHeroDamage) parts.push('After this damages the enemy hero, add a copy of a random card from their deck to your hand.');
   if (d.spellDrain) parts.push('After you play a spell, Drain ' + d.spellDrain + ' from your opponent.');
   if (d.trapGrowth) parts.push('After you play a trap, this gets +1/+0.');
-  if (d.deathGrowth) parts.push('Trample. At the end of your turn, if a creature died, this gets +1/+1.');
+  if (d.deathGrowth) parts.push('At the end of your turn, if a creature died, this gets +1/+1.');
   if (d.discardSpellWhenBlocked) parts.push('After this is blocked, your opponent discards a random spell.');
   if (d.moonlight) parts.push('Moonlight: if you end your turn with exactly 2 mana available, this flips into ' + (CARDS[d.flipsTo] ? CARDS[d.flipsTo].name : 'its other face') + '.');
   if (d.flipOnSpells) parts.push('After you play your third or more spell in a turn, this flips into ' + (CARDS[d.flipsTo] ? CARDS[d.flipsTo].name : 'its other face') + '.');
   if (d.afterFlip) parts.push('After this flips: ' + eff(d.afterFlip));
   if (d.graveExitDouble) parts.push('After this leaves your graveyard, double its power.');
   if (d.selfDamageDiscount) parts.push('Costs ' + d.selfDamageDiscount + ' less if you’ve dealt damage to yourself this turn.');
-  if (d.charges) parts.push('Activate (' + d.charges + ' charges): ' + eff(d.effect));
+  if (d.charges && d.type !== 'artifact') parts.push('Activate (' + d.charges + ' charges): ' + eff(d.effect)); // M121: artifacts carry this on the Artifact line below — printing both tripled the text (Jesse's Ward Lens screenshot)
   if (d.emptyDeckWin) parts.push('If your deck is empty, you win the game.');
   if (d.freeIfDrafted) parts.push('Costs 0 if you’ve drafted this turn.');
   if (d.miracle) parts.push('\u2728 Miracle: ' + (d.miracle.kind === 'healSelf' ? 'Heal yourself for ' + d.miracle.amount + '.' : d.miracle.kind === 'discountSelf' ? 'Costs ' + d.miracle.amount + ' less this turn.' : d.miracle.kind === 'summonSoldier' ? 'Summon a Soldier.' : d.miracle.kind === 'damageRandomEnemy' ? 'Deal ' + d.miracle.amount + ' damage to a random enemy.' : 'Mill yourself for ' + d.miracle.amount + '.') + ' (Resolves free when you draw this card.)');
@@ -4525,8 +4532,9 @@ function effectText(d) {
   if (d.selfDecay) parts.push('At the start of your turn, this loses ' + d.selfDecay + ' health.');
   if (d.debut) parts.push('Debut: ' + eff(d.debut));
   if (d.finale) parts.push('Finale: ' + eff(d.finale));
-  if (d.effect && d.type !== 'trap') parts.push(eff(d.effect));
+  if (d.effect && d.type !== 'trap' && !(d.type === 'artifact' && d.charges)) parts.push(eff(d.effect));
   if (d.type === 'trap' && d.trigger) {
+    var trapBefore = parts.length;
     if (d.trigger.kind === 'counterBig') parts.push('Trap: counter the enemy\'s next card costing ' + d.trigger.minCost + '+.' + (d.effect ? ' ' + eff(d.effect) : ''));
     if (d.trigger.kind === 'counterAny') parts.push('Trap: if your opponent plays a spell, trap, or artifact, counter it.');
     if (d.trigger.kind === 'afterAttackDeclared') parts.push('Trap: after your opponent declares attackers, the strongest attacking creature gets -3/-0 before damage lands.');
@@ -4537,9 +4545,19 @@ function effectText(d) {
     if (d.trigger.kind === 'vindictive') parts.push('Trap: at the end of the enemy\'s turn, destroy the strongest creature that damaged you this turn.');
     if (d.trigger.kind === 'foeEndSummon') parts.push('Trap: at the end of your opponent\'s turn, ' + eff(d.effect).charAt(0).toLowerCase() + eff(d.effect).slice(1));
     if (d.trigger.kind === 'guardFlock') parts.push('Trap: counter a spell or Debut that targets one of your creatures, whatever it costs.');
+    if (parts.length === trapBefore) { if (d.text) parts.push('Trap: ' + d.text); else if (d.effect) parts.push('Trap: ' + eff(d.effect)); } // M121: triggers without a written line speak in the card's own recorded words
   }
-  if (d.type === 'artifact') parts.push('Artifact, ' + d.charges + ' charges. Activate once per turn: ' + eff(d.effect));
-  return parts.join(' ');
+  if (d.type === 'artifact' && d.charges) parts.push('Artifact, ' + d.charges + ' charges. Activate once per turn: ' + eff(d.effect));
+  // M121 (Jesse's screenshots: Drain Blood and Step Over inspected BLANK): if the
+  // assembled mechanics say nothing beyond keywords, the card's own recorded
+  // text speaks — many face-read defs carry their rules in d.text alone.
+  var mechParts = parts.length - (kw ? 1 : 0);
+  if (mechParts <= 0 && d.text) parts.push(d.text);
+  // M121: no sentence ever prints twice (a keyword stated in the header and
+  // again in the card's own text is the common case).
+  var sents = parts.join(' ').split('. '), seenS = {}, keptS = [];
+  for (var si = 0; si < sents.length; si++) { var skey = sents[si].replace(/\.$/, '').trim().toLowerCase(); if (skey && seenS[skey]) continue; seenS[skey] = 1; keptS.push(sents[si]); }
+  return keptS.join('. ');
 }
 function badges(inst, ownerIdx) {
   var d = D(inst), out = '';
@@ -5436,7 +5454,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M120 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M121 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;

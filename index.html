@@ -922,6 +922,38 @@
   .speech::after { content:''; position:absolute; left:-5px; top:55%; border:5px solid transparent; border-right-color: rgba(24,16,44,.92); border-left:0; }
   .winburst { position:absolute; inset:0; overflow:visible; pointer-events:none; }
   .winburst i { position:absolute; left:50%; top:26px; width:6px; height:10px; border-radius:2px; background:#ffd166; opacity:0; animation: burstFly 1.5s ease-out forwards; }
+  /* M126: the victory cinematic — the camera pans across the winning hero, Spellslingers-style */
+  .endstage { position:relative; height:214px; margin:-24px -24px 12px; border-radius:15px 15px 0 0; overflow:hidden; background:#0a0614; } /* 214, not 252: the whole result — stage, tiles, buttons — fits a phone screen without scrolling */
+  .endstage img.vhero { position:absolute; left:50%; top:-4%; height:122%; width:200px; max-width:64vw; object-fit:cover; object-position:top center; transform:translateX(-50%); animation:endPan 7.5s ease-in-out forwards; }
+  .endstage.lost img.vhero { filter:grayscale(.55) brightness(.7); animation-name:endSink; }
+  .endstage .vshade { position:absolute; inset:0; background:linear-gradient(180deg, rgba(5,3,10,.22), rgba(5,3,10,0) 38%, rgba(5,3,10,.9) 94%); }
+  .endstage .vname { position:absolute; top:10px; left:0; right:0; text-align:center; font-family:Georgia,serif; letter-spacing:2.5px; font-size:13px; color:#ffe9a8; text-shadow:0 2px 8px #000; text-transform:uppercase; }
+  .endstage .vquote { position:absolute; left:0; right:0; bottom:9px; padding:0 16px; text-align:center; font-style:italic; font-size:15px; color:#f5eeff; text-shadow:0 2px 8px #000; }
+  @keyframes endPan { from { transform:translateX(-54%) scale(1.03); } to { transform:translateX(-46%) scale(1.2) translateY(-12px); } }
+  @keyframes endSink { from { transform:translateX(-50%) scale(1.14); } to { transform:translateX(-50%) scale(1.05) translateY(8px); } }
+  @media (max-height:500px) { .endstage { height:148px; } }
+  @media (prefers-reduced-motion: reduce) { .endstage img.vhero { animation:none; } }
+  /* M128: the match intro — both heroes take the field, opening lines spoken, then the veil lifts */
+  .matchintro { position:fixed; inset:0; z-index:58; pointer-events:none; display:flex; flex-direction:column; background:rgba(6,4,12,.55); animation:introOut .45s ease 1.6s forwards; }
+  .intro-side { position:relative; flex:1; overflow:hidden; }
+  .intro-side img { position:absolute; height:97%; width:230px; max-width:64vw; object-fit:cover; object-position:top center; left:50%; bottom:0; transform:translateX(-50%); }
+  .intro-side.foe img { animation:introDown .65s ease-out; }
+  .intro-side.me img { animation:introUp .65s ease-out; }
+  .intro-tag { position:absolute; left:0; right:0; text-align:center; z-index:2; padding:0 12px; }
+  .intro-side.foe .intro-tag { bottom:4px; } .intro-side.me .intro-tag { top:4px; }
+  .intro-name { font-family:Georgia,serif; letter-spacing:2px; font-size:15px; color:#ffe9a8; text-shadow:0 2px 8px #000; text-transform:uppercase; }
+  .intro-line { font-style:italic; font-size:13.5px; color:#f5eeff; text-shadow:0 2px 8px #000; margin-top:2px; }
+  .intro-vs { text-align:center; font-size:25px; margin:-13px 0; z-index:3; animation:introClash .45s ease .45s both; text-shadow:0 2px 10px #000; }
+  @keyframes introDown { from { transform:translateX(-50%) translateY(-52px); opacity:0; } to { transform:translateX(-50%) translateY(0); opacity:1; } }
+  @keyframes introUp { from { transform:translateX(-50%) translateY(52px); opacity:0; } to { transform:translateX(-50%) translateY(0); opacity:1; } }
+  @keyframes introClash { from { transform:scale(.3); opacity:0; } to { transform:scale(1); opacity:1; } }
+  @keyframes introOut { to { opacity:0; visibility:hidden; } }
+  @media (prefers-reduced-motion: reduce) { .matchintro, .intro-side img, .intro-vs { animation:none; } }
+  /* M127: end-screen stats as tiles, not a sentence */
+  .statgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0 4px; }
+  .stattile { background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:7px 4px 6px; }
+  .stattile b { display:block; font-size:17px; color:#ffe9a8; line-height:1.1; }
+  .stattile span { font-size:10px; color:#a793d6; letter-spacing:.5px; text-transform:uppercase; }
   .winburst i:nth-child(3n) { background:#fff0b8; } .winburst i:nth-child(4n) { background:#c9a227; }
   .winburst i:nth-child(1) { --bx:-120px; --by:120px; --br:-160deg; } .winburst i:nth-child(2) { --bx:-70px; --by:170px; --br:120deg; animation-delay:.06s; }
   .winburst i:nth-child(3) { --bx:-30px; --by:200px; --br:200deg; animation-delay:.12s; } .winburst i:nth-child(4) { --bx:15px; --by:185px; --br:-90deg; animation-delay:.03s; }
@@ -4001,6 +4033,22 @@ function fanfareWatch() {
     fanfareGame = G;
     if (G.winner === humanIdx) { tone(523, 523, .16, 'triangle', .5, 0); tone(659, 659, .16, 'triangle', .5, .12); tone(784, 784, .32, 'triangle', .55, .24); }
     else { tone(330, 262, .3, 'sine', .5, 0); tone(262, 196, .45, 'sine', .5, .2); }
+    endChant(G.winner === humanIdx);
+  } catch (e) {}
+}
+/* M126: the chant — a low, layered drone with a slow three-note call over
+   the victory pan, like a coliseum choir heard through stone. Synth only,
+   built from the same tone() bricks as everything else. */
+function endChant(won) {
+  try {
+    if (!AC || muted) return;
+    if (won) {
+      tone(196, 196, 1.9, 'sine', .26, .30); tone(294, 294, 1.9, 'sine', .15, .34); tone(392, 392, 1.7, 'sine', .10, .38);
+      tone(262, 262, .62, 'triangle', .20, .55); tone(330, 330, .62, 'triangle', .20, 1.12); tone(392, 392, 1.05, 'triangle', .23, 1.70);
+      tone(131, 131, 2.2, 'sine', .16, .30); tone(523, 523, .9, 'sine', .07, 1.74);
+    } else {
+      tone(147, 147, 2.0, 'sine', .22, .30); tone(110, 98, 2.3, 'sine', .20, .55); tone(220, 196, 1.4, 'triangle', .08, .40);
+    }
   } catch (e) {}
 }
 /* ---------- M29 batch: summon/death cinematics, hero profile popup,
@@ -5225,7 +5273,7 @@ function renderBody() {
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
-    $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field">' + heroFigure(mf.heroId, 'foe') + heroFigure(mm.heroId, 'me') + '</div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>'; return; }
+    $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field">' + heroFigure(mf.heroId, 'foe') + heroFigure(mm.heroId, 'me') + '</div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>' + (introUntil && Date.now() < introUntil && G.winner === null ? matchIntroHtml() : ''); return; }
   if (G.winner !== null) crowdStop(); else crowdStart();
   var me = G.players[humanIdx], foe = G.players[aiIdx];
   soundWatch(); turnWatch(); m81Watch(); m83Watch(); m84Watch();
@@ -5383,6 +5431,7 @@ function renderBody() {
   html += '</div></div>';
   fanBloom = false; fanSettle = false;
   if (inspectUid !== null || inspectCardId !== null) html += inspectHtml();
+  if (introUntil && Date.now() < introUntil && G && G.winner === null && typeof PORTRAITS !== 'undefined') html += matchIntroHtml(); // (the mulligan shell appends it too — renderBody returns before this path)
   if (profileIdx !== null) html += heroProfileHtml();
   if (graveIdx !== null) html += graveHtml();
   if (deckIdx !== null && G) html += deckHtml();
@@ -5403,6 +5452,14 @@ function renderBody() {
   var log = document.getElementById('log'); if (log) log.scrollTop = log.scrollHeight;
 }
 var reviewField = false;
+var introUntil = 0;
+function matchIntroHtml() {
+  if (typeof PORTRAITS === 'undefined') return '';
+  var me = G.players[humanIdx], foe = G.players[aiIdx];
+  if (!PORTRAITS[me.heroId] || !PORTRAITS[foe.heroId]) return '';
+  function side(p, idx, cls) { var line = heroLine(idx, 'start'); return '<div class="intro-side ' + cls + '"><img src="' + PORTRAITS[p.heroId] + '" alt=""><div class="intro-tag"><div class="intro-name">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div>' + (line ? '<div class="intro-line">\u201c' + esc(line) + '\u201d</div>' : '') + '</div></div>'; }
+  return '<div class="matchintro">' + side(foe, aiIdx, 'foe') + '<div class="intro-vs">⚔️</div>' + side(me, humanIdx, 'me') + '</div>';
+}
 function gameOverHtml() {
   if (reviewField) return '<button class="review-chip" onclick="reviewField=false;render()">🏁 Result</button>';
   var won = G.winner === humanIdx;
@@ -5420,8 +5477,18 @@ function gameOverHtml() {
     ' · Life drained by Nightmares: ' + s.nightmareLifeDrained + ' · Traps triggered: ' + s.trapsTriggered +
     ' · Cards drawn: ' + s.drawsByPlayer[humanIdx] + ' · Countered: ' + s.cardsCountered + ' · Mastery summons: ' + s.masterySummons) + raceLine + raceSvg + durLine + turnLine;
   function box(title, text, buttons) {
-    return '<div class="overlay"><div class="box">' + (title === 'Victory' ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<div class="faceoff"><div class="fo-side"><div class="portrait">' + heroPortrait(G.players[humanIdx].heroId) + '</div><small>' + esc(G.players[humanIdx].hero.name) + '</small></div><span class="fo-x">⚔️</span><div class="fo-side"><div class="portrait">' + heroPortrait(G.players[aiIdx].heroId) + '</div><small>' + esc(G.players[aiIdx].hero.name) + '</small></div></div><p>' + text + '</p>' +
-      '<p style="color:#c4b6e8;font-size:13.5px">' + statsLine + '</p>' + buttons + '</div></div>';
+    /* M126: the end screen opens on the cinematic — a slow pan across the
+       winning hero (dimmed and sinking when it isn't yours), their win line
+       spoken over the shot. M127: stats as tiles; the old sentence-wall and
+       the face-off minis retire, and the league line is no longer quoted
+       as if the hero said it. */
+    var wp = G.players[G.winner];
+    var wl = heroLine(G.winner, 'win');
+    var stage = (typeof PORTRAITS !== 'undefined' && PORTRAITS[wp.heroId]) ? '<div class="endstage' + (won ? '' : ' lost') + '"><img class="vhero" src="' + PORTRAITS[wp.heroId] + '" alt=""><div class="vshade"></div><div class="vname">' + (SIGILS[wp.heroId] || '') + ' ' + esc(wp.hero.name) + '</div>' + (wl ? '<div class="vquote">\u201c' + esc(wl) + '\u201d</div>' : '') + '</div>' : '';
+    var quoteFallback = stage ? '' : (wl ? '<br><i>\u201c' + esc(wl) + '\u201d \u2014 ' + esc(wp.hero.name) + '</i>' : '');
+    var tiles = '<div class="statgrid">' + [['Turns', G.players[humanIdx].ownTurns], ['Nightmares planted', s.nightmaresPlanted], ['Life drained', s.nightmareLifeDrained], ['Traps sprung', s.trapsTriggered], ['Cards drawn', s.drawsByPlayer[humanIdx]], ['Countered', s.cardsCountered]].map(function (t) { return '<div class="stattile"><b>' + t[1] + '</b><span>' + t[0] + '</span></div>'; }).join('') + '</div>';
+    var story = (typeof durLine !== 'undefined' && durLine ? durLine : '') + (turnLine || ''); /* M127: the life-race sparkline retired — the turning-point line tells the same story in words */
+    return '<div class="overlay"><div class="box">' + stage + (won ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<p>' + text + quoteFallback + '</p>' + tiles + (story ? '<p style="color:#c4b6e8;font-size:12.5px;margin:2px 0 4px">' + story + '</p>' : '') + buttons + '</div></div>';
   }
   if (climb) {
     var r = climb.rung;
@@ -5440,9 +5507,8 @@ function gameOverHtml() {
       '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
   }
   var lgNow = leagueOf(record().w);
-  var endLine = (heroLine(G.winner, 'win') || '') + '<br><span style="color:#c4b6e8;font-size:13px">' + lgNow.icon + ' ' + lgNow.name + ' League · ' + record().w + ' wins' + (lgNow.next ? ' · ' + lgNow.next[1] + ' ' + lgNow.next[2] + ' at ' + lgNow.next[0] : '') + '</span>';
-  var endQuote = endLine ? '<br><i>“' + esc(endLine) + '” — ' + esc(G.players[G.winner].hero.name) + '</i>' : '';
-  return box(won ? '🏆 Victory' : '💀 Defeat', (won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.') + endQuote,
+  var leagueLine = '<span style="color:#c4b6e8;font-size:13px">' + lgNow.icon + ' ' + lgNow.name + ' League · ' + record().w + ' wins' + (lgNow.next ? ' · ' + lgNow.next[1] + ' ' + lgNow.next[2] + ' at ' + lgNow.next[0] : '') + '</span>';
+  return box(won ? '🏆 Victory' : '💀 Defeat', (won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.') + '<br>' + leagueLine,
     '<button class="ghost big" onclick="reviewField=true;render()">👁 Review the field</button>' +
     '<button class="big" onclick="rematch()">Rematch</button>' +
     '<button class="ghost big" onclick="rematchSwapped()">' + (humanIdx === 0 ? 'Rematch — enemy leads this time' : 'Rematch — you lead this time') + '</button>' +
@@ -5474,7 +5540,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M125 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M128 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;
@@ -5870,6 +5936,8 @@ function startMatch() {
   if (climbBonus) G.players[aiIdx].life += climbBonus;
   uiLog = []; lastEngineLog = 0; msg = ''; recordCounted = false;
   speech = {}; speechFlags = {};
+  introUntil = Date.now() + 2100; // M128: the heroes take the field
+  setTimeout(function () { try { if (G && G.winner === null && mode !== 'menu' && mode !== 'collection' && mode !== 'builder') render(); } catch (e) {} }, 2180);
   lastLurking = {}; nmPopIdx = -1;
   redrawSet = new Set(); blockMap = {}; attackSet = new Set();
   // AI mulligan: throw back pricey cards.

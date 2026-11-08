@@ -1899,7 +1899,7 @@ class Game {
         nextTrapDiscount: 0, fragileGem: false, tookDamageThisTurn: false, selfDamageThisTurn: 0,
         spellManaTurn: 0, deathsThisTurn: 0, playsThisGame: 0, damageTakenGame: 0, creaturesToGraveThisTurn: 0,
         summonCount: 0, damageDealtThisTurn: 0, spiritThreshold: 3, beckonClaimed: [],
-        mastery: false, graveWhispers: false, auraValor: false, unbrokenMight: false,
+        mastery: 0, graveWhispers: false, auraValor: false, unbrokenMight: false, // M131: mastery is a STACK COUNT, not a switch (Jesse, from play, 2026-11-07)
         school: schoolOpt === undefined ? (DEFAULT_SCHOOL[heroId] || null) : schoolOpt,
         schoolNext: 1, schoolStagePlayed: 0, questDue: {}, questDone: {},
         stance: stanceOpt === undefined ? 'open' : stanceOpt,
@@ -2352,10 +2352,14 @@ class Game {
     for (const c of [...p.board]) if ((def(c).keywords || []).includes('fleeting')) { p.board.splice(p.board.indexOf(c), 1); p.graveyard.push(c); this.log.push(`${def(c).name} was fleeting — gone with the turn`); }
     // M72: temporary copies (the Snapcaster's) dissolve from hand at end of turn — they are copies, not cards, so they never touch the graveyard.
     for (const c of [...p.hand]) if (c.temporary) { p.hand.splice(p.hand.indexOf(c), 1); this.log.push(`${def(c).name} was temporary — it dissolves`); }
-    // Mastery of Currents: a mastered school answers a spell-heavy turn with an Elemental.
-    if (p.mastery && p.spellManaTurn >= 6 && p.board.length < 5 && this.winner === null) {
-      this.summonToken(p, 'tide_elemental'); this.stats.masterySummons++;
-      this.log.push(`${p.hero.name}'s Mastery of Currents summons a Tide Elemental`);
+    // Mastery of Currents (M131, Jesse from play 2026-11-07): the condition
+    // is PER STACK — a spell-heavy turn answers with one Elemental per
+    // Mastery attained, capped only by the board's free slots.
+    if (p.mastery > 0 && p.spellManaTurn >= 6 && this.winner === null) {
+      const slots = 5 - p.board.length;
+      const count = Math.min(p.mastery, slots);
+      for (let k = 0; k < count; k++) { this.summonToken(p, 'tide_elemental'); this.stats.masterySummons++; }
+      if (count > 0) this.log.push(`${p.hero.name}'s Mastery of Currents summons ${count === 1 ? 'a Tide Elemental' : count + ' Tide Elementals'}`);
     }
     // Sister Vesper: a sufficiently violent turn earns a spirit CARD in hand
     // (M20 fidelity: the recovered original adds the spirit to hand as a
@@ -2937,7 +2941,7 @@ class Game {
         this.offerDraft(i, Object.keys(CARDS).filter((id) => CARDS[id].signatureFor), srcName, 'signature');
         break;
       }
-      case 'mastery': p.mastery = true; this.log.push(`${p.hero.name} attains Mastery of Currents`); break;
+      case 'mastery': p.mastery = (p.mastery || 0) + 1; this.log.push(`${p.hero.name} attains Mastery of Currents (stack ${p.mastery})`); break; // M131: EVERY cast stacks — chain completion, a recast, or a temporary Adept copy alike; the stack is rest-of-game player state, so a copy dissolving at end of turn cannot take it back
       case 'graveWhispers': p.graveWhispers = true; this.log.push(`${p.hero.name} hears the Whispers of the Grave`); break;
       case 'auraValor': p.auraValor = true; this.log.push(`${p.hero.name} is wrapped in an Aura of Valor`); break;
       case 'unbrokenMight': p.unbrokenMight = true; this.log.push(`${p.hero.name} swears by Unbroken Might`); break;
@@ -4535,7 +4539,7 @@ function effectText(d) {
       case 'transformBoard': return 'Destroy all your creatures. For each, summon a 4/4 Ash Dragon with flying.';
       case 'draftCreatureUpgrade': return 'Draft a random creature into your hand with a random upgrade (+1/+1, +3 health, or 1 cheaper).';
       case 'draftTrap': return 'Draft a Trap \u2014 pick 1 of 3 to add to your hand.';
-      case 'mastery': return 'Mastery: for the rest of the game, at the end of your turn, if you spent 6 or more mana on spells that turn, summon a 5/5 Tide Elemental (once per turn).';
+      case 'mastery': return 'Mastery (stacks): for the rest of the game, at the end of your turn, if you spent 6 or more mana on spells that turn, summon a 5/5 Tide Elemental for each Mastery you have attained.';
       case 'graveWhispers': return 'For the rest of the game, whenever one of your creatures dies during your turn, drain 1 life from the enemy hero.';
       case 'auraValor': return 'For the rest of the game, your creatures get +1/+1 when they attack.';
       case 'unbrokenMight': return 'For the rest of the game, whenever you attack with a creature of 5 or more power, deal 5 damage to the enemy hero (once per combat).';
@@ -5540,7 +5544,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M128 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M131 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;

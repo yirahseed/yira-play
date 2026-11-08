@@ -188,6 +188,17 @@
   .floatnum.heal { color:#8bf5a8; }
   .floatnum { position:absolute; left:50%; top:4px; transform:translateX(-50%); font-size:17px; font-weight:900; color:#ff8fa3;
               text-shadow:0 1px 4px rgba(0,0,0,.9); animation:floatUp .95s ease-out forwards; z-index:6; pointer-events:none; }
+  /* M134: hero-bound damage reads BIG; the killing blow reads biggest, in gold */
+  .floatnum.big { font-size:27px; animation:floatUpBig 1.15s ease-out forwards; }
+  .floatnum.big.lethal { font-size:35px; color:#ffd76a; text-shadow:0 0 14px rgba(255,180,60,.75), 0 2px 5px rgba(0,0,0,.9); }
+  @keyframes floatUpBig { 0% { transform:translate(-50%,0) scale(.55); opacity:0; } 28% { transform:translate(-50%,-10px) scale(1.18); opacity:1; } 100% { transform:translate(-50%,-44px) scale(1); opacity:0; } }
+  .miniburst { position:absolute; left:50%; top:30%; pointer-events:none; z-index:7; }
+  .miniburst i { position:absolute; width:5px; height:8px; border-radius:2px; background:#ffd166; opacity:0; animation:burstFly .95s ease-out forwards; }
+  .miniburst i:nth-child(3n) { background:#fff0b8; } .miniburst i:nth-child(4n) { background:#ff9d5c; }
+  .miniburst i:nth-child(1) { --bx:-52px; --by:44px; --br:-140deg; } .miniburst i:nth-child(2) { --bx:-26px; --by:64px; --br:110deg; animation-delay:.04s; }
+  .miniburst i:nth-child(3) { --bx:4px; --by:70px; --br:190deg; animation-delay:.08s; } .miniburst i:nth-child(4) { --bx:30px; --by:58px; --br:-80deg; animation-delay:.02s; }
+  .miniburst i:nth-child(5) { --bx:54px; --by:36px; --br:150deg; animation-delay:.06s; } .miniburst i:nth-child(6) { --bx:-64px; --by:8px; --br:70deg; animation-delay:.09s; }
+  .miniburst i:nth-child(7) { --bx:66px; --by:6px; --br:-50deg; animation-delay:.05s; } .miniburst i:nth-child(8) { --bx:0px; --by:84px; --br:30deg; animation-delay:.1s; }
   @keyframes floatUp { to { transform:translate(-50%,-28px); opacity:0; } }
   .chev { color:#ff6b5e; font-size:12px; font-weight:900; line-height:1; letter-spacing:-3px; margin-top:0; text-shadow:0 1px 3px rgba(0,0,0,.8); }
   .emblem-name { margin-top:5px; font-size:9.5px; font-weight:700; color:#ecdfc2; max-width:94px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center; }
@@ -949,6 +960,27 @@
   @keyframes introClash { from { transform:scale(.3); opacity:0; } to { transform:scale(1); opacity:1; } }
   @keyframes introOut { to { opacity:0; visibility:hidden; } }
   @media (prefers-reduced-motion: reduce) { .matchintro, .intro-side img, .intro-vs { animation:none; } }
+  /* M132 (the green-lit M129): the post-match FLOW — screens melt into each
+     other, and a crossed league tier gets its own celebration */
+  .box.flowin { animation:flowIn .5s ease both; }
+  @keyframes flowIn { from { opacity:0; filter:blur(7px); transform:scale(.965); } to { opacity:1; filter:blur(0); transform:scale(1); } }
+  .leaguebanner { box-shadow:0 0 18px rgba(255,215,106,.5); animation:trophyPulse 2.2s ease-in-out infinite; }
+  .leaguebox { position:relative; overflow:hidden; }
+  .league-trophy { font-size:74px; line-height:1.1; margin:8px 0 2px; filter:drop-shadow(0 0 22px var(--tier)); animation:trophyPulse 2.2s ease-in-out infinite; }
+  @keyframes trophyPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.07); } }
+  .league-h { font-family:Georgia,serif; letter-spacing:2px; color:var(--tier); margin:4px 0; font-size:21px; }
+  .league-name { font-family:Georgia,serif; font-size:27px; letter-spacing:4px; color:#fff; text-shadow:0 0 18px var(--tier); margin:2px 0 6px; }
+  .shardfield { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .shardfield i { position:absolute; top:-14px; width:7px; height:11px; background:var(--tier); opacity:.85; clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); animation:shardFall linear infinite; }
+  @keyframes shardFall { to { transform:translateY(580px) rotate(340deg); } }
+  @media (prefers-reduced-motion: reduce) { .box.flowin, .league-trophy, .leaguebanner { animation:none; } .shardfield { display:none; } }
+  /* M133 (the green-lit M130): a particle layer the whole game breathes through */
+  .emberfield { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+  .emberfield i { position:absolute; bottom:-8px; width:5px; height:5px; border-radius:50%; background:#ffca7a; box-shadow:0 0 6px #ff9d5c; opacity:0; animation:emberRise linear infinite; }
+  .leaguebox .emberfield i { background:var(--tier); box-shadow:0 0 7px var(--tier); }
+  @keyframes emberRise { 0% { transform:translate(0,0); opacity:0; } 12% { opacity:.9; } 100% { transform:translate(12px,-250px); opacity:0; } }
+  .endstage .winburst i { top:46%; }
+  @media (prefers-reduced-motion: reduce) { .emberfield { display:none; } }
   /* M127: end-screen stats as tiles, not a sentence */
   .statgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:10px 0 4px; }
   .stattile { background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:7px 4px 6px; }
@@ -972,6 +1004,14 @@
   .motes i:nth-child(3) { left:47%; animation-delay:5.1s; } .motes i:nth-child(4) { left:63%; animation-delay:1.4s; width:5px; height:5px; }
   .motes i:nth-child(5) { left:76%; animation-delay:7.3s; width:3px; height:3px; } .motes i:nth-child(6) { left:88%; animation-delay:3.9s; }
   .motes i:nth-child(7) { left:37%; animation-delay:9.2s; width:3px; height:3px; }
+  .motes i:nth-child(8) { left:55%; animation-delay:4.6s; width:4px; height:4px; } .motes i:nth-child(9) { left:70%; animation-delay:8.1s; width:3px; height:3px; }
+  /* M135: hub tiles carry a slow sheen, staggered — light moving across glass */
+  .menupage .tile { position:relative; overflow:hidden; }
+  .menupage .tile::after { content:''; position:absolute; top:0; bottom:0; width:34%; left:-60%; background:linear-gradient(100deg, transparent, rgba(255,240,200,.13), transparent); transform:skewX(-14deg); animation:tileSheen 6.5s ease-in-out infinite; pointer-events:none; }
+  .menupage .tile:nth-of-type(2)::after { animation-delay:1.1s; } .menupage .tile:nth-of-type(3)::after { animation-delay:2.2s; }
+  .menupage .tile:nth-of-type(4)::after { animation-delay:3.3s; } .menupage .tile:nth-of-type(5)::after { animation-delay:4.4s; } .menupage .tile:nth-of-type(6)::after { animation-delay:5.5s; }
+  @keyframes tileSheen { 0%, 55% { left:-60%; } 85%, 100% { left:130%; } }
+  @media (prefers-reduced-motion: reduce) { .menupage .tile::after { display:none; } }
   @keyframes moteRise { 0% { transform: translateY(0) translateX(0); opacity:0; } 12% { opacity:.55; } 55% { transform: translateY(-46vh) translateX(14px); opacity:.4; } 100% { transform: translateY(-88vh) translateX(-8px); opacity:0; } }
   .foehand.thinking i { animation: foeThink 1.1s ease-in-out infinite; }
   .foehand.thinking i:nth-child(2n) { animation-delay:.18s; } .foehand.thinking i:nth-child(3n) { animation-delay:.36s; }
@@ -1073,7 +1113,7 @@
   .titlepage .tagline { color:#e9defc; text-shadow:0 2px 10px rgba(0,0,0,.9); }
   .titlepage .pressstart { margin-top:30px; text-shadow:0 2px 12px rgba(0,0,0,.95); }
   .titlepage .titlever { position:absolute; left:0; right:0; bottom:calc(10px + env(safe-area-inset-bottom)); margin:0; z-index:2; color:#b7a8dd; text-shadow:0 1px 8px rgba(0,0,0,.9); }
-  .menubg { position:fixed; inset:0; background-size:cover; background-position:50% 32%; opacity:.30; filter:brightness(.72) saturate(.92); z-index:0; pointer-events:none; } /* M117: dimmed — the art stays the landing's soul but stops washing out the hub (Jesse: 'it's all translucent') */
+  .menubg { position:fixed; inset:0; background-size:cover; background-position:50% 32%; opacity:.30; filter:brightness(.78) saturate(1.04); box-shadow:inset 0 0 190px rgba(255,138,54,.20), inset 0 -120px 190px rgba(20,8,40,.35); z-index:0; pointer-events:none; } /* M135: the hub breathes warm — the reference's lava-gold register, not cold purple */ /* M117: dimmed — the art stays the landing's soul but stops washing out the hub (Jesse: 'it's all translucent') */
   .pagescroll.menupage { position:relative; z-index:1; background:transparent; }
   .menupage .panel { background:rgba(17,11,32,.87); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border-color:rgba(216,180,84,.38); box-shadow:0 10px 30px rgba(0,0,0,.45); animation:menuRise .45s ease both; }
   .menupage .panel:nth-of-type(3) { animation-delay:.06s; }
@@ -1462,7 +1502,7 @@ const CARDS = {
   infectious_scorpion: { icon: "\uD83E\uDD82", name: 'Infectious Scorpion', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'pest', finale: { kind: 'addCard', cardId: 'fatal_infection' }, orig: "Infectious Scorpion", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — face-verified twice (Roxora tech + Garruk deck); sits in the BLACK section of a played Ashiok deck view, hence Grave" },
   fatal_infection: { icon: "\u2623\uFE0F", name: 'Fatal Infection', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'doom' }, orig: "Fatal Infection (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   frostgrip_mage: { icon: "\u2744\uFE0F", name: 'Wintergrip Mage', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'wizard', finale: { kind: 'addCard', cardId: 'chill_wind' }, orig: "Wintergrip Mage", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — cost + Finale face-verified; final stats 2/3 per the v1.04 patch record (an older video face read 1/3)" },
-  spellmark_adept: { icon: "\uD83D\uDD16", name: 'Spellmark Adept', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'wizard', debut: { kind: 'markedCopy' }, orig: "Snapcaster Mage", src: "VIDEO-DIGEST-4B (O3 deckbuilding tour, full face), 2026-11-01 — cost 2, 2/1 Wizard, 'While in hand, marks a spell in your graveyard each turn. Debut: Add a temporary copy of the marked spell to your hand.' Implemented: the mark resolves dynamically as the most recent spell in your graveyard at debut; the copy is temporary (dissolves from hand at end of turn). Also x2 in the wave's Jace + Teferi lists — Jesse's plug-in rule puts it in Umbra's deck" },
+  spellmark_adept: { icon: "\uD83D\uDD16", name: 'Spellmark Adept', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'wizard', debut: { kind: 'markedCopy' }, orig: "Snapcaster Mage", src: "VIDEO-DIGEST-4B (O3 deckbuilding tour, full face), 2026-11-01 — cost 2, 2/1 Wizard, 'While in hand, marks a spell in your graveyard each turn. Debut: Add a temporary copy of the marked spell to your hand.' RULING SUPERSEDED 2026-11-07 (Jesse, balance): the mark is a RANDOM graveyard spell, held on the Adept instance and re-rolled each turn — the original M72 dynamic most-recent resolution was deterministic and would have made Elemental Mastery stacking a guaranteed loop. The copy is temporary (dissolves from hand at end of turn). Also x2 in the wave's Jace + Teferi lists — Jesse's plug-in rule puts it in Umbra's deck" },
   tideshaper: { icon: "\uD83E\uDDDC", name: 'Tideshaper', cost: 3, type: 'creature', power: 2, health: 2, subtype: 'merfolk', debut: { kind: 'ramp' }, orig: "Kiora's Tideshaper", src: "VIDEO-DIGEST-4B (O11, full face), 2026-11-01 — cost 3, 2/2 Merfolk, 'Debut: Get an empty mana gem' (the engine's ramp case verbatim)" },
   chill_wind: { icon: "\uD83C\uDF2C\uFE0F", name: 'Chill Wind', cost: 1, type: 'spell', generatedOnly: true, effect: { kind: 'stunCreature' }, orig: "Chill Wind (token)", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   warp_of_agony: { icon: "\uD83E\uDD22", name: 'Agony Warp', cost: 3, type: 'spell', effect: { kind: 'debuffAndAdd', power: -3, health: 0, cardId: 'agonys_twist' }, orig: "Agony Warp", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
@@ -2260,9 +2300,25 @@ class Game {
     const p = this.players[i];
     if (p.hand.length >= 10) { p.graveyard.push(inst); if (def(inst).type === 'creature') p.creaturesToGraveThisTurn++; return inst; } // hand cap 10: discard instead
     p.hand.push(inst);
+    if (inst.cardId === 'spellmark_adept') this.rollMark(p, inst); // M132: an Adept takes its mark the moment it reaches a hand
     if (p.hero.passive === 'weave' && inst.starterOwner !== i) this.plantNightmares(i);
     return inst;
   }
+  // M132 (JESSE RULING, 2026-11-07 — balance, superseding the M72 reading):
+  // the Adept's mark is a RANDOM spell in its controller's graveyard, held
+  // on the instance, re-rolled at the start of each of its controller's
+  // turns ("marks a spell in your graveyard each turn"). The M72 build
+  // resolved the mark dynamically as the MOST RECENT graveyard spell —
+  // deterministic, so a player could engineer the graveyard to guarantee
+  // the exact spell back (Elemental Mastery on turn 8, every time), which
+  // would have made Mastery stacking a loop instead of an achievement.
+  rollMark(p, inst) {
+    const spells = p.graveyard.filter((c) => def(c).type === 'spell');
+    if (!spells.length) { inst.markedSpellUid = null; inst.markedSpellId = null; return; }
+    const pick = this.rng.pick(spells);
+    inst.markedSpellUid = pick.uid; inst.markedSpellId = pick.cardId;
+  }
+  refreshMarks(p) { for (const c of p.hand) if (c.cardId === 'spellmark_adept') this.rollMark(p, c); }
   plantNightmares(weaverIdx) {
     const w = this.players[weaverIdx];
     const foe = this.players[this.opp(weaverIdx)];
@@ -2281,6 +2337,7 @@ class Game {
     if (this.winner !== null) return;
     const p = this.players[i];
     this.active = i; this.turnNumber++;
+    this.refreshMarks(p); // M132: Adepts in hand re-mark as their controller's turn begins
     for (const c of this.players[i].board) if (c.wardTurn !== undefined && c.wardTurn < this.turnNumber) delete c.wardTurn; // M116: Ward lapses as its controller's next turn begins
     p.ownTurns++;
     p.gainedMana = 0; // M67: last turn's gained mana is spent or gone (bonusMana = ramp pool, never reset)
@@ -2830,7 +2887,7 @@ class Game {
       case 'healPerSheep': { const n = p.board.filter((c) => c.cardId === 'sheep').length; if (n) { const sheltered = this.gainLife(p, 2 * n); this.log.push(`${def(sourceInst).name}: the flock shelters ${p.hero.name} (+${sheltered} life)`); } break; }
       case 'drawSpells': { let drawn = 0; for (let k = 0; k < p.deck.length && drawn < effect.count;) if (def(p.deck[k]).type === 'spell') { const [s] = p.deck.splice(k, 1); this.addToHand(i, s, srcName); drawn++; } else k++; if (effect.selfDamage) { p.life -= effect.selfDamage; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + effect.selfDamage; p.damageTakenCurrTurn += effect.selfDamage; this.log.push(`${srcName}: the whisper costs ${effect.selfDamage} life`); this.checkWin(); } break; }
       case 'copyFromFoeGrave': { const foe = this.players[this.opp(i)]; if (foe.graveyard.length) { const src = this.rng.pick(foe.graveyard); this.addToHand(i, makeInstance(src.cardId, null), srcName); this.log.push(`${srcName}: copies ${def(src).name} from ${foe.hero.name}'s graveyard`); } break; }
-      case 'markedCopy': { const spells = p.graveyard.filter((c) => def(c).type === 'spell'); if (spells.length) { const marked = spells[spells.length - 1]; const copy = makeInstance(marked.cardId, null); copy.temporary = true; this.addToHand(i, copy, srcName); this.log.push(`${srcName}: the marked ${def(marked).name} returns as a temporary copy`); } break; } // M72 Snapcaster: the mark rides the most recent spell in the graveyard (the 'each turn' re-mark, resolved dynamically)
+      case 'markedCopy': { if (sourceInst && sourceInst.markedSpellUid === undefined) this.rollMark(p, sourceInst); const marked = sourceInst ? p.graveyard.find((c) => c.uid === sourceInst.markedSpellUid && def(c).type === 'spell') : null; if (marked) { const copy = makeInstance(marked.cardId, null); copy.temporary = true; this.addToHand(i, copy, srcName); this.log.push(`${srcName}: the marked ${def(marked).name} returns as a temporary copy`); } else if (p.graveyard.some((c) => def(c).type === 'spell')) this.log.push(`${srcName}: the marked spell is gone — no copy`); break; } // M132: the debut copies THE MARK (a random graveyard spell, held on the instance and re-rolled each turn) — Jesse's ruling supersedes the M72 most-recent resolution
       case 'refillMana': p.manaSpent = 0; this.log.push(`${p.hero.name}'s mana gems refill`); break;
       case 'buffAndDoom': if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; target.inst.doomedEOT = true; this.log.push(`${def(target.inst).name} swells with borrowed might — and is doomed at turn's end`); } break;
       case 'transformFriendly': { if (target && target.kind === 'creature') { target.inst.cardId = effect.into; target.inst.damage = 0; target.inst.permPower = 0; target.inst.permHealth = 0; target.inst.tempPower = 0; target.inst.tempHealth = 0; this.log.push(`${srcName}: becomes a ${CARDS[effect.into].name}`); } break; }
@@ -4522,7 +4579,7 @@ function effectText(d) {
       case 'healPerSheep': return 'Heal yourself for 2 for each friendly Sheep.';
       case 'drawSpells': return 'Draw ' + e.count + ' spells from your deck and deal ' + e.selfDamage + ' damage to yourself.';
       case 'copyFromFoeGrave': return 'Add a copy of a random card in your opponent\'s graveyard to your hand.';
-      case 'markedCopy': return 'While in hand, marks a spell in your graveyard. Debut: Add a temporary copy of the marked spell to your hand (it dissolves at end of turn).';
+      case 'markedCopy': return 'While in hand, marks a random spell in your graveyard (a new mark each turn). Debut: Add a temporary copy of the marked spell to your hand (it dissolves at end of turn).';
       case 'refillMana': return 'Refill your mana gems.';
       case 'buffAndDoom': return 'Give another friendly creature +' + e.power + '/+' + e.health + ' and destroy it at the end of the turn.';
       case 'summonPerCount': return e.count === 'foeCreatures' ? 'Summon a 1/1 Vampire Thrall for each enemy creature.' : 'Summon a 1/1 Vampire Thrall for each of your Vampires.';
@@ -5104,7 +5161,7 @@ function inspectHtml() {
       var bits = [];
       if (inst.miracleDiscount && G && inst.miracleTurn === G.turnNumber) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">✨ Miracle live — this copy costs ' + inst.miracleDiscount + ' less, this turn only.</div>');
       if (inst.stunned) bits.push('<div style="font-size:12.5px;color:#b8c8ff;margin-top:4px">💤 Stunned — it cannot attack on its controller\u2019s next turn.</div>');
-      if (d.debut && d.debut.kind === 'markedCopy' && G) { var holder = G.players.find(function (pp) { return pp.hand.indexOf(inst) >= 0; }); if (holder) { var mspells = holder.graveyard.filter(function (c) { return D(c).type === 'spell'; }); bits.push('<div style="font-size:12.5px;color:#9df0e8;margin-top:4px">' + (mspells.length ? '🔖 Marking: ' + esc(D(mspells[mspells.length - 1]).name) + ' — play this creature to gain a temporary copy of it.' : '🔖 No spell in the graveyard to mark yet.') + '</div>'); } }
+      if (d.debut && d.debut.kind === 'markedCopy' && G) { var holder = G.players.find(function (pp) { return pp.hand.indexOf(inst) >= 0; }); if (holder) { var markedInst = inst.markedSpellUid ? holder.graveyard.find(function (c) { return c.uid === inst.markedSpellUid; }) : null; bits.push('<div style="font-size:12.5px;color:#9df0e8;margin-top:4px">' + (markedInst ? '🔖 Marking: ' + esc(D(markedInst).name) + ' — play this creature to gain a temporary copy of it. (A new random mark each turn.)' : (inst.markedSpellUid ? '🔖 The marked spell has left the graveyard — a new mark comes next turn.' : '🔖 No spell in the graveyard to mark yet.')) + '</div>'); } }
       if (d.flipsTo && CARDS[d.flipsTo]) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">' + (typeof CARD_ART !== 'undefined' && CARD_ART[d.flipsTo] ? '<img src="' + CARD_ART[d.flipsTo] + '" style="width:42px;height:42px;object-fit:cover;border-radius:7px;vertical-align:-13px;margin-right:7px">' : '') + '🌙 Transforms into ' + esc(CARDS[d.flipsTo].name) + (d.flipOnSpells ? ' after you cast ' + d.flipOnSpells + ' spells in one turn.' : ' when you end your turn with exactly 2 mana available.') + '</div>');
       if (d.afterFlip) { var baseId = Object.keys(CARDS).find(function (k) { return CARDS[k].flipsTo === inst.cardId; }); if (baseId) bits.push('<div style="font-size:12.5px;color:#cdbcf5;margin-top:4px">🌙 The transformed face of ' + esc(CARDS[baseId].name) + '.</div>'); }
       if (inst.temporary) bits.push('<div style="font-size:12.5px;color:#ffd166;margin-top:4px">⏳ Temporary — this copy dissolves at end of turn.</div>');
@@ -5198,7 +5255,7 @@ function m84Watch() {
           var bars = document.querySelectorAll('.hcluster');
           var hel = bars && bars[p.idx === aiIdx ? 0 : 1];
           var dl = freshLife[p.idx] - beforeL;
-          if (hel) floatNum(hel, (dl > 0 ? '+' : '') + dl, dl > 0 ? 'heal' : '');
+          if (hel) floatNum(hel, (dl > 0 ? '+' : '') + dl, dl > 0 ? 'heal' : (dl <= -4 ? 'big' : '')); // M134: heavy spell/effect damage to a hero reads big too
         }
       });
       window.__lifeSnap = freshLife;
@@ -5456,6 +5513,27 @@ function renderBody() {
   var log = document.getElementById('log'); if (log) log.scrollTop = log.scrollHeight;
 }
 var reviewField = false;
+var leagueCrossed = null, leagueSeen = false, endStep = 'result'; // M132: the post-match flow state
+var TIER_COLORS = { Seedling: '#8fce6e', Bronze: '#e09a55', Silver: '#cfd8e3', Gold: '#ffd76a', Platinum: '#7fe3d0', Mythic: '#c99aff' };
+function showLeague() { leagueSeen = true; endStep = 'league'; try { sfx('legendary'); } catch (e) {} render(); }
+function leagueContinue() { endStep = 'result'; render(); }
+var SCHOOL_EMBER = { tides: '#6ec3ff', ember: '#ff9a5c', grave: '#c99aff', dawn: '#ffe9a8', worldroot: '#9fe08a', none: '#ffca7a' };
+function emberHtml(heroId, n) {
+  var col = SCHOOL_EMBER[(typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[heroId] || ['none'])[0]] || '#ffca7a';
+  var out = '<div class="emberfield">';
+  for (var ei = 0; ei < (n || 11); ei++) out += '<i style="left:' + ((ei * 29 + 7) % 100) + '%;background:' + col + ';box-shadow:0 0 6px ' + col + ';animation-duration:' + (3.4 + (ei % 5) * 0.9).toFixed(1) + 's;animation-delay:' + ((ei % 6) * 0.7).toFixed(1) + 's"></i>';
+  return out + '</div>';
+}
+function leagueHtml() {
+  var t = leagueCrossed; var col = TIER_COLORS[t.name] || '#ffd76a';
+  var shards = '';
+  for (var si = 0; si < 14; si++) shards += '<i style="left:' + ((si * 37) % 100) + '%;animation-duration:' + (2.6 + (si % 5) * 0.4).toFixed(1) + 's;animation-delay:' + ((si % 7) * 0.35).toFixed(2) + 's"></i>';
+  return '<div class="overlay"><div class="box leaguebox flowin" style="--tier:' + col + '"><div class="shardfield">' + shards + '</div>' +
+    '<div class="league-trophy">🏆</div><h2 class="league-h">NEW LEAGUE Achieved!</h2>' + emberHtml(G.players[humanIdx].heroId, 9) +
+    '<div class="league-name">' + t.icon + ' ' + esc(t.name).toUpperCase() + '</div>' +
+    '<p style="color:#c4b6e8">Your ' + record().w + ' wins carry you into the ' + esc(t.name) + ' League. The coliseum notices.</p>' +
+    '<button class="big" onclick="leagueContinue()">Continue \u25b8</button></div></div>';
+}
 var introUntil = 0;
 function matchIntroHtml() {
   if (typeof PORTRAITS === 'undefined') return '';
@@ -5465,6 +5543,7 @@ function matchIntroHtml() {
   return '<div class="matchintro">' + side(foe, aiIdx, 'foe') + '<div class="intro-vs">⚔️</div>' + side(me, humanIdx, 'me') + '</div>';
 }
 function gameOverHtml() {
+  if (endStep === 'league' && leagueCrossed) return leagueHtml(); // M132: the celebration interrupts the result, once
   if (reviewField) return '<button class="review-chip" onclick="reviewField=false;render()">🏁 Result</button>';
   var won = G.winner === humanIdx;
   var turnLine = '';
@@ -5488,11 +5567,11 @@ function gameOverHtml() {
        as if the hero said it. */
     var wp = G.players[G.winner];
     var wl = heroLine(G.winner, 'win');
-    var stage = (typeof PORTRAITS !== 'undefined' && PORTRAITS[wp.heroId]) ? '<div class="endstage' + (won ? '' : ' lost') + '"><img class="vhero" src="' + PORTRAITS[wp.heroId] + '" alt=""><div class="vshade"></div><div class="vname">' + (SIGILS[wp.heroId] || '') + ' ' + esc(wp.hero.name) + '</div>' + (wl ? '<div class="vquote">\u201c' + esc(wl) + '\u201d</div>' : '') + '</div>' : '';
+    var stage = (typeof PORTRAITS !== 'undefined' && PORTRAITS[wp.heroId]) ? '<div class="endstage' + (won ? '' : ' lost') + '"><img class="vhero" src="' + PORTRAITS[wp.heroId] + '" alt=""><div class="vshade"></div>' + emberHtml(wp.heroId, won ? 12 : 6) + (won ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="vname">' + (SIGILS[wp.heroId] || '') + ' ' + esc(wp.hero.name) + '</div>' + (wl ? '<div class="vquote">\u201c' + esc(wl) + '\u201d</div>' : '') + '</div>' : '';
     var quoteFallback = stage ? '' : (wl ? '<br><i>\u201c' + esc(wl) + '\u201d \u2014 ' + esc(wp.hero.name) + '</i>' : '');
     var tiles = '<div class="statgrid">' + [['Turns', G.players[humanIdx].ownTurns], ['Nightmares planted', s.nightmaresPlanted], ['Life drained', s.nightmareLifeDrained], ['Traps sprung', s.trapsTriggered], ['Cards drawn', s.drawsByPlayer[humanIdx]], ['Countered', s.cardsCountered]].map(function (t) { return '<div class="stattile"><b>' + t[1] + '</b><span>' + t[0] + '</span></div>'; }).join('') + '</div>';
     var story = (typeof durLine !== 'undefined' && durLine ? durLine : '') + (turnLine || ''); /* M127: the life-race sparkline retired — the turning-point line tells the same story in words */
-    return '<div class="overlay"><div class="box">' + stage + (won ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + '<p>' + text + quoteFallback + '</p>' + tiles + (story ? '<p style="color:#c4b6e8;font-size:12.5px;margin:2px 0 4px">' + story + '</p>' : '') + buttons + '</div></div>';
+    return '<div class="overlay"><div class="box flowin">' + stage + (won ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + (leagueCrossed && !leagueSeen && !climb ? '<button class="big leaguebanner" onclick="showLeague()">✦ New League — ' + leagueCrossed.icon + ' ' + esc(leagueCrossed.name) + ' ✦</button>' : '') + '<p>' + text + quoteFallback + '</p>' + tiles + (story ? '<p style="color:#c4b6e8;font-size:12.5px;margin:2px 0 4px">' + story + '</p>' : '') + buttons + '</div></div>';
   }
   if (climb) {
     var r = climb.rung;
@@ -5544,7 +5623,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M131 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M132 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false;
@@ -5628,7 +5707,7 @@ function renderMenu() {
       return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>';
     }).join('');
   }
-  $app.innerHTML = '<div class="pagescroll menupage">' + (typeof PORTRAITS !== 'undefined' && PORTRAITS['title-roster'] ? '<div class="menubg" style="background-image:url(' + PORTRAITS['title-roster'] + ')"></div>' : '') + '<h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread</p>' +
+  $app.innerHTML = '<div class="pagescroll menupage">' + (typeof PORTRAITS !== 'undefined' && PORTRAITS['title-roster'] ? '<div class="menubg" style="background-image:url(' + PORTRAITS['title-roster'] + ')"></div>' : '') + '<div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' + '<h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread</p>' +
     hubHtml(rec) +
     '<div class="panel" id="panel-match"><h2>New match</h2>' +
     '<label>You play</label>' + heroChips(setup.me, 'me') + '<div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
@@ -5923,7 +6002,7 @@ function renderBuilder() {
 function startMatch() {
   matchStartedAt = Date.now();
   soundInit();
-  sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null }; prevLife = {}; lifeSeries = []; lastSeriesTurn = -1; prevHandUids = {}; prevHandCount = -1; concedeArmed = false; reviewField = false;
+  sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null }; prevLife = {}; lifeSeries = []; lastSeriesTurn = -1; prevHandUids = {}; prevHandCount = -1; concedeArmed = false; reviewField = false; leagueCrossed = null; leagueSeen = false; endStep = 'result';
   var seat = climb ? 'first' : setup.seat;
   var foeHero = climb ? CLIMB_RUNGS[climb.rung - 1].hero : setup.foe;
   var climbBonus = climb ? CLIMB_RUNGS[climb.rung - 1].bonus : 0;
@@ -5988,6 +6067,7 @@ function finishCheck() {
     if (!recordCounted) {
       recordCounted = true;
       var rec = record(); if (G.winner === humanIdx) rec.w++; else rec.l++;
+      if (G.winner === humanIdx && !climb) { var lgB = leagueOf(rec.w - 1), lgA = leagueOf(rec.w); if (lgB.name !== lgA.name) leagueCrossed = { name: lgA.name, icon: lgA.icon }; } // M132: a tier crossed upward earns its own screen
       try { localStorage.setItem('yira_record', JSON.stringify(rec)); } catch (e) {}
       try { var st = JSON.parse(localStorage.getItem('yira_streak') || '{"c":0,"b":0}'); if (G.winner === humanIdx) { st.c++; if (st.c > st.b) st.b = st.c; } else st.c = 0; localStorage.setItem('yira_streak', JSON.stringify(st)); } catch (e) {}
       if (climb) {
@@ -6146,7 +6226,7 @@ function floatNum(el, txt, cls) {
   try {
     if (!el || !el.appendChild || typeof document === 'undefined' || !document.createElement) return;
     var s = document.createElement('span'); s.className = 'floatnum' + (cls ? ' ' + cls : ''); s.textContent = txt; el.appendChild(s);
-    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 950);
+    setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, cls && cls.indexOf('big') >= 0 ? 1200 : 950);
   } catch (e) {}
 }
 /* The strike sequence: each queued attacker lunges at its blocker (or the
@@ -6170,7 +6250,13 @@ async function animateCombat(list) {
       await sleep(150);
       if (tgt) {
         tgt.classList.add('hitflash');
-        floatNum(tgt, '-' + item.power);
+        /* M134: a strike at a hero reads big; the killing blow reads biggest
+           and bursts — the reference's confetti on the final attack. */
+        var heroHit = item.target === 'hero';
+        var foeHero = heroHit ? G.players[item.dir < 0 ? aiIdx : humanIdx] : null;
+        var lethal = !!(foeHero && foeHero.life - item.power <= 0);
+        floatNum(tgt, '-' + item.power, heroHit ? ('big' + (lethal ? ' lethal' : '')) : '');
+        if (lethal && tgt.appendChild) { var mb = document.createElement('span'); mb.className = 'miniburst'; mb.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>'; tgt.appendChild(mb); setTimeout(function () { if (mb.parentNode) mb.parentNode.removeChild(mb); }, 1100); }
         setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(tgt), 400);
       }
       if (anim && anim.finished) await anim.finished;

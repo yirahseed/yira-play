@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Yira: Enchanted Coliseum</title>
 <meta name="description" content="Yira: Enchanted Coliseum — a 1v1 card battler of traps, nightmares and five schools of magic. Twelve heroes, a five-rung Climb, a full deck builder. No accounts, no ads, no pay-to-win.">
 <meta name="theme-color" content="#17102b">
+<link rel="apple-touch-icon" href="yira-icon-180.png">
+<link rel="icon" type="image/png" href="yira-icon-180.png">
 <style>
   /* Skins: the whole palette runs on variables; data-theme on <html> swaps them. */
   :root { --bgA:#2b2145; --bgB:#171226; --bgC:#0e0a18; --accent:#6d4fc2; --accentHover:#7f61d4;
@@ -671,10 +673,17 @@
   .statgrid .stat b { display:block; font-size:16px; color:#fff; }
   .statgrid .stat span { font-size:10.5px; color:#a793d6; letter-spacing:.04em; }
   .signin-frame { border:1px dashed rgba(200,170,255,.4); border-radius:12px; padding:12px 10px; margin-top:10px; text-align:center; }
+  /* M159: NON-CARD overlay panels (profile, PvP gates, prompts) wear their own
+     dark-glass identity — not the bronze card frame. Card-flavoured content
+     (.ctext parchment inside .sheet) stays card-flavoured on purpose. */
+  .bigcard.sheet { background:linear-gradient(168deg, rgba(26,19,44,.97), rgba(15,11,28,.97)); border:1.5px solid rgba(216,180,84,.5); border-radius:18px; box-shadow:0 14px 44px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08); padding:20px 18px; text-align:center; }
+  .bigcard.sheet .cname { background:none; background-image:none; background-color:transparent; color:#e9d8a6; text-shadow:none; box-shadow:none; padding:0; font-size:20px; white-space:normal; }
+  .bigcard.sheet .ctext { background:none; background-image:none; color:#cfc2ee; box-shadow:none; padding:0; }
+
   .ladder { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin:8px 0 4px; }
   .rung { font-size:11.5px; color:#c4b6e8; border:1px solid rgba(200,170,255,.25); border-radius:999px; padding:3px 9px; background:rgba(14,9,26,.4); }
   .rung.done { color:#9df0b6; border-color:rgba(120,220,150,.4); }
-  #collSearch { width:100%; margin-top:10px; padding:10px 13px; font-size:14.5px; color:#efe9ff; background:rgba(20,13,36,.85); border:1px solid rgba(200,170,255,.35); border-radius:11px; outline:none; }
+  #collSearch { width:100%; margin-top:10px; padding:10px 13px; font-size:16px; color:#efe9ff; background:rgba(20,13,36,.85); border:1px solid rgba(200,170,255,.35); border-radius:11px; outline:none; }
   #collSearch:focus { border-color:#b18cff; }
   .curve { display:flex; align-items:flex-end; gap:4px; margin:9px 0 3px; }
   .cbar { display:flex; flex-direction:column; align-items:center; gap:2px; }
@@ -1062,6 +1071,8 @@
   .pressstart { margin-top:44px; font-size:17px; letter-spacing:3px; color:#ffd76a; animation:psPulse 1.7s ease-in-out infinite; }
   @keyframes psPulse { 0%,100% { opacity:.4; } 50% { opacity:1; } }
   .titlever { margin-top:46px; font-size:11.5px; color:#8f83b8; letter-spacing:.04em; }
+  .titlechips { position:absolute; left:0; right:0; bottom:calc(18px + env(safe-area-inset-bottom)); display:flex; flex-wrap:wrap; gap:7px; justify-content:center; padding:0 14px; }
+  .tchip { font-size:11.5px; letter-spacing:.03em; color:#e6dcff; background:rgba(20,14,38,.62); border:1px solid rgba(216,180,84,.35); border-radius:999px; padding:5px 11px; backdrop-filter:blur(4px); }
   @media (prefers-reduced-motion: reduce) { .pressstart { animation:none; } }
 
   /* ---- M95: the heroes wear their life as a ring ---- */
@@ -1830,10 +1841,10 @@ const DECKS = {
 
 // --- Schools (class chains): one per deck, chosen beside the deck itself ---
 const SCHOOLS = {
-  wizard:    { name: 'School of Tides', icon: '🌊', stages: ['tidewing_familiar', 'signature_weaving', 'mastery_of_currents'], blurb: 'Spellcraft chain: a flying familiar, a drafted signature, then a tide that answers spell-heavy turns with a 5/5 Elemental.' },
-  warlock:   { name: 'Pact of the Grave', icon: '🕳️', stages: ['gravebound_imp', 'withering_edict', 'whispers_of_grave'], blurb: 'Death chain: a decaying imp, a withering curse, then a pact that drains the foe whenever your creatures die on your turn.' },
-  paladin:   { name: 'Oath of the Dawn', icon: '🌅', stages: ['dawn_steed', 'dawns_smite', 'aura_of_valor'], blurb: 'Army chain: a faithful steed, a smite that grows with your board, then an aura that strengthens every attack.' },
-  barbarian: { name: 'Path of the Ember Wrath', icon: '🔥', stages: ['axe_of_pyre', 'reckless_wrath', 'unbroken_might'], blurb: 'Wrath chain: a burning axe, reckless damage from your strongest creature, then ruin for the foe when your giants attack.' },
+  wizard:    { name: 'School of Tides', icon: '🌊', stages: ['tidewing_familiar', 'signature_weaving', 'mastery_of_currents'], blurb: 'Spellcraft chain: a flying familiar, a drafted signature, then a tide that answers spell-heavy turns with a 5/5 Elemental — one for each time you have cast Elemental Mastery.' },
+  warlock:   { name: 'Pact of the Grave', icon: '🕳️', stages: ['gravebound_imp', 'withering_edict', 'whispers_of_grave'], blurb: 'Death chain: a decaying imp, a withering curse, then a pact that drains 1 life from the foe whenever your creatures die on your turn — once per Whispers you have cast.' },
+  paladin:   { name: 'Oath of the Dawn', icon: '🌅', stages: ['dawn_steed', 'dawns_smite', 'aura_of_valor'], blurb: 'Army chain: a faithful steed, a smite that grows with your board, then an aura that permanently grows your surviving attackers +1/+1 after every attack — once per Aura you have cast.' },
+  barbarian: { name: 'Path of the Ember Wrath', icon: '🔥', stages: ['axe_of_pyre', 'reckless_wrath', 'unbroken_might'], blurb: 'Wrath chain: a burning axe, reckless damage from your strongest creature, then ruin for the foe — 5 damage whenever your giants attack, once per Indomitable Strength you have cast.' },
   druid:     { name: 'Circle of the Wilds', icon: '🌳', stages: ['thornwolf', 'barkhide_bloom', 'worldroot_titanosaur'], blurb: 'Wild chain: a healing wolf, a blooming ramp, then a warded titanosaur that shields your life with its own.' },
 };
 const DEFAULT_SCHOOL = { weaver: 'wizard', controller: 'wizard', bruiser: 'barbarian', keeper: 'druid', torchbearer: 'barbarian', banneret: 'paladin', graven: 'warlock', unchained: 'warlock', unbridled: 'barbarian', sibilance: 'warlock', hammer: 'barbarian', tidemother: 'druid' };
@@ -4533,7 +4544,7 @@ function effectText(d) {
       case 'copyOpponentHand': return 'Replace your hand with a copy of your opponent\'s hand.';
       case 'buffCreaturesAndHand': return 'Give your other creatures, and the creatures in your hand, +' + e.power + '/+' + e.health + '.';
       case 'swapHeroLifeWithHealth': return 'Exchange this creature\'s health with your hero\'s life.';
-      case 'taxFoeHand': return 'Every card in your opponent\'s hand costs ' + e.amount + ' more.';
+      case 'taxFoeHand': return e.randomOne ? 'Raise the cost of a random creature in your opponent\'s hand by ' + e.amount + '.' : 'Each card currently in your opponent\'s hand costs ' + e.amount + ' more.';
       case 'buffCreature': return e.temp ? ('Give a creature +' + e.power + '/+' + e.health + ' until end of turn.') : ('Give a creature +' + e.power + '/+' + e.health + ' permanently.');
       case 'buffAllCreatures': return 'Give all your creatures +' + e.power + '/+' + e.health + ' permanently.';
       case 'damageAllEnemyCreatures': return 'Deal ' + e.amount + ' damage to all enemy creatures' + (e.heroDamage ? ' and ' + e.heroDamage + ' to the enemy hero.' : '.') + (e.requiem ? ' If any of your creatures died this turn, deal ' + e.requiem + ' damage to the enemy hero.' : '');
@@ -4542,7 +4553,7 @@ function effectText(d) {
       case 'shuffleSecondSun': return 'Shuffle The Second Sun (10 mana: deal 10 to the enemy hero and each enemy creature) into your deck.';
       case 'healCreatureAll': return 'Heal all your creatures for ' + e.amount + '.';
       case 'draftTrap': return 'Draft a Trap \u2014 pick 1 of 3 to add to your hand.';
-      case 'discountGenerated': return 'Cards in your hand that did not start in your deck cost 1 less.';
+      case 'discountGenerated': return 'Each card currently in your hand that did not start in your deck costs 1 less.';
       case 'nextTrapDiscount': return 'The next Trap you arm costs ' + e.amount + ' less.';
       case 'drainCreature': return 'Drain ' + e.amount + ' from an enemy creature.';
       case 'stunOrDestroyArtifact': return 'Stun an enemy creature or destroy an enemy artifact.';
@@ -4606,16 +4617,16 @@ function effectText(d) {
       case 'raiseStrongest': return 'Summon the strongest creature from any graveyard to your side.';
       case 'cullByStats': return 'Destroy all creatures whose power is greater than their health.';
       case 'doom': return 'Mark an enemy creature with doom: it dies at the start of its controller\'s second turn from now.';
-      case 'discountGenerated': return 'Cards in your hand that did not start in your deck cost ' + e.amount + ' less.';
+      case 'discountGenerated': return 'Each card currently in your hand that did not start in your deck costs ' + e.amount + ' less.';
       case 'sowSeed': return 'Plant a Nightmare in the enemy deck.';
       case 'stealFromGrave': return 'Add ' + e.count + ' random cards from your opponent\'s graveyard to your hand.';
       case 'transformBoard': return 'Destroy all your creatures. For each, summon a 4/4 Ash Dragon with flying.';
       case 'draftCreatureUpgrade': return 'Draft a random creature into your hand with a random upgrade (+1/+1, +3 health, or 1 cheaper).';
       case 'draftTrap': return 'Draft a Trap \u2014 pick 1 of 3 to add to your hand.';
       case 'mastery': return 'Mastery (stacks): for the rest of the game, at the end of your turn, if you spent 6 or more mana on spells that turn, summon a 5/5 Tide Elemental for each Mastery you have attained.';
-      case 'graveWhispers': return 'For the rest of the game, whenever one of your creatures dies during your turn, drain 1 life from the enemy hero.';
-      case 'auraValor': return 'For the rest of the game, your creatures get +1/+1 when they attack.';
-      case 'unbrokenMight': return 'For the rest of the game, whenever you attack with a creature of 5 or more power, deal 5 damage to the enemy hero (once per combat).';
+      case 'graveWhispers': return 'Whispers (stacks): for the rest of the game, whenever one of your creatures dies during your turn, drain 1 life from the enemy hero for each Whispers you have heard.';
+      case 'auraValor': return 'Aura (stacks): for the rest of the game, after your creatures attack, each surviving attacker permanently gets +1/+1 for each Aura upon you.';
+      case 'unbrokenMight': return 'Might (stacks): for the rest of the game, whenever you attack with a creature of 5 or more power, deal 5 damage to the enemy hero for each Might you have sworn (once per combat).';
       case 'ramp': return e.bothPlayers ? 'Each player gains an empty mana gem.' : 'Gain an empty mana gem (it fills from next turn).';
       case 'stealPower': return 'Steal ' + e.amount + ' power from an enemy creature.';
       case 'grantKeywordAll': return 'Give all ' + (e.excludeSelf ? 'other ' : '') + 'friendly creatures ' + e.keyword.charAt(0).toUpperCase() + e.keyword.slice(1) + (e.temp ? ' this turn.' : '.');
@@ -4625,6 +4636,10 @@ function effectText(d) {
       case 'buffRandomCreature': return 'Give a random friendly creature +' + e.power + '/+' + e.health + ' permanently.';
       case 'buffSelfPerCreature': return 'Gets +1/+1 for each other creature you control.';
       case 'gainKeywordsInPlay': return 'Gains every keyword in play (flying, trample, ward, and the rest).';
+      case 'scryTop': return 'Look at the top card of your deck. You may place it on the bottom of your deck.';
+      case 'nextDrawArmor': return 'The next creature you draw gains Armor.';
+      case 'healLock': return 'Your opponent cannot heal until your next turn.';
+      case 'rays': return 'Attacks with one of four rays at random: add a random Ember or Tides card to your hand and deal 3 to the enemy hero; bounce the strongest enemy creature to its hand; cheapen a card in your hand and tax one in theirs; or steal 1 power from every enemy creature with power.';
       case 'smiteByBoard': return 'Deal damage to an enemy creature equal to the number of creatures you control.';
       case 'rageStrongest': return 'Deal damage to a random enemy creature equal to your strongest creature\'s power.';
       case 'wither': return e.amount ? ('Give an enemy creature -' + e.amount + '/-' + e.amount + '.') : 'Give an enemy creature -3/-3 (-5/-5 instead if one of your creatures died this turn).';
@@ -4635,7 +4650,7 @@ function effectText(d) {
     }
   }
   if (d.doubler) parts.push('When this attacks, double all Nightmare planting for the rest of the turn.');
-  if (d.school) parts.push((SCHOOLS[d.school] ? SCHOOLS[d.school].name : 'School') + ' — stage ' + d.schoolStage + ' of 3. Playing it brings the next stage into the top of your deck.');
+  if (d.school) parts.push((SCHOOLS[d.school] ? SCHOOLS[d.school].name : 'School') + ' — stage ' + d.schoolStage + ' of 3.' + (d.schoolStage >= 3 ? ' The final stage: its boon lasts the rest of the game — and stacks if you cast it again.' : ' Playing it brings the next stage into the top 3 of your deck.'));
   if (d.graveyardGrowth) parts.push('Gets +2/+2 for each card type in your graveyard (up to +8/+8).');
   if (d.gravePower) parts.push('Gets +1 power for every 5 cards in your graveyard.');
   if (d.deathShuffle) parts.push('When this dies, shuffle ' + d.deathShuffle + ' copies of it into your deck.');
@@ -4681,8 +4696,8 @@ function effectText(d) {
     var trapBefore = parts.length;
     if (d.trigger.kind === 'counterBig') parts.push('Trap: counter the enemy\'s next card costing ' + d.trigger.minCost + '+.' + (d.effect ? ' ' + eff(d.effect) : ''));
     if (d.trigger.kind === 'counterAny') parts.push('Trap: if your opponent plays a spell, trap, or artifact, counter it.');
-    if (d.trigger.kind === 'afterAttackDeclared') parts.push('Trap: after your opponent declares attackers, the strongest attacking creature gets -3/-0 before damage lands.');
-    if (d.trigger.kind === 'beforeFriendlyFight') parts.push('Trap: before a friendly creature fights, give it +3/+2 this turn.');
+    if (d.trigger.kind === 'afterAttackDeclared') parts.push(d.effect && d.effect.kind === 'damageRandomAttacker' ? 'Trap: after your opponent declares attackers, deal ' + d.effect.amount + ' damage to a random attacking creature.' : d.effect && d.effect.kind === 'summonToken' ? 'Trap: after your opponent declares attackers, summon a ' + (CARDS[d.effect.cardId] ? CARDS[d.effect.cardId].name : 'token') + '.' : 'Trap: after your opponent declares attackers, the strongest attacking creature gets -3/-0 before damage lands.');
+    if (d.trigger.kind === 'beforeFriendlyFight') parts.push(d.effect && d.effect.kind === 'salvoDamage' ? 'Trap: before a friendly creature fights, deal ' + d.effect.amount + ' damage to the creature your strongest fighter is fighting.' : d.effect && d.effect.kind === 'tempBuffAll' ? 'Trap: before a friendly creature fights, give all friendly creatures +' + (d.effect.power || 0) + '/+' + (d.effect.health || 0) + ' for the fight.' : 'Trap: before a friendly creature fights, give it +3/+2 this turn.');
     if (d.trigger.kind === 'zapAttacker') parts.push('Trap: when the enemy attacks, deal ' + d.trigger.amount + ' damage to their strongest attacker.');
     if (d.trigger.kind === 'wardLife') parts.push('Trap: when the enemy attacks, gain ' + d.trigger.amount + ' life.');
     if (d.trigger.kind === 'slayAttacker') parts.push('Trap: when the enemy attacks, destroy their strongest attacking creature.');
@@ -5327,7 +5342,7 @@ function renderBody() {
   applyCalm();
   clearTargetLine();
   if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
-  if (mode === 'collection') return renderCollection();
+  if (mode === 'collection') { renderCollection(); if (inspectCardId !== null) $app.innerHTML += inspectHtml(); return; }
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
     $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field">' + heroFigure(mf.heroId, 'foe') + heroFigure(mm.heroId, 'me') + '</div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>' + (introUntil && Date.now() < introUntil && G.winner === null ? matchIntroHtml() : ''); return; }
@@ -5619,7 +5634,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">all names and art original</div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
+    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 12 heroes</span><span class="tchip">\uD83C\uDCCF 331 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
@@ -5658,7 +5673,7 @@ function hubHtml(rec) {
   var ava = (typeof PORTRAITS !== 'undefined' && PORTRAITS[setup.me]) ? '<img src="' + PORTRAITS[setup.me] + '" alt="">' : (SIGILS[setup.me] || '\u2726');
   var lvl = 1 + Math.floor(rec.w / 5);
   return '<div class="profilebar"><div class="pava">' + ava + '</div><div class="pwho">' +
-    '<div class="pname">YirahSeed <span style="font-size:10.5px;color:#ffd166;border:1px solid rgba(255,209,102,.5);border-radius:6px;padding:1px 6px;vertical-align:2px;letter-spacing:.05em">LOCAL</span></div>' +
+    '<div class="pname">Wanderer <span style="font-size:10.5px;color:#ffd166;border:1px solid rgba(255,209,102,.5);border-radius:6px;padding:1px 6px;vertical-align:2px;letter-spacing:.05em">LOCAL</span></div>' +
     '<div class="psub">' + lg.icon + ' ' + lg.name + ' League \u00B7 ' + rec.w + 'W\u2013' + rec.l + 'L' + (stk >= 2 ? ' \u00B7 \uD83D\uDD25 ' + stk + ' streak' : '') + ' \u00B7 Lv ' + lvl + '</div>' +
     '<div class="xpbar"><i style="width:' + (rec.w % 5) * 20 + '%"></i></div></div>' +
     '<button class="ghost" style="flex:0 0 auto" onclick="profileOpen=true;render()">\uD83D\uDC64 Profile</button></div>' +
@@ -5698,7 +5713,7 @@ var GLOSS_SYSTEMS = [
   ['✨', 'Miracle', 'When a card with Miracle is truly drawn (never from your opening hand), the Miracle resolves free, right then.'],
   ['🌙', 'Moonlight', 'A Moonlight card flips at the end of your turn if you end with exactly 2 mana unspent.'],
   ['🎲', 'Draft', 'Whenever you draft, you choose: 1 of 3 cards.'],
-  ['🌀', 'School chains', "Run a school's class card and the next stage slips into the top 3 of your deck as each stage is played. Stage 3 grants a rest-of-game boon — and the Wizard's Elemental Mastery STACKS: every cast adds a stack, and a turn ending on 6+ mana of spells summons one 5/5 Tide Elemental per stack."],
+  ['🌀', 'School chains', "Run a school's class card and the next stage slips into the top 3 of your deck as each stage is played. Stage 3 grants a rest-of-game boon — and EVERY stage 3 STACKS: each cast adds a stack and the boon grows with it (the Wizard's Mastery summons one 5/5 Tide Elemental per stack on a 6+ spell-mana turn; Whispers drain per stack, the Aura grows attackers per stack, Might burns per stack). Pilfer or draft your way into another school's class card and its chain is yours to climb."],
   ['🔖', 'The Spellmark', "Spellmark Adept holds a mark on a RANDOM spell in your graveyard — rolled when it reaches your hand, re-rolled each turn. Its debut adds a temporary copy of the marked spell; look at the Adept in hand to see its mark."],
   ['🌑', 'Nightmares', "Umbra plants Nightmares inside cards in the foe's deck. When a haunted card is drawn, each Nightmare drains 1 life from its holder to Umbra."]
 ];
@@ -5718,9 +5733,9 @@ function profileHtml() {
   var colN = Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length;
   var ava = (typeof PORTRAITS !== 'undefined' && PORTRAITS[setup.me]) ? '<img src="' + PORTRAITS[setup.me] + '" alt="">' : (SIGILS[setup.me] || '\u2726');
   function stat(b, label) { return '<div class="stat"><b>' + b + '</b><span>' + label + '</span></div>'; }
-  return '<div class="overlay"><div class="bigcard" style="max-width:430px;width:94%">' +
+  return '<div class="overlay"><div class="bigcard sheet" style="max-width:430px;width:94%">' +
     '<div style="display:flex;gap:12px;align-items:center"><div style="width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid #d8b454;background:#241640;display:flex;align-items:center;justify-content:center;font-size:28px;color:#efe9ff;flex:0 0 auto">' + ava + '</div>' +
-    '<div><div class="cname" style="text-align:left;margin:0">YirahSeed</div><div class="ctext" style="text-align:left">Local profile \u00B7 on this device \u00B7 Lv ' + lvl + '</div></div></div>' +
+    '<div><div class="cname" style="text-align:left;margin:0">Wanderer</div><div class="ctext" style="text-align:left">Local profile \u00B7 on this device \u00B7 Lv ' + lvl + '</div></div></div>' +
     '<div class="statgrid">' +
     stat(rec.w, 'WINS') + stat(rec.l, 'LOSSES') + stat(games ? Math.round(rec.w / games * 100) + '%' : '\u2014', 'WIN RATE') +
     stat(lg.icon + ' ' + lg.name, 'LEAGUE') + stat(climbBest() + ' / 5', 'CLIMB BEST') + stat(stk >= 2 ? '\uD83D\uDD25 ' + stk : '0', 'WIN STREAK') +
@@ -5732,7 +5747,7 @@ function profileHtml() {
     '<button class="ghost big" style="margin-top:12px" onclick="profileOpen=false;render()">Close</button></div></div>';
 }
 function pvpHtml() {
-  return '<div class="overlay"><div class="bigcard" style="max-width:430px;width:94%">' +
+  return '<div class="overlay"><div class="bigcard sheet" style="max-width:430px;width:94%">' +
     '<div class="cname">\uD83D\uDC65 The Coliseum Gates</div>' +
     '<div class="ctext">Online duels are being forged. The gates open in stages:</div>' +
     '<div style="text-align:left;margin:10px 0;display:grid;gap:8px">' +
@@ -5790,7 +5805,7 @@ function renderMenu() {
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
     'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10. <b>Tap either deck pile</b> (the 🂠 count on a hero bar) to inspect it: cards left, and how many Nightmares are buried inside. When you are done, <b>⏭ Pass</b> hands the turn over.<br><br>' +
-    '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. The stage-1 class card is a normal card of its school — run it in your 30 (or don\'t); if you run it, it always starts within the top 3 of your deck, and each stage played slips the next into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
+    '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. The stage-1 class card is a normal card of its school — run it in your 30 (or don\'t); if you run it, it always starts within the top 3 of your deck, and each stage played slips the next into the top 3. Finish the chain for a game-long power — and <b>every stage 3 stacks</b>: cast it again (or pilfer your way into another school’s chain) and the power grows. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
     '</details></div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px">' +
     '<button class="tile" onclick="openIntro()"><div class="tico">🎓</div><div class="tt">How to Play</div><div class="ts">Thirty seconds to your first duel</div></button>' +
@@ -5884,7 +5899,7 @@ function collectionGroupsHtml() {
     if (!ids.length) return '';
     collShown += ids.length;
     return '<div class="board-label" style="margin-top:14px">' + title + ' · ' + ids.length + '</div><div class="hand">' +
-      ids.map(function (id) { return cardHtml(fakeInst(id), 0, { showType: true, ribbon: !!NEW_CARDS[id] }); }).join('') + '</div>';
+      ids.map(function (id) { return cardHtml(fakeInst(id), 0, { showType: true, ribbon: !!NEW_CARDS[id], onclick: 'openInspectCard(\'' + id + '\')' }); }).join('') + '</div>';
   }
   var ids = Object.keys(CARDS);
   var byHero = function (h) { return ids.filter(function (id) { return CARDS[id].signatureFor === h; }); };
@@ -5901,6 +5916,7 @@ function collectionGroupsHtml() {
     group('TRAPS', plain('trap'), 'trap') +
     group('ARTIFACTS', plain('artifact'), 'artifact') +
     group('✨ GENERATED ONLY — NEVER START IN A DECK', ids.filter(function (id) { return CARDS[id].generatedOnly; }), 'gen') +
+    (collShown === 0 ? '<p style="color:#c4b6e8;font-size:14px;text-align:center;margin:26px 10px">No cards match those filters. <button class="ghost" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></p>' : '') +
     '<p style="color:#a793d6;font-size:12.5px;margin-top:14px">Karg the Unbroken has no signature cards. Karg <i>is</i> the signature.</p>';
 }
 function renderCollection() {
@@ -6053,7 +6069,7 @@ function renderBuilder() {
     (saved ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
     '</div></div>' +
     '<div class="panel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty — add cards from the pool below.</p>') + '</div>' +
-    '<div class="panel"><h2>Card pool</h2><div class="collbar"><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:14px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') + builderFilterHtml(pool.length) + '</div>' +
+    '<div class="panel"><h2>Card pool</h2><div class="collbar"><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') + builderFilterHtml(pool.length) + '</div>' +
     group('SIGNATURES', pool.filter(function (id) { return CARDS[id].signatureFor === heroId; })) +
     group('CREATURES', pool.filter(function (id) { return CARDS[id].type === 'creature' && !CARDS[id].signatureFor; })) +
     group('SPELLS', pool.filter(function (id) { return CARDS[id].type === 'spell' && !CARDS[id].signatureFor; })) +

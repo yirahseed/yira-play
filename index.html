@@ -1186,6 +1186,25 @@
   .shell.stage .passive-emblem .pe-count { right:-6px; top:-6px; bottom:auto; font-size:11.5px; padding:1px 6px; min-width:12px; text-align:center; color:#fff; background:#5b21b6; border:1.5px solid #d6bcff; box-shadow:0 2px 6px rgba(0,0,0,.5); }
   .card .cname { padding:2px 17px 2px 8px; }
   .bigcard .cname { padding:4px 20px 4px 12px; }
+  /* M154: sectioned hub — the featured Play banner + bottom nav */
+  .playbanner { position:relative; border-radius:18px; overflow:hidden; margin:4px 0 12px; border:1px solid rgba(255,209,102,.55); box-shadow:0 14px 34px rgba(0,0,0,.5); height:212px; background:#17102b; } /* M154: fixed height — min-height alone let content sizing wobble the box (119px measured under virtual time) */
+  .playbanner .pbart { position:absolute; inset:0; background-size:cover; background-repeat:no-repeat; } /* M154: a DIV, not an <img> — headless Chromium computed the portrait <img> as static in-flow (its natural 512x1024 inflated the banner to 1147px) while the same pattern (.titleart <img>) lays out fine on the title screen; the div is deterministic everywhere */ /* M154 fix: the global portrait img rule (max-height:240px) inflated this box to 1147px — the banner's art must fill the banner, not size it */
+  .playbanner .pbshade { position:absolute; inset:0; background:linear-gradient(90deg, rgba(16,9,30,.88) 30%, rgba(16,9,30,.25) 68%, transparent); z-index:1; }
+  .playbanner .pbart { z-index:0; }
+  .playbanner .pbcore { z-index:2; } /* M154: explicit layer order — under some compositors the shade painted UNDER the art and the banner text sat on raw art */
+  .playbanner .pbcore { position:relative; padding:16px; display:flex; flex-direction:column; gap:5px; height:100%; box-sizing:border-box; }
+  .playbanner .pbkick { font-size:11px; letter-spacing:.22em; color:#ffd166; font-weight:700; }
+  .playbanner .pbhero { font-size:24px; font-weight:800; color:#fff; text-shadow:0 2px 10px rgba(0,0,0,.6); }
+  .playbanner .pbsub { font-size:13px; color:#e6dcff; }
+  .playbanner .pbplay { margin-top:auto; align-self:flex-start; min-width:170px; font-size:18px; padding:13px 26px; box-shadow:0 8px 22px rgba(0,0,0,.45); }
+  .collbar { position:sticky; top:0; z-index:6; background:rgba(13,8,26,.93); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding:10px 2px 8px; margin:0 -2px; border-bottom:1px solid rgba(216,180,84,.3); border-radius:0 0 12px 12px; } /* M155: collection filters ride along while the library scrolls */
+  .hubnav { position:sticky; bottom:0; z-index:5; display:grid; grid-template-columns:repeat(4, 1fr); gap:2px; margin:14px -2px -4px; padding:7px 6px calc(7px + env(safe-area-inset-bottom)); background:rgba(13,8,26,.94); border-top:1px solid rgba(216,180,84,.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-radius:14px 14px 0 0; }
+  .navtab { background:none; border:none; color:#a793d6; font:inherit; font-size:11.5px; display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 2px; border-radius:10px; cursor:pointer; touch-action:manipulation; }
+  .navtab > * { pointer-events:none; }
+  .navtab .nico { font-size:20px; line-height:1.15; }
+  .navtab.on { color:#ffd166; background:rgba(255,209,102,.1); }
+  .menupage .hubtiles .tile:nth-child(1), .menupage .hubtiles .tile:nth-child(2) { display:none; } /* M154: Quick Match + Climb tiles yield to the nav (both live on the Play screen) */
+  @media (max-width:500px) { .menupage .panel { animation:none; } } /* M154: panels settle instantly on phones — no staggered rise competing with tab switches */
 </style>
 </head>
 <body>
@@ -1946,7 +1965,7 @@ class Game {
         nextTrapDiscount: 0, fragileGem: false, tookDamageThisTurn: false, selfDamageThisTurn: 0,
         spellManaTurn: 0, deathsThisTurn: 0, playsThisGame: 0, damageTakenGame: 0, creaturesToGraveThisTurn: 0,
         summonCount: 0, damageDealtThisTurn: 0, spiritThreshold: 3, beckonClaimed: [],
-        mastery: 0, graveWhispers: false, auraValor: false, unbrokenMight: false, // M131: mastery is a STACK COUNT, not a switch (Jesse, from play, 2026-11-07)
+        mastery: 0, graveWhispers: 0, auraValor: 0, unbrokenMight: 0, // M131/M153: ALL stage-3 rest-of-game states are STACK COUNTS, not switches (Jesse: 'yes, all of them can duplicate with multiple casts', 2026-11-08)
         school: schoolOpt === undefined ? (DEFAULT_SCHOOL[heroId] || null) : schoolOpt,
         schoolNext: 1, schoolStagePlayed: 0, questDue: {}, questDone: {},
         stance: stanceOpt === undefined ? 'open' : stanceOpt,
@@ -3006,9 +3025,9 @@ class Game {
         break;
       }
       case 'mastery': p.mastery = (p.mastery || 0) + 1; this.log.push(`${p.hero.name} attains Mastery of Currents (stack ${p.mastery})`); break; // M131: EVERY cast stacks — chain completion, a recast, or a temporary Adept copy alike; the stack is rest-of-game player state, so a copy dissolving at end of turn cannot take it back
-      case 'graveWhispers': p.graveWhispers = true; this.log.push(`${p.hero.name} hears the Whispers of the Grave`); break;
-      case 'auraValor': p.auraValor = true; this.log.push(`${p.hero.name} is wrapped in an Aura of Valor`); break;
-      case 'unbrokenMight': p.unbrokenMight = true; this.log.push(`${p.hero.name} swears by Unbroken Might`); break;
+      case 'graveWhispers': p.graveWhispers = (p.graveWhispers || 0) + 1; this.log.push(`${p.hero.name} hears the Whispers of the Grave (stack ${p.graveWhispers})`); break; // M153: stacks per cast
+      case 'auraValor': p.auraValor = (p.auraValor || 0) + 1; this.log.push(`${p.hero.name} is wrapped in an Aura of Valor (stack ${p.auraValor})`); break; // M153: stacks per cast
+      case 'unbrokenMight': p.unbrokenMight = (p.unbrokenMight || 0) + 1; this.log.push(`${p.hero.name} swears by Indomitable Strength (stack ${p.unbrokenMight})`); break; // M153: stacks per cast
       case 'ramp': p.bonusMana = (p.bonusMana || 0) + 1; this.log.push(`${p.hero.name} grows an empty mana gem`); this.afterGemCheck(i); if (effect.bothPlayers) { foe.bonusMana = (foe.bonusMana || 0) + 1; this.log.push(`${foe.hero.name} grows one too — collaboration cuts both ways`); this.afterGemCheck(this.opp(i)); } break;
       case 'buffRandomCreature': {
         if (p.board.length) { const c = this.rng.pick(p.board); c.permPower += effect.power; c.permHealth += effect.health; }
@@ -3275,9 +3294,9 @@ class Game {
     // friendly creature attacks, it PERMANENTLY gets +1/+1 — applied below,
     // once combat resolves, to the attackers still standing.
     // Unbroken Might: when your giants attack, the foe's hero suffers 5 (once per combat).
-    if (atk.unbrokenMight && liveAttackers.some((a) => powerOf(a) >= 5)) {
-      this.hurtHero(dfn.idx, 5, atkIdx); dfn.tookDamageThisTurn = true;
-      this.log.push(`Unbroken Might: ${dfn.hero.name} suffers 5`);
+    if (atk.unbrokenMight > 0 && liveAttackers.some((a) => powerOf(a) >= 5)) {
+      this.hurtHero(dfn.idx, 5 * atk.unbrokenMight, atkIdx); dfn.tookDamageThisTurn = true; // M153: 5 per stack
+      this.log.push(`Unbroken Might: ${dfn.hero.name} suffers ${5 * atk.unbrokenMight}`);
     }
     // Doubler tracking (weaver signature): attacking with a doubler doubles planting for the rest of the turn.
     for (const a of liveAttackers) { if (def(a).doubler) atk.doublerAttacks++; a.attackedEver = true; }
@@ -3329,7 +3348,7 @@ class Game {
     for (const q of this.players) for (const c of q.board) { if (c._dealtDmg) { const dd = def(c); if (dd.healFlatOnDamage) { const gained = this.gainLife(q, dd.healFlatOnDamage); this.log.push(`${dd.name}: ${q.hero.name} gains ${gained} life from the blow`); } if (dd.drawOnDamage) for (let k = 0; k < dd.drawOnDamage; k++) this.drawCard(q.idx); delete c._dealtDmg; } }
     this.cleanupDeaths();
     this.checkSurvivorTraps([...liveAttackers, ...liveAttackers.map((a) => blockerOf(a)).filter(Boolean)]); // M112: Beginner's Luck / Envenom
-    if (atk.auraValor) for (const a of liveAttackers) if (atk.board.includes(a)) { a.permPower += 1; a.permHealth += 1; this.log.push(`${def(a).name} grows under the Aura of Valor (+1/+1, now ${powerOf(a)}/${healthOf(a)})`); }
+    if (atk.auraValor > 0) for (const a of liveAttackers) if (atk.board.includes(a)) { a.permPower += atk.auraValor; a.permHealth += atk.auraValor; this.log.push(`${def(a).name} grows under the Aura of Valor (+${atk.auraValor}/+${atk.auraValor}, now ${powerOf(a)}/${healthOf(a)})`); } // M153: growth per stack
     // M74 (Predator Ooze): a blocked ooze that survives buds a copy after combat.
     // (the blocker need not survive — 'if this WAS blocked' is the condition)
     for (const a of liveAttackers) if (def(a).copyIfBlocked && blockerMap[a.uid] != null && atk.board.includes(a) && atk.board.length < 5) { const t2 = this.summonToken(atk, a.cardId); this.log.push(`${def(a).name} buds: a new ${def(t2).name} oozes forth`); }
@@ -3390,9 +3409,9 @@ class Game {
           this.log.push(`${def(d).name} shuffles ${def(d).deathShuffle} copies of itself into ${p.hero.name}'s deck`);
         }
         // Whispers of the Grave: your creatures dying on YOUR turn drain the foe.
-        if (p.graveWhispers && this.active === p.idx && this.winner === null) {
+        if (p.graveWhispers > 0 && this.active === p.idx && this.winner === null) {
           const foe = this.players[this.opp(p.idx)];
-          const wd = 1 + this.drainBonus(p);
+          const wd = p.graveWhispers * (1 + this.drainBonus(p)); // M153: each stack drains — two Whispers, two life per death
           foe.life -= wd; foe.damageTakenCurrTurn += wd; foe.damageTakenGame = (foe.damageTakenGame || 0) + wd; this.gainLife(p, wd);
           this.log.push(`Whispers of the Grave drain ${wd} from ${foe.hero.name}`);
           this.checkWin();
@@ -5307,7 +5326,7 @@ function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
-  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
+  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
@@ -5600,10 +5619,33 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M152 · all names and art original</div></div>';
+    '<div class="titlever">all names and art original</div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
+var hubTab = 'play', settingsOpen = false; // M154: the hub is sectioned screens, not one long scroll
+function hubShow(tab) { hubTab = tab; try { sfx('click'); } catch (e) {} render(); try { var ps = document.querySelector && document.querySelector('.pagescroll'); if (ps) ps.scrollTop = 0; } catch (e) {} }
+function hubNavHtml() {
+  function tab(id, ico, label) { return '<button class="navtab' + (hubTab === id ? ' on' : '') + '" onclick="hubShow(\'' + id + '\')"><span class="nico">' + ico + '</span><span>' + label + '</span></button>'; }
+  return '<nav class="hubnav">' + tab('play', '\u2694\uFE0F', 'Play') + tab('decks', '\uD83C\uDCCF', 'Decks') + tab('collection', '\uD83D\uDCDA', 'Collection') + tab('more', '\u2726', 'More') + '</nav>';
+}
+function playBannerHtml() {
+  var p = (typeof PORTRAITS !== 'undefined' && PORTRAITS[setup.me]) ? PORTRAITS[setup.me] : '';
+  var pos = (typeof PORTRAIT_POS !== 'undefined' && PORTRAIT_POS[setup.me] || ['50% 15%', '50% 15%'])[1];
+  return '<div class="playbanner">' + (p ? '<div class="pbart" style="background-image:url(' + p + ');background-position:' + pos + '"></div>' : '') + '<div class="pbshade"></div>' +
+    '<div class="pbcore"><div class="pbkick">\u2694\uFE0F QUICK MATCH</div>' +
+    '<div class="pbhero">' + (SIGILS[setup.me] || '') + ' ' + esc(HEROES[setup.me].name) + '</div>' +
+    '<div class="pbsub">vs ' + esc(HEROES[setup.foe].name) + ' \u00B7 ' + (setup.seat === 'first' ? 'you lead' : 'enemy leads') + '</div>' +
+    '<button class="big pbplay" onclick="startMatch()">\u25B6 PLAY</button></div></div>';
+}
+function settingsHtml() {
+  return '<div class="overlay" onclick="settingsOpen=false;render()"><div class="box" style="max-width:400px" onclick="event.stopPropagation()"><h2 style="text-align:center">\u2699\uFE0F Settings</h2>' +
+    '<label>Theme (skin)</label><select onchange="setTheme(this.value)">' + Object.keys(THEMES).map(function (id) { return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>'; }).join('') + '</select>' +
+    '<label>Sound</label><button class="ghost big" onclick="toggleMute()">' + (muted ? '\uD83D\uDD07 Sound: off' : '\uD83D\uDD0A Sound: on') + '</button>' +
+    '<label>Motion</label><button class="ghost big" onclick="toggleCalm()">' + (calm ? '\uD83C\uDF43 Calm: on (animations near-instant)' : '\uD83C\uDF9E\uFE0F Calm: off') + '</button>' +
+    '<label>Volume</label><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="width:100%;accent-color:#8b5cf6">' +
+    '<button class="big" style="margin-top:14px" onclick="settingsOpen=false;render()">Done</button></div></div>';
+}
 function hubGo(id) { try { sfx('click'); } catch (e) {} var n = document.getElementById(id); if (n) n.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); }
 function hubTile(ico, t, sub, onclick, locked) {
   return '<button class="tile' + (locked ? ' locked' : '') + '" onclick="' + onclick + '">' + (locked ? '<span class="lock">\uD83D\uDD12 SOON</span>' : '') + '<div class="tico">' + ico + '</div><div class="tt">' + t + '</div><div class="ts">' + sub + '</div></button>';
@@ -5621,11 +5663,11 @@ function hubHtml(rec) {
     '<div class="xpbar"><i style="width:' + (rec.w % 5) * 20 + '%"></i></div></div>' +
     '<button class="ghost" style="flex:0 0 auto" onclick="profileOpen=true;render()">\uD83D\uDC64 Profile</button></div>' +
     '<div class="hubtiles">' +
-    hubTile('\u2694\uFE0F', 'Quick Match', 'Face the AI \u2014 your heroes, your decks', "hubGo('panel-match')", false) +
-    hubTile('\uD83E\uDDD7', 'The Climb', climbParked() ? ('Paused at rung ' + climbParked() + ' of 5 — resume anytime') : (climbBest() > 0 ? ('Best: rung ' + climbBest() + ' of 5 \u00B7 Umbra waits at the summit') : 'Five rungs. Umbra waits at the summit'), "hubGo('panel-climb')", false) +
+    hubTile('\u2694\uFE0F', 'Quick Match', 'Face the AI \u2014 your heroes, your decks', 'hubShow(\'play\')', false) +
+    hubTile('\uD83E\uDDD7', 'The Climb', climbParked() ? ('Paused at rung ' + climbParked() + ' of 5 — resume anytime') : (climbBest() > 0 ? ('Best: rung ' + climbBest() + ' of 5 \u00B7 Umbra waits at the summit') : 'Five rungs. Umbra waits at the summit'), 'hubShow(\'play\')', false) +
     hubTile('\uD83D\uDC65', 'PvP', 'Friend codes first, then matchmaking', 'pvpOpen=true;render()', true) +
-    hubTile('\uD83C\uDCCF', 'Deck Builder', 'Your 30, your way', 'openBuilder()', false) +
-    hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).length + ' cards \u2014 search & filter them all', 'openCollection()', false) +
+    hubTile('\uD83C\uDCCF', 'Deck Builder', 'Your 30, your way', 'hubShow(\'decks\')', false) +
+    hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).length + ' cards \u2014 search & filter them all', 'hubShow(\'collection\')', false) +
     hubTile('\uD83C\uDF93', 'How to Play', 'Thirty seconds to your first duel', 'openIntro()', false) +
     hubTile('📖', 'Glossary', 'Every keyword & rule, in plain words', 'openGlossary();render()', false) +
     '</div>';
@@ -5719,32 +5761,29 @@ function renderMenu() {
   }
   $app.innerHTML = '<div class="pagescroll menupage">' + (typeof PORTRAITS !== 'undefined' && PORTRAITS['title-roster'] ? '<div class="menubg" style="background-image:url(' + PORTRAITS['title-roster'] + ')"></div>' : '') + '<div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' + '<h1 class="logo">YIRA</h1><p class="tagline">the Enchanted Coliseum · a card battler of dreams and dread</p>' +
     hubHtml(rec) +
+    (hubTab === 'play' ? playBannerHtml() +
     '<div class="panel" id="panel-match"><h2>New match</h2>' +
     '<label>You play</label>' + heroChips(setup.me, 'me') + '<div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
     '<label>Enemy (AI)</label>' + heroChips(setup.foe, 'foe') + '<div class="herodesc">' + esc(HEROES[setup.foe].blurb) + '</div>' +
     '<label>Turn order</label><select id="selSeat" onchange="setup.seat=this.value"><option value="first"' + (setup.seat === 'first' ? ' selected' : '') + '>I go first (3-card hand)</option><option value="second"' + (setup.seat === 'second' ? ' selected' : '') + '>I go second (4-card hand + fragile gem)</option></select>' +
-    '<label>Theme (skin)</label><select id="selTheme" onchange="setTheme(this.value)">' + themeOptions() + '</select>' +
-    '<label>Sound</label><button class="ghost" onclick="toggleMute()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +
-    '<label>Motion</label><button class="ghost" onclick="toggleCalm()">' + (calm ? '🍃 Calm: on (animations near-instant)' : '🎞️ Calm: off') + '</button>' +
-    '<label>Volume</label><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="flex:1;accent-color:#8b5cf6">' +
     versusHtml() +
-    '<button class="big" onclick="startMatch()">Start match</button>' +
+    '<button class="big" onclick="startMatch()">▶ Start match</button>' +
     '<button class="ghost big" onclick="openIntro()">🎓 How to play — 30 seconds</button>' +
-    '<div class="record">Your record on this device: ' + rec.w + ' wins · ' + rec.l + ' losses' + ((rec.w + rec.l) > 0 ? ' · ' + Math.round(rec.w / (rec.w + rec.l) * 100) + '% win rate' : '') + '</div></div>' +
-    '<div class="panel" id="panel-climb"><h2>🧗 The Climb</h2>' +
+    '<div class="record">Your record on this device: ' + rec.w + ' wins · ' + rec.l + ' losses' + ((rec.w + rec.l) > 0 ? ' · ' + Math.round(rec.w / (rec.w + rec.l) * 100) + '% win rate' : '') + '</div></div>' : '') +
+    (hubTab === 'play' ? '<div class="panel" id="panel-climb"><h2>🧗 The Climb</h2>' +
     '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Five rungs with the hero you picked above. You lead every rung; each enemy starts with more bonus life than the last. Karg guards the base — and Umbra waits at the summit. Pause whenever you like — the ladder remembers where you left off, even between days.</p>' +
     '<div class="ladder">' + CLIMB_RUNGS.map(function (r, i) { var done = climbBest() > i; return '<span class="rung' + (done ? ' done' : '') + '">' + (done ? '✓ ' : '') + (i + 1) + ' · ' + (SIGILS[r.hero] || '') + ' ' + esc(HEROES[r.hero].name.split(' ')[0]) + (r.bonus ? ' +' + r.bonus + '♥' : '') + '</span>'; }).join('<span class="pip-sep">›</span>') + '</div>' +
     (function () { var nb = climbBest(); if (nb >= CLIMB_RUNGS.length) return ''; var nx = CLIMB_RUNGS[nb]; return '<p style="color:#c4b6e8;font-size:12.5px;text-align:center;margin:6px 0 0">Next guardian: ' + esc(HEROES[nx.hero].name) + ' — ' + esc(HEROES[nx.hero].blurb || '') + (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[nx.hero] ? ' Running \u201C' + esc(DECK_NAMES[nx.hero]) + '.\u201D' : '') + '</p>'; })() +
     (climbBest() ? '<div class="record">Best height on this device: ' + climbBest() + ' of 5 rungs cleared' + (climbBest() >= 5 ? ' — SUMMITED 🏔️' : '') + '</div>' : '') +
     (function () { var pk = climbParked(); if (!pk) return ''; var rr = CLIMB_RUNGS[pk - 1]; return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0"><button class="big" onclick="resumeClimb()">▶ Resume at rung ' + pk + ' — ' + esc(HEROES[rr.hero].name) + '</button><span style="font-size:12px;color:#a793d6">Your place is saved on this device.</span></div>'; })() +
     '<button class="big" onclick="startClimb()">' + (climbParked() ? '↺ Start fresh at rung 1' : 'Start The Climb') + '</button>' +
-    (climbBest() > 1 ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center"><span style="font-size:12px;color:#a793d6">Practice a cleared rung:</span>' + CLIMB_RUNGS.slice(0, climbBest()).map(function (r, i) { return '<button class="ghost" style="padding:5px 11px;font-size:12.5px" onclick="startClimbAt(' + (i + 1) + ')">↺ Rung ' + (i + 1) + '</button>'; }).join('') + '</div>' : '') + '</div>' +
-    '<div class="panel"><h2>🃏 Deck builder</h2>' +
+    (climbBest() > 1 ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center"><span style="font-size:12px;color:#a793d6">Practice a cleared rung:</span>' + CLIMB_RUNGS.slice(0, climbBest()).map(function (r, i) { return '<button class="ghost" style="padding:5px 11px;font-size:12.5px" onclick="startClimbAt(' + (i + 1) + ')">↺ Rung ' + (i + 1) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '') +
+    (hubTab === 'decks' ? '<div class="panel"><h2>🃏 Deck builder</h2>' +
     '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Build a custom 30-card deck for your hero — it will be used in matches and The Climb. The AI keeps its tuned default decks.</p>' +
     (activeDeckFor(setup.me) ? '<div class="record">🃏 ' + esc(HEROES[setup.me].name) + ' is using your custom deck</div>' : '') +
-    '<button class="big" onclick="openBuilder()">Open the deck builder</button></div>' +
-    '<div class="panel"><h2>📚 Card collection</h2>' +
+    '<button class="big" onclick="openBuilder()">Open the deck builder</button></div>' : '') +
+    (hubTab === 'more' ? '<div class="panel"><h2>📚 Card collection</h2>' +
     '<button class="big" onclick="openCollection()">Browse all ' + Object.keys(CARDS).length + ' cards</button>' +
     '<div class="record">The 1:1 library: ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly || CARDS[id].schoolStage === 1; }).length + ' playable · ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered so far</div></div>' +
     '<div class="panel"><details><summary>How it plays (60 seconds)</summary>' +
@@ -5752,7 +5791,12 @@ function renderMenu() {
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
     'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10. <b>Tap either deck pile</b> (the 🂠 count on a hero bar) to inspect it: cards left, and how many Nightmares are buried inside. When you are done, <b>⏭ Pass</b> hands the turn over.<br><br>' +
     '🏫 <b>Schools:</b> every deck also carries one School — a three-stage chain. The stage-1 class card is a normal card of its school — run it in your 30 (or don\'t); if you run it, it always starts within the top 3 of your deck, and each stage played slips the next into the top 3. Finish the chain for a game-long power. 🎚️ <b>Stances:</b> your land slot is a posture — the Open Stance just grows mana, while others feed you spells, legends, recruits, or stronger creatures. Pick both for your hero in the deck builder.' +
-    '</details></div></div>';
+    '</details></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px">' +
+    '<button class="tile" onclick="openIntro()"><div class="tico">🎓</div><div class="tt">How to Play</div><div class="ts">Thirty seconds to your first duel</div></button>' +
+    '<button class="tile" onclick="openGlossary()"><div class="tico">📖</div><div class="tt">Glossary</div><div class="ts">Every keyword & rule, in plain words</div></button></div>' +
+    '<button class="big" style="margin-top:10px" onclick="settingsOpen=true;render()">⚙️ Settings — theme, sound, motion, volume</button>' : '') +
+    hubNavHtml() + '</div>';
 }
 function renderMulligan() {
   /* M92 (Jesse): the mulligan is JUST THE CARDS — full size on the dimmed
@@ -5796,7 +5840,7 @@ function startClimbAt(n) { parkClimb(n); climb = { rung: n }; startMatch(); }
 function climbNext() { if (climb && climb.rung < 5) { climb.rung++; parkClimb(climb.rung); } startMatch(); }
 
 /* ---------- card collection ---------- */
-function openCollection() { try { sfx('click'); } catch (e) {} mode = 'collection'; render(); }
+function openCollection() { try { sfx('click'); } catch (e) {} hubTab = 'collection'; mode = 'collection'; render(); }
 function fakeInst(cardId) {
   var d = CARDS[cardId];
   return { uid: -1, cardId: cardId, starterOwner: d.generatedOnly ? null : 0, damage: 0, permPower: 0, permHealth: 0, nightmares: 0, charges: d.charges || 0 };
@@ -5864,6 +5908,7 @@ function renderCollection() {
   var groupsHtml = collectionGroupsHtml();
   $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the collection · showing <span id="collCount">' + collShown + '</span> of ' + ids.length + ' cards · ' + ids.filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered</p>' +
     '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
+    '<div class="collbar">' +
     '<input id="collSearch" type="text" placeholder="🔍 Search name or rules text…" value="' + esc(collectionQuery) + '" oninput="setCollectionQuery(this.value)">' +
     '<div style="margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px">' + [['all', '🌐 All'], ['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (sc) {
       return '<button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionSchool === sc[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionSchool(\'' + sc[0] + '\')">' + sc[1] + '</button>';
@@ -5871,6 +5916,7 @@ function renderCollection() {
     '<div style="margin:8px 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#a793d6">Sort:</span>' + [['cost', '💧 Cost'], ['name', '🔤 Name'], ['new', '✨ Newest']].map(function (s) { return '<button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionSort === s[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionSort(\'' + s[0] + '\')">' + s[1] + '</button>'; }).join('') + '<span style="font-size:12px;color:#a793d6">' + ['tides', 'ember', 'grave', 'dawn', 'worldroot'].map(function (s) { return SCHOOL_META[s].icon + ' ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].cardSchool === s && !CARDS[id].generatedOnly; }).length; }).join(' · ') + ' playable</span><button class="ghost" style="padding:5px 11px;font-size:12.5px" onclick="setCollectionTokens(!collectionShowTokens)">' + (collectionShowTokens ? '🫥 Hide tokens' : '👀 Show tokens') + '</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionOnlySig ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'sig\')">◆ Signatures</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionOnlyLeg ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'leg\')">👑 Legendaries</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="cycleCollectionKeyword()">' + (collectionKeyword === 'all' ? '🔑 Keyword: any' : '🔑 ' + KW_LABELS[collectionKeyword]) + '</button><button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="setCollectionArt(collectionArt === \'all\' ? \'painted\' : collectionArt === \'painted\' ? \'glyph\' : \'all\')">' + (collectionArt === 'all' ? '🎨 Art: all' : collectionArt === 'painted' ? '🎨 Art: painted' : '✦ Art: glyphs') + '</button></div>' +
     '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Type:</span>' + [['all', '🌐 All'], ['creature', '🐾 Creatures'], ['spell', '✨ Spells'], ['trap', '🪤 Traps'], ['artifact', '🏺 Artifacts'], ['sig', '◆ Signatures'], ['gen', '🔮 Generated']].map(function (t) { return '<button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionType === t[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionType(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div>' +
     '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Cost:</span>' + [['all', 'Any'], ['01', '0–1'], ['23', '2–3'], ['45', '4–5'], ['6p', '6+']].map(function (t) { return '<button class="ghost" style="padding:5px 11px;font-size:12.5px' + (collectionCost === t[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionCost(\'' + t[0] + '\')">' + t[1] + ' 💧</button>'; }).join('') + '<button class="ghost" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></div>' +
+    '</div>' +
     '<div id="collGroups">' + groupsHtml + '</div>' +
     '<div style="height:16px"></div></div>';
 }
@@ -5926,7 +5972,7 @@ function deckErrors(heroId, ids) {
   return errs;
 }
 function activeDeckFor(heroId) { var c = loadCustomDeck(heroId); return (c && !deckErrors(heroId, c).length) ? c : null; }
-function openBuilder() { try { sfx('click'); } catch (e) {} builderHero = setup.me; builderDeck = (loadCustomDeck(builderHero) || DECKS[builderHero]).slice(); mode = 'builder'; render(); }
+function openBuilder() { try { sfx('click'); } catch (e) {} hubTab = 'decks'; builderHero = setup.me; builderDeck = (loadCustomDeck(builderHero) || DECKS[builderHero]).slice(); mode = 'builder'; render(); }
 function builderSetHero(h) { try { sfx('click'); } catch (e) {} builderHero = h; builderDeck = (loadCustomDeck(h) || DECKS[h]).slice(); render(); }
 function builderAdd(id) { var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.length >= 30) return; if (builderDeck.filter(function (x) { return x === id; }).length >= cap) return; builderDeck.push(id); render(); }
 function builderRemove(id) { var i = builderDeck.indexOf(id); if (i >= 0) builderDeck.splice(i, 1); render(); }
@@ -6007,7 +6053,7 @@ function renderBuilder() {
     (saved ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
     '</div></div>' +
     '<div class="panel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty — add cards from the pool below.</p>') + '</div>' +
-    '<div class="panel"><h2>Card pool</h2><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:14px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') + builderFilterHtml(pool.length) +
+    '<div class="panel"><h2>Card pool</h2><div class="collbar"><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:14px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') + builderFilterHtml(pool.length) + '</div>' +
     group('SIGNATURES', pool.filter(function (id) { return CARDS[id].signatureFor === heroId; })) +
     group('CREATURES', pool.filter(function (id) { return CARDS[id].type === 'creature' && !CARDS[id].signatureFor; })) +
     group('SPELLS', pool.filter(function (id) { return CARDS[id].type === 'spell' && !CARDS[id].signatureFor; })) +

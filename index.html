@@ -1804,7 +1804,16 @@ const CARDS = {
   untested_rookie: { icon: "\uD83E\uDE96", name: 'Untested Rookie', cost: 1, type: 'creature', power: 2, health: 2, subtype: 'soldier', surviveFightBuff: { power: 2, health: 2 }, text: 'The first time this survives a fight, it gets +2/+2.', orig: "Untested Rookie", src: "RECOVERY-MANIFEST §4 Tier A: W 1-cost 2/2 Soldier, text verbatim (fan sheet Text via the CSV; the Drizzt guide's trap-synergy note agrees). 'Fights' reads by the M111 ruling — combat pairs and fight effects alike; the hook rides fightRidersAfter beside the Explorer's charting." },
   regenerate: { icon: "\uD83C\uDF31", name: 'Regenerate', cost: 2, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'buffCreature', power: 1, health: 1 }, { kind: 'grantEndTurn', endTurn: { kind: 'healCreatureFull' } } ] }, text: "Give a friendly creature +1/+1 and 'At the end of your turn, fully heal this.'", orig: "Regenerate", src: "RECOVERY-MANIFEST §4 Tier A: G 2-cost Spell (D&D Icons), text verbatim (fan sheet Text via the CSV). The granted rider is read in endTurn beside a printed endTurn — 'your turn' is the creature's controller's turn, as every printed endTurn reads." },
   alabaster_faith: { icon: "\uD83D\uDD4A\uFE0F", name: 'Alabaster Faith', cost: 2, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'buffCreature', power: 1, health: 0 }, { kind: 'grantAttackEffect', attackEffect: { kind: 'draw', count: 1 } } ] }, text: "Give a friendly creature +1/+0 and 'Attack: Draw a card.'", orig: "Alabaster Faith", src: "FACE FINAL (RECOVERY-WEB2, v1.04.00): W 2-cost Spell, text verbatim — the v1.04 patch cut the granted buff from +1/+1 to +1/+0; the final printing stands. The granted attack trigger is read in declareCombat beside a printed one." },
-  goldnight_harbinger: { icon: "\u2600\uFE0F", name: 'Goldnight Harbinger', cost: 6, type: 'creature', power: 6, health: 4, subtype: 'angel soldier', keywords: ['flying'], legendary: true, debut: { kind: 'doubleDeckPower' }, orig: "Goldnight Harbinger", src: "FACE-VERIFIED (Hipsters Helvault spoilers card-face image + video digest 4A face read; CSV row): WR Mythic 6-cost 6/4 Angel Soldier, Flying, 'Debut: Double the power of each creature in your deck.' Data closed since 2026-11-02. Dual WR: legal for either school under the M168 schooling. A unique named Mythic — legendary under Jesse's unique-name law. The display name is a title, not a personal name, so it stands as printed (the Dawn Seraph precedent)." }
+  goldnight_harbinger: { icon: "\u2600\uFE0F", name: 'Goldnight Harbinger', cost: 6, type: 'creature', power: 6, health: 4, subtype: 'angel soldier', keywords: ['flying'], legendary: true, debut: { kind: 'doubleDeckPower' }, orig: "Goldnight Harbinger", src: "FACE-VERIFIED (Hipsters Helvault spoilers card-face image + video digest 4A face read; CSV row): WR Mythic 6-cost 6/4 Angel Soldier, Flying, 'Debut: Double the power of each creature in your deck.' Data closed since 2026-11-02. Dual WR: legal for either school under the M168 schooling. A unique named Mythic — legendary under Jesse's unique-name law. The display name is a title, not a personal name, so it stands as printed (the Dawn Seraph precedent)." },
+  // ---- M172 (2026-11-08): THE TWO-TARGET FLOW. Three cards held across
+  // waves because their texts name two targets; the pair flow (engine
+  // {kind:'pair'} targets, a two-step UI pick, paired AI aim) unblocks
+  // them, and the friendly-artifact surface it neighbours lands Gear
+  // Mender the same day. ----
+  fling: { icon: "\uD83D\uDCA5", name: 'Fling', cost: 1, type: 'spell', effect: { kind: 'sacrificeDamage', amount: 3 }, orig: "Fling", src: "RECOVERY-MANIFEST §4 Tier A: R 1-cost Common Spell, 'Destroy a friendly creature to deal 3 damage to an enemy.' — the CSV effect and the fan sheet Text agree word for word (fan-made source, flagged as the manifest flags Tier A). The damage is a FIXED 3 as recorded (not the sacrificed creature's power), and 'an enemy' reads as any target — a creature or the hero — by the Firemind Bolt precedent (M165). Held since M165 for the two-target flow; the M165 pin that kept it undefined is revised in the tests with its dated note." },
+  sinister_southpaw: { icon: "\uD83D\uDC4A", name: 'Sinister Southpaw', cost: 6, type: 'creature', power: 5, health: 4, subtype: 'wizard', debut: { kind: 'sacrificeDestroy' }, orig: "Sinister Southpaw", src: "FACE FINAL (RECOVERY-WEB2, v1.01.02): B 6-cost 5/4 Wizard, 'Debut: Destroy another friendly creature to destroy an enemy creature.' The cost walked 6 → 5 (v0.21) → 6 (v1.01.02); the final printing stands. Deferred at M168 for the two-target flow — a sacrifice plus a victim is two picks, not one." },
+  grudge_match: { icon: "\u2694\uFE0F", name: 'Grudge Match', cost: 2, type: 'spell', effect: { kind: 'fightPair', power: 1, health: 1 }, orig: "Grudge Match", src: "RECOVERY-MANIFEST §4: G 2-cost Spell (Core Set), full Fan Text on file: 'Give a friendly creature +1+1, then choose an enemy creature. They fight!' (fan sheet full-card-list.json via the CSV; the CSV's own effect line carries only a Drizzt-guide note calling it an interaction staple of green decks — the fan Text is the complete text and the manifest marks the data complete, held only for the fight flow). The buff lands BEFORE the fight, as the text sequences it ('Give +1+1, THEN choose... They fight!')." },
+  gear_mender: { icon: "\uD83D\uDD27", name: 'Gear Mender', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'construct', debut: { kind: 'addChargeArtifact', amount: 1 }, orig: "Gear Mender", src: "RECOVERY-MANIFEST §4 Tier A: colourless 4-cost 4/4 Construct, 'Debut: Add a charge to a friendly artifact.' (fan sheet Text via the CSV; the bot-cluster caveat applies — the manifest names this cluster the first a face-check should sample). Deferred at M169 for want of a friendly-artifact target surface; the M172 pair work built that surface (own-dock targeting, mirroring foeArtifactTargetable)." }
 
 };
 const TRAP_POOL = ['beginners_luck', 'champions_grit', 'envenom', 'step_over', 'ancestors_vengeance', 'mana_short', 'molten_misstep', 'crippling_bolt', 'quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil', 'countersign', 'broken_focus', 'sudden_growth', 'opening_salvo', 'raise_the_guard', 'ready_to_rumble', 'transparent_hallway', 'resilient_sphere', 'dance_with_devils', 'shields_up']; // M169: the Devils' dance and Shields Up join the draftable traps // M104: the two vetted traps join // M73: Raise the Guard joins (Soldier token closed by wave 4C) // M62 purge: only verified traps remain — M72: the M68/M69/M72 verified traps join the draft pool
@@ -1961,6 +1970,7 @@ const SCHOOL_OF = {
   deep_rooting:'worldroot', firstroot_titan:'worldroot', grove_sentinel:'worldroot', thornwood_archer:'worldroot', oakenhide:'worldroot', naturalize:'worldroot',
   // Neutral
   eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'ember', hungerpit_tyrant:'grave',
+  fling:'ember', sinister_southpaw:'grave', grudge_match:'worldroot', gear_mender:'none', // M172: the two-target wave's schools (Fling R, Southpaw B, Grudge Match G per the record; Gear Mender colourless)
 };
 // M168: a SCHOOL_OF value may be an array of two schools (a dual-colour
 // original) \u2014 cardSchool keeps the primary for display, cardSchools
@@ -2689,7 +2699,18 @@ class Game {
     if (this.tryCounterTrap(this.opp(i), inst)) { p.graveyard.push(inst); return { countered: true }; }
     // Guard-the-Flock traps (M26): a spell aimed at one of the defender's
     // creatures is countered outright, whatever the spell costs.
-    if (d.type === 'spell' && this.tryGuardTrap(this.opp(i), inst, target, false)) { p.graveyard.push(inst); return { countered: true }; }
+    // M172: a pair target guards on its first FOE-BOARD member — the trap
+    // tests "a spell or debut that targets one of their creatures", and a
+    // pair names at most one creature on the defender's side.
+    let guardTgt = target;
+    if (target && target.kind === 'pair') {
+      guardTgt = null;
+      const foeBoard = this.players[this.opp(i)].board;
+      for (const t of (target.targets || [])) {
+        if (t && t.kind === 'creature' && t.inst && foeBoard.includes(t.inst)) { guardTgt = t; break; }
+      }
+    }
+    if (d.type === 'spell' && this.tryGuardTrap(this.opp(i), inst, guardTgt, false)) { p.graveyard.push(inst); return { countered: true }; }
     if (d.type === 'creature') {
       if (p.board.length >= 5) throw new Error('board full (5)');
       inst.summonedTurn = this.turnNumber; inst.damage = 0;
@@ -2702,7 +2723,7 @@ class Game {
       if (p.hero.passive === 'bloom') { const bloomed = this.gainLife(p, 1); this.log.push(`${p.hero.name} blooms: +${bloomed} life`); }
       // M26: a Guard-the-Flock trap negates a Debut aimed at one of the
       // defender's creatures — the body still lands, only the Debut dies.
-      if (d.debut && !this.tryGuardTrap(this.opp(i), inst, target, true)) this.resolveEffect(i, d.debut, inst, target);
+      if (d.debut && !this.tryGuardTrap(this.opp(i), inst, guardTgt, true)) this.resolveEffect(i, d.debut, inst, target);
     } else if (d.type === 'artifact') {
       const existing = p.artifacts.find((a) => a.cardId === inst.cardId);
       if (existing) { existing.charges += d.charges; p.graveyard.push(inst); }
@@ -2901,6 +2922,18 @@ class Game {
       if (ownerIdx >= 0 && ownerIdx !== i && this.wardActive(target.inst)) {
         this.log.push(`${def(target.inst).name}'s Ward turns aside ${def(sourceInst).name}`);
         return;
+      }
+    }
+    // M172: Ward gates a PAIR effect the same way — if any enemy-creature
+    // member of the pair is warded, the whole effect turns aside (the
+    // single-target gate fizzles the whole effect too; it never resolves
+    // half of a spell).
+    if (target && target.kind === 'pair' && ['sacrificeDamage', 'sacrificeDestroy', 'fightPair'].includes(effect.kind)) {
+      for (const t of (target.targets || [])) {
+        if (t && t.kind === 'creature' && t.inst && foe.board.includes(t.inst) && this.wardActive(t.inst)) {
+          this.log.push(`${def(t.inst).name}'s Ward turns aside ${srcName}`);
+          return;
+        }
       }
     }
     switch (effect.kind) {
@@ -3127,6 +3160,55 @@ class Game {
       case 'stunStrongest': { const foes = foe.board.slice().sort((x, y) => powerOf(y) - powerOf(x)); if (foes.length) { foes[0].stunned = true; this.log.push(`${def(sourceInst).name} stuns ${def(foes[0]).name} \u2014 it cannot attack next turn`); } break; }
       case 'destroyCreature': { if (target && target.kind === 'creature') { target.inst.damage = 999; this.log.push(`${def(sourceInst).name} destroys ${def(target.inst).name}`); } break; }
       case 'fightOnce': { const victim = effect.random ? (foe.board.length ? this.rng.pick(foe.board) : null) : (target && target.kind === 'creature' ? target.inst : null); if (victim && p.board.includes(sourceInst)) { this.fightRidersBefore(sourceInst, victim); if (p.board.includes(sourceInst) && foe.board.includes(victim)) { const vp = powerOf(victim), sp = powerOf(sourceInst); const dealtVictim = this.hurtCreature(victim, sp); const dealtSource = this.hurtCreature(sourceInst, vp); this.log.push(`${def(sourceInst).name} fights ${def(victim).name} (${sp} vs ${vp})`); this.fightRidersAfter(sourceInst, victim, i, this.opp(i)); this.checkVengeance(i, sourceInst, victim, dealtSource); this.checkVengeance(this.opp(i), victim, sourceInst, dealtVictim); } this.cleanupDeaths(); this.checkSurvivorTraps([sourceInst, victim]); } break; }
+      // ---- M172: THE TWO-TARGET FLOW. A pair target arrives as
+      // { kind:'pair', targets:[t1, t2] } — an ordered pair of ordinary
+      // single targets. Resolution is ATOMIC with the sacrifice linked:
+      // the texts read "destroy X TO do Y", so if the first half has no
+      // valid creature to take, the whole effect does nothing (the cost
+      // half and the payoff half stand or fall together). If the second
+      // target has left its board by the time its half resolves, that
+      // half alone fizzles (Fling's creature died to its own sacrifice's
+      // finale, say) — the first half already happened and is not undone.
+      case 'sacrificeDamage': { // Fling: destroy a friendly creature, deal effect.amount to a creature or the enemy hero
+        if (target && target.kind === 'pair') {
+          const [t1, t2] = target.targets || [];
+          if (t1 && t1.kind === 'creature' && p.board.includes(t1.inst)) {
+            t1.inst.damage = 999;
+            this.log.push(`${srcName}: ${def(t1.inst).name} is destroyed`);
+            this.cleanupDeaths();
+            if (t2 && t2.kind === 'hero') { this.hurtHero(this.opp(i), effect.amount, i); foe.tookDamageThisTurn = true; this.log.push(`${srcName}: ${foe.hero.name} suffers ${effect.amount}`); }
+            else if (t2 && t2.kind === 'creature' && foe.board.includes(t2.inst)) { this.hurtCreature(t2.inst, effect.amount); this.log.push(`${srcName}: ${def(t2.inst).name} takes ${effect.amount}`); this.cleanupDeaths(); }
+          }
+        }
+        break; }
+      case 'sacrificeDestroy': { // Sinister Southpaw's debut: destroy ANOTHER friendly creature to destroy an enemy creature
+        if (target && target.kind === 'pair') {
+          const [t1, t2] = target.targets || [];
+          if (t1 && t1.kind === 'creature' && t1.inst !== sourceInst && p.board.includes(t1.inst)
+            && t2 && t2.kind === 'creature' && foe.board.includes(t2.inst)) {
+            t1.inst.damage = 999;
+            this.log.push(`${srcName}: ${def(t1.inst).name} is destroyed`);
+            this.cleanupDeaths();
+            if (foe.board.includes(t2.inst)) { t2.inst.damage = 999; this.log.push(`${srcName} destroys ${def(t2.inst).name}`); this.cleanupDeaths(); }
+          }
+        }
+        break; }
+      case 'fightPair': { // Grudge Match: buff the friendly fighter FIRST (the text sequences it), then the two fight
+        if (target && target.kind === 'pair') {
+          const [t1, t2] = target.targets || [];
+          if (t1 && t1.kind === 'creature' && p.board.includes(t1.inst) && t2 && t2.kind === 'creature' && foe.board.includes(t2.inst)) {
+            const a = t1.inst, b = t2.inst;
+            a.permPower += effect.power || 0; a.permHealth += effect.health || 0;
+            this.log.push(`${srcName}: ${def(a).name} gets +${effect.power || 0}/+${effect.health || 0}`);
+            this.fightRidersBefore(a, b);
+            if (p.board.includes(a) && foe.board.includes(b)) { const ap = powerOf(a), bp = powerOf(b); const dealtB = this.hurtCreature(b, ap); const dealtA = this.hurtCreature(a, bp); this.log.push(`${def(a).name} fights ${def(b).name} (${ap} vs ${bp})`); this.fightRidersAfter(a, b, i, this.opp(i)); this.checkVengeance(i, a, b, dealtA); this.checkVengeance(this.opp(i), b, a, dealtB); }
+            this.cleanupDeaths(); this.checkSurvivorTraps([a, b]);
+          }
+        }
+        break; }
+      case 'addChargeArtifact': { // M172 (Gear Mender): a friendly artifact gains a charge — the addChargeHand funnel aimed at the dock instead of the hand
+        if (target && target.kind === 'artifact' && p.artifacts.includes(target.inst)) { target.inst.charges += effect.amount || 1; this.log.push(`${srcName}: ${def(target.inst).name} gains a charge (${target.inst.charges})`); }
+        break; }
       case 'conditionalSelf': { let ok = false; if (effect.condition === 'creatureDied') ok = (this.turnDeaths || 0) > 0; else if (effect.condition === 'bigInHand') ok = p.hand.some((c) => def(c).type === 'creature' && (def(c).power || 0) >= 5); else if (effect.condition === 'foeDamaged') ok = !!foe.tookDamageThisTurn; if (ok && sourceInst) { if (effect.power || effect.health) { sourceInst.permPower += effect.power || 0; sourceInst.permHealth += effect.health || 0; } if (effect.keyword) { sourceInst.gainedKeywords = sourceInst.gainedKeywords || []; if (!keywordsOf(sourceInst).includes(effect.keyword)) sourceInst.gainedKeywords.push(effect.keyword); } this.log.push(`${def(sourceInst).name}'s condition is met — it rises (+${effect.power || 0}/+${effect.health || 0}${effect.keyword ? ', ' + effect.keyword : ''})`); } break; }
       case 'setHealth': { if (target && target.kind === 'creature') { const t = target.inst; t.permHealth += (effect.health - healthOf(t)); this.log.push(`${def(t).name}'s health is set to ${effect.health}`); this.cleanupDeaths(); } break; }
       case 'halveStats': { if (target && target.kind === 'creature') { const t = target.inst; const np = Math.floor(powerOf(t) / 2), nh = Math.floor(healthOf(t) / 2); t.permPower += (np - powerOf(t)); t.permHealth += (nh - healthOf(t)); this.log.push(`${def(t).name} is halved (${np}/${nh})`); this.cleanupDeaths(); } break; }
@@ -3753,6 +3835,35 @@ function targetFor(game, i, inst) {
     const weakest = foe.board.slice().sort((a, b) => (healthOf(a) - a.damage) - (healthOf(b) - b.damage))[0];
     return weakest ? { kind: 'creature', inst: weakest } : null;
   }
+  // M172: the two-target kinds answer an ordered pair.
+  if (eff.kind === 'sacrificeDamage') { // Fling: feed it the weakest body standing; aim the fixed 3 like a small bolt
+    const sac = game.players[i].board.slice().sort((a, b) => (powerOf(a) + healthOf(a)) - (powerOf(b) + healthOf(b)))[0];
+    if (!sac) return null;
+    const tgt = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
+    let second;
+    if (tgt && (healthOf(tgt) - tgt.damage) <= eff.amount) second = { kind: 'creature', inst: tgt };
+    else if (foe.life <= eff.amount + 3) second = { kind: 'hero' };
+    else if (tgt) second = { kind: 'creature', inst: tgt };
+    else second = { kind: 'hero' };
+    return { kind: 'pair', targets: [{ kind: 'creature', inst: sac }, second] };
+  }
+  if (eff.kind === 'sacrificeDestroy') { // Sinister Southpaw: the played body is not on the board when this runs, so every standing friendly is "another"
+    const sac = game.players[i].board.slice().sort((a, b) => (powerOf(a) + healthOf(a)) - (powerOf(b) + healthOf(b)))[0];
+    const victim = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
+    if (!sac || !victim) return null;
+    return { kind: 'pair', targets: [{ kind: 'creature', inst: sac }, { kind: 'creature', inst: victim }] };
+  }
+  if (eff.kind === 'fightPair') { // Grudge Match: the strongest fighter meets the best enemy the buff lets it kill and live through
+    const fighter = game.players[i].board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
+    if (!fighter || !foe.board.length) return null;
+    const fp = powerOf(fighter) + (eff.power || 0);
+    const fh = (healthOf(fighter) - fighter.damage) + (eff.health || 0);
+    const prey = foe.board.filter((c) => (healthOf(c) - c.damage) <= fp && powerOf(c) < fh).sort((a, b) => powerOf(b) - powerOf(a))[0]
+      || foe.board.filter((c) => (healthOf(c) - c.damage) <= fp).sort((a, b) => powerOf(b) - powerOf(a))[0]
+      || foe.board.slice().sort((a, b) => (healthOf(a) - a.damage) - (healthOf(b) - b.damage))[0];
+    return { kind: 'pair', targets: [{ kind: 'creature', inst: fighter }, { kind: 'creature', inst: prey }] };
+  }
+  if (eff.kind === 'addChargeArtifact') { const art = game.players[i].artifacts[0]; return art ? { kind: 'artifact', inst: art } : null; } // M172: Gear Mender tops up the first friendly artifact on the dock
   if (eff.kind === 'damageAny') {
     if (eff.creatureOnly) { const ct = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0]; return ct ? { kind: 'creature', inst: ct } : null; }
     const target = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
@@ -3869,6 +3980,8 @@ function playMainPhase(game, i) {
     if (k === 'summonPerCount' && eff2.count === 'foeCreatures' && !foeBoard()) return false;
     if (k === 'summonPerCount' && eff2.count === 'yourVampires' && !p.board.some((c) => def(c).subtype === eff2.subtype)) return false;
     if (k === 'rageStrongest' && (!foeBoard() || !p.board.length)) return false;
+    if (k === 'sacrificeDamage' && !p.board.length) return false; // M172: Fling needs a body to throw
+    if (k === 'fightPair' && (!p.board.length || !foeBoard())) return false; // M172: Grudge Match needs a fighter and an opponent
     return true;
   });
   // M113 (Recycled Grotesque): when mana won't cover it, trade the weakest
@@ -3984,7 +4097,7 @@ var mode = 'menu'; // menu | mulligan | main | targeting | attackSelect | blocki
 var titleDismissed = false; // M94: the press-start landing stands until the first tap or key
 var uiLog = [], lastEngineLog = 0, msg = '';
 var redrawSet = new Set(), pendingUid = null;
-var sacrificePick = false, pendingTargets = []; // M113: alt-cost picks + multi-target casts
+var sacrificePick = false, pendingTargets = [], pendingFirst = null; // M113: alt-cost picks + multi-target casts · M172: pendingFirst holds a pair cast's first pick
 var attackSet = new Set(), blockMap = {}, blockPick = null, aiAttackers = [];
 var blockResolver = null, recordCounted = false, inspectUid = null, inspectCardId = null;
 var matchStartedAt = 0;
@@ -4235,7 +4348,26 @@ function effTargetKind(eff) { // M109: a targeted SEQUENCE (Burn Through) aims b
 function defNeedsTarget(d) {
   var eff = d && (d.effect || d.debut);
   if (eff && eff.kind === 'fightOnce' && eff.random) return false; // a random fight needs no click
-  return !!(eff && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'tuckIntoDeck', 'grantAttackEffect', 'grantEndTurn'].indexOf(eff.kind) >= 0); // M169 kinds
+  return !!(eff && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'bounce', 'bounceOwnSetCost', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'tuckIntoDeck', 'grantAttackEffect', 'grantEndTurn', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact'].indexOf(eff.kind) >= 0); // M169 kinds + M172 pair kinds
+}
+/* M172: the two-target kinds describe their two picks as ordered steps —
+   which side of the table each pick must come from. 'anyEnemy' may also
+   be answered by the enemy hero (targetHero). */
+function pairSpec(d) {
+  var eff = d && (d.effect || d.debut);
+  if (!eff) return null;
+  if (eff.kind === 'sacrificeDamage') return { steps: ['friendlyCreature', 'anyEnemy'] };
+  if (eff.kind === 'sacrificeDestroy') return { steps: ['friendlyCreature', 'enemyCreature'] };
+  if (eff.kind === 'fightPair') return { steps: ['friendlyCreature', 'enemyCreature'] };
+  return null;
+}
+function defTwoTarget(d) { return !!pairSpec(d); }
+function pairStepMsg(d, step) {
+  var eff = d && (d.effect || d.debut); var k = eff && eff.kind;
+  if (k === 'sacrificeDamage') return step === 1 ? '🎯 ' + d.name + ': first, choose a friendly creature to destroy.' : '🎯 Now choose what takes ' + (eff.amount || 3) + ' damage — a creature or their hero.';
+  if (k === 'sacrificeDestroy') return step === 1 ? '🎯 ' + d.name + ': first, choose another friendly creature to destroy.' : '🎯 Now choose the enemy creature to destroy.';
+  if (k === 'fightPair') return step === 1 ? '🎯 ' + d.name + ': choose your fighter — it gets +1/+1.' : '🎯 Now choose the enemy creature it fights.';
+  return '';
 }
 /* Floating nightmare wisps (plant: rise from mid-screen toward the enemy;
    drain: fall over the afflicted hero). Count scales with the event size. */
@@ -4767,6 +4899,10 @@ function effectText(d) {
       case 'swapStats': return "Switch a creature's power and health.";
       case 'grantKeyword': return 'Give ' + (e.foeTarget ? 'an enemy' : 'a friendly') + ' creature ' + ((e.power || e.health) ? '+' + (e.power || 0) + '/+' + (e.health || 0) + ' and ' : '') + e.keyword.charAt(0).toUpperCase() + e.keyword.slice(1) + (e.temp ? ' this turn.' : '.');
       case 'fightOnce': return e.random ? 'Fight a random enemy creature.' : 'Fight an enemy creature.';
+      case 'sacrificeDamage': return 'Destroy a friendly creature to deal ' + e.amount + ' damage to a creature or the enemy hero.';
+      case 'sacrificeDestroy': return 'Destroy another friendly creature to destroy an enemy creature.';
+      case 'fightPair': return 'Give a friendly creature +' + (e.power || 0) + '/+' + (e.health || 0) + ', then choose an enemy creature. They fight!';
+      case 'addChargeArtifact': return 'Add a charge to a friendly artifact.';
       case 'conditionalSelf': return 'If its condition is met, it rises.';
       case 'setHealth': return "Set an enemy creature's health to " + e.health + '.';
       case 'halveStats': return "Halve an enemy creature's power and health, rounded down.";
@@ -5105,7 +5241,7 @@ function heroBarHtml(p, isMe) {
   var pendingDef = null;
   if (mode === 'targeting' && pendingUid !== null) { var pc = G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }); if (pc) pendingDef = D(pc); }
   var apD2 = null; if (artifactPick && !isMe) { var aa2 = G.players[humanIdx].artifacts.find(function (x) { return x.uid === artifactPick; }); if (aa2) apD2 = D(aa2); }
-  var click = (artifactPick && !isMe && apD2 && apD2.activateTarget === 'anyEnemy') ? ' onclick="resolveArtifactTarget({kind:\'hero\'})"' : ((mode === 'targeting' && !isMe && pendingDef && pendingDef.effect && pendingDef.effect.kind === 'damageAny' && !pendingDef.effect.creatureOnly) ? ' onclick="targetHero()"' : ''); // M116: an aimed artifact (Rod of Ruin) can strike the hero too
+  var click = (artifactPick && !isMe && apD2 && apD2.activateTarget === 'anyEnemy') ? ' onclick="resolveArtifactTarget({kind:\'hero\'})"' : ((mode === 'targeting' && !isMe && pendingDef && pendingDef.effect && pendingDef.effect.kind === 'damageAny' && !pendingDef.effect.creatureOnly) || (mode === 'targeting' && !isMe && pendingDef && pairSpec(pendingDef) && pendingFirst && pairSpec(pendingDef).steps[1] === 'anyEnemy') ? ' onclick="targetHero()"' : ''); // M116: an aimed artifact (Rod of Ruin) can strike the hero too · M172: a pair cast whose second step is anyEnemy (Fling) answers on the hero bar too
   var loadLine = '';
   if (typeof SCHOOLS !== 'undefined') {
     var questLine = function (s, taken) {
@@ -5205,7 +5341,13 @@ function boardHtml(p, isMe) {
       var k = effTargetKind(d.effect || d.debut);
       var warded = (typeof G.wardActive === 'function') ? G.wardActive(inst) : false; // M116: Ward is a window, not a wall (recovered tooltip) — the engine's gate decides
       var flying = (D(inst).keywords || []).indexOf('flying') >= 0;
-      if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify' || k === 'stealCreature' || k === 'setHealth' || k === 'halveStats' || k === 'destroyIfPower' || k === 'fightOnce' || k === 'stealPower' || k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures' || k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges') && !warded) || (k === 'grantKeyword' && (d.effect || d.debut).foeTarget && !warded) || (k === 'destroyFlyer' && flying && !warded) || (k === 'debuffCreature' && !warded))) || (isMe && (k === 'buffCreature' || (k === 'grantKeyword' && !(d.effect || d.debut).foeTarget) || k === 'healCreatureFull' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly' || k === 'buffAndDoom' || (k === 'pacify' && d.debut))) || k === 'bounce' || k === 'swapStats' || (isMe && sacrificePick)) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
+      var pspec = pairSpec(d); // M172: a pair cast lights only the current step's side; the first pick stays marked
+      if (pspec) {
+        var stepNow = pendingFirst ? pspec.steps[1] : pspec.steps[0];
+        var okPick = (stepNow === 'friendlyCreature' && isMe) || ((stepNow === 'enemyCreature' || stepNow === 'anyEnemy') && !isMe && !warded);
+        if (okPick) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
+        if (pendingFirst && pendingFirst.inst === inst) opts.cls = (opts.cls || '') + ' selected-attacker';
+      } else if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify' || k === 'stealCreature' || k === 'setHealth' || k === 'halveStats' || k === 'destroyIfPower' || k === 'fightOnce' || k === 'stealPower' || k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures' || k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges') && !warded) || (k === 'grantKeyword' && (d.effect || d.debut).foeTarget && !warded) || (k === 'destroyFlyer' && flying && !warded) || (k === 'debuffCreature' && !warded))) || (isMe && (k === 'buffCreature' || (k === 'grantKeyword' && !(d.effect || d.debut).foeTarget) || k === 'healCreatureFull' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly' || k === 'buffAndDoom' || (k === 'pacify' && d.debut))) || k === 'bounce' || k === 'swapStats' || (isMe && sacrificePick)) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = ' targetable clickable'; }
     }
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
     window.__faces = window.__faces || {};
@@ -5257,6 +5399,20 @@ function targetArtifact(uid) {
   var a = G.players[aiIdx].artifacts.find(function (x) { return x.uid === uid; });
   if (a) resolveTarget({ kind: 'artifact', inst: a });
 }
+/* M172 (Gear Mender): the mirror surface on YOUR dock — while a
+   friendly-artifact debut is being aimed, your own medals become the
+   target instead of their usual activation tap. */
+function ownArtifactTargetable() {
+  if (typeof mode === 'undefined' || mode !== 'targeting' || typeof pendingUid === 'undefined' || pendingUid === null || !G) return false;
+  var pc = G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; });
+  if (!pc) return false;
+  var eff = D(pc) && (D(pc).effect || D(pc).debut);
+  return !!(eff && eff.kind === 'addChargeArtifact');
+}
+function targetOwnArtifact(uid) {
+  var a = G.players[humanIdx].artifacts.find(function (x) { return x.uid === uid; });
+  if (a) resolveTarget({ kind: 'artifact', inst: a });
+}
 function artifactMedalHtml(p, isMe) {
   if (!p.artifacts || !p.artifacts.length) return '';
   return p.artifacts.map(function (a) {
@@ -5265,9 +5421,9 @@ function artifactMedalHtml(p, isMe) {
     var pips = '';
     for (var k = 0; k < max; k++) pips += '<i class="' + (k < a.charges ? 'on' : 'off') + '"></i>';
     var face = (typeof CARD_ART !== 'undefined' && CARD_ART[a.cardId]) ? '<img src="' + CARD_ART[a.cardId] + '" alt="">' : '<span>' + (d.icon || '🏺') + '</span>';
-    var click = isMe ? ' onclick="event.stopPropagation();medAct(' + a.uid + ')"' : (foeArtifactTargetable() ? ' onclick="event.stopPropagation();targetArtifact(' + a.uid + ')"' : '');
+    var click = isMe ? (ownArtifactTargetable() ? ' onclick="event.stopPropagation();targetOwnArtifact(' + a.uid + ')"' : ' onclick="event.stopPropagation();medAct(' + a.uid + ')"') : (foeArtifactTargetable() ? ' onclick="event.stopPropagation();targetArtifact(' + a.uid + ')"' : '');
     var eye = '<span class="amedal-eye" role="button" aria-label="Read this artifact" onclick="event.stopPropagation();openInspect(null,' + a.uid + ')" title="Read this artifact">👁</span>';
-    return '<div class="amedal' + (a.usedThisTurn ? ' used' : '') + (isMe && !a.usedThisTurn && a.charges > 0 ? ' ready' : '') + (!isMe && foeArtifactTargetable() ? ' targetable clickable' : '') + '"' + click + ' title="' + esc(d.name) + ' · ' + a.charges + ' charge' + (a.charges === 1 ? '' : 's') + (isMe ? ' · tap to activate' : '') + '"><div class="amedal-face">' + face + '</div><div class="amedal-pips">' + pips + '</div>' + eye + '</div>';
+    return '<div class="amedal' + (a.usedThisTurn ? ' used' : '') + (isMe && !a.usedThisTurn && a.charges > 0 ? ' ready' : '') + (!isMe && foeArtifactTargetable() ? ' targetable clickable' : '') + (isMe && ownArtifactTargetable() ? ' targetable clickable' : '') + '"' + click + ' title="' + esc(d.name) + ' · ' + a.charges + ' charge' + (a.charges === 1 ? '' : 's') + (isMe ? ' · tap to activate' : '') + '"><div class="amedal-face">' + face + '</div><div class="amedal-pips">' + pips + '</div>' + eye + '</div>';
   }).join('');
 }
 
@@ -5631,7 +5787,7 @@ function renderBody() {
      leaving attack selection = toggle the last attacker off. */
   html += '<div class="actions">';
   if (mode === 'aiTurn') html += '<button disabled>⏳ Their turn</button>';
-  else if (mode === 'targeting') { html += '<button class="danger" onclick="cancelTarget()">✕ Cancel cast</button>'; if (pendingTargets.length) html += '<button class="pass-ready" onclick="confirmMultiTarget()">⚡ Cast (' + pendingTargets.length + ')</button>'; }
+  else if (mode === 'targeting') { html += '<button class="danger" onclick="cancelTarget()">✕ Cancel cast</button>'; if (pendingTargets.length) html += '<button class="pass-ready" onclick="confirmMultiTarget()">⚡ Cast (' + pendingTargets.length + ')</button>'; if (pendingFirst) html += '<button onclick="restartTargets()">↩ Restart targets</button>'; }
   else if (mode === 'attackSelect') {
     if (mode === 'attackSelect') { var readyN = me.board.filter(function (c) { return G.canAttack(c, me); }); var allIn = readyN.length && readyN.every(function (c) { return attackSet.has(c.uid); }); html += '<button class="ghost" onclick="attackAllToggle()">' + (allIn ? '✕ Clear attackers' : '⚔️ All attackers') + '</button>'; }
     if (attackSet.size) { var totPow = 0; attackSet.forEach(function (u) { var c = me.board.find(function (x) { return x.uid === u; }); if (c) totPow += D(c).power + c.permPower; }); html += '<button class="pass-ready" onclick="declareAttack()">⚔️ Declare (' + attackSet.size + ') · ' + totPow + ' power</button>';
@@ -5854,7 +6010,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 12 heroes</span><span class="tchip">\uD83C\uDCCF 384 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
+    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 12 heroes</span><span class="tchip">\uD83C\uDCCF 388 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
@@ -6406,15 +6562,19 @@ function clickHand(uid) {
   }
   if (d.altSummonSacrifice && G.availableMana(me) < G.effectiveCost(me, inst) && me.board.length > 0) { pendingUid = uid; sacrificePick = true; mode = 'targeting'; msg = 'Choose a friendly creature to destroy for the summoning.'; render(); return; }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
-  if (targetedEff && !(targetedEff.kind === 'fightOnce' && targetedEff.random) && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact'].indexOf(targetedEff.kind) >= 0) {
+  if (targetedEff && !(targetedEff.kind === 'fightOnce' && targetedEff.random) && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact'].indexOf(targetedEff.kind) >= 0) { // M172: stripCharges joins (Gear Render's debut was unroutable here — a drive-by repair), plus the pair kinds and Gear Mender's friendly-artifact debut
     var k = effTargetKind(targetedEff);
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'bounce') ? true : (k === 'damageAny' ? (targetedEff.creatureOnly ? foe.board.length > 0 : true) : (k === 'grimEchoes' ? me.board.length > 0 : (k === 'buffCreature' || k === 'healCreatureFull' || (k === 'grantKeyword' && !targetedEff.foeTarget) ? me.board.length > 0 : (k === 'pacify' && d.debut ? me.board.length > 0 : (k === 'swapStats' ? (me.board.length + foe.board.length) > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0))))));
     if (k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures') hasTarget = foe.board.length > 0;
     if (k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges') hasTarget = foe.board.length > 0 || foe.artifacts.length > 0;
     if (k === 'destroyArtifact') hasTarget = foe.artifacts.length > 0; // M165: Naturalize needs an artifact standing
+    if (k === 'stripCharges') hasTarget = foe.artifacts.length > 0; // M172: Gear Render needs an enemy artifact standing
+    var pspec2 = pairSpec(d);
+    if (pspec2) hasTarget = me.board.length > 0 && (k === 'sacrificeDamage' || foe.board.length > 0); // M172: a pair cast needs its first pick standing (and its second, unless the hero can answer)
+    if (k === 'addChargeArtifact') hasTarget = me.artifacts.length > 0; // M172: Gear Mender needs a friendly artifact on the dock
     if (!hasTarget) { msg = 'No valid target yet.'; render(); return; }
-    pendingUid = uid; mode = 'targeting'; render(); return;
+    pendingUid = uid; pendingFirst = null; mode = 'targeting'; if (pspec2) msg = pairStepMsg(d, 1); render(); return;
   }
   try { G.playCard(humanIdx, uid, null); handOpen = false; sfx(d.type === 'creature' ? 'creature' : d.type === 'artifact' ? 'play' : 'spell'); say('You play ' + d.name + '.'); } catch (e) { msg = errMsg(e, uid); }
   if (G.pendingDraft && G.pendingDraft.player === humanIdx) mode = 'draftPick';
@@ -6454,6 +6614,19 @@ function targetCreature(uid) {
   if (sacrificePick) { sacrificePick = false; resolveTarget({ kind: 'creature', inst: inst }); return; }
   var pd = pendingUid !== null ? D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }) || {}) : null;
   var eff = pd && (pd.effect || pd.debut);
+  var pspec = pd && pairSpec(pd); // M172: a pair cast takes two picks, in order, each from its own side of the table
+  if (pspec) {
+    var stepNow = pendingFirst ? pspec.steps[1] : pspec.steps[0];
+    var isMine = G.players[humanIdx].board.indexOf(inst) >= 0;
+    var wardedC = (typeof G.wardActive === 'function') ? G.wardActive(inst) : false;
+    var okPick = (stepNow === 'friendlyCreature' && isMine) || ((stepNow === 'enemyCreature' || stepNow === 'anyEnemy') && !isMine && !wardedC);
+    if (!okPick) { msg = stepNow === 'friendlyCreature' ? '🎯 First pick: one of YOUR creatures.' : '🎯 Second pick: one of THEIR creatures.'; render(); return; }
+    if (!pendingFirst) { pendingFirst = { kind: 'creature', inst: inst }; try { sfx('click'); } catch (e) {} msg = pairStepMsg(pd, 2); render(); return; }
+    var pairTgt = { kind: 'pair', targets: [pendingFirst, { kind: 'creature', inst: inst }] };
+    pendingFirst = null;
+    resolveTarget(pairTgt);
+    return;
+  }
   if (eff && eff.kind === 'stunCreatures') {
     if (!pendingTargets.some(function (t) { return t.uid === uid; })) pendingTargets.push(inst);
     if (pendingTargets.length >= (eff.count || 2)) { var ts = pendingTargets.slice(); pendingTargets = []; resolveTarget({ kind: 'creatures', insts: ts }); }
@@ -6463,14 +6636,25 @@ function targetCreature(uid) {
   resolveTarget({ kind: 'creature', inst: inst });
 }
 function confirmMultiTarget() { var ts = pendingTargets.slice(); pendingTargets = []; if (ts.length) resolveTarget({ kind: 'creatures', insts: ts }); }
-function targetHero() { resolveTarget({ kind: 'hero' }); }
+function targetHero() {
+  var pd = pendingUid !== null ? D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }) || {}) : null;
+  var pspec = pd && pairSpec(pd); // M172: Fling's second pick may be the enemy hero
+  if (pspec && pendingFirst && pspec.steps[1] === 'anyEnemy') { var pairTgt = { kind: 'pair', targets: [pendingFirst, { kind: 'hero' }] }; pendingFirst = null; resolveTarget(pairTgt); return; }
+  resolveTarget({ kind: 'hero' });
+}
 function resolveTarget(target) {
   clearTargetLine();
   var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }));
   try { G.playCard(humanIdx, pendingUid, target); sfx('spell'); say('You play ' + (d ? d.name : 'a card') + '.'); } catch (e) { msg = errMsg(e, pendingUid); }
-  pendingUid = null; pendingTargets = []; sacrificePick = false; mode = (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : (G.pendingScry && G.pendingScry.player === humanIdx) ? 'scryPick' : 'main'; flushEngineLog(); if (!finishCheck()) render();
+  pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; mode = (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : (G.pendingScry && G.pendingScry.player === humanIdx) ? 'scryPick' : 'main'; flushEngineLog(); if (!finishCheck()) render();
 }
-function cancelTarget() { clearTargetLine(); pendingUid = null; pendingTargets = []; sacrificePick = false; mode = 'main'; render(); }
+function cancelTarget() { clearTargetLine(); pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; mode = 'main'; render(); }
+function restartTargets() { // M172: step back to a pair cast's first pick without giving up the cast
+  pendingFirst = null;
+  var pd = pendingUid !== null ? D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }) || {}) : null;
+  if (pd) msg = pairStepMsg(pd, 1);
+  render();
+}
 function disarm(uid) {
   try { G.disarmTrap(humanIdx, uid); say('Trap disarmed.'); } catch (e) { msg = errMsg(e, uid); }
   render();

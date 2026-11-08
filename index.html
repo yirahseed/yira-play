@@ -1326,8 +1326,8 @@ const CARDS = {
   mind_magnifier: { icon: "🔍", name: 'Mind Magnifier', cost: 5, type: 'artifact', charges: 2, effect: { kind: 'copyLastSpell' }, text: 'Activate: Add a temporary copy of the last spell you played this turn to your hand. Change its cost to 1.', cardSchool: 'tides', orig: "Mind Magnifier", src: "Video digest 4A F13 (full face): printed cost 5 (two deck views), 2 charges, text verbatim — closes the long-held charges question. The copy is temporary with costOverride 1." },
   demonic_priest: { icon: "😈", name: 'Demonic Priest', cost: 2, type: 'creature', power: 2, health: 2, subtype: 'demon', generatedOnly: true, healOnDealtDamage: true, text: 'After this deals damage, heal yourself for that much.', cardSchool: 'grave', orig: "Demonic Priest", src: "Token of Profane Palace. Video digest 4A F8 (full face): cost 2, 2/2, text verbatim. Wave 4B O6 spoiler sheet read 3/2 — the gameplay face governs (spoiler sheets are pre-release; Awoken Horror precedent). healOnDealtDamage is the M51 priest mechanic." },
 
-  thing_beneath_the_ice: { icon: "🧊", name: 'Thing in the Ice', cost: 2, type: 'creature', power: 0, health: 3, subtype: 'monster', flipsTo: 'awoken_horror', flipOnSpells: 3 , orig: "Thing in the Ice", src: "Hipsters gallery + csv: cost 2, 0/3 — 'After you play your third or more spell in a turn, this flips into Awoken Horror' (the numeral closed by VIDEO-DIGEST-4B's O6 sheet); renamed off the MTG card" },
-  awoken_horror: { icon: "👹", name: 'Awoken Horror', cost: 0, type: 'creature', power: 5, health: 4, subtype: 'monster', generatedOnly: true, afterFlip: { kind: 'stunStrongest' } , orig: "Awoken Horror (flip side)", src: "csv (Hipsters + v1.04 notes): 'final 5/4' — the O6 spoiler sheet read 6/5 (pre-release era); patch-final 5/4 governs. Printed cost 4; flip sides carry cost 0 in-engine like the Moonlight family. 'After this flips, stun the strongest enemy creature'" },
+  thing_beneath_the_ice: { icon: "🧊", name: 'Thing in the Ice', cost: 2, type: 'creature', power: 0, health: 3, subtype: 'monster', flipsTo: 'awoken_horror', flipOnSpells: 3, flipFresh: true , orig: "Thing in the Ice", src: "Hipsters gallery + csv: cost 2, 0/3 — 'After you play your third or more spell in a turn, this flips into Awoken Horror' (the numeral closed by VIDEO-DIGEST-4B's O6 sheet); renamed off the MTG card" },
+  awoken_horror: { icon: "👹", name: 'Awoken Horror', cost: 0, type: 'creature', power: 5, health: 4, subtype: 'monster', generatedOnly: true, afterFlip: { kind: 'stunStrongest' } , orig: "Awoken Horror (flip side)", src: "csv (Hipsters + v1.04 notes): 'final 5/4' — the O6 spoiler sheet read 6/5 (pre-release era); patch-final 5/4 governs the stats (Jesse deferred to the data on the number, 2026-11-08); his ruling the same day: the flip clears prior damage — the Horror wakes at full health even if the Thing was at 1. See LIBRARY-PROVENANCE M166. Printed cost 4; flip sides carry cost 0 in-engine like the Moonlight family. 'After this flips, stun the strongest enemy creature'" },
 
   // --- M20 board-swing spells (Second Dawn pair + the great verdict) ---
   second_suns_dawn: { icon: "🌄", name: "Second Sun's Dawn", cost: 6, type: 'spell', effect: { kind: 'sequence', effects: [ { kind: 'healHero', amount: 7, who: 'self' }, { kind: 'shuffleSecondSun' } ] } , orig: "Second Sun's Dawn", src: "VIDEO-DIGEST batch 2B (YouTube face-verified), 2026-11-01 \u2014 name, cost 6 and text all confirmed against the M20 conversion, which had them right" },
@@ -1461,9 +1461,10 @@ const CARDS = {
   // the AI's targetFor now treat a targeted debut like a targeted spell.
   // The debut reuses the 'wither' kind with amount 1 — the recorded -1/-1 —
   // NOT the Withering Edict's conditional -3/-3/-5/-5 (see engine wither).
-  // Colour recorded (B) -> Hollow Grave. Cost was never recorded:
-  // FORGE-COSTED at 6, argued in files/COSTING.md (Batch 10). Name is ours.
-  grave_gladiator: { icon: "⚔️", name: 'Dark Gladiator', cost: 6, costForge: true, type: 'creature', power: 6, health: 5, debut: { kind: 'wither', amount: 1 } , orig: "Dark Gladiator", src: "COSTING.md B10 \u2014 cost Forge-assigned" },
+  // Colour recorded (B) -> Hollow Grave. Cost: Forge-costed at 6 from
+  // M25 (COSTING.md B10) until RECOVERY-WEB2 (2026-11-08) read the
+  // v1.01.00 face: cost 5, recorded — flag retired the same day (M167).
+  grave_gladiator: { icon: "⚔️", name: 'Dark Gladiator', cost: 5, type: 'creature', power: 6, health: 5, subtype: 'zombie soldier', debut: { kind: 'wither', amount: 1 } , orig: "Dark Gladiator", src: "RECOVERY-WEB2 2026-11-08: v1.01.00 face reads cost 5, Zombie Soldier 6/5, 'Debut: Give an enemy creature -1/-1' — cost RECORDED (was Forge-costed 6 under COSTING.md B10 until the face surfaced; name-swap history in the sweep file)" },
   // ——— Conversion batch 11 (M26, sprint): the fourth NEEDS-ENGINE conversion ———
   // The Guard the Flock of the record (U, trap, CONVERSION-AUDIT §3; LT_WV1_342
   // per the Wave 1 archive mapping): Trap — counter any spell or Debut effect
@@ -2698,7 +2699,9 @@ class Game {
   flipCreature(i, inst) {
     const p = this.players[i];
     const to = def(inst).flipsTo; if (!to) return;
+    const fresh = def(inst).flipFresh === true; // M166 (Jesse ruling 2026-11-08): this flip wakes a fresh face — damage does not carry
     inst.cardId = to; inst.tempPower = 0; inst.tempHealth = 0;
+    if (fresh) inst.damage = 0;
     this.log.push(`${p.hero.name}'s creature flips under the moonlight: it is now ${def(inst).name}`);
     const af = def(inst).afterFlip;
     if (af) this.resolveEffect(i, af, inst, null);

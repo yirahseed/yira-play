@@ -486,7 +486,6 @@
   .hand.fan { justify-content:center; }
   .hand.fan .card:hover { z-index:60 !important; }
   .herobar.active-turn .portrait { box-shadow:0 0 0 2.5px #ffd28a, 0 0 16px rgba(255,210,138,.55); }
-  .turn-pill { align-self:center; margin:1px auto; font-size:10.5px; letter-spacing:.14em; color:#e9defc; background:rgba(16,10,28,.55); border:1px solid rgba(200,170,255,.30); padding:2.5px 12px; border-radius:999px; }
   .emblem.ghost { opacity:.30; pointer-events:none; }
   .emblem.ghost .emblem-head { background:rgba(22,15,38,.40); border:1.5px dashed rgba(200,170,255,.4); box-shadow:none; }
   .card.unaffordable .cart img { filter:grayscale(.85) brightness(.72); }
@@ -513,7 +512,6 @@
   .emblem.ghost .emblem-name, .emblem.ghost .emblem-badges { display:none; }
   .emblem.ghost .emblem-head { width:54px; height:70px; margin:0 auto; }
   @media (max-width:400px) { .emblem-head { width:54px; height:70px; } }
-  .mute-btn { padding:7px 10px !important; font-size:14px !important; align-self:center; margin-top:6px; }
   /* --- M36: contained fan, tiny stance, room to raise --- */
   .hand.fan { overflow:visible; }
   .shell.stage .handzone { padding-top:30px; background:radial-gradient(ellipse 62% 105% at 50% 108%, rgba(124,80,220,.20), rgba(124,80,220,0) 70%), linear-gradient(rgba(10,6,18,0), rgba(10,6,18,.62) 46%); }
@@ -526,7 +524,6 @@
   .emblem-name { max-width:74px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; line-height:1.1; }
   .shell.stage #log { font-size:10.5px; max-height:30px; width:min(400px,80%); }
   .chip { padding:2px 8px; }
-  .mute-btn { border-color:transparent; background:rgba(16,10,28,.4); opacity:.85; }
   /* --- M37: the LoR hand (rest small, engage to grow) + linked cards --- */
   .overlay { flex-wrap:wrap; gap:14px; }
   .hand.fan { --spread:1; }
@@ -540,7 +537,6 @@
   .assoc-card .card { transform:scale(.68); transform-origin:top left; }
   /* --- M38: the hand rests as a dock; scrub picks by geometry --- */
   #hoverZoom { pointer-events:none; }
-  .hand-dock { display:flex; align-items:center; gap:9px; margin:2px auto 4px; width:max-content; max-width:92%; padding:8px 18px 8px 12px; border-radius:999px; background:rgba(20,12,36,.78); border:1px solid rgba(150,120,255,.45); box-shadow:0 4px 14px rgba(0,0,0,.45); cursor:pointer; }
   .dock-backs { position:relative; width:32px; height:26px; flex:none; }
   .dock-backs i { position:absolute; top:1px; width:16px; height:24px; border-radius:3px; background:linear-gradient(160deg,#4b357f,#2a1b4d); border:1px solid rgba(190,160,255,.55); }
   .dock-backs i:nth-child(1) { left:0; transform:rotate(-11deg); }
@@ -548,7 +544,6 @@
   .dock-backs i:nth-child(3) { left:16px; transform:rotate(11deg); }
   .dock-n { font-weight:800; color:#e7d9ff; font-size:14px; }
   .dock-word { font-size:9.5px; letter-spacing:.24em; color:#a793d6; }
-  .hand-close { position:absolute; right:10px; bottom:12px; padding:4px 10px !important; font-size:13px !important; opacity:.85; }
   .hand.fan { --spread:1.18; }
   .hand.fan .card { scale:.92; }
   .hand.fan.engaged { --spread:1.5; }
@@ -639,16 +634,11 @@
   .vs-splash { flex-direction:column; }
   .vs-row { display:flex; align-items:center; justify-content:center; gap:18px; }
   .vs-tip { max-width:min(430px,86vw); text-align:center; color:#d9ccff; font-size:13.5px; line-height:1.45; background:rgba(14,9,26,.72); border:1px solid rgba(200,170,255,.3); border-radius:12px; padding:8px 14px; }
-  .mull-foe { display:flex; align-items:center; gap:9px; justify-content:center; color:#c4b6e8; font-size:13px; margin:2px 0 8px; }
-  .mull-foe .mf-portrait { width:34px; height:34px; border-radius:50%; overflow:hidden; display:inline-block; border:2px solid rgba(200,170,255,.45); }
-  .mull-foe .mf-portrait img { width:100%; height:100%; object-fit:cover; }
-  .mull-foe .mf-backs { letter-spacing:2px; color:#8d7cc0; }
   .pips { display:flex; justify-content:center; align-items:center; gap:5px; margin:1px 0 3px; }
   .pip { font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:#8d7cc0; border:1px solid rgba(200,170,255,.22); padding:2px 8px; border-radius:999px; background:rgba(14,9,26,.45); }
   .pip.on { color:#fff; border-color:#b18cff; background:rgba(124,80,220,.4); }
   .pip.done { color:#9df0b6; border-color:rgba(120,220,150,.35); }
   .pip-sep { color:#6f5ea6; font-size:10px; }
-  .league-banner { text-align:center; font-size:14.5px; color:#e7d9ff; background:linear-gradient(90deg, rgba(124,80,220,.12), rgba(124,80,220,.3), rgba(124,80,220,.12)); border:1px solid rgba(200,170,255,.35); border-radius:12px; padding:9px 12px; margin-bottom:10px; }
   /* M115: the hub — profile frame + mode tiles */
   .profilebar { display:flex; align-items:center; gap:12px; background:linear-gradient(120deg, rgba(46,30,84,.96), rgba(24,16,46,.97)); border:1px solid rgba(216,180,84,.45); border-radius:14px; padding:10px 12px; margin-bottom:10px; } /* M117: solid — the .22-alpha wash read as broken glass over the roster art (Jesse) */
   .profilebar .pava { width:52px; height:52px; border-radius:50%; overflow:hidden; border:2px solid #d8b454; flex:0 0 auto; background:#241640; display:flex; align-items:center; justify-content:center; font-size:26px; color:#efe9ff; }
@@ -757,7 +747,6 @@
   @keyframes cardShake { 0%,100% { margin-top:0 } 25% { margin-top:-5px } 55% { margin-top:2px } 80% { margin-top:-2px } }
   .hand.fan .card.shake { animation:cardShake .4s ease; }
   .shell.stage .pile.gravepop { animation:chipPulse .65s ease; }
-  .shell.stage .hand-close { top:-4px; bottom:auto; right:8px; width:36px; height:36px; min-width:36px; min-height:36px; border-radius:50%; padding:0 !important; display:flex; align-items:center; justify-content:center; }
   .herobar.drop-hover { outline:none; }
   .herobar.drop-hover .portrait { box-shadow:0 0 0 3px #ffd94d, 0 0 22px rgba(255,217,77,.85); border-radius:50%; }
   /* --- M59: fan cards are SOLID — the .45 unaffordable translucency was
@@ -781,7 +770,6 @@
   .hand.fan .card { box-shadow:-7px 0 16px rgba(0,0,0,.5), 0 8px 20px rgba(0,0,0,.45); }
   .hand.fan:has(.card:hover) .card:not(:hover) { filter:none; }
   .hand.fan .card:hover ~ .card { translate:none; }
-  .mute-btn.hasplay { border-color:#ffd166; color:#ffe9b0; animation:chipPulse 1.7s ease-in-out infinite; }
   /* --- M57: no placement lines (the arena art carries the boundaries),
      the whole closed handzone is the tap target, and the fan rises in. --- */
   .emblem.ghost .emblem-head { background:transparent !important; border:1.5px solid transparent !important; box-shadow:none !important; }
@@ -799,7 +787,6 @@
   .hcluster .hname { max-width:96px; }
   /* --- M56: honest touch targets on the phase controls. --- */
   .shell.stage .actions button { min-height:44px; }
-  .shell.stage .hand-close { min-width:44px; min-height:44px; }
   /* --- M55: boards FIT — five slots flex to the stage, no sideways
      scrolling anywhere on the field (Jesse) — plus the mulligan's
      entrance and the foe-ready gleam. --- */
@@ -857,7 +844,6 @@
 .orb.hp { background: linear-gradient(180deg, #c0453d, #8e2a24) !important; color: #ffe9e7 !important; }
 .card.justplayed { animation: justPlayed .6s ease-out; }
 @keyframes justPlayed { 0% { transform: translateY(10px) scale(1.04); filter: brightness(1.5); } 100% { transform: none; filter: none; } }
-.endscreen .bigemoji { animation: victoryBloom 1.6s ease-out; display: inline-block; }
 @keyframes victoryBloom { 0% { transform: scale(.4); filter: brightness(2); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
 /* M70: turn banner (the original's grammar), moonlight-ready pulse, flip shimmer */
@@ -1071,6 +1057,7 @@
   .pressstart { margin-top:44px; font-size:17px; letter-spacing:3px; color:#ffd76a; animation:psPulse 1.7s ease-in-out infinite; }
   @keyframes psPulse { 0%,100% { opacity:.4; } 50% { opacity:1; } }
   .titlever { margin-top:46px; font-size:11.5px; color:#8f83b8; letter-spacing:.04em; }
+  .titlepage { position:relative; }
   .titlechips { position:absolute; left:0; right:0; bottom:calc(18px + env(safe-area-inset-bottom)); display:flex; flex-wrap:wrap; gap:7px; justify-content:center; padding:0 14px; }
   .tchip { font-size:11.5px; letter-spacing:.03em; color:#e6dcff; background:rgba(20,14,38,.62); border:1px solid rgba(216,180,84,.35); border-radius:999px; padding:5px 11px; backdrop-filter:blur(4px); }
   @media (prefers-reduced-motion: reduce) { .pressstart { animation:none; } }
@@ -1095,11 +1082,6 @@
   .artdock.foe { top:54px; right:6px; }
   .artdock.me { top:auto; bottom:238px; right:6px; }
   @media (orientation: landscape) and (max-height: 540px) { .artdock.me { bottom:196px; } }
-  .faceoff { display:flex; align-items:center; justify-content:center; gap:14px; margin:8px 0 2px; }
-  .faceoff .portrait { width:56px; height:56px; border-radius:50%; overflow:hidden; margin:0 auto; }
-  .faceoff .portrait img { width:100%; height:100%; object-fit:cover; }
-  .faceoff .fo-side small { display:block; margin-top:3px; color:#c4b6e8; font-size:11px; }
-  .faceoff .fo-x { font-size:18px; }
   @media (prefers-reduced-motion: reduce) {
     .motes, .winburst { display:none !important; }
     .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand.thinking i, .log-btn.hasnews { animation: none !important; }
@@ -1154,7 +1136,7 @@
   .titleartbg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(22px) brightness(.5); transform:scale(1.18); }
   .titleart { object-fit:contain; object-position:50% 50%; }
   .titlepage .logo { background:none; -webkit-text-fill-color:#ffdf8e; color:#ffdf8e; filter:none; text-shadow:0 2px 0 rgba(122,84,16,.85), 0 6px 22px rgba(0,0,0,.85); }
-  .titlepage .titlever { bottom:calc(24px + env(safe-area-inset-bottom)); }
+  .titlepage .titlever { bottom:calc(88px + env(safe-area-inset-bottom)); } /* M163: the legal line clears the chips' full two-row height (59px measured in-browser) plus a gap */
   .titleshade { background:linear-gradient(180deg, rgba(5,3,12,.66) 0%, rgba(5,3,12,0) 26%, rgba(5,3,12,0) 74%, rgba(5,3,12,.72) 100%); }
   .card .cname { letter-spacing:-.3px; }
   .herochips { display:flex; flex-wrap:wrap; gap:7px; margin:2px 0 8px; }
@@ -5343,7 +5325,7 @@ function renderBody() {
   clearTargetLine();
   if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
   if (mode === 'collection') { renderCollection(); if (inspectCardId !== null) $app.innerHTML += inspectHtml(); return; }
-  if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
+  if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); if (deckCodeOpen) $app.innerHTML += deckCodeHtml(); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
     $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field">' + heroFigure(mf.heroId, 'foe') + heroFigure(mm.heroId, 'me') + '</div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>' + (introUntil && Date.now() < introUntil && G.winner === null ? matchIntroHtml() : ''); return; }
   if (G.winner !== null) crowdStop(); else crowdStart();
@@ -5801,7 +5783,7 @@ function renderMenu() {
     (hubTab === 'more' ? '<div class="panel"><h2>📚 Card collection</h2>' +
     '<button class="big" onclick="openCollection()">Browse all ' + Object.keys(CARDS).length + ' cards</button>' +
     '<div class="record">The 1:1 library: ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly || CARDS[id].schoolStage === 1; }).length + ' playable · ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered so far</div></div>' +
-    '<div class="panel"><details><summary>How it plays (60 seconds)</summary>' +
+    '<div class="panel"><details><summary>How it plays (30 seconds)</summary>' +
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
     'You lose if your hero hits 0 — or if your turn ends with an empty deck. Board limit: 5 creatures. Hand limit: 10. <b>Tap either deck pile</b> (the 🂠 count on a hero bar) to inspect it: cards left, and how many Nightmares are buried inside. When you are done, <b>⏭ Pass</b> hands the turn over.<br><br>' +
@@ -5940,6 +5922,7 @@ function renderCollection() {
 
 /* ---------- M5: deck builder (custom 30-card decks per hero, saved on device) ---------- */
 var builderHero = null, builderDeck = null, builderQuery = '';
+var deckCodeOpen = false, deckCodeMode = 'export', deckCodeMsg = ''; // M164: the in-app deck-code sheet (no native prompt/alert)
 var builderSchoolF = 'all', builderType = 'all', builderCost = 'all', builderKeyword = 'all';
 function cycleBuilderKeyword() { var keys = ['all'].concat(Object.keys(KW_LABELS)); builderKeyword = keys[(keys.indexOf(builderKeyword) + 1) % keys.length]; render(); }
 function setBuilderFilter(kind, v) { if (kind === 'school') builderSchoolF = v; else if (kind === 'type') builderType = v; else builderCost = v; render(); }
@@ -6004,18 +5987,28 @@ function builderAuto() {
   }
   render();
 }
-function builderExport() {
-  try { var code = 'YV1.' + btoa(JSON.stringify({ h: builderHero, d: builderDeck })); window.prompt('Copy your deck code:', code); } catch (e) {}
-}
-function builderImport() {
+function deckCodeString() { return 'YV1.' + btoa(JSON.stringify({ h: builderHero, d: builderDeck })); }
+function builderExport() { deckCodeOpen = true; deckCodeMode = 'export'; deckCodeMsg = ''; render(); }
+function builderImport() { deckCodeOpen = true; deckCodeMode = 'import'; deckCodeMsg = ''; render(); }
+function importDeckCode(raw) {
+  raw = (raw || '').trim();
+  if (!raw) { deckCodeMsg = 'Paste a code first.'; render(); return; }
   try {
-    var raw = window.prompt('Paste a deck code (YV1.…):');
-    if (!raw) return;
-    raw = raw.trim(); if (raw.indexOf('YV1.') !== 0) { alert('That does not look like a Yira deck code.'); return; }
+    if (raw.indexOf('YV1.') !== 0) { deckCodeMsg = 'That does not look like a Yira deck code.'; render(); return; }
     var obj = JSON.parse(atob(raw.slice(4)));
-    if (!HEROES[obj.h] || !Array.isArray(obj.d)) { alert('That code is damaged.'); return; }
-    builderHero = obj.h; builderDeck = migrateDeckIds(obj.d); render();
-  } catch (e) { try { alert('That code could not be read.'); } catch (e2) {} }
+    if (!HEROES[obj.h] || !Array.isArray(obj.d)) { deckCodeMsg = 'That code is damaged.'; render(); return; }
+    builderHero = obj.h; builderDeck = migrateDeckIds(obj.d); deckCodeOpen = false; deckCodeMsg = ''; render();
+  } catch (e) { deckCodeMsg = 'That code could not be read.'; render(); }
+}
+function deckCodeHtml() {
+  var inner = deckCodeMode === 'export'
+    ? '<div class="cname">📤 Your deck code</div><div class="ctext">Share this code — anyone can import the deck from it.</div><textarea id="deckCodeField" readonly rows="4" style="width:100%;box-sizing:border-box;font-size:13px;padding:10px;border-radius:9px;background:rgba(20,12,38,.85);border:1px solid rgba(177,140,255,.4);color:#efe9ff" onclick="this.select()">' + esc(deckCodeString()) + '</textarea><button class="big" style="margin-top:10px" onclick="copyDeckCode()">Copy code</button>'
+    : '<div class="cname">📥 Import a deck code</div><div class="ctext">Paste a YV1.… code and the builder loads that deck.</div><textarea id="deckCodeField" rows="4" placeholder="YV1.…" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:9px;background:rgba(20,12,38,.85);border:1px solid rgba(177,140,255,.4);color:#efe9ff"></textarea>' + (deckCodeMsg ? '<div style="color:#e8a0b4;font-size:13px;margin-top:6px">' + esc(deckCodeMsg) + '</div>' : '') + '<button class="big" style="margin-top:10px" onclick="importDeckCode(document.getElementById(\'deckCodeField\').value)">Load this deck</button>';
+  return '<div class="overlay" onclick="deckCodeOpen=false;render()"><div class="bigcard sheet" style="max-width:430px;width:94%" onclick="event.stopPropagation()">' + inner + '<button class="ghost big" style="margin-top:12px" onclick="deckCodeOpen=false;render()">Close</button></div></div>';
+}
+function copyDeckCode() {
+  try { var f = document.getElementById('deckCodeField'); if (f) { f.select(); } if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(deckCodeString()); else if (f) document.execCommand('copy'); } catch (e) {}
+  deckCodeMsg = ''; render();
 }
 function builderSave() { if (deckErrors(builderHero, builderDeck).length) return; try { localStorage.setItem(customDeckKey(builderHero), JSON.stringify(builderDeck)); } catch (e) {} render(); }
 function builderUseDefault() { try { localStorage.removeItem(customDeckKey(builderHero)); } catch (e) {} builderDeck = DECKS[builderHero].slice(); render(); }

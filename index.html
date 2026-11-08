@@ -188,7 +188,7 @@
   .floatnum.heal { color:#8bf5a8; }
   .floatnum { position:absolute; left:50%; top:4px; transform:translateX(-50%); font-size:17px; font-weight:900; color:#ff8fa3;
               text-shadow:0 1px 4px rgba(0,0,0,.9); animation:floatUp .95s ease-out forwards; z-index:6; pointer-events:none; }
-  /* M134: hero-bound damage reads BIG; the killing blow reads biggest, in gold */
+  /* M135: hero-bound damage reads BIG; the killing blow reads biggest, in gold */
   .floatnum.big { font-size:27px; animation:floatUpBig 1.15s ease-out forwards; }
   .floatnum.big.lethal { font-size:35px; color:#ffd76a; text-shadow:0 0 14px rgba(255,180,60,.75), 0 2px 5px rgba(0,0,0,.9); }
   @keyframes floatUpBig { 0% { transform:translate(-50%,0) scale(.55); opacity:0; } 28% { transform:translate(-50%,-10px) scale(1.18); opacity:1; } 100% { transform:translate(-50%,-44px) scale(1); opacity:0; } }
@@ -965,7 +965,12 @@
   .box.flowin { animation:flowIn .5s ease both; }
   @keyframes flowIn { from { opacity:0; filter:blur(7px); transform:scale(.965); } to { opacity:1; filter:blur(0); transform:scale(1); } }
   .leaguebanner { box-shadow:0 0 18px rgba(255,215,106,.5); animation:trophyPulse 2.2s ease-in-out infinite; }
-  .leaguebox { position:relative; overflow:hidden; }
+  .glossbox { max-width:430px; text-align:left; max-height:86vh; overflow-y:auto; }
+.glosshead { color:#ffd76a; font-family:Georgia,serif; margin:14px 0 6px; font-size:15px; letter-spacing:.04em; }
+.glossrow { display:flex; gap:10px; align-items:flex-start; padding:5px 0; border-bottom:1px solid rgba(255,255,255,.06); font-size:13px; line-height:1.45; color:#d9ccff; }
+.glossrow .eicon { font-size:17px; line-height:1.2; }
+.glossrow b { color:#fff; }
+.leaguebox { position:relative; overflow:hidden; }
   .league-trophy { font-size:74px; line-height:1.1; margin:8px 0 2px; filter:drop-shadow(0 0 22px var(--tier)); animation:trophyPulse 2.2s ease-in-out infinite; }
   @keyframes trophyPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.07); } }
   .league-h { font-family:Georgia,serif; letter-spacing:2px; color:var(--tier); margin:4px 0; font-size:21px; }
@@ -1005,7 +1010,7 @@
   .motes i:nth-child(5) { left:76%; animation-delay:7.3s; width:3px; height:3px; } .motes i:nth-child(6) { left:88%; animation-delay:3.9s; }
   .motes i:nth-child(7) { left:37%; animation-delay:9.2s; width:3px; height:3px; }
   .motes i:nth-child(8) { left:55%; animation-delay:4.6s; width:4px; height:4px; } .motes i:nth-child(9) { left:70%; animation-delay:8.1s; width:3px; height:3px; }
-  /* M135: hub tiles carry a slow sheen, staggered — light moving across glass */
+  /* M136: hub tiles carry a slow sheen, staggered — light moving across glass */
   .menupage .tile { position:relative; overflow:hidden; }
   .menupage .tile::after { content:''; position:absolute; top:0; bottom:0; width:34%; left:-60%; background:linear-gradient(100deg, transparent, rgba(255,240,200,.13), transparent); transform:skewX(-14deg); animation:tileSheen 6.5s ease-in-out infinite; pointer-events:none; }
   .menupage .tile:nth-of-type(2)::after { animation-delay:1.1s; } .menupage .tile:nth-of-type(3)::after { animation-delay:2.2s; }
@@ -1113,7 +1118,7 @@
   .titlepage .tagline { color:#e9defc; text-shadow:0 2px 10px rgba(0,0,0,.9); }
   .titlepage .pressstart { margin-top:30px; text-shadow:0 2px 12px rgba(0,0,0,.95); }
   .titlepage .titlever { position:absolute; left:0; right:0; bottom:calc(10px + env(safe-area-inset-bottom)); margin:0; z-index:2; color:#b7a8dd; text-shadow:0 1px 8px rgba(0,0,0,.9); }
-  .menubg { position:fixed; inset:0; background-size:cover; background-position:50% 32%; opacity:.30; filter:brightness(.78) saturate(1.04); box-shadow:inset 0 0 190px rgba(255,138,54,.20), inset 0 -120px 190px rgba(20,8,40,.35); z-index:0; pointer-events:none; } /* M135: the hub breathes warm — the reference's lava-gold register, not cold purple */ /* M117: dimmed — the art stays the landing's soul but stops washing out the hub (Jesse: 'it's all translucent') */
+  .menubg { position:fixed; inset:0; background-size:cover; background-position:50% 32%; opacity:.30; filter:brightness(.78) saturate(1.04); box-shadow:inset 0 0 190px rgba(255,138,54,.20), inset 0 -120px 190px rgba(20,8,40,.35); z-index:0; pointer-events:none; } /* M136: the hub breathes warm — the reference's lava-gold register, not cold purple */ /* M117: dimmed — the art stays the landing's soul but stops washing out the hub (Jesse: 'it's all translucent') */
   .pagescroll.menupage { position:relative; z-index:1; background:transparent; }
   .menupage .panel { background:rgba(17,11,32,.87); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border-color:rgba(216,180,84,.38); box-shadow:0 10px 30px rgba(0,0,0,.45); animation:menuRise .45s ease both; }
   .menupage .panel:nth-of-type(3) { animation-delay:.06s; }
@@ -5061,6 +5066,7 @@ function sheetHtml() {
     '<button class="ghost big" onclick="toggleCalm()">' + (calm ? '🍃 Motion: calm (animations near-instant)' : '🎞️ Motion: full') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;showLog()">📜 Battle log</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;openIntro()">🎓 How to play</button>' +
+    '<button class="ghost big" onclick="sheetOpen=false;openGlossary()">📖 Glossary</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;startMatch()">↻ Restart match</button>' +
     '<button class="ghost big" onclick="sheetConcede()">' + (concedeArmed ? '🏳 Tap again to yield the match' : '🏳 Concede') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;backToMenu()">🚪 Abandon match — back to menu</button>' +
@@ -5330,7 +5336,7 @@ function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
-  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
+  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
   if (mode === 'collection') return renderCollection();
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
@@ -5500,6 +5506,7 @@ function renderBody() {
   if (sheetOpen) html += sheetHtml();
   if (mode === 'draftPick') html += draftHtml();
   if (mode === 'scryPick') html += scryHtml();
+  if (glossaryOpen) html += glossaryHtml();
   if (G.winner !== null) html += gameOverHtml();
   $app.innerHTML = html;
   figFx = { hurt: {}, flare: -1, lunge: '' };
@@ -5623,10 +5630,10 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M133 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M137 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
-var profileOpen = false, pvpOpen = false;
+var profileOpen = false, pvpOpen = false, glossaryOpen = false;
 function hubGo(id) { try { sfx('click'); } catch (e) {} var n = document.getElementById(id); if (n) n.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); }
 function hubTile(ico, t, sub, onclick, locked) {
   return '<button class="tile' + (locked ? ' locked' : '') + '" onclick="' + onclick + '">' + (locked ? '<span class="lock">\uD83D\uDD12 SOON</span>' : '') + '<div class="tico">' + ico + '</div><div class="tt">' + t + '</div><div class="ts">' + sub + '</div></button>';
@@ -5650,7 +5657,45 @@ function hubHtml(rec) {
     hubTile('\uD83C\uDCCF', 'Deck Builder', 'Your 30, your way', 'openBuilder()', false) +
     hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).length + ' cards \u2014 search & filter them all', 'openCollection()', false) +
     hubTile('\uD83C\uDF93', 'How to Play', 'Thirty seconds to your first duel', 'openIntro()', false) +
+    hubTile('📖', 'Glossary', 'Every keyword & rule, in plain words', 'openGlossary();render()', false) +
     '</div>';
+}
+/* M137: THE GLOSSARY — the inspect law has always said keyword
+   explanations "live in the glossary"; until now there wasn't one. Every
+   wording below is a recovered rule (the game's own tooltips for Ward,
+   Armor and Relentless; engine-verified behaviour for the rest) — nothing
+   invented. Reachable from the hub tiles and the pause sheet. */
+var GLOSS_KEYWORDS = [
+  ['flying', 'Flying', 'Can only be blocked by a creature with Flying or Reach.'],
+  ['reach', 'Reach', 'Can block creatures with Flying.'],
+  ['haste', 'Haste', 'Can attack the turn it arrives — no summoning sickness.'],
+  ['trample', 'Trample', "Damage beyond the blocker\u2019s health spills onto the enemy hero."],
+  ['ward', 'Ward', "Can't be targeted by your opponent until your next turn."],
+  ['armor', 'Armor', "Blocks incoming damage once \u2014 then it breaks. (Destruction ignores it.)"],
+  ['relentless', 'Relentless', "Resummon this with can't block the first time it dies."],
+  ['sneak', 'Sneak', "Can't be blocked the first time it attacks."],
+  ['cantBlock', "Can't Block", 'This creature can never be assigned as a blocker.'],
+  ['cantAttack', "Can't Attack", 'This creature can never attack.'],
+  ['cantStun', "Can't Be Stunned", 'Stun effects pass this creature by.'],
+  ['fleeting', 'Fleeting', 'Burns away at the end of the turn it arrives.']
+];
+var GLOSS_SYSTEMS = [
+  ['🌟', 'Debut', 'Fires the moment the card enters play.'],
+  ['🪦', 'Finale', 'Fires when the card dies.'],
+  ['🪤', 'Traps', 'Armed face-down on your turn; their mana stays reserved (purple ◆) and they fire themselves when their moment comes.'],
+  ['✨', 'Miracle', 'When a card with Miracle is truly drawn (never from your opening hand), the Miracle resolves free, right then.'],
+  ['🌙', 'Moonlight', 'A Moonlight card flips at the end of your turn if you end with exactly 2 mana unspent.'],
+  ['🎲', 'Draft', 'Whenever you draft, you choose: 1 of 3 cards.'],
+  ['🌀', 'School chains', "Run a school's class card and the next stage slips into the top 3 of your deck as each stage is played. Stage 3 grants a rest-of-game boon — and the Wizard's Elemental Mastery STACKS: every cast adds a stack, and a turn ending on 6+ mana of spells summons one 5/5 Tide Elemental per stack."],
+  ['🔖', 'The Spellmark', "Spellmark Adept holds a mark on a RANDOM spell in your graveyard — rolled when it reaches your hand, re-rolled each turn. Its debut adds a temporary copy of the marked spell; look at the Adept in hand to see its mark."],
+  ['🌑', 'Nightmares', "Umbra plants Nightmares inside cards in the foe's deck. When a haunted card is drawn, each Nightmare drains 1 life from its holder to Umbra."]
+];
+function openGlossary() { glossaryOpen = true; }
+function dismissGlossary() { glossaryOpen = false; }
+function glossaryHtml() {
+  var kw = GLOSS_KEYWORDS.map(function (r) { return '<div class="glossrow"><span class="eicon">' + (KW_ICONS[r[0]] || '•') + '</span><div><b>' + r[1] + '</b><br><span>' + r[2] + '</span></div></div>'; }).join('');
+  var sy = GLOSS_SYSTEMS.map(function (r) { return '<div class="glossrow"><span class="eicon">' + r[0] + '</span><div><b>' + r[1] + '</b><br><span>' + r[2] + '</span></div></div>'; }).join('');
+  return '<div class="overlay" onclick="dismissGlossary();render()"><div class="box glossbox" onclick="event.stopPropagation()"><h2 style="text-align:center">📖 The Glossary</h2><h3 class="glosshead">Keywords</h3>' + kw + '<h3 class="glosshead">How the Coliseum works</h3>' + sy + '<button class="ghost big" style="margin-top:12px" onclick="dismissGlossary();render()">Close</button></div></div>';
 }
 function profileHtml() {
   var rec = record(); var lg = leagueOf(rec.w);
@@ -6250,7 +6295,7 @@ async function animateCombat(list) {
       await sleep(150);
       if (tgt) {
         tgt.classList.add('hitflash');
-        /* M134: a strike at a hero reads big; the killing blow reads biggest
+        /* M135: a strike at a hero reads big; the killing blow reads biggest
            and bursts — the reference's confetti on the final attack. */
         var heroHit = item.target === 'hero';
         var foeHero = heroHit ? G.players[item.dir < 0 ? aiIdx : humanIdx] : null;

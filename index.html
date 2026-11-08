@@ -1495,6 +1495,7 @@ const CARDS = {
   // ---------- M67: the Helvault vampire court + the Aven dawnflight (EN Spoilers full rows) ----------
   vampire_thrall: { icon: "\uD83E\uDDDB", name: 'Vampire', cost: 1, type: 'creature', power: 1, health: 1, subtype: 'vampire', generatedOnly: true, orig: "Vampire (token)", src: "the 1/1 Vampire body summoned across the Olivia block, EN Spoilers sheet" },
   soldier: { icon: "🪖", name: 'Soldier', cost: 1, type: 'creature', power: 1, health: 1, generatedOnly: true , orig: "Soldier (token)", src: "VIDEO-DIGEST-4C: Knight Militant inspect tooltip — 'Soldier — 1-cost, 1/1 Creature' (frame knight-militant-soldier-tooltip.jpg)" },
+  knight: { icon: "⚔️", name: 'Knight', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'soldier', generatedOnly: true, orig: "Knight (token)", src: "RECOVERY-WEB2 §4 (v1.03.00 face attachment): the Knight token is SETTLED — printed cost 2, Creature — Soldier, 2/3, no rules text. Summoned by Under My Watch (M174) as the new target; the same token Shrine of Valor calls (that card stays held with the Serra hero mapping)." },
   elf: { icon: "🧝", name: 'Elf', cost: 1, type: 'creature', power: 1, health: 1, generatedOnly: true , orig: "Elf (token)", src: "VIDEO-DIGEST-4B O12: Forest Patrol's sidebar — Elf token 1/1" },
   raging_goblin: { icon: "👺", name: 'Raging Goblin', cost: 1, type: 'creature', power: 2, health: 1, keywords: ['haste'], generatedOnly: true , orig: "Raging Goblin (token)", src: "VIDEO-DIGEST-4B O12: token 2/1 Haste (its printed cost is unrecorded — set 1)" },
   crypt_pup: { icon: "\uD83D\uDC3A", name: 'Vampire Pup', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'vampire', orig: "Vampire Pup", src: "Fan sortable sheet (Wayback snapshot 20221107), EN Spoilers tab - full row recorded" },
@@ -1813,10 +1814,14 @@ const CARDS = {
   fling: { icon: "\uD83D\uDCA5", name: 'Fling', cost: 1, type: 'spell', effect: { kind: 'sacrificeDamage', amount: 3 }, orig: "Fling", src: "RECOVERY-MANIFEST §4 Tier A: R 1-cost Common Spell, 'Destroy a friendly creature to deal 3 damage to an enemy.' — the CSV effect and the fan sheet Text agree word for word (fan-made source, flagged as the manifest flags Tier A). The damage is a FIXED 3 as recorded (not the sacrificed creature's power), and 'an enemy' reads as any target — a creature or the hero — by the Firemind Bolt precedent (M165). Held since M165 for the two-target flow; the M165 pin that kept it undefined is revised in the tests with its dated note." },
   sinister_southpaw: { icon: "\uD83D\uDC4A", name: 'Sinister Southpaw', cost: 6, type: 'creature', power: 5, health: 4, subtype: 'wizard', debut: { kind: 'sacrificeDestroy' }, orig: "Sinister Southpaw", src: "FACE FINAL (RECOVERY-WEB2, v1.01.02): B 6-cost 5/4 Wizard, 'Debut: Destroy another friendly creature to destroy an enemy creature.' The cost walked 6 → 5 (v0.21) → 6 (v1.01.02); the final printing stands. Deferred at M168 for the two-target flow — a sacrifice plus a victim is two picks, not one." },
   grudge_match: { icon: "\u2694\uFE0F", name: 'Grudge Match', cost: 2, type: 'spell', effect: { kind: 'fightPair', power: 1, health: 1 }, orig: "Grudge Match", src: "RECOVERY-MANIFEST §4: G 2-cost Spell (Core Set), full Fan Text on file: 'Give a friendly creature +1+1, then choose an enemy creature. They fight!' (fan sheet full-card-list.json via the CSV; the CSV's own effect line carries only a Drizzt-guide note calling it an interaction staple of green decks — the fan Text is the complete text and the manifest marks the data complete, held only for the fight flow). The buff lands BEFORE the fight, as the text sequences it ('Give +1+1, THEN choose... They fight!')." },
-  gear_mender: { icon: "\uD83D\uDD27", name: 'Gear Mender', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'construct', debut: { kind: 'addChargeArtifact', amount: 1 }, orig: "Gear Mender", src: "RECOVERY-MANIFEST §4 Tier A: colourless 4-cost 4/4 Construct, 'Debut: Add a charge to a friendly artifact.' (fan sheet Text via the CSV; the bot-cluster caveat applies — the manifest names this cluster the first a face-check should sample). Deferred at M169 for want of a friendly-artifact target surface; the M172 pair work built that surface (own-dock targeting, mirroring foeArtifactTargetable)." }
+  gear_mender: { icon: "\uD83D\uDD27", name: 'Gear Mender', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'construct', debut: { kind: 'addChargeArtifact', amount: 1 }, orig: "Gear Mender", src: "RECOVERY-MANIFEST §4 Tier A: colourless 4-cost 4/4 Construct, 'Debut: Add a charge to a friendly artifact.' (fan sheet Text via the CSV; the bot-cluster caveat applies — the manifest names this cluster the first a face-check should sample). Deferred at M169 for want of a friendly-artifact target surface; the M172 pair work built that surface (own-dock targeting, mirroring foeArtifactTargetable)." },
+  // ---------- M174: the flow-blocked three — a modal Debut choice, a draft from the deck itself, and resolution-time retargeting ----------
+  ragerunner: { icon: "\uD83D\uDC15", name: 'Ragerunner', cost: 2, type: 'creature', power: 3, health: 1, subtype: 'dog', debut: { kind: 'debutChoice', options: ['haste', 'sneak'] }, orig: "Ragerunner", src: "Record (cards.csv): R Rare Creature Dog, cost 2, 3/1 — the CSV effect line carries only the official bug-fix notes' mention; the full text rides the fan sheet Text via the CSV: 'Debut: Give this haste or sneak.' (fan-made source, flagged as the manifest flags Tier A; the card is also VIDEO-DIGEST face-verified in batches 1-2). Deferred at M169 because no modal-choice flow existed for a Debut; M174 builds it (pendingChoice). The choice is the creature's own two printed keywords, granted via gainedKeywords, so Ward/combat math sees them exactly as printed ones." },
+  anticipate: { icon: "\uD83D\uDD2E", name: 'Anticipate', cost: 2, type: 'spell', effect: { kind: 'draftFromDeck' }, orig: "Anticipate", src: "RECOVERY-MANIFEST §4 Tier A: U Common Spell, cost 2 — fan sheet Text via the CSV: 'Draft a card from your deck and draw it.' (fan-made source, flagged as the manifest flags Tier A; the CSV effect line carries the official bug-fix notes' mention, and the card is VIDEO-DIGEST face-verified in batches 1-2). Deferred at M169: offerDraft works on id pools, not the deck's instances, and the unpicked cards' disposition was recorded nowhere. M174 reads the card by its own word — it IS a draft, so Jesse's draft law (M122) governs both halves: pick 1 of 3 from the top of your deck, the pick is DRAWN through the true-draw pipeline (nightmares, taxes, Miracles all answer), and the other two are GONE — they enter no zone, exactly as a pool draft's unpicked instances never do." },
+  under_my_watch: { icon: "\u269C\uFE0F", name: 'Under My Watch', cost: 2, type: 'trap', trigger: { kind: 'watchRetarget' }, text: 'If your opponent targets a friendly creature, summon a Knight as the new target.', orig: "Under My Watch", src: "Record (cards.csv): W Rare Trap, cost 2, Opening Ceremony — text verbatim from the fan sheet Full Card List via the CSV: 'If your opponent targets a friendly creature, summon a Knight as the new target.' (fan-made source, flagged as Tier A is flagged.) The Knight it summons is the settled token (RECOVERY-WEB2 §4, v1.03.00 face: 2-cost Soldier 2/3). Deferred at M169 for resolution-time retargeting; M174 hooks the retarget at the chosen-target funnels (playCard spells and Debuts, pair members, artifact activations) beside Guard-the-Flock's own hook — auto-targeted and random effects do not 'target' and never trip it, the ward gate's own scope. Joins TRAP_POOL." }
 
 };
-const TRAP_POOL = ['beginners_luck', 'champions_grit', 'envenom', 'step_over', 'ancestors_vengeance', 'mana_short', 'molten_misstep', 'crippling_bolt', 'quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil', 'countersign', 'broken_focus', 'sudden_growth', 'opening_salvo', 'raise_the_guard', 'ready_to_rumble', 'transparent_hallway', 'resilient_sphere', 'dance_with_devils', 'shields_up']; // M169: the Devils' dance and Shields Up join the draftable traps // M104: the two vetted traps join // M73: Raise the Guard joins (Soldier token closed by wave 4C) // M62 purge: only verified traps remain — M72: the M68/M69/M72 verified traps join the draft pool
+const TRAP_POOL = ['beginners_luck', 'champions_grit', 'envenom', 'step_over', 'ancestors_vengeance', 'mana_short', 'molten_misstep', 'crippling_bolt', 'quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil', 'countersign', 'broken_focus', 'sudden_growth', 'opening_salvo', 'raise_the_guard', 'ready_to_rumble', 'transparent_hallway', 'resilient_sphere', 'dance_with_devils', 'shields_up', 'under_my_watch']; // M174: Under My Watch joins the draftable traps // M169: the Devils' dance and Shields Up join the draftable traps // M104: the two vetted traps join // M73: Raise the Guard joins (Soldier token closed by wave 4C) // M62 purge: only verified traps remain — M72: the M68/M69/M72 verified traps join the draft pool
 
 const HEROES = {
   weaver: {
@@ -1971,6 +1976,7 @@ const SCHOOL_OF = {
   // Neutral
   eager_smith:'none', runesteel_monstrosity:'none', scattershot_rig:'ember', hungerpit_tyrant:'grave',
   fling:'ember', sinister_southpaw:'grave', grudge_match:'worldroot', gear_mender:'none', // M172: the two-target wave's schools (Fling R, Southpaw B, Grudge Match G per the record; Gear Mender colourless)
+  ragerunner:'ember', anticipate:'tides', under_my_watch:'dawn', knight:'dawn', // M174: the flow-blocked three's schools (Ragerunner R, Anticipate U, Under My Watch W per the record); the Knight token schools Dawn like the Soldier token does (M16: every def carries a school)
 };
 // M168: a SCHOOL_OF value may be an array of two schools (a dual-colour
 // original) \u2014 cardSchool keeps the primary for display, cardSchools
@@ -2027,6 +2033,7 @@ class Game {
     this.winner = null;
     this.autoDraft = autoDraft || [true, true]; // seats that draft instantly (AI); a human seat waits for a pick
     this.pendingDraft = null; // { player, options: [inst] } while a draft choice is open
+    this.pendingChoice = null; // M174: { player, uid, options, label } while a modal choice (a Debut's either/or) is open
     this.turnNumber = 0; // counts half-turns taken
     this.stats = {
       nightmaresPlanted: 0, nightmaresPlantedBy: [0, 0], nightmareDrains: 0, nightmareLifeDrained: 0, nightmareLifeDrainedBy: [0, 0], // M146: nightmare stats split by the WEAVER who owns them
@@ -2271,20 +2278,29 @@ class Game {
   // priciest, as they always have. A second draft opening while one waits
   // resolves instantly rather than overwriting the open choice.
   offerDraft(i, poolIds, label, kind, opts = null) {
-    const pool = [...new Set(poolIds)];
-    const picks = [];
-    for (let k = 0; k < 3 && pool.length; k++) picks.push(makeInstance(pool.splice(this.rng.int(pool.length), 1)[0], null));
+    // M174: a deck draft (opts.deckOptions) arrives with its instances already
+    // made — they are the deck's own top cards, lifted out while the choice
+    // is open. Every other draft still rolls its picks from an id pool.
+    let picks;
+    if (opts && opts.deckOptions) picks = opts.deckOptions;
+    else {
+      const pool = [...new Set(poolIds)];
+      picks = [];
+      for (let k = 0; k < 3 && pool.length; k++) picks.push(makeInstance(pool.splice(this.rng.int(pool.length), 1)[0], null));
+    }
     if (!picks.length) return null;
     this.players[i].draftedThisTurn = true;
     if (this.autoDraft[i] || picks.length === 1 || this.pendingDraft) {
       const best = picks.slice().sort((a, b) => CARDS[b.cardId].cost - CARDS[a.cardId].cost)[0];
       // M169 (Unholy Recruitment): a summon-mode draft resolves instantly too — the pick takes the field.
       if (opts && opts.summon) this.resolveDraftSummon(i, best, label, opts);
+      // M174: a deck draft's instant pick is DRAWN, like the waited-for pick.
+      else if (opts && opts.fromDeck) { this.drawInstance(i, best, {}); this.log.push(`${this.players[i].hero.name} drafts ${def(best).name}`); }
       else { this.addToHand(i, best, label); this.log.push(`${this.players[i].hero.name} drafts ${def(best).name}`); }
       this.cleanupDeaths(); this.checkWin();
       return best;
     }
-    this.pendingDraft = { player: i, options: picks, label, kind, summon: !!(opts && opts.summon), grantKeyword: (opts && opts.grantKeyword) || null };
+    this.pendingDraft = { player: i, options: picks, label, kind, summon: !!(opts && opts.summon), grantKeyword: (opts && opts.grantKeyword) || null, fromDeck: !!(opts && opts.fromDeck) };
     this.log.push(`${this.players[i].hero.name} is drafting — pick 1 of 3`);
     return null;
   }
@@ -2314,12 +2330,68 @@ class Game {
     const [chosen] = this.pendingDraft.options.splice(oi, 1);
     const label = this.pendingDraft.label;
     const summonMode = this.pendingDraft.summon; const draftGrant = this.pendingDraft.grantKeyword;
+    const fromDeck = this.pendingDraft.fromDeck;
     this.pendingDraft = null;
     if (summonMode) this.resolveDraftSummon(i, chosen, label, { grantKeyword: draftGrant }); // M169: Unholy Recruitment's pick takes the field
+    // M174: a deck draft's pick is DRAWN through the true-draw pipeline; the
+    // unpicked instances were lifted out of the deck at offer time and are
+    // simply gone — no zone holds them (Jesse's draft law, M122).
+    else if (fromDeck) { this.drawInstance(i, chosen, {}); this.log.push(`${this.players[i].hero.name} drafts ${def(chosen).name}`); }
     else { this.addToHand(i, chosen, label); this.log.push(`${this.players[i].hero.name} drafts ${def(chosen).name}`); }
     this.players[i].draftedThisTurn = true; // M79
     this.cleanupDeaths(); this.checkWin();
     return chosen;
+  }
+  // M174 (Anticipate — "Draft a card from your deck and draw it"): the draft
+  // options are the top instances of the caster's own deck. The disposition
+  // question M169 left open is answered by the card's own word: it is a
+  // DRAFT, so the draft law governs — pick 1 of 3, the pick is drawn, the
+  // other two are gone (they enter no zone, exactly as a pool draft's
+  // unpicked instances never do).
+  offerDeckDraft(i, label) {
+    const p = this.players[i];
+    const options = p.deck.splice(0, Math.min(3, p.deck.length));
+    if (!options.length) { this.log.push(`${label} finds the deck empty — nothing to draft`); return null; }
+    return this.offerDraft(i, [], label, 'deck', { fromDeck: true, deckOptions: options });
+  }
+  // M174: a modal choice on a creature (Ragerunner's Debut: "Give this haste
+  // or sneak"). Mirrors offerDraft's seat rule exactly: an auto-draft seat —
+  // or a second choice opening while one already waits — resolves instantly
+  // by the choice policy; a human seat's choice waits in pendingChoice.
+  offerChoice(i, inst, options, label) {
+    if (!inst || !options || !options.length) return null;
+    if (this.autoDraft[i] || this.pendingChoice) {
+      const pick = this.choicePolicy(i, inst, options);
+      this.applyChoice(i, inst, pick, label);
+      return pick;
+    }
+    this.pendingChoice = { player: i, uid: inst.uid, options: options.slice(), label };
+    this.log.push(`${this.players[i].hero.name} must choose for ${def(inst).name} — ${options.join(' or ')}`);
+    return null;
+  }
+  // The instant seat's heuristic: Haste when the swing lands NOW — an open
+  // field to run at, or a foe hero the blow would finish. Otherwise Sneak:
+  // an unblockable first attack next turn is worth more than a 3-power
+  // body traded into a standing blocker this turn.
+  choicePolicy(i, inst, options) {
+    const foe = this.players[this.opp(i)];
+    if (options.includes('haste') && (!foe.board.length || foe.life <= powerOf(inst))) return 'haste';
+    return options.includes('sneak') ? 'sneak' : options[0];
+  }
+  applyChoice(i, inst, keyword, label) {
+    if (!inst || !this.players[i].board.includes(inst)) return; // the creature left before its choice landed — the choice is moot
+    inst.gainedKeywords = inst.gainedKeywords || [];
+    if (!keywordsOf(inst).includes(keyword)) inst.gainedKeywords.push(keyword);
+    this.log.push(`${def(inst).name} gains ${keyword} (${label})`);
+  }
+  resolveChoice(i, keyword) {
+    if (!this.pendingChoice || this.pendingChoice.player !== i) throw new Error('no choice is waiting');
+    if (!this.pendingChoice.options.includes(keyword)) throw new Error('that is not one of the choices');
+    const pc = this.pendingChoice; this.pendingChoice = null;
+    const inst = this.players[i].board.find((c) => c.uid === pc.uid);
+    if (inst) this.applyChoice(i, inst, keyword, pc.label);
+    this.cleanupDeaths(); this.checkWin();
+    return keyword;
   }
   reservedMana(p) { return p.traps.reduce((s, t) => s + t.reservedCost, 0); }
   availableMana(p) {
@@ -2391,9 +2463,16 @@ class Game {
     pl.life += amt; return amt;
   }
   drawCard(i, { mill = false } = {}) {
-    const p = this.players[i];
-    const inst = p.deck.shift();
+    const inst = this.players[i].deck.shift();
     if (!inst) return null;
+    return this.drawInstance(i, inst, { mill });
+  }
+  // M174: the draw pipeline proper, split from the deck shift so a card an
+  // effect names as DRAWN from the deck (Anticipate's deck draft) passes
+  // through the same nightmares, next-draw riders, Miracles and hand entry
+  // as a card drawn off the top — the printed word "draw" is honoured whole.
+  drawInstance(i, inst, { mill = false } = {}) {
+    const p = this.players[i];
     this.stats.drawsByPlayer[i]++;
     this.stats.nightmarePerDrawLog[i].push(inst.nightmares);
     if (inst.nightmares > 0 && inst.nightmareOwner !== null) {
@@ -2711,6 +2790,10 @@ class Game {
       }
     }
     if (d.type === 'spell' && this.tryGuardTrap(this.opp(i), inst, guardTgt, false)) { p.graveyard.push(inst); return { countered: true }; }
+    // M174 (Under My Watch): a spell that survives the Guard still answers
+    // to an armed Watch — its chosen target may be swapped for a Knight
+    // before it resolves (see tryWatchTrap).
+    if (d.type === 'spell') target = this.tryWatchTrap(this.opp(i), target) || target;
     if (d.type === 'creature') {
       if (p.board.length >= 5) throw new Error('board full (5)');
       inst.summonedTurn = this.turnNumber; inst.damage = 0;
@@ -2723,7 +2806,7 @@ class Game {
       if (p.hero.passive === 'bloom') { const bloomed = this.gainLife(p, 1); this.log.push(`${p.hero.name} blooms: +${bloomed} life`); }
       // M26: a Guard-the-Flock trap negates a Debut aimed at one of the
       // defender's creatures — the body still lands, only the Debut dies.
-      if (d.debut && !this.tryGuardTrap(this.opp(i), inst, guardTgt, true)) this.resolveEffect(i, d.debut, inst, target);
+      if (d.debut && !this.tryGuardTrap(this.opp(i), inst, guardTgt, true)) { target = this.tryWatchTrap(this.opp(i), target) || target; this.resolveEffect(i, d.debut, inst, target); } // M174: the Watch swaps the Debut's target for a Knight, Guard first
     } else if (d.type === 'artifact') {
       const existing = p.artifacts.find((a) => a.cardId === inst.cardId);
       if (existing) { existing.charges += d.charges; p.graveyard.push(inst); }
@@ -2800,6 +2883,7 @@ class Game {
     if (ac > this.availableMana(p)) throw new Error('not enough mana to activate');
     if (ac) p.manaSpent += ac;
     art.usedThisTurn = true; art.charges--;
+    target = this.tryWatchTrap(this.opp(i), target) || target; // M174 (Under My Watch): an aimed activation's target can be answered by an armed Watch
     this.resolveEffect(i, def(art).effect, art, target || null);
     if (art.charges <= 0) { p.artifacts = p.artifacts.filter((a) => a !== art); p.graveyard.push(art); }
   }
@@ -2875,6 +2959,36 @@ class Game {
       ? `${def(trap).name} guards ${def(target.inst).name}: ${def(playedInst).name}'s Debut is turned aside`
       : `${def(trap).name} guards ${def(target.inst).name}: ${def(playedInst).name} is countered`);
     return true;
+  }
+  // M174 (Under My Watch — "If your opponent targets a friendly creature,
+  // summon a Knight as the new target"): resolution-time retargeting. The
+  // hook sits at the chosen-target funnels — playCard spells and Debuts
+  // (Guard-the-Flock is consulted first at both sites, so a countered card
+  // never spends the Watch), pair targets (the foe-board member is the one
+  // answered for), and artifact activations. Auto-targeted and random
+  // effects never pass a chosen target through these sites and do not
+  // "target" — they never trip the Watch, the same scope the ward gate
+  // keeps. A full field leaves no room for the Knight to answer, and the
+  // Watch stays armed.
+  tryWatchTrap(trapOwnerIdx, target) {
+    if (!target) return null;
+    const owner = this.players[trapOwnerIdx];
+    let member = null;
+    if (target.kind === 'creature' && target.inst) member = target;
+    else if (target.kind === 'pair') member = (target.targets || []).find((t) => t && t.kind === 'creature' && t.inst && owner.board.includes(t.inst)) || null;
+    if (!member || !owner.board.includes(member.inst)) return null;
+    const ti = owner.traps.findIndex((t) => def(t).trigger && def(t).trigger.kind === 'watchRetarget');
+    if (ti < 0) return null;
+    if (owner.board.length >= 5) return null; // no room for the Knight to answer
+    const [trap] = owner.traps.splice(ti, 1);
+    trap.reservedCost = 0;
+    owner.graveyard.push(trap);
+    this.stats.trapsTriggered++; this.stats.trapsTriggeredBy[trapOwnerIdx]++;
+    this.onTrapTriggered(trapOwnerIdx, trap);
+    const knight = this.summonToken(owner, 'knight');
+    this.log.push(`${def(trap).name}: a Knight answers for ${def(member.inst).name} — the Knight is the target now`);
+    if (target.kind === 'pair') { target.targets[target.targets.indexOf(member)] = { kind: 'creature', inst: knight }; return target; }
+    return { kind: 'creature', inst: knight };
   }
   onTrapTriggered(ownerIdx, trap) {
     const owner = this.players[ownerIdx];
@@ -3054,6 +3168,8 @@ class Game {
         this.cleanupDeaths(); break; }
       case 'generateSpells': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly); for (let k = 0; k < effect.count; k++) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'draftSpell': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'spell' && !CARDS[id].generatedOnly && (effect.maxCost == null || CARDS[id].cost <= effect.maxCost)); this.offerDraft(i, pool, srcName, 'spell'); break; }
+      case 'draftFromDeck': this.offerDeckDraft(i, srcName); break; // M174 (Anticipate): draft the deck's own top instances; the pick is drawn, the rest are gone
+      case 'debutChoice': this.offerChoice(i, sourceInst, effect.options, srcName); break; // M174 (Ragerunner): the Debut is a choice of keyword for the creature itself
       case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
       case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === effect.subtype && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'debuffAndAdd': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.cleanupDeaths(); } this.addToHand(i, makeInstance(effect.cardId, null), srcName); break; }
@@ -4913,6 +5029,8 @@ function effectText(d) {
       case 'debuffAll': return e.foesOnly ? 'Give each enemy creature ' + e.power + '/' + e.health + '.' : 'Give all creatures ' + e.power + '/' + e.health + '.';
       case 'generateSpells': return 'Add ' + e.count + ' random spells to your hand.';
       case 'draftSpell': return e.maxCost != null ? 'Draft a spell that costs ' + e.maxCost + ' or less \u2014 pick 1 of 3 to add to your hand.' : 'Draft a spell \u2014 pick 1 of 3 to add to your hand.';
+      case 'draftFromDeck': return 'Draft a card from your deck and draw it \u2014 pick 1 of 3 from the top of your deck; the other two are gone.'; // M174 (Anticipate): the recorded words, with the draft law (M122) spoken aloud
+      case 'debutChoice': return 'Give this ' + (e.options || []).join(' or ') + '.'; // M174 (Ragerunner): prints as "Debut: Give this haste or sneak."
       case 'destroyAndSelfDamage': return 'Destroy an enemy creature. Deal damage to yourself equal to its power unless a creature died this turn.';
       case 'debuffAndAdd': return 'Give an enemy creature ' + e.power + '/' + e.health + ' and add ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'a card') + ' to your hand.';
       case 'addRandomSubtype': return 'Add a random ' + e.subtype + ' to your hand.';
@@ -5060,6 +5178,7 @@ function effectText(d) {
     if (d.trigger.kind === 'vindictive') parts.push('Trap: at the end of the enemy\'s turn, destroy the strongest creature that damaged you this turn.');
     if (d.trigger.kind === 'foeEndSummon') parts.push('Trap: at the end of your opponent\'s turn, ' + eff(d.effect).charAt(0).toLowerCase() + eff(d.effect).slice(1));
     if (d.trigger.kind === 'guardFlock') parts.push('Trap: counter a spell or Debut that targets one of your creatures, whatever it costs.');
+    if (d.trigger.kind === 'watchRetarget') parts.push('Trap: if your opponent targets one of your creatures, summon a Knight as the new target.'); // M174 (Under My Watch)
     if (parts.length === trapBefore) { if (d.text) parts.push('Trap: ' + d.text); else if (d.effect) parts.push('Trap: ' + eff(d.effect)); } // M121: triggers without a written line speak in the card's own recorded words
   }
   if (d.type === 'artifact' && d.charges) parts.push('Artifact, ' + d.charges + ' charges. Activate once per turn: ' + eff(d.effect));
@@ -5887,6 +6006,7 @@ function renderBody() {
   if (sheetOpen) html += sheetHtml();
   if (mode === 'draftPick') html += draftHtml();
   if (mode === 'scryPick') html += scryHtml();
+  if (mode === 'choicePick') html += choiceHtml(); // M174
   if (glossaryOpen) html += glossaryHtml();
   if (G.winner !== null) html += gameOverHtml();
   $app.innerHTML = html;
@@ -6010,7 +6130,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 12 heroes</span><span class="tchip">\uD83C\uDCCF 388 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
+    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 12 heroes</span><span class="tchip">\uD83C\uDCCF 391 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history)
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
@@ -6579,6 +6699,7 @@ function clickHand(uid) {
   try { G.playCard(humanIdx, uid, null); handOpen = false; sfx(d.type === 'creature' ? 'creature' : d.type === 'artifact' ? 'play' : 'spell'); say('You play ' + d.name + '.'); } catch (e) { msg = errMsg(e, uid); }
   if (G.pendingDraft && G.pendingDraft.player === humanIdx) mode = 'draftPick';
   if (G.pendingScry && G.pendingScry.player === humanIdx) mode = 'scryPick';
+  if (G.pendingChoice && G.pendingChoice.player === humanIdx) mode = 'choicePick'; // M174: a modal Debut (Ragerunner) asks its question
   flushEngineLog(); if (!finishCheck()) render();
 }
 function pickDraft(uid) {
@@ -6590,8 +6711,8 @@ function draftHtml() {
   if (!pd) return '';
   // M122: every draft is a pick of 3 — the overlay speaks for its kind.
   var dkind = pd.kind || 'signature';
-  var dtitle = dkind === 'signature' ? 'Draft a signature \u2014 pick one' : dkind === 'trap' ? 'Draft a trap \u2014 pick one' : 'Draft a spell \u2014 pick one';
-  var dsub = dkind === 'signature' ? 'Three signature cards from across every hero\'s set. The other two are gone.' : 'Choose one to add to your hand. The other two are gone.';
+  var dtitle = dkind === 'signature' ? 'Draft a signature \u2014 pick one' : dkind === 'trap' ? 'Draft a trap \u2014 pick one' : dkind === 'deck' ? 'Draft from your deck \u2014 pick one' : 'Draft a spell \u2014 pick one'; // M174: a deck draft (Anticipate) names its source
+  var dsub = dkind === 'signature' ? 'Three signature cards from across every hero\'s set. The other two are gone.' : dkind === 'deck' ? 'The top of your deck, offered up. Choose one to draw. The other two are gone.' : 'Choose one to add to your hand. The other two are gone.';
   return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">' + dtitle + '</div>' +
     '<div class="ctext">' + dsub + '</div>' +
     '<div class="draftrow">' + pd.options.map(function (inst) { var dd = D(inst); var cap = dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : ((dd.cardSchool && SCHOOL_META[dd.cardSchool] ? SCHOOL_META[dd.cardSchool].name + ' ' : '') + dd.type); return '<div class="draftpick">' + cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }) + '<div class="draftcap">' + cap + '</div></div>'; }).join('') + '</div></div></div>';
@@ -6603,6 +6724,26 @@ function scryHtml() {
     '<div class="ctext">Keep it there, or send it to the bottom.</div>' +
     '<div style="display:flex;justify-content:center;margin:10px 0">' + cardHtml(top, humanIdx, {}) + '</div>' +
     '<div style="display:flex;gap:10px;justify-content:center"><button class="actbtn" onclick="resolveScryChoice(false)">Keep on top</button><button class="actbtn" onclick="resolveScryChoice(true)">Put on bottom</button></div></div></div>';
+}
+/* M174: the modal-choice overlay — a Debut that asks its creature's
+   controller to pick one of two keywords (Ragerunner: haste or sneak).
+   Built on the scry overlay's shape: the card, the choice, the gloss. */
+function choiceHtml() {
+  var pc = G.pendingChoice;
+  if (!pc) return '';
+  var inst = null; G.players[humanIdx].board.forEach(function (c) { if (c.uid === pc.uid) inst = c; });
+  var d = inst ? D(inst) : null;
+  var gloss = {}; GLOSS_KEYWORDS.forEach(function (r) { gloss[r[0]] = r; });
+  return '<div class="overlay"><div class="bigcard" style="max-width:420px;width:94%"><div class="cname">' + (d ? esc(d.name) : 'Choose') + '</div>' +
+    '<div class="ctext">Its debut is a choice — pick one. The other is gone.</div>' +
+    (inst ? '<div style="display:flex;justify-content:center;margin:10px 0">' + cardHtml(inst, humanIdx, {}) + '</div>' : '') +
+    '<div style="display:flex;gap:10px;justify-content:center">' + pc.options.map(function (k) { var g = gloss[k]; return '<button class="actbtn" onclick="pickChoice(\'' + k + '\')">' + (KW_ICONS[k] || '') + ' ' + (g ? g[1] : k) + '</button>'; }).join('') + '</div>' +
+    pc.options.map(function (k) { var g = gloss[k]; return g ? '<div class="ctext" style="margin-top:8px">' + (KW_ICONS[k] || '') + ' <b>' + g[1] + '</b> — ' + g[2] + '</div>' : ''; }).join('') +
+    '</div></div>';
+}
+function pickChoice(keyword) {
+  try { G.resolveChoice(humanIdx, keyword); sfx('spell'); say('Chosen.'); } catch (e) { msg = errMsg(e, null); }
+  mode = 'main'; flushEngineLog(); if (!finishCheck()) render();
 }
 function resolveScryChoice(toBottom) {
   try { G.resolveScry(humanIdx, toBottom); sfx('spell'); } catch (e) { msg = errMsg(e, null); }
@@ -6646,7 +6787,7 @@ function resolveTarget(target) {
   clearTargetLine();
   var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }));
   try { G.playCard(humanIdx, pendingUid, target); sfx('spell'); say('You play ' + (d ? d.name : 'a card') + '.'); } catch (e) { msg = errMsg(e, pendingUid); }
-  pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; mode = (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : (G.pendingScry && G.pendingScry.player === humanIdx) ? 'scryPick' : 'main'; flushEngineLog(); if (!finishCheck()) render();
+  pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; mode = (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : (G.pendingScry && G.pendingScry.player === humanIdx) ? 'scryPick' : (G.pendingChoice && G.pendingChoice.player === humanIdx) ? 'choicePick' : 'main'; flushEngineLog(); if (!finishCheck()) render(); // M174: choicePick joins the post-play landings
 }
 function cancelTarget() { clearTargetLine(); pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; mode = 'main'; render(); }
 function restartTargets() { // M172: step back to a pair cast's first pick without giving up the cast

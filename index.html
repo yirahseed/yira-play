@@ -5600,7 +5600,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">playable slice M149 · all names and art original</div></div>';
+    '<div class="titlever">playable slice M152 · all names and art original</div></div>';
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); }
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
@@ -5660,8 +5660,8 @@ var GLOSS_SYSTEMS = [
   ['🔖', 'The Spellmark', "Spellmark Adept holds a mark on a RANDOM spell in your graveyard — rolled when it reaches your hand, re-rolled each turn. Its debut adds a temporary copy of the marked spell; look at the Adept in hand to see its mark."],
   ['🌑', 'Nightmares', "Umbra plants Nightmares inside cards in the foe's deck. When a haunted card is drawn, each Nightmare drains 1 life from its holder to Umbra."]
 ];
-function openGlossary() { glossaryOpen = true; }
-function dismissGlossary() { glossaryOpen = false; }
+function openGlossary() { glossaryOpen = true; render(); } // M151: these helpers now render (like showLog/toggleCalm) — the pause-sheet button calls openGlossary() alone and silently did nothing
+function dismissGlossary() { glossaryOpen = false; render(); }
 function glossaryHtml() {
   var kw = GLOSS_KEYWORDS.map(function (r) { return '<div class="glossrow"><span class="eicon">' + (KW_ICONS[r[0]] || '•') + '</span><div><b>' + r[1] + '</b><br><span>' + r[2] + '</span></div></div>'; }).join('');
   var sy = GLOSS_SYSTEMS.map(function (r) { return '<div class="glossrow"><span class="eicon">' + r[0] + '</span><div><b>' + r[1] + '</b><br><span>' + r[2] + '</span></div></div>'; }).join('');
@@ -5905,7 +5905,9 @@ try {
   }
 } catch (e) {}
 function customDeckKey(heroId) { return 'yira_custom_' + heroId; }
-function loadCustomDeck(heroId) { try { var a = JSON.parse(localStorage.getItem(customDeckKey(heroId)) || 'null'); return Array.isArray(a) ? a : null; } catch (e) { return null; } }
+var RETIRED_CARDS = { rushhorn_minotaur: 'blitzing_minotaur' }; // M150: cards retired by a merge (M147) — saved decks and codes heal forward to the surviving card instead of breaking
+function migrateDeckIds(a) { return a.map(function (id) { return RETIRED_CARDS[id] || id; }).filter(function (id) { return CARDS[id]; }); }
+function loadCustomDeck(heroId) { try { var a = JSON.parse(localStorage.getItem(customDeckKey(heroId)) || 'null'); return Array.isArray(a) ? migrateDeckIds(a) : null; } catch (e) { return null; } }
 function heroPool(heroId) { return Object.keys(CARDS).filter(function (id) { var d = CARDS[id]; return (!d.generatedOnly || d.schoolStage === 1) && (!d.signatureFor || d.signatureFor === heroId) && cardLegalFor(heroId, id); }); }
 function deckErrors(heroId, ids) {
   var errs = [];
@@ -5950,7 +5952,7 @@ function builderImport() {
     raw = raw.trim(); if (raw.indexOf('YV1.') !== 0) { alert('That does not look like a Yira deck code.'); return; }
     var obj = JSON.parse(atob(raw.slice(4)));
     if (!HEROES[obj.h] || !Array.isArray(obj.d)) { alert('That code is damaged.'); return; }
-    builderHero = obj.h; builderDeck = obj.d.filter(function (id) { return CARDS[id]; }); render();
+    builderHero = obj.h; builderDeck = migrateDeckIds(obj.d); render();
   } catch (e) { try { alert('That code could not be read.'); } catch (e2) {} }
 }
 function builderSave() { if (deckErrors(builderHero, builderDeck).length) return; try { localStorage.setItem(customDeckKey(builderHero), JSON.stringify(builderDeck)); } catch (e) {} render(); }
@@ -5981,7 +5983,7 @@ function renderBuilder() {
   if (builderType !== 'all') pool = pool.filter(function (id) { return CARDS[id].type === builderType; });
   if (builderCost !== 'all') pool = pool.filter(function (id) { return costIn(builderCost, CARDS[id].cost); });
   if (builderKeyword !== 'all') pool = pool.filter(function (id) { return (CARDS[id].keywords || []).indexOf(builderKeyword) >= 0; });
-  var deckIds = Object.keys(counts).sort(function (a, b) { return CARDS[a].cost - CARDS[b].cost || CARDS[a].name.localeCompare(CARDS[b].name); });
+  var deckIds = Object.keys(counts).sort(function (a, b) { return (CARDS[a] ? CARDS[a].cost : 99) - (CARDS[b] ? CARDS[b].cost : 99) || (CARDS[a] ? CARDS[a].name : a).localeCompare(CARDS[b] ? CARDS[b].name : b); });
   $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">deck builder · build your own 30</p>' +
     '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
     '<div class="panel"><h2>🃏 Deck builder</h2>' +

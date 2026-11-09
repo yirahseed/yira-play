@@ -74,7 +74,7 @@
           --schLine:color-mix(in srgb, var(--schA, #7a5fd0) 55%, transparent);
           background:linear-gradient(165deg,var(--schBody1, #2b2138),var(--schBody2, #221831)) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
           border:2px solid transparent; border-radius:16px; padding:6px 7px; position:relative; cursor:default;
-          box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3px rgba(24,14,4,.55), inset 0 0 0 4.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 6px rgba(255,240,210,.06);
+          box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3px rgba(24,14,4,.55), inset 0 0 0 4.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 6px rgba(255,240,210,.11);
           display:flex; flex-direction:column; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent; }
   .card img { -webkit-user-drag:none; -webkit-touch-callout:none; }
   /* M73 (Jesse) — ONE FRAME FAMILY, superseding M12's per-type metals: every
@@ -108,10 +108,10 @@
   .card .cost { position:absolute; top:-9px; left:-9px; color:#fff; font-weight:800; z-index:4;
                 width:28px; height:28px; text-align:center; line-height:27px; font-size:13.5px; text-shadow:0 1px 2px rgba(10,2,30,.85);
                 clip-path:polygon(30% 0, 70% 0, 100% 35%, 50% 100%, 0 35%);
-                background-color:#3d1f7a; background-image:linear-gradient(100deg, rgba(255,255,255,.50) 0 18%, rgba(255,255,255,0) 19% 55%, rgba(0,0,0,.22) 56% 78%, rgba(255,255,255,.16) 79%), radial-gradient(circle at 34% 24%, #cdb2ff, #7a4fd0 52%, #3d1f7a 88%);
+                background-color:#3d1f7a; background-image:linear-gradient(100deg, rgba(255,255,255,.50) 0 18%, rgba(255,255,255,0) 19% 55%, rgba(0,0,0,.22) 56% 78%, rgba(255,255,255,.16) 79%), radial-gradient(circle at 34% 24%, #d9c4ff, #6a3fc4 52%, #2c1258 88%);
                 filter:drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
   .card .cname { font-weight:700; font-size:12.5px; line-height:1.15; margin:3px 0 3px; height:29px; overflow:hidden; flex:none; white-space:nowrap;
-                 background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28);
+                 background-color:var(--metalDk); background-image:linear-gradient(180deg, rgba(255,255,255,.30), rgba(255,255,255,0) 48%, rgba(0,0,0,.15)), var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,246,220,.45), 0 -1px 1px rgba(0,0,0,.28);
                  border-radius:5px; padding:3px 6px 3px 17px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35);
                  clip-path:polygon(0 0, 100% 0, calc(100% - 4px) 50%, 100% 100%, 0 100%, 4px 50%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
   .card .ctype { font-size:10px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
@@ -132,14 +132,14 @@
   .bigcard { width:240px; --metal:linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355); --metalDk:#7c521f;
              --schLine:color-mix(in srgb, var(--schA, #7a5fd0) 55%, transparent);
              background:linear-gradient(165deg,var(--schBody1, #2b2138),var(--schBody2, #221831)) padding-box, linear-gradient(160deg,#eab26c,#a06a2c 55%,#cfa355) border-box;
-             border:2.5px solid transparent; border-radius:14px; padding:14px; position:relative; text-align:left;
+             border:3px solid transparent; border-radius:14px; padding:14px; position:relative; text-align:left;
              box-shadow:0 6px 24px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3.5px rgba(24,14,4,.55), inset 0 0 0 5.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 7px rgba(255,240,210,.06); }
   .bigcard .cost { position:absolute; top:-11px; left:-11px; color:#fff; font-weight:800; z-index:4; width:34px; height:34px; text-align:center; line-height:33px; font-size:16px; text-shadow:0 1px 2px rgba(10,2,30,.85);
                 clip-path:polygon(30% 0, 70% 0, 100% 35%, 50% 100%, 0 35%);
-                background-color:#3d1f7a; background-image:linear-gradient(100deg, rgba(255,255,255,.50) 0 18%, rgba(255,255,255,0) 19% 55%, rgba(0,0,0,.22) 56% 78%, rgba(255,255,255,.16) 79%), radial-gradient(circle at 34% 24%, #cdb2ff, #7a4fd0 52%, #3d1f7a 88%);
+                background-color:#3d1f7a; background-image:linear-gradient(100deg, rgba(255,255,255,.50) 0 18%, rgba(255,255,255,0) 19% 55%, rgba(0,0,0,.22) 56% 78%, rgba(255,255,255,.16) 79%), radial-gradient(circle at 34% 24%, #d9c4ff, #6a3fc4 52%, #2c1258 88%);
                 filter:drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
-  .bigcard .cname { font-weight:700; font-size:17px; white-space:nowrap; overflow:hidden; margin:2px 0 3px; background-color:var(--metalDk); background-image:var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,255,255,.28); border-radius:6px; padding:4px 8px 4px 26px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); clip-path:polygon(0 0, 100% 0, calc(100% - 5px) 50%, 100% 100%, 0 100%, 5px 50%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
-  .bigcard .cart { border-radius:9px; overflow:hidden; margin:5px 0 7px; line-height:0; position:relative; border:1px solid rgba(0,0,0,.65); box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.5), inset 0 0 0 3px rgba(255,240,210,.10), inset 0 -16px 14px -12px var(--schA, #7a5fd0), 0 1px 3px rgba(0,0,0,.4); }
+  .bigcard .cname { font-weight:700; font-size:17px; white-space:nowrap; overflow:hidden; margin:2px 0 3px; background-color:var(--metalDk); background-image:linear-gradient(180deg, rgba(255,255,255,.30), rgba(255,255,255,0) 48%, rgba(0,0,0,.15)), var(--metal); color:#241503; text-shadow:0 1px 0 rgba(255,246,220,.45), 0 -1px 1px rgba(0,0,0,.28); border-radius:6px; padding:4px 8px 4px 26px; box-shadow:inset 0 1px 2px rgba(255,255,255,.45), inset 0 -1px 2px rgba(0,0,0,.35); clip-path:polygon(0 0, 100% 0, calc(100% - 5px) 50%, 100% 100%, 0 100%, 5px 50%); filter:drop-shadow(0 1px 1px rgba(0,0,0,.5)); }
+  .bigcard .cart { border-radius:9px; overflow:hidden; margin:5px 0 7px; line-height:0; position:relative; border:1px solid rgba(0,0,0,.65); box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.5), inset 0 0 0 3px rgba(255,240,210,.10), inset 0 -22px 20px -13px var(--schA, #7a5fd0), inset 0 10px 14px -9px rgba(255,255,255,.13), 0 1px 3px rgba(0,0,0,.4); }
   .bigcard .cart img { width:100%; height:150px; object-fit:cover; display:block; }
   .bigcard .ctype { font-size:11px; color:#a793d6; text-transform:uppercase; letter-spacing:.08em; }
   .bigcard .ctext { font-size:13.5px; color:#33261a; line-height:1.45; margin:8px 0;
@@ -172,18 +172,19 @@
      white engraved numerals; rarity is one small faceted diamond whose
      colour alone speaks; legendaries strike richer gold and wear a crown;
      the POLISHED form gilds the same card — same layout, treasured. */
-  .rgem { flex:none; align-self:center; width:11px; height:11px; margin:0 auto; transform:rotate(45deg); border-radius:2.5px;
+  .rgem { flex:none; align-self:center; width:12px; height:12px; margin:0 auto; transform:rotate(45deg); border-radius:2.5px; position:relative;
           box-shadow:inset 0 1px 1px rgba(255,255,255,.65), inset 0 -1px 2px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.5); }
   .rgem.r-common { background:radial-gradient(circle at 35% 30%, #f2f4f7, #9aa3ad 78%); }
-  .rgem.r-rare { background:radial-gradient(circle at 35% 30%, #a9c8ff, #2f5fd0 78%); }
-  .rgem.r-epic { background:radial-gradient(circle at 35% 30%, #e3b8ff, #7d3fd1 78%); }
+  .rgem.r-rare { background:radial-gradient(circle at 35% 30%, #a9c8ff, #2f5fd0 78%); box-shadow:inset 0 1px 1px rgba(255,255,255,.65), inset 0 -1px 2px rgba(0,0,0,.35), 0 0 5px rgba(70,130,255,.55); }
+  .rgem.r-epic { background:radial-gradient(circle at 35% 30%, #e3b8ff, #7d3fd1 78%); box-shadow:inset 0 1px 1px rgba(255,255,255,.65), inset 0 -1px 2px rgba(0,0,0,.35), 0 0 5px rgba(160,80,255,.55); }
+  .rgem::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,0) 46%); pointer-events:none; }
   .rgem.r-mythic { background:radial-gradient(circle at 35% 30%, #ffd9a0, #e06414 78%); box-shadow:inset 0 1px 1px rgba(255,255,255,.65), inset 0 -1px 2px rgba(0,0,0,.35), 0 0 6px rgba(255,140,26,.75); }
   .rgem.insp { width:14px; height:14px; margin:0; }
   .cpips { display:inline-flex; gap:2.5px; align-items:center; flex:none; }
-  .cpips i { width:6px; height:6px; transform:rotate(45deg); border-radius:1.5px; background:#9a6ae0; box-shadow:0 0 3px rgba(154,106,224,.8); }
-  .cpips i.off { background:rgba(255,255,255,.16); box-shadow:none; }
+  .cpips i { width:6px; height:6px; transform:rotate(45deg); border-radius:1.5px; background:radial-gradient(circle at 38% 32%, #e9ddff, #9a6bff 58%, #5a2fd0); box-shadow:0 0 4px rgba(150,100,255,.85), inset 0 0 1px rgba(0,0,0,.35); }
+  .cpips i.off { background:rgba(18,8,38,.45); box-shadow:inset 0 0 0 1.5px rgba(200,180,255,.38); }
   .crownmark { position:absolute; top:2px; left:50%; margin-left:-8px; width:16px; height:12px; z-index:4; pointer-events:none;
-               background:linear-gradient(180deg,#ffe9a8,#c08c2a); clip-path:polygon(0 100%, 0 6%, 24% 62%, 50% 0, 76% 62%, 100% 6%, 100% 100%);
+               background:linear-gradient(180deg,#ffedb5 0%,#f3c44e 52%,#d99a26 80%,#9a6a1c 100%); clip-path:polygon(0 100%, 0 6%, 24% 62%, 50% 0, 76% 62%, 100% 6%, 100% 100%);
                filter:drop-shadow(0 0 3px rgba(20,8,40,.55)) drop-shadow(0 1px 1px rgba(0,0,0,.8)); }
   .bigcard .crownmark { width:24px; height:17px; margin-left:-12px; top:3px; }
   .bigcard .ctype { display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -192,7 +193,15 @@
   .card .cart::after, .bigcard .cart::after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
                background:radial-gradient(ellipse at 50% 42%, transparent 58%, rgba(5,2,12,.38) 100%); box-shadow:inset 0 1px 0 rgba(255,255,255,.14); }
   .bigcard .cart.glyphbox { display:flex; align-items:center; justify-content:center; height:150px; font-size:54px; color:#e8dcc0;
-               background:radial-gradient(circle at 50% 34%, var(--schB, #4b3566), #120c20 78%); text-shadow:0 0 18px var(--schA, #7a5fd0), 0 2px 3px rgba(0,0,0,.7); }
+               background:radial-gradient(circle at 9px 9px, rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at calc(100% - 9px) 9px, rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at 9px calc(100% - 9px), rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--schA, #7a5fd0) 30%, transparent) 0, transparent 47%), repeating-linear-gradient(0deg, rgba(255,255,255,.030) 0 2px, transparent 2px 9px), radial-gradient(circle at 50% 34%, var(--schB, #4b3566), #120c20 78%); text-shadow:0 -1px 0 rgba(255,240,210,.28), 0 2px 3px rgba(0,0,0,.85), 0 0 20px var(--schA, #7a5fd0); }
+  /* M189: the no-art window is a SEALED VAULT, not a hole — an engraved
+     medallion ring seats the school sigil; rivets and door seams ride the
+     glyphbox background layers. Frame treatment only: the five veterans
+     stay unpainted (decline-locked). */
+  .card .glyphbox::before, .bigcard .cart.glyphbox::before { content:''; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border-radius:50%; pointer-events:none;
+               border:2px solid color-mix(in srgb, var(--schA, #7a5fd0) 48%, rgba(0,0,0,.35)); box-shadow:inset 0 0 0 3px rgba(0,0,0,.38), inset 0 0 16px rgba(0,0,0,.55), 0 0 0 1px rgba(255,240,210,.08); }
+  .card .glyphbox::before { width:40px; height:40px; }
+  .bigcard .cart.glyphbox::before { width:84px; height:84px; }
   .cname.foil, .polished .cname { background-image:linear-gradient(160deg,#fff0b8,#eec25e 45%,#c08c2a 80%,#f7dc8d); }
   .card.armed-glow { --schLine:rgba(167,120,255,.85); } /* an armed trap's enamel turns violet — the glow moves INTO the frame */
   .card.legendary, .bigcard.legendary { --metal:linear-gradient(160deg,#ffe9a8,#dfae4a 50%,#a8741f 82%,#f3d27a); --metalDk:#7c5214; }
@@ -203,18 +212,31 @@
   /* POLISHED — the same card, treasured: true gold, a sheen of light across
      the frame, jewels lit from inside. Calm-safe by construction: body.calm
      flattens every animation in the app, this one included. */
-  .card.polished, .bigcard.polished { --metal:linear-gradient(160deg,#ffedb0,#eec25e 42%,#c08c2a 78%,#f7dc8d); --metalDk:#8a5f14; }
-  .card.polished { box-shadow:0 3px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3px rgba(24,14,4,.55), inset 0 0 0 4.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 6px rgba(255,240,210,.06), 0 0 18px rgba(238,194,94,.40); }
-  .bigcard.polished { box-shadow:0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3.5px rgba(24,14,4,.55), inset 0 0 0 5.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 7px rgba(255,240,210,.06), 0 0 22px rgba(238,194,94,.40); }
-  .card.sigcard.polished { box-shadow:0 3px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), inset 0 0 0 5px rgba(10,6,2,.55), inset 0 0 0 6.5px rgba(255,240,210,.38), inset 0 0 0 8px var(--schLine, rgba(122,95,208,.5)), 0 0 18px rgba(238,194,94,.5); }
-  .bigcard.sigcard.polished { box-shadow:0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), inset 0 0 0 5px rgba(10,6,2,.55), inset 0 0 0 6.5px rgba(255,240,210,.38), inset 0 0 0 8px var(--schLine, rgba(122,95,208,.5)), 0 0 22px rgba(238,194,94,.5); }
+  .card.polished, .bigcard.polished { --metal:linear-gradient(160deg,#fff3c4,#f3cd6a 36%,#d9a83e 60%,#a8741f 84%,#f9e08e); --metalDk:#8a5f14; }
+  /* M189: a baked diagonal light lives in the polished BODY (a middle
+     padding-box layer, screen-blended over the school tint) — the gilding
+     survives a still frame and the Calm toggle alike; it is material,
+     not motion. */
+  .card.polished, .bigcard.polished { background-image:linear-gradient(165deg,var(--schBody1, #2b2138),var(--schBody2, #221831)), linear-gradient(150deg, rgba(255,244,200,.16), rgba(255,244,200,0) 48%), var(--metal); background-clip:padding-box, padding-box, border-box; background-blend-mode:normal, screen, normal; }
+  .card.polished { box-shadow:0 3px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3px rgba(24,14,4,.55), inset 0 0 0 4.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 6px rgba(255,240,210,.06), 0 0 26px rgba(240,200,100,.55); }
+  .bigcard.polished { box-shadow:0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(0,0,0,.45), inset 0 0 0 3.5px rgba(24,14,4,.55), inset 0 0 0 5.5px var(--schLine, rgba(122,95,208,.5)), inset 0 0 0 7px rgba(255,240,210,.06), 0 0 32px rgba(240,200,100,.55); }
+  .card.sigcard.polished { box-shadow:0 3px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), inset 0 0 0 5px rgba(10,6,2,.55), inset 0 0 0 6.5px rgba(255,240,210,.38), inset 0 0 0 8px var(--schLine, rgba(122,95,208,.5)), 0 0 26px rgba(240,200,100,.62); }
+  .bigcard.sigcard.polished { box-shadow:0 8px 28px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(0,0,0,.4), inset 0 0 0 3px rgba(255,240,210,.05), inset 0 0 0 5px rgba(10,6,2,.55), inset 0 0 0 6.5px rgba(255,240,210,.38), inset 0 0 0 8px var(--schLine, rgba(122,95,208,.5)), 0 0 32px rgba(240,200,100,.62); }
   @keyframes yiraSheen { 0% { background-position:135% 0; } 100% { background-position:-135% 0; } }
   .card.polished::before, .bigcard.polished::before { content:''; position:absolute; inset:-2px; border-radius:inherit; pointer-events:none; z-index:2;
-               background:linear-gradient(115deg, transparent 32%, rgba(255,240,190,.15) 44%, rgba(255,255,255,.32) 50%, rgba(255,240,190,.15) 56%, transparent 68%);
+               background:linear-gradient(115deg, transparent 32%, rgba(255,240,190,.22) 44%, rgba(255,255,255,.42) 50%, rgba(255,240,190,.22) 56%, transparent 68%);
                background-size:260% 100%; background-position:135% 0; animation:yiraSheen 3.4s ease-in-out infinite alternate; }
-  .polished .cart img { filter:saturate(1.13) contrast(1.05) brightness(1.06); }
+  .polished .cart img { filter:saturate(1.2) contrast(1.06) brightness(1.09); }
   @keyframes gemGlow { from { filter:brightness(1.02); } to { filter:brightness(1.35) saturate(1.2); } }
   .polished .rgem { animation:gemGlow 2.6s ease-in-out infinite alternate; }
+  /* M189: polished jewels are LIT — the cost jewel throws a violet halo
+     (drop-shadow: the only shadow a clip-path shape can cast) and the
+     stat orbs burn a step brighter, seat shadows preserved. */
+  .polished .cost { filter:drop-shadow(0 1px 2px rgba(0,0,0,.7)) drop-shadow(0 0 6px rgba(150,100,255,.55)); }
+  .polished .orb.pow { filter:drop-shadow(0 1px 2px rgba(0,0,0,.55)) brightness(1.12) saturate(1.15); }
+  .polished .orb.hp { filter:brightness(1.12) saturate(1.15); }
+  .bigcard.polished .stats .pow { filter:drop-shadow(0 1px 2px rgba(0,0,0,.55)) brightness(1.12) saturate(1.15); }
+  .bigcard.polished .stats .hp { filter:brightness(1.12) saturate(1.15); }
   .collprog { height:6px; border-radius:3px; background:rgba(10,6,20,.65); box-shadow:inset 0 1px 3px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,240,210,.08); margin:8px 2px 2px; overflow:hidden; }
   .collprog i { display:block; height:100%; border-radius:3px; background:linear-gradient(90deg,#a06a2c,#eec25e 60%,#f7dc8d); box-shadow:0 0 8px rgba(238,194,94,.55); }
   .polishtoggle { position:absolute; top:12px; right:12px; z-index:60; padding:6px 12px; border-radius:999px; font-size:12.5px; font-weight:700;
@@ -225,7 +247,7 @@
   .emblem-head { width:62px; height:80px; flex:none; position:relative; }
   .emblem-rim { position:absolute; inset:0; z-index:0;
                  clip-path:polygon(50% 0%, 86% 5%, 100% 13%, 100% 56%, 80% 84%, 50% 100%, 20% 84%, 0% 56%, 0% 13%, 14% 5%);
-                 background:linear-gradient(165deg,#eab26c,#a06a2c 55%,#cfa355); }
+                 background:linear-gradient(180deg, var(--schA, rgba(0,0,0,0)), rgba(0,0,0,0) 58%), linear-gradient(165deg,#eab26c,#a06a2c 55%,#cfa355); background-blend-mode:soft-light, normal; }
   .emblem-face { position:absolute; inset:3px; z-index:1; overflow:hidden; display:flex; align-items:center; justify-content:center;
                  clip-path:polygon(50% 0%, 86% 5%, 100% 13%, 100% 56%, 80% 84%, 50% 100%, 20% 84%, 0% 56%, 0% 13%, 14% 5%);
                  background:radial-gradient(circle at 35% 30%, #3a2c52, #241a36 75%); }
@@ -377,11 +399,8 @@
     16%{ opacity:.95 } 100%{ transform:translate(calc(-50% + var(--drift,0px)),30vh) scale(1.15); opacity:0 } }
   .fx-drain { position:fixed; left:50%; top:9%; z-index:60; pointer-events:none; font-size:24px;
     filter:drop-shadow(0 0 9px #8a5cff); animation:wispFall 1.3s ease-in forwards; }
-  /* M21 smoke streams: one per Nightmare, hero -> afflicted deck, single volley */
-  @keyframes streamFly { 0%{ transform:translate(-50%,-50%) scale(.55) rotate(-8deg); opacity:0 }
-    12%{ opacity:.95 } 82%{ opacity:.9 } 100%{ transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(1.2) rotate(10deg); opacity:0 } }
-  .fx-stream { position:fixed; z-index:61; pointer-events:none; font-size:22px;
-    filter:drop-shadow(0 0 8px #8a5cff) drop-shadow(0 0 20px rgba(120,60,255,.65)) blur(.4px); animation:streamFly .95s ease-in forwards; }
+  /* M189: the M21 .fx-stream single-moon CSS (streamFly) was dead — no
+     emitter since M27's spawnStreams replaced it; removed in the FX pass. */
   /* M21 speech bubble: small, cream, beside the corner portrait (the original's format) */
   .speech-bubble { position:absolute; top:-9px; z-index:30; max-width:210px; background:#fdf6dd; color:#33261a;
     font-size:12.5px; font-weight:600; line-height:1.3; padding:6px 10px; border-radius:12px;
@@ -418,7 +437,11 @@
   @media (min-width:700px){ .field { padding-right:104px; } }
   #log { max-height:52px; }
   .fx-pathsvg { position:fixed; left:0; top:0; z-index:61; pointer-events:none; }
-  .stream-under { fill:none; stroke:rgba(120,70,220,.16); stroke-width:11; stroke-linecap:round; }
+  /* M189: the smoke body shares the dash stroke's fade family — it ramps
+     in with the volley, holds while the dashes flow, and is gone as they
+     finish. (Was: no fade at all — a static band until SVG removal.) */
+  .stream-under { fill:none; stroke:rgba(120,70,220,.16); stroke-width:11; stroke-linecap:round; animation:underFade 1.65s linear forwards; }
+  @keyframes underFade { 0% { opacity:0; } 12% { opacity:1; } 60% { opacity:1; } 100% { opacity:0; } }
   .stream-path { fill:none; stroke:rgba(168,120,255,.6); stroke-width:5; stroke-linecap:round; stroke-dasharray:1 13; animation:dashFlow 1.05s linear forwards; }
   @keyframes dashFlow { 0%{ opacity:0 } 10%{ opacity:.95 } 78%{ opacity:.9 } 100%{ stroke-dashoffset:-168; opacity:0 } }
   .fx-puff { position:fixed; z-index:62; pointer-events:none; font-size:19px; transform:translate(-50%,-50%);
@@ -444,8 +467,8 @@
   .sm-name { font-size:9.5px; color:#cbbcf2; letter-spacing:.04em; }
   .emblem-doom { position:absolute; top:-6px; left:-4px; z-index:4; font-size:10.5px; font-weight:800; color:#ffb3c1;
     background:rgba(40,4,16,.85); border:1px solid #ae4f7d; border-radius:999px; padding:1px 5px; text-shadow:0 1px 2px rgba(0,0,0,.8); }
-  .card .cost.disc { background-image:none; background-color:#2e7d4f; color:#dcffe6; border-color:#14532d; }
-  .card .cost.taxed { background-image:none; background-color:#8e2f3c; color:#ffe0e4; border-color:#5e1f28; }
+  .card .cost.disc { background-image:linear-gradient(100deg, rgba(255,255,255,.45) 0 18%, rgba(255,255,255,0) 19% 55%, rgba(0,0,0,.20) 56% 78%, rgba(255,255,255,.14) 79%), radial-gradient(circle at 34% 24%, #b9f4cd, #39a465 52%, #0d3a20 88%); background-color:#2e7d4f; color:#eafff1; border-color:#0d3a20; }
+  .card .cost.taxed { background-image:linear-gradient(100deg, rgba(255,255,255,.45) 0 18%, rgba(255,255,255,0) 19% 55%, rgba(0,0,0,.20) 56% 78%, rgba(255,255,255,.14) 79%), radial-gradient(circle at 34% 24%, #ffc9ce, #c04a58 52%, #4d1620 88%); background-color:#8e2f3c; color:#fff0f2; border-color:#4d1620; }
   /* --- M28 Spellslingers-feel batch --- */
   .eicon { font-size:10.5px; margin:0 1px; text-shadow:0 1px 2px rgba(0,0,0,.7); }
   .emblem-badges { min-height:15px; }
@@ -467,8 +490,9 @@
   #blockSvg { position:fixed; left:0; top:0; z-index:40; pointer-events:none; }
   #blockSvg line { stroke:#57b6ff; stroke-width:3; stroke-linecap:round; stroke-dasharray:2 7; filter:drop-shadow(0 0 4px rgba(87,182,255,.8)); }
   .fx-drawback { position:fixed; width:30px; height:43px; margin:-21px 0 0 -15px; border-radius:4px; z-index:64; pointer-events:none;
-    background:linear-gradient(160deg,#5a4390,#2c1e52); border:1.5px solid rgba(200,170,255,.65); box-shadow:0 4px 12px rgba(0,0,0,.55);
+    background:linear-gradient(160deg,#4a3480,#2a1a4e 58%,#1d1332); border:1.5px solid #c9a86a; box-shadow:inset 0 0 0 2px rgba(16,8,36,.7), inset 0 0 0 3.5px rgba(233,201,138,.30), 0 4px 12px rgba(0,0,0,.55);
     transition:transform .55s ease, opacity .55s ease; }
+  .fx-drawback::after { content:'\u25C6'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; color:rgba(233,201,138,.9); text-shadow:0 0 4px rgba(150,90,255,.6); }
   .gems-col i:not(.off) { animation:gemIn .35s ease both; }
   .gems-col i:nth-of-type(2){ animation-delay:.04s } .gems-col i:nth-of-type(3){ animation-delay:.08s }
   .gems-col i:nth-of-type(4){ animation-delay:.12s } .gems-col i:nth-of-type(5){ animation-delay:.16s }
@@ -682,8 +706,8 @@
   .card .cstats { height:25px; margin:2px 0 0; padding:0 2px; flex:none; }
   .card.sigcard .ctext { height:54px; }
   .card .glyphbox { display:flex; align-items:center; justify-content:center; font-size:32px; color:#e8dcc0;
-                    background:radial-gradient(circle at 50% 34%, var(--schB, #4b3566), #120c20 78%);
-                    text-shadow:0 0 14px var(--schA, #7a5fd0), 0 2px 3px rgba(0,0,0,.7); }
+                    background:radial-gradient(circle at 9px 9px, rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at calc(100% - 9px) 9px, rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at 9px calc(100% - 9px), rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), rgba(240,220,170,.5) 1.6px, rgba(0,0,0,.5) 2.5px, transparent 3.2px), radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--schA, #7a5fd0) 30%, transparent) 0, transparent 47%), repeating-linear-gradient(0deg, rgba(255,255,255,.030) 0 2px, transparent 2px 9px), radial-gradient(circle at 50% 34%, var(--schB, #4b3566), #120c20 78%);
+                    text-shadow:0 -1px 0 rgba(255,240,210,.28), 0 2px 3px rgba(0,0,0,.85), 0 0 16px var(--schA, #7a5fd0); }
   .hand.fan.mini { touch-action:manipulation; }
   .bigcard .cname { white-space:normal; overflow:visible; text-overflow:clip; }
 
@@ -982,7 +1006,8 @@
   /* ===== M82: second compare-and-polish batch ===== */
   .fragile-gem { font-size: 13px; display: inline-block; animation: medalPulse 1.8s ease-in-out infinite; border-radius: 50%; }
   .foehand { position:absolute; top:2px; left:50%; transform:translateX(-50%); display:flex; z-index:4; pointer-events:none; }
-  .foehand i { width:17px; height:24px; margin-left:-7px; border-radius:4px; background:linear-gradient(160deg,#3d2a63,#1d1332); border:1px solid rgba(190,150,255,.5); box-shadow:inset 0 0 6px rgba(150,90,255,.35), 0 2px 4px rgba(0,0,0,.45); }
+  .foehand i { width:17px; height:24px; margin-left:-7px; border-radius:4px; position:relative; background:linear-gradient(160deg,#4a3480,#2a1a4e 58%,#1d1332); border:1px solid #c9a86a; box-shadow:inset 0 0 0 2px rgba(16,8,36,.7), inset 0 0 0 3px rgba(233,201,138,.32), inset 0 0 7px rgba(150,90,255,.35), 0 2px 4px rgba(0,0,0,.45); }
+  .foehand i::after { content:'\u25C6'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:8px; color:rgba(233,201,138,.9); text-shadow:0 0 4px rgba(150,90,255,.6); }
   .foehand i:first-child { margin-left:0; }
   .chip.trapchip { background:linear-gradient(165deg, rgba(75,42,114,.85), rgba(36,18,57,.85)); border-color:rgba(190,140,255,.55); color:#e2d2ff; }
   .field .actions { background:radial-gradient(ellipse 130% 120% at 70% 50%, rgba(10,6,20,.55), rgba(10,6,20,0) 72%); border-radius:16px; padding:6px 4px; }
@@ -5913,7 +5938,15 @@ var HERO_ACCENT = {
   unbridled: ['linear-gradient(160deg,#e0c290,#6b4f2a 55%,#97a04a)', '#4a3517'],
   sibilance: ['linear-gradient(160deg,#c6f16d,#527a2d 55%,#7a4a8c)', '#3c5a20'],
   hammer: ['linear-gradient(160deg,#d9d4c5,#5d6d7e 55%,#b3543f)', '#3f4a56'],
-  tidemother: ['linear-gradient(160deg,#9ae6d8,#1f6f7a 55%,#4aa3a2)', '#14494f']
+  tidemother: ['linear-gradient(160deg,#9ae6d8,#1f6f7a 55%,#4aa3a2)', '#14494f'],
+  /* M189: the six post-launch heroes join the accent table (school-derived),
+     so their signature emblems wear hero metal like the original twelve. */
+  stormconduit: ['linear-gradient(160deg,#a8d4ff,#2f7fd0 55%,#e0532f)', '#1d4e6e'],
+  skydancer: ['linear-gradient(160deg,#cfeeff,#2f7fd0 55%,#7fd4f0)', '#123c66'],
+  palelord: ['linear-gradient(160deg,#efe9da,#8a8a96 55%,#c9a227)', '#3c3c46'],
+  wildhuntress: ['linear-gradient(160deg,#d8f0b8,#57a773 55%,#8a6a3a)', '#1e4d2e'],
+  hallchampion: ['linear-gradient(160deg,#ffeec2,#57a773 55%,#c9a227)', '#2e5530'],
+  veilwarden: ['linear-gradient(160deg,#f2e2a4,#4b3566 55%,#c9a227)', '#241a36']
 };
 var SCHOOL_COLORS = { tides: ['#2f7fd0', '#123c66'], grave: ['#4b3566', '#17102a'], ember: ['#e0532f', '#6e1f0e'], dawn: ['#e9b949', '#7a5510'], worldroot: ['#57a773', '#1e4d2e'] };
 /* M176: the Crowned Arch — one style attr now carries every frame var:
@@ -5931,7 +5964,7 @@ function cardStyle(d) {
   var vars = [];
   if (d.signatureFor) {
     var schools = (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[d.signatureFor]) || [];
-    if (schools.length >= 2 && SCHOOL_COLORS[schools[0]] && SCHOOL_COLORS[schools[1]]) vars.push('--sigA:' + SCHOOL_COLORS[schools[0]][0], '--sigB:' + SCHOOL_COLORS[schools[1]][0]);
+    if (schools.length >= 1 && SCHOOL_COLORS[schools[0]]) { var scB = SCHOOL_COLORS[schools[1] || schools[0]]; vars.push('--sigA:' + SCHOOL_COLORS[schools[0]][0], '--sigB:' + (schools.length >= 2 ? scB[0] : scB[1])); } /* M189: a mono-school hero's lozenge shades light->dark of her one school instead of falling back to plain bronze */
   }
   var sch = (d.cardSchool && SCHOOL_BODY[d.cardSchool]) ? d.cardSchool : 'none';
   var sc = SCHOOL_COLORS[sch] || ['#9a8a72', '#40382a'];
@@ -6008,7 +6041,7 @@ function emblemHtml(inst, ownerIdx, opts) {
   var d = D(inst);
   var hpLeft = d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage;
   var face = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<img src="' + CARD_ART[inst.cardId] + '" alt="">' : '<span class="emblem-glyph">' + (d.icon || '❓') + '</span>';
-  var rimStyle = (d.signatureFor && HERO_ACCENT[d.signatureFor]) ? ' style="background:' + HERO_ACCENT[d.signatureFor][0] + '"' : '';
+  var rimStyle = (d.signatureFor && HERO_ACCENT[d.signatureFor]) ? ' style="background:' + HERO_ACCENT[d.signatureFor][0] + '"' : cardStyle(d); /* M189: plain creatures carry their school vars so the rim takes its soft-light school tint */
   var openHit = '';
   try {
     // M31 repair: the real blocking state is aiAttackers + blockMap

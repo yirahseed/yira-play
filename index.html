@@ -376,6 +376,25 @@
   @keyframes figHurt { 0%{ transform:translateX(0) } 18%{ transform:translateX(-7px); filter:brightness(1.9) sepia(.7) hue-rotate(-40deg) } 38%{ transform:translateX(6px) } 58%{ transform:translateX(-4px); filter:brightness(1.4) } 100%{ transform:translateX(0) } }
   .bfig img.flare { animation:figFlare 1.1s ease-out; }
   @keyframes figFlare { 0%{ filter:brightness(1) } 30%{ filter:brightness(1.65) drop-shadow(0 0 22px rgba(150,90,255,.95)) } 100%{ filter:brightness(1) } }
+  /* M198: the figure entrance — mount-once (.fig-in is stamped by
+     ui.js figEntranceFor, first build per game/side/hero only, so the
+     board's re-render churn can never replay it). The hero condenses
+     out of a breath of their school colour: the container de-blurs
+     (figMat composes WITH the standing figSway — it animates only
+     opacity/filter), the portrait settles down into place, and the
+     breath itself swells and dissolves at the figure's base in
+     --figc (set inline by heroFigure). fill backwards everywhere:
+     once the entrance ends, natural styles own the figure again
+     (the <=560px opacity .85 included). Calm crushes all of it to
+     a blink via the global body.calm rule. */
+  .bfig.fig-in { animation: figSway 5.4s ease-in-out infinite alternate, figMat .95s ease-out backwards; }
+  .bfig.me.fig-in { animation-duration: 6.3s, .95s; }
+  @keyframes figMat { 0% { opacity:0; filter:blur(7px) brightness(1.8) saturate(1.35); } 55% { opacity:1; } 100% { filter:blur(0px) brightness(1) saturate(1); } }
+  .bfig.fig-in img { animation: figSettle .95s cubic-bezier(.2,.8,.3,1) backwards; }
+  @keyframes figSettle { 0% { transform:translateY(16px) scale(.965); opacity:.2; } 100% { transform:translateY(0) scale(1); opacity:1; } }
+  .bfig.fig-in::after { content:''; position:absolute; left:50%; bottom:-4px; width:150%; height:62%; transform:translateX(-50%); border-radius:50%; pointer-events:none;
+    background:radial-gradient(ellipse at 50% 62%, var(--figc, rgba(150,90,255,.55)) 0%, transparent 66%); filter:blur(9px); opacity:0; animation:figBreath 1.2s ease-out backwards; }
+  @keyframes figBreath { 0% { opacity:0; transform:translateX(-50%) scale(.55); } 32% { opacity:.5; } 100% { opacity:0; transform:translateX(-50%) scale(1.3); } }
   @media (max-width:560px){ .bfig img{height:112px} .bfig.foe img{height:104px} .bfig{opacity:.85} }
   /* --- M5: deck builder rows --- */
   .brow { display:flex; align-items:center; gap:8px; padding:6px 8px; border:1px solid rgba(150,120,220,.25); border-radius:9px; margin:5px 0; background:rgba(20,14,36,.35); }
@@ -456,6 +475,16 @@
   .wisp-head { filter:blur(1.1px) saturate(1.28) brightness(1.22); }
   .wisp-pulse { position:absolute; left:0; top:0; border-radius:50%; mix-blend-mode:screen; pointer-events:none;
     background:radial-gradient(circle, rgba(196,152,255,.85) 0%, rgba(124,72,235,.38) 45%, rgba(0,0,0,0) 70%); }
+  /* M198: school tints for one-off vapor (the summon breath). The smoke
+     sprite's native hue is violet (the Grave's own colour); the other
+     schools are the same smoke turned on the colour wheel, in the
+     .wisp.gold tradition. These rules restate the wisp blur so the
+     feather survives the tint. */
+  .fx-vapor.tint-tides .wisp { filter:blur(1.6px) saturate(1.3) hue-rotate(-52deg) brightness(1.06); }
+  .fx-vapor.tint-ember .wisp { filter:blur(1.6px) saturate(1.35) hue-rotate(114deg) brightness(1.06); }
+  .fx-vapor.tint-dawn .wisp { filter:blur(1.6px) saturate(1.7) hue-rotate(138deg) brightness(1.28); }
+  .fx-vapor.tint-worldroot .wisp { filter:blur(1.6px) saturate(1.3) hue-rotate(-140deg) brightness(1.03); }
+  .fx-vapor.tint-grave .wisp { filter:blur(1.6px) saturate(1.3) brightness(1.1); }
   /* M192: arena dust motes — tiny, warm or violet, hanging in the air of the fight. */
   .dust { position:absolute; left:0; top:0; border-radius:50%; pointer-events:none; filter:blur(.6px); }
   #targetSvg { position:fixed; inset:0; width:100%; height:100%; z-index:115; pointer-events:none; display:none; }
@@ -496,8 +525,13 @@
   @keyframes revealIn { 0%{ opacity:0; transform:translate(-50%,-50%) scale(.8) } 14%{ opacity:1; transform:translate(-50%,-50%) scale(1) } 82%{ opacity:1 } 100%{ opacity:0; transform:translate(-50%,-54%) scale(1.02) } }
   .turn-sweep { position:fixed; left:50%; top:38%; transform:translate(-50%,-50%); z-index:78; pointer-events:none; font-size:32px; font-weight:900;
     letter-spacing:.26em; color:#ffe1a8; text-shadow:0 3px 14px rgba(0,0,0,.85); animation:sweepIn 1.25s ease-out forwards; white-space:nowrap; }
-  .turn-sweep.foe { color:#ffc4cd; }
+  .turn-sweep.foe { color:#f093a8; animation:sweepInFoe 1.7s ease-out forwards; text-shadow:0 3px 18px rgba(60,0,20,.92), 0 0 26px rgba(150,30,60,.35); }
   @keyframes sweepIn { 0%{ opacity:0; transform:translate(-50%,-50%) scale(1.5) } 18%{ opacity:1; transform:translate(-50%,-50%) scale(1) } 78%{ opacity:1 } 100%{ opacity:0; transform:translate(-50%,-56%) scale(.98) } }
+  /* M198 (M195 gap 11): the foe's sweep is its own weather — it congeals
+     out of a dark blur, slower and heavier than yours, and hangs a beat
+     longer (checkPhaseSweep keeps the node for 1750ms to match). */
+  @keyframes sweepInFoe { 0%{ opacity:0; transform:translate(-50%,-50%) scale(1.7); filter:blur(4px) brightness(.65) } 20%{ opacity:1; filter:blur(0) brightness(.92) } 80%{ opacity:1 } 100%{ opacity:0; transform:translate(-50%,-57%) scale(.97); filter:brightness(.75) } }
+  .turnsweep.foe { background:linear-gradient(90deg, transparent, rgba(255,110,145,.8), rgba(150,90,255,.85), transparent); box-shadow:0 0 12px rgba(255,90,120,.5); }
   #blockSvg { position:fixed; left:0; top:0; z-index:40; pointer-events:none; }
   #blockSvg line { stroke:#57b6ff; stroke-width:3; stroke-linecap:round; stroke-dasharray:2 7; filter:drop-shadow(0 0 4px rgba(87,182,255,.8)); }
   .fx-drawback { position:fixed; width:30px; height:43px; margin:-21px 0 0 -15px; border-radius:4px; z-index:64; pointer-events:none;
@@ -550,11 +584,17 @@
   /* --- M29 batch --- */
   #app { padding-top:max(8px, env(safe-area-inset-top)); }
   .gems-col i.held { background:#ff8fa3; box-shadow:0 0 5px rgba(255,143,163,.85); }
+  /* M198 (M195 gap 9): a gem being SPENT flashes out — stamped
+     post-render by ui.js applyManaSweeps on newly-off gems only, so
+     it fires once per spend and never replays on re-render. The
+     100% frame is the .off resting state the gem then keeps. */
+  .gems-col i.gemspent { animation:gemSpent .55s ease-out; }
+  @keyframes gemSpent { 0% { background:#efe6ff; box-shadow:0 0 10px rgba(205,175,255,1); transform:scale(1.55); filter:brightness(2.3); } 100% { background:rgba(255,255,255,.14); box-shadow:none; transform:scale(1); filter:brightness(1); } }
   .gems-col i:not(.off):not(.held) { animation:gemIn .35s ease both; }
   .fx-death { position:fixed; z-index:65; transform:translate(-50%,-50%); font-size:27px; pointer-events:none; animation:deathPuff .72s ease-out forwards; }
   @keyframes deathPuff { 0%{ opacity:.95; transform:translate(-50%,-50%) scale(.7) } 100%{ opacity:0; transform:translate(-50%,-74%) scale(1.7) } }
   .summon-in { animation:summonIn .45s ease-out; }
-  @keyframes summonIn { 0%{ transform:scale(.55); filter:brightness(2.1) } 100%{ transform:scale(1); filter:brightness(1) } }
+  @keyframes summonIn { 0%{ transform:scale(.55); filter:brightness(2.1) } 62%{ transform:scale(1.055); filter:brightness(1.22) } 100%{ transform:scale(1); filter:brightness(1) } } /* M198: a settle overshoot — the arrival lands, breathes once, rests */
   .emblem.summon-in .emblem-head::after { content:''; position:absolute; inset:-5px; border:2px solid rgba(200,170,255,.85); border-radius:50%; animation:ringOut .55s ease-out forwards; pointer-events:none; }
   @keyframes ringOut { from{ transform:scale(.65); opacity:1 } to{ transform:scale(1.3); opacity:0 } }
   .turn-sweep.warn { font-size:19px; color:#ffb84d; letter-spacing:.14em; }
@@ -965,9 +1005,9 @@
   .card.miracle-live { animation:miracleglow 1.5s ease-in-out infinite; }
   @keyframes miracleglow { 0%,100% { box-shadow:0 0 0 1.5px rgba(255,209,102,.55), 0 2px 8px rgba(0,0,0,.4); } 50% { box-shadow:0 0 0 2.5px rgba(255,209,102,.95), 0 0 14px rgba(255,209,102,.5); } }
   button.lethal { animation:miracleglow 1.2s ease-in-out infinite; border-color:#ffd166; color:#ffe9b0; }
-  .mullgrid .card { animation:dealIn .38s cubic-bezier(.2,.8,.3,1) both; }
-  .mullgrid .card:nth-child(2) { animation-delay:.06s; } .mullgrid .card:nth-child(3) { animation-delay:.12s; }
-  .mullgrid .card:nth-child(4) { animation-delay:.18s; } .mullgrid .card:nth-child(5) { animation-delay:.24s; }
+  .mullgrid .card.mull-dealt { animation:dealIn .38s cubic-bezier(.2,.8,.3,1) both; } /* M198: gated on the mount-once stamp (ui.js mullDealtFor) — the M65 rule animated every rebuild, so each redraw toggle re-dealt the hand */
+  .mullgrid .card.mull-dealt:nth-child(2) { animation-delay:.06s; } .mullgrid .card.mull-dealt:nth-child(3) { animation-delay:.12s; }
+  .mullgrid .card.mull-dealt:nth-child(4) { animation-delay:.18s; } .mullgrid .card.mull-dealt:nth-child(5) { animation-delay:.24s; }
   @keyframes dealIn { from { transform:translateY(16px) scale(.95); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
   .pile.deck-critical { border-color:#ff5a48 !important; color:#ffc9c0; animation:deckpulse 1s ease-in-out infinite; }
   @keyframes deckpulse { 0%,100% { box-shadow:0 0 0 0 rgba(255,90,72,.0); } 50% { box-shadow:0 0 9px 1px rgba(255,90,72,.55); } }
@@ -1051,6 +1091,14 @@
   .foehand i { width:17px; height:24px; margin-left:-7px; border-radius:4px; position:relative; background:linear-gradient(160deg,#4a3480,#2a1a4e 58%,#1d1332); border:1px solid #c9a86a; box-shadow:inset 0 0 0 2px rgba(16,8,36,.7), inset 0 0 0 3px rgba(233,201,138,.32), inset 0 0 7px rgba(150,90,255,.35), 0 2px 4px rgba(0,0,0,.45); }
   .foehand i::after { content:'◆'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:8px; color:rgba(233,201,138,.9); text-shadow:0 0 4px rgba(150,90,255,.6); }
   .foehand i:first-child { margin-left:0; }
+  /* M198 (M195 gap 8): the foe's fan breathes — a barely-there sway, a
+     held hand thinking. Amplitude is deliberately tiny so the board's
+     re-render churn restarting the cycle never reads as a jump; the
+     negative delays desync the backs. While the AI is actually
+     thinking, foeThink owns the backs (the :not(.thinking) gate). */
+  .foehand:not(.thinking) i { animation:fanSway 4.4s ease-in-out infinite alternate; transform-origin:50% 85%; }
+  .foehand:not(.thinking) i:nth-child(2n) { animation-delay:-1.4s; } .foehand:not(.thinking) i:nth-child(3n) { animation-delay:-2.6s; } .foehand:not(.thinking) i:nth-child(4n) { animation-delay:-3.5s; }
+  @keyframes fanSway { from { transform:translateY(0) rotate(-.8deg); } to { transform:translateY(1.8px) rotate(1deg); } }
   .chip.trapchip { background:linear-gradient(165deg, rgba(75,42,114,.85), rgba(36,18,57,.85)); border-color:rgba(190,140,255,.55); color:#e2d2ff; }
   .field .actions { background:radial-gradient(ellipse 130% 120% at 70% 50%, rgba(10,6,20,.55), rgba(10,6,20,0) 72%); border-radius:16px; padding:6px 4px; }
   .shell.stage.bigcast::after { content:''; position:absolute; inset:0; z-index:15; pointer-events:none; background:radial-gradient(circle at 50% 42%, rgba(255,225,160,.38), rgba(255,180,80,.12) 42%, rgba(0,0,0,0) 68%); animation: bigcastFade .48s ease-out forwards; }
@@ -1226,7 +1274,7 @@
   @media (orientation: landscape) and (max-height: 540px) { .artdock.me { bottom:196px; } }
   @media (prefers-reduced-motion: reduce) {
     .motes, .winburst { display:none !important; }
-    .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand.thinking i, .log-btn.hasnews { animation: none !important; }
+    .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand i, .log-btn.hasnews { animation: none !important; }
   }
 
   /* ===== M86: sixth compare-and-polish batch ===== */
@@ -5904,8 +5952,71 @@ function applyArrivals() {
     pendingArrivals.forEach(function (uid) {
       var el = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
       if (el && el.classList) el.classList.add('summon-in');
+      if (el && !calm) spawnSummonVapor(uid, el); // M198: the summon breathes its school colour
     });
     pendingArrivals = [];
+  } catch (e) {}
+}
+/* M198: a breath of school-coloured vapor at the summon point — one
+   short ribbon in the stream idiom, tinted by the card's first school
+   (the .fx-vapor.tint-* rules in template.html). Quiet and brief: it
+   blesses the arrival the .summon-in settle already plays, it does
+   not compete with it. Calm skips the vapor (the settle is crushed
+   flat by body.calm like everything else). */
+function spawnSummonVapor(uid, el) {
+  try {
+    if (!el.getBoundingClientRect || !document.createElement || !document.body) return;
+    var inst = null;
+    G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(uid)) inst = c; }); });
+    if (!inst) return;
+    var d = D(inst);
+    var sch = (d.cardSchools && d.cardSchools[0]) || d.cardSchool || 'none';
+    var r = el.getBoundingClientRect();
+    if (!r.width && !r.height) return;
+    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    var layer = document.createElement('div');
+    layer.className = 'fx-vapor tint-' + sch;
+    document.body.appendChild(layer);
+    var P = {
+      x0: cx - r.width * 0.30, y0: cy + r.height * 0.30,
+      x1: cx - r.width * 0.22, y1: cy - r.height * 0.20,
+      x2: cx + r.width * 0.25, y2: cy - r.height * 0.48,
+      x3: cx + r.width * 0.34, y3: cy - r.height * 0.28
+    };
+    spawnRibbon(layer, P, { segs: 6, lag: 0.42, dur: 560, delay: 0, size: 40, opacity: 0.30, ease: 1.2, writhe: 4, wfreq: 8, waveK: 5, halo: false });
+    setTimeout(function () { if (layer.parentNode) layer.parentNode.removeChild(layer); }, 1200);
+  } catch (e) {}
+}
+/* M198: THE MANA-SPEND SWEEP (M195 gap 9). gemIn already celebrates
+   gems arriving; spent gems used to just BE off on the next render.
+   The watcher snapshots each seat's off-gem count (from game state,
+   the same numbers heroBarHtml renders) and, when the count grows,
+   stamps .gemspent on the newly-off gems in the fresh DOM — the ones
+   nearest the lit boundary, first in document order among the off.
+   Post-render class-stamping (the applyArrivals discipline) is what
+   keeps it mount-once: a re-render with no spend adds no class, so
+   nothing replays. Reserving for a trap moves gems to .held, not
+   .off, and never sweeps — a hold is not a spend. Refills lower the
+   count and simply re-baseline. */
+var manaSnapGame = null, manaSnapOff = null;
+function manaOffCount(p) {
+  try { return Math.max(0, p.maxMana - Math.max(0, G.availableMana(p)) - Math.max(0, G.reservedMana(p))); } catch (e) { return 0; }
+}
+function applyManaSweeps() {
+  try {
+    if (!G || !document.querySelector) return;
+    if (manaSnapGame !== G || !manaSnapOff) { manaSnapGame = G; manaSnapOff = G.players.map(manaOffCount); return; }
+    G.players.forEach(function (p, i) {
+      var now = manaOffCount(p), prev = manaSnapOff[i] || 0;
+      if (now > prev) {
+        var col = document.querySelector('#herobar-' + p.idx + ' .gems-col');
+        if (col && col.querySelectorAll) {
+          var offs = col.querySelectorAll('i.off');
+          for (var k = 0; k < Math.min(now - prev, offs.length); k++) offs[k].classList.add('gemspent');
+        }
+      }
+      manaSnapOff[i] = now;
+    });
   } catch (e) {}
 }
 var deckWarnGame = null, deckWarned = {};
@@ -6019,7 +6130,7 @@ function checkPhaseSweep() {
     node.className = 'turn-sweep ' + phase;
     node.textContent = phase === 'me' ? 'Your Turn' : "Opponent's Turn";
     document.body.appendChild(node);
-    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1300);
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, phase === 'foe' ? 1750 : 1300); // M198: the foe sweep is slower — it gets a longer stage
   } catch (e) {}
 }
 /* M195: the draw flight joins the stream idiom — the card back rides a
@@ -6067,6 +6178,90 @@ function spawnDrawFlight(idx, delay) {
     flyNode(node, frames, dur, dl, 'linear');
   } catch (e) {}
 }
+/* M198: HAND->GRAVE FLIGHTS (M195 gap 7). A card that leaves a hand for
+   the graveyard — a cast spell resolving, an end-of-turn discard, a
+   sprung trap, a mill out of hand — no longer pops: it flies. The
+   watcher keeps a per-game snapshot of held uids (hand + armed traps,
+   the fan's two populations); on each soundWatch, a held uid that is
+   now in its owner's graveyard spawns a flight from where the card
+   sits in the CURRENT (pre-render) DOM — the watcher runs before the
+   rebuild, in the boardFxWatch tradition, and the flight nodes live
+   on document.body so they survive it. The destination anchor is the
+   pile chip: deck and graveyard share the pile corner on the bar
+   (the grave's contents open from there), so the card visibly goes
+   to the pile. The flight itself is the draw flight's mirror — a
+   card back on a bowed cubic with a short vapor tail — but quieter,
+   faster, and bowed DOWNWARD, a burial rather than a delivery. Caps
+   at 3 per seat per render; Calm shortens it and drops the tail,
+   exactly as draws do. The foe's cards fly as backs from the foe fan
+   (all anyone ever sees of them). */
+var graveFxGame = null, graveFxHeld = null;
+function graveFxWatch() {
+  try {
+    if (!G) return;
+    if (graveFxGame !== G || !graveFxHeld) {
+      graveFxGame = G;
+      graveFxHeld = G.players.map(function (p) { var m = {}; p.hand.concat(p.traps || []).forEach(function (c) { m[c.uid] = c; }); return m; });
+      return;
+    }
+    G.players.forEach(function (p, i) {
+      var prev = graveFxHeld[i] || {};
+      var nowHeld = {};
+      p.hand.concat(p.traps || []).forEach(function (c) { nowHeld[c.uid] = c; });
+      var flew = 0;
+      Object.keys(prev).forEach(function (uid) {
+        if (nowHeld[uid] || flew >= 3) return;
+        var inst = prev[uid];
+        if (p.graveyard.indexOf(inst) >= 0) { spawnGraveFlight(p.idx, inst, flew * 70); flew++; }
+      });
+      graveFxHeld[i] = nowHeld;
+    });
+  } catch (e) {}
+}
+function spawnGraveFlight(idx, inst, delay) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var H = window.innerHeight || 700, W = window.innerWidth || 400;
+    var isMe = idx === humanIdx;
+    var src = null;
+    if (document.querySelector) {
+      var el = isMe ? document.querySelector('.hand .card[data-uid="' + inst.uid + '"]') : document.querySelector('.foehand');
+      if (el && el.getBoundingClientRect) { var r0 = el.getBoundingClientRect(); if (r0.width || r0.height) src = { x: r0.left + r0.width / 2, y: r0.top + r0.height / 2 }; }
+    }
+    if (!src) src = anchorPoint('herobar-' + idx, { x: W / 2, y: isMe ? H * 0.9 : H * 0.1 });
+    var dst = anchorPoint('pile-' + idx, { x: isMe ? W * 0.84 : W * 0.16, y: isMe ? H * 0.93 : H * 0.07 });
+    var dl = delay || 0;
+    var dur = calm ? 300 : 500;
+    var dxv = dst.x - src.x, dyv = dst.y - src.y;
+    var len = Math.sqrt(dxv * dxv + dyv * dyv) || 1;
+    var bow = (isMe ? 1 : -1) * (16 + Math.random() * 14); // bows away from the table centre — the card sinks, it does not soar
+    var P = {
+      x0: src.x, y0: src.y,
+      x1: src.x + dxv * 0.33 + (-dyv / len) * bow, y1: src.y + dyv * 0.33 + (dxv / len) * bow,
+      x2: src.x + dxv * 0.68 + (-dyv / len) * bow * 0.6, y2: src.y + dyv * 0.68 + (dxv / len) * bow * 0.6,
+      x3: dst.x, y3: dst.y
+    };
+    if (!calm) {
+      var layer = document.createElement('div');
+      layer.className = 'fx-vapor';
+      document.body.appendChild(layer);
+      spawnRibbon(layer, P, { segs: 5, lag: 0.5, dur: dur, delay: dl, size: 24, opacity: 0.22, ease: 1.15, writhe: 2, wfreq: 7, waveK: 4, halo: false });
+      setTimeout(function () { if (layer.parentNode) layer.parentNode.removeChild(layer); }, dl + dur + 500);
+    }
+    var node = document.createElement('div');
+    node.className = 'fx-drawback fx-graveflight';
+    node.style.transition = 'none';
+    node.style.left = src.x + 'px'; node.style.top = src.y + 'px';
+    document.body.appendChild(node);
+    var frames = [], S = 10;
+    for (var s2 = 0; s2 <= S; s2++) {
+      var u = s2 / S;
+      var pt = pathPoint(P, 0.12 + 0.88 * u);
+      frames.push({ transform: 'translate(' + (pt.x - src.x).toFixed(1) + 'px,' + (pt.y - src.y).toFixed(1) + 'px) rotate(' + (-6 * Math.sin(u * 3.14)).toFixed(1) + 'deg) scale(' + (1 - 0.22 * u).toFixed(3) + ')', opacity: u > 0.8 ? +(1 - (u - 0.8) / 0.2 * 0.9).toFixed(3) : 1, offset: u });
+    }
+    flyNode(node, frames, dur, dl, 'linear');
+  } catch (e) {}
+}
 var lastTurnRendered = -1, sweepPending = false;
 function turnWatch() {
   if (!G) return;
@@ -6075,6 +6270,7 @@ function turnWatch() {
 }
 function soundWatch() {
   if (!G) return;
+  graveFxWatch(); // M198: hand->grave transitions, caught against the pre-render DOM
   boardFxWatch();
   try { // trap-arm click: your artifact row just grew
     if (!G.__artCounts) G.__artCounts = G.players.map(function (p) { return p.artifacts.length; });
@@ -6190,10 +6386,37 @@ var PORTRAIT_POS = {
 // M124: battlefield hero figures — the M4.3 .bfig staging CSS shipped for
 // years with nothing rendering it. The figure is the hero's tall portrait
 // looming at the field's edge, behind the play (z-index 0, no pointer events).
+/* M198: MOUNT-ONCE FIGURE ENTRANCES. The board is rebuilt as an HTML
+   string on every render, so a CSS entrance on .bfig would replay on
+   every action. The stamp lives in JS instead: the first time a figure
+   is built for a given game + side + hero, heroFigure adds .fig-in and
+   stamps the key; every later render in that game omits it, so the
+   entrance plays exactly once per mount. Two gates keep the moment
+   honest: the mulligan shell's backdrop figures never consume the
+   stamp (the entrance belongs to the field), and the stamp waits out
+   the versus splash (introUntil) so the materializing is seen as the
+   splash lifts, not behind it. New game object = fresh stamps. */
+var figStampGame = null, figStamps = {};
+function figEntranceFor(heroId, side) {
+  try {
+    if (typeof G === 'undefined' || !G) return false;
+    if (figStampGame !== G) { figStampGame = G; figStamps = {}; }
+    var key = side + ':' + heroId;
+    if (figStamps[key]) return false;
+    if (typeof mode !== 'undefined' && mode === 'mulligan') return false;
+    if (typeof introUntil !== 'undefined' && introUntil && Date.now() < introUntil) return false;
+    figStamps[key] = true;
+    return true;
+  } catch (e) { return false; }
+}
 function heroFigure(heroId, side) {
   if (typeof PORTRAITS === 'undefined') return '';
-  if (!PORTRAITS[heroId]) return '<div class="bfig ' + side + ' figmedal" data-hero="' + heroId + '">' + heroMedallion(heroId) + '</div>'; // M191: portrait-less heroes still take the field — as their medallion, not as nobody
-  return '<div class="bfig ' + side + '" data-hero="' + heroId + '"><img src="' + PORTRAITS[heroId] + '" alt=""></div>';
+  var figc = '';
+  try { if (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[heroId] && typeof SCHOOL_HEX !== 'undefined') figc = SCHOOL_HEX[HERO_SCHOOLS[heroId][0]] || ''; } catch (e) {}
+  var st = figc ? ' style="--figc:' + figc + '"' : '';
+  var ein = figEntranceFor(heroId, side) ? ' fig-in' : '';
+  if (!PORTRAITS[heroId]) return '<div class="bfig ' + side + ' figmedal' + ein + '" data-hero="' + heroId + '"' + st + '>' + heroMedallion(heroId) + '</div>'; // M191: portrait-less heroes still take the field — as their medallion, not as nobody
+  return '<div class="bfig ' + side + ein + '" data-hero="' + heroId + '"' + st + '><img src="' + PORTRAITS[heroId] + '" alt=""></div>';
 }
 /* M191: the medallion — a portrait-less hero's finished face. The sigil
    sits in a school-enamel disc ringed with the hero's own accent metal
@@ -7221,7 +7444,7 @@ function renderBody() {
      the field; there are no separate sections anymore. */
   var shellStyle = (typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.20), rgba(15,9,27,.38)), url(' + PORTRAITS.arena + ')"' : '';
   if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
-  var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep"></div>' : '');
+  var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep' + (G.active === aiIdx ? ' foe' : '') + '"></div>' : '');
   html += '<button class="log-btn" aria-label="Battle log" onclick="showLog()" title="Battle log — recent events">📜</button>';
   html += '<button class="log-btn pause-btn" aria-label="Pause menu" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
   sweepPending = false;
@@ -7383,6 +7606,7 @@ function renderBody() {
   drawBlockLines();
   checkPhaseSweep();
   applyArrivals();
+  applyManaSweeps(); // M198
   checkDeckWarn();
   checkMarquee();
   fanfareWatch();
@@ -7685,6 +7909,24 @@ function renderMenu() {
     '<button class="big" style="margin-top:10px" onclick="settingsOpen=true;render()">⚙️ Settings — theme, sound, motion, volume</button>' : '') +
     hubNavHtml() + '</div>';
 }
+/* M198: MOUNT-ONCE DEAL-IN. The M65 deal-in animated every .mullgrid
+   card unconditionally — and the sheet re-renders on every redraw
+   toggle, so the whole hand re-dealt itself on every tap (M195 gap 2).
+   The stamp is per game + uid: a card is built with .mull-dealt only
+   the first time it is rendered into the sheet; toggles, inspect
+   round-trips and redraw-count re-renders rebuild it plain. (The
+   redrawn replacements never re-enter the sheet — the confirmed hand
+   opens in the fan, where newdraw already marks them.) */
+var mullStampGame = null, mullStamps = {};
+function mullDealtFor(uid) {
+  try {
+    if (typeof G === 'undefined' || !G) return true;
+    if (mullStampGame !== G) { mullStampGame = G; mullStamps = {}; }
+    if (mullStamps[uid]) return false;
+    mullStamps[uid] = true;
+    return true;
+  } catch (e) { return true; }
+}
 function renderMulligan() {
   /* M92 (Jesse): the mulligan is JUST THE CARDS — full size on the dimmed
      arena, one quiet hint line, the confirm, nothing else talking. The
@@ -7696,7 +7938,7 @@ function renderMulligan() {
     '<div class="mull-hint">Tap to throw back · hold to read</div>' +
     (humanIdx === 1 ? '<div class="mull-gem">💎 +1 mana on your first turn</div>' : '') +
     '<div class="mullgrid">' + me.hand.map(function (inst) {
-      return cardHtml(inst, humanIdx, { cls: ' clickable' + (redrawSet.has(inst.uid) ? ' redraw-pick' : ''), onclick: 'toggleRedraw(' + inst.uid + ')', onpd: 'mullPressStart(' + inst.uid + ')' });
+      return cardHtml(inst, humanIdx, { cls: ' clickable' + (mullDealtFor(inst.uid) ? ' mull-dealt' : '') + (redrawSet.has(inst.uid) ? ' redraw-pick' : ''), onclick: 'toggleRedraw(' + inst.uid + ')', onpd: 'mullPressStart(' + inst.uid + ')' });
     }).join('') + '</div>' +
     (redrawSet.size ? '<p style="text-align:center;color:#e8a0b4;font-size:12.5px;margin:-4px 0 8px">\u21a9 ' + redrawSet.size + ' marked to redraw</p>' : '') +
     '<button class="big" onclick="confirmMulligan()">' + (redrawSet.size ? 'Redraw ' + redrawSet.size + ' · Keep ' + (me.hand.length - redrawSet.size) : 'Keep this hand') + '</button>' +

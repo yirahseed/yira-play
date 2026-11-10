@@ -4282,6 +4282,11 @@ class Game {
   }
   declareCombat(atkIdx, attackerUids, blockerMap = {}) {
     const atk = this.players[atkIdx]; const dfn = this.players[this.opp(atkIdx)];
+    // M193: an empty declaration is not a combat step — refuse it BEFORE
+    // anything is marked, so it can never spend the turn's one step
+    // (pre-M193 it resolved silently, set combatDone, and locked out the
+    // turn's real attack).
+    if (!attackerUids || attackerUids.length === 0) throw new Error('no attackers declared');
     if (atk.combatDone) throw new Error('only one combat step per turn');
     const attackers = attackerUids.map((u) => atk.board.find((c) => c.uid === u));
     if (attackers.some((a) => !a)) throw new Error('attacker not on board');
@@ -6642,7 +6647,7 @@ function boardHtml(p, isMe) {
     if (window.__faces[inst.uid] && window.__faces[inst.uid] !== inst.cardId && CARDS[inst.cardId] && CARDS[inst.cardId].afterFlip) opts.cls = (opts.cls || '') + ' justflipped';
     window.__faces[inst.uid] = inst.cardId;
     if (!G.canAttack(inst, p) && d2type(inst) === 'creature' && inst.summonedTurn === G.turnNumber) { opts.cls = (opts.cls || '') + ' ready-dim'; opts.zz = true; }
-    if (isMe && (mode === 'main' || mode === 'attackSelect') && d2type(inst) === 'creature' && G.canAttack(inst, p)) opts.cls = (opts.cls || '') + ' ready-glow';
+    if (isMe && (mode === 'main' || mode === 'attackSelect') && d2type(inst) === 'creature' && G.canAttack(inst, p) && !p.combatDone) opts.cls = (opts.cls || '') + ' ready-glow'; // M193: the glow is an invitation to attack — it goes out when the step is spent
     if (d2type(inst) === 'creature' && G.active === p.idx && inst.summonedTurn === G.turnNumber && !G.canAttack(inst, p) && !inst.stunned && (D(inst).keywords || []).indexOf('cantAttack') < 0) { opts.cls = (opts.cls || '') + ' sick'; opts.sick = true; }
     if (!isMe && mode === 'attackSelect' && d2type(inst) === 'creature' && (D(inst).keywords || []).indexOf('cantBlock') < 0) opts.cls = (opts.cls || '') + ' canblock-hint';
     if (d2type(inst) === 'creature' && inst.damage > 0 && (D(inst).health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) <= 2) opts.cls = (opts.cls || '') + ' hurtish';
@@ -8088,12 +8093,19 @@ function finishPan(dt) { // M187: the woken Debut's target has landed \u2014 the
   flushEngineLog(); if (!finishCheck()) render();
 }
 var hintsShown = {}; function hintOnce(key, text) { if (hintsShown[key]) return ''; hintsShown[key] = 1; return text; } /* M102 (Jesse): a hint earns its place once, not every phase of every match */
-function startAttackSelect() { attackSet = new Set(); mode = 'attackSelect'; msg = hintOnce('atk', 'Tap your attackers — hold any creature to read it.'); render(); }
+function startAttackSelect() {
+  if (!G || G.players[humanIdx].combatDone) return; // M193: the combat step is spent — this door stays shut for the rest of the turn
+  attackSet = new Set(); mode = 'attackSelect'; msg = hintOnce('atk', 'Tap your attackers — hold any creature to read it.'); render();
+}
 /* M31: double-tap the field — everyone ready attacks (tap again to call
    them all back). The original's gesture, on our tap-safe terms. */
 function attackAllToggle() {
   if (!G || (mode !== 'main' && mode !== 'attackSelect')) return;
   var me = G.players[humanIdx];
+  if (me.combatDone) { // M193 (Jesse's report): the step is spent — the double-tap offers nothing more this turn; any stale selection is stood down
+    if (mode === 'attackSelect') { attackSet = new Set(); mode = 'main'; render(); }
+    return;
+  }
   var ready = me.board.filter(function (c) { return G.canAttack(c, me); });
   if (!ready.length) { msg = 'No creature is ready to attack.'; render(); return; }
   var allIn = ready.every(function (c) { return attackSet.has(c.uid); });
@@ -8121,6 +8133,7 @@ function dragAssignBlock(blockerUid, attackerUid) {
 }
 function toggleAttacker(uid) {
   var me = G.players[humanIdx];
+  if (me.combatDone) { attackSet = new Set(); if (mode === 'attackSelect') mode = 'main'; render(); return; } // M193: no queueing after the step
   var inst = me.board.find(function (c) { return c.uid === uid; });
   if (!G.canAttack(inst, me)) { msg = inst.stunned ? '💤 ' + D(inst).name + ' is stunned — it cannot attack this turn.' : ((D(inst).keywords || []).indexOf('cantAttack') >= 0 ? D(inst).name + ' cannot attack at all — that is its nature.' : D(inst).name + ' can\'t attack the turn it\'s played (no Haste).'); render(); return; }
   attackSet.has(uid) ? attackSet.delete(uid) : attackSet.add(uid);

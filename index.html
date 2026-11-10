@@ -3777,7 +3777,7 @@ class Game {
     if (!effect) return;
     const p = this.players[i]; const foe = this.players[this.opp(i)];
     // Ward: a warded enemy creature cannot be singled out by spells or effects.
-    if (target && target.kind === 'creature' && ['damageAny', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'pathExile', 'pacify', 'stealCreature', 'debuffCreature', 'debuffPerZombieGrave', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'stunCreature', 'stunPermanent', 'drainCreature', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'damageCreatureHeal', 'healAny', 'damagePerGem'].includes(effect.kind) || (effect.kind === 'grantKeyword' && effect.foeTarget)) {
+    if (target && target.kind === 'creature' && (['damageAny', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'pathExile', 'pacify', 'stealCreature', 'debuffCreature', 'debuffPerZombieGrave', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'stunCreature', 'stunPermanent', 'drainCreature', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'damageCreatureHeal', 'healAny', 'damagePerGem'].includes(effect.kind) || (effect.kind === 'grantKeyword' && effect.foeTarget))) { // M200: the grantKeyword clause sat OUTSIDE the target guard (|| precedence) — a foeTarget grant with no target in hand (Goblin Shortcutter's Debut / Burn Through's second step on an empty enemy field) dereferenced target.inst and threw a TypeError instead of fizzling. The grantKeyword case itself already fizzles on a null target; the gate now only speaks when there is a creature target to protect.
       const ownerIdx = this.players.findIndex((q) => q.board.includes(target.inst));
       if (ownerIdx >= 0 && ownerIdx !== i && this.wardActive(target.inst)) {
         this.log.push(`${def(target.inst).name}'s Ward turns aside ${def(sourceInst).name}`);
@@ -3931,7 +3931,10 @@ class Game {
       case 'stealDeckBottom': { const foe = this.players[this.opp(i)]; if (foe.deck.length) { const taken = foe.deck.pop(); this.addToHand(i, taken, srcName); this.log.push(`${srcName}: ${p.hero.name} takes the bottom card of ${foe.hero.name}'s deck (${def(taken).name})`); } break; }
       case 'fightWeakest': { const me = sourceInst; const fwFoes = []; for (let round = 0; round < 8; round++) { const foe = this.players[this.opp(i)]; if (!foe.board.length || !p.board.includes(me) || me.damage >= healthOf(me)) break; const prey = foe.board.slice().sort((x, y) => powerOf(x) - powerOf(y))[0]; if (!fwFoes.includes(prey)) fwFoes.push(prey); this.fightRidersBefore(me, prey); if (!p.board.includes(me) || !foe.board.includes(prey)) { this.cleanupDeaths(); if (!p.board.includes(me)) break; continue; } const mp = powerOf(me), pp = powerOf(prey); const dealtPrey = this.hurtCreature(prey, mp); const dealtMe = this.hurtCreature(me, pp); this.log.push(`${def(me).name} fights ${def(prey).name}`); this.fightRidersAfter(me, prey, i, this.opp(i)); this.checkVengeance(i, me, prey, dealtMe); this.checkVengeance(this.opp(i), prey, me, dealtPrey); this.cleanupDeaths(); if (!p.board.includes(me)) break; } this.checkSurvivorTraps([me, ...fwFoes]); break; }
       case 'drainCreatureOrDamage': { if (target && target.kind === 'creature') { const hasKin = p.board.some((c) => def(c).subtype === effect.subtype); this.hurtCreature(target.inst, effect.amount); if (hasKin) { this.gainLife(p, effect.amount); this.log.push(`${srcName}: drains ${effect.amount} from ${def(target.inst).name}`); } this.cleanupDeaths(); } break; }
-      case 'summonToken': this.summonToken(p, effect.cardId); break;
+      case 'summonToken': { // M200: every sibling summon path checks the field first (playCard's own throw, summonTokens, summonPerCount, the Shrine, the Miracle rider, the stance recruit) — this one did not, so a Debut/attack token (Hermit of the Flock's Sheep, Grave Titan's Zombie, Knight Militant's Soldier, Goblin Fieldrusher's Raging Goblin) could take a field to 6 against the locked 5-cap. The token now answers only when there is room, exactly like its siblings.
+        if (p.board.length < 5) this.summonToken(p, effect.cardId);
+        else this.log.push(`${srcName}: the field is full — the ${CARDS[effect.cardId] ? CARDS[effect.cardId].name : 'token'} cannot take the field`);
+        break; }
       case 'summonTokens': { let s = 0; for (let k = 0; k < (effect.count || 1) && p.board.length < 5; k++) { this.summonToken(p, effect.token); s++; } if (s) this.log.push(`${def(sourceInst).name}: ${s} ${def(effect.token) ? def(effect.token).name : 'token'}${s === 1 ? '' : 's'} answer${s === 1 ? 's' : ''} the call`); break; }
       case 'gainFragileGem': if (!p.fragileGem) { p.fragileGem = true; this.log.push(`${p.hero.name} gains a fragile mana gem`); } break;
       case 'markCreature': if (target && target.kind === 'creature') { sourceInst.markUid = target.inst.uid; this.log.push(`${srcName}: marks ${def(target.inst).name}`); } break;
@@ -4776,21 +4779,30 @@ class Game {
 // is in real danger.
 function chooseBlockers(game, defIdx, attackerInsts) {
   const dfn = game.players[defIdx];
-  const free = dfn.board.filter((b) => !(def(b).keywords || []).includes('cantBlock'));
+  // M200: legality reads go through keywordsOf (printed + gained + temp),
+  // the same merge declareCombat enforces and the UI's canBlockCreature
+  // uses. The printed-only read proposed blockers the engine must refuse:
+  // a Relentless creature risen with gained cantBlock (Decaying Ghoul,
+  // Morvane's Goliath) was offered as a blocker, declareCombat threw, and
+  // the whole combat step died with it — in the UI that left the human's
+  // attack unresolvable while the risen body stood. Granted/temp Sneak and
+  // Flying on the attacker side had the same stale read.
+  const free = dfn.board.filter((b) => !keywordsOf(b).includes('cantBlock'));
   const map = {};
   const attackers = attackerInsts.slice().sort((a, b) => powerOf(b) - powerOf(a));
   for (const a of attackers) {
-    const ak = def(a).keywords || [];
+    const ak = keywordsOf(a);
     if (ak.includes('sneak') && (!a.sneakUsed || def(a).sneakInfinite)) continue; // Sneak: unblockable on its first attack (the Phantom Warrior's, forever)
+    if (def(a).unblockableIfFoeHealthier && dfn.life > game.players[defIdx === 0 ? 1 : 0].life) continue; // M200: Night Stalker — unblockable while the defending hero has more life; declareCombat throws on a proposed block, and the UI's canBlockCreature has always known this rule — the chooser now does too
     const legal = free.filter((b) => {
-      const bk = def(b).keywords || [];
+      const bk = keywordsOf(b);
       return !ak.includes('flying') || bk.includes('flying') || bk.includes('reach');
     });
     if (!legal.length) continue;
     const aPow = powerOf(a); const aHealthLeft = healthOf(a) - a.damage;
     const killsAndLives = legal.filter((b) => powerOf(b) >= aHealthLeft && aPow < healthOf(b) - b.damage);
     const kills = legal.filter((b) => powerOf(b) >= aHealthLeft);
-    const danger = dfn.life <= aPow + 4 || (def(a).keywords || []).includes('trample');
+    const danger = dfn.life <= aPow + 4 || keywordsOf(a).includes('trample');
     let choice = null;
     if (killsAndLives.length) choice = killsAndLives.sort((x, y) => powerOf(x) - powerOf(y))[0];
     else if (kills.length && (danger || aPow >= 3)) choice = kills.sort((x, y) => (healthOf(y) - y.damage) - (healthOf(x) - x.damage))[0];
@@ -4883,7 +4895,7 @@ function targetFor(game, i, inst) {
     return { kind: 'hero' };
   }
   if (eff.kind === 'transformFriendly') {
-    const mine = g.players[i].board;
+    const mine = game.players[i].board; // M200: was g.players — a ReferenceError the play loops' try/catch swallowed, so Shell Game was unplayable in AI hands (same swallowed-variable class as the M180 Thwack! fix and this wave's scry fix)
     if (!mine.length) return undefined;
     const weakest = mine.slice().sort((a, b) => (a.damage - b.damage))[0];
     return { kind: 'creature', inst: mine.slice().sort((x, y) => (def(x).power + def(x).health) - (def(y).power + def(y).health))[0] };
@@ -4925,7 +4937,7 @@ function targetFor(game, i, inst) {
     return target ? { kind: 'creature', inst: target } : null;
   }
   if (eff.kind === 'buffAndDoom') {
-    const mine = g.players[i].board;
+    const mine = game.players[i].board; // M200: same g-for-game slip as the transformFriendly line above — Sadistic Mindflayer's Debut could never be aimed by the AI
     if (!mine.length) return undefined;
     return { kind: 'creature', inst: mine.slice().sort((a, b) => powerOf(b) - powerOf(a))[0] };
   }
@@ -5031,9 +5043,9 @@ function playMainPhase(game, i) {
     if (!traps.length) break;
     // M114 (Dawnkite Spy): settle a scry first — bottom a card too dear to
     // cast next turn, keep anything playable.
-    if (game.pendingScry && game.pendingScry.player === i && me.deck.length) {
-      const topD = def(me.deck[0]);
-      game.resolveScry(i, topD.cost > me.maxMana + 1);
+    if (game.pendingScry && game.pendingScry.player === i && p.deck.length) {
+      const topD = def(p.deck[0]);
+      game.resolveScry(i, topD.cost > p.maxMana + 1);
     }
     try { game.armTrap(i, traps[0].uid); } catch (e) { break; }
   }

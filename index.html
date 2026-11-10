@@ -7295,7 +7295,7 @@ function openIntro() { introStep = 0; render(); }
 function closeIntro() { try { localStorage.setItem('yira_intro_seen', '1'); } catch (e) {} introStep = -1; render(); }
 function introHtml() {
   var steps = [
-    ['🃏', 'Your hand lives at the bottom', 'Tap anywhere along the bottom edge of the field to bring your hand up. <b>Tap</b> a card to read it, <b>hold</b> to inspect it — and <b>drag</b> it onto the field to play it. Dragging is the only way to play.'],
+    ['🃏', 'Your hand lives at the bottom', 'Your hand rests fanned at the bottom of the field — <b>tap it</b> to bring it up, and tap the field to rest it again. <b>Hold</b> any card to read it big, and <b>drag</b> it onto the field to play it. Dragging is the only way to play.'],
     ['⚔️', 'Combat, the Coliseum way', 'Play creatures, then attack when you are ready. The <b>defender chooses the blockers</b>, one for one — and damage is <b>permanent</b>: a wounded creature stays wounded. Attackers never tap, so your creatures can attack and still block next turn.'],
     ['🪤', 'Traps, mana, and falling', 'Mana grows and refills every turn. <b>Traps</b> are armed face-down on your turn and fire themselves when their moment comes; their mana stays reserved until they do. A hero falls at 0 life — or by ending their own turn with an empty deck.'],
     ['📖', 'When a word puzzles you', 'Cards speak in emblems. Any keyword — Ward, Armor, Relentless — is explained in plain words in the <b>Glossary</b>: find it on the hub, or in the ⏸ pause menu mid-duel.'],
@@ -7561,7 +7561,7 @@ function renderBody() {
   (function () {
     if ((record().w + record().l) < 2 && G.winner === null) {
       var coach = '';
-      if (mode === 'blocking') coach = '🧭 Pair your creatures against their attackers: tap an attacker, then the creature that should block it.';
+      if (mode === 'blocking') { var anyBlk = aiAttackers.some(function (a) { var ac = foe.board.find(function (x) { return x.uid === a.uid; }); return ac && me.board.some(function (b) { return canBlockCreature(ac, b); }); }); coach = anyBlk ? '🧭 Pair your creatures against their attackers: tap an attacker, then the creature that should block it.' : '🧭 Nothing of yours can block this time — the button below takes the hit for your hero.'; } /* M204: the coach must not advise pairing creatures the player does not have */
       else if (mode === 'main' && !me.combatDone && me.board.some(function (c) { return G.canAttack(c, me); })) coach = '🧭 When you are ready, select attackers (tap them, or double-tap the field for all) — the enemy picks the blockers.';
       else if (mode === 'main' && G.turnNumber <= 3) coach = '🧭 Drag a card onto the field to play it. Tap your fanned hand below to open it.';
       if (coach) html += '<div class="coachline">' + coach + '</div>';
@@ -7879,7 +7879,7 @@ function hubHtml(rec) {
     hubTile('\uD83E\uDDD7', 'The Climb', climbParked() ? ('Paused at rung ' + climbParked() + ' of 5 — resume anytime') : (climbBest() > 0 ? ('Best: rung ' + climbBest() + ' of 5 \u00B7 Umbra waits at the summit') : 'Five rungs. Umbra waits at the summit'), 'hubShow(\'play\')', false) +
     hubTile('\uD83D\uDC65', 'PvP', 'Friend codes first, then matchmaking', 'pvpOpen=true;render()', true) +
     hubTile('\uD83C\uDCCF', 'Deck Builder', 'Your 30, your way', 'hubShow(\'decks\')', false) +
-    hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).length + ' cards \u2014 search & filter them all', 'hubShow(\'collection\')', false) +
+    hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' cards \u2014 search & filter them all', 'hubShow(\'collection\')', false) +
     hubTile('\uD83C\uDF93', 'How to Play', 'Thirty seconds to your first duel', 'openIntro()', false) +
     hubTile('📖', 'Glossary', 'Every keyword & rule, in plain words', 'openGlossary();render()', false) +
     '</div>';
@@ -7996,7 +7996,7 @@ function renderMenu() {
     (activeDeckFor(setup.me) ? '<div class="record">🃏 ' + esc(HEROES[setup.me].name) + ' is using your custom deck</div>' : '') +
     '<button class="big" onclick="openBuilder()">Open the deck builder</button></div>' : '') +
     (hubTab === 'more' ? '<div class="panel"><h2>📚 Card collection</h2>' +
-    '<button class="big" onclick="openCollection()">Browse all ' + Object.keys(CARDS).length + ' cards</button>' +
+    '<button class="big" onclick="openCollection()">Browse all ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' cards</button>' +
     '<div class="record">The 1:1 library: ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly || CARDS[id].schoolStage === 1; }).length + ' playable · ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered so far</div></div>' +
     '<div class="panel"><details><summary>How it plays (30 seconds)</summary>' +
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +

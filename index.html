@@ -5256,8 +5256,9 @@ function sfx(name) {
     case 'click': tone(330, 235, 0.05, 'triangle', 0.14); noiseBurst(0.03, 0.045, 3200); break; // M192: a soft wooden tick, not an 8-bit blip
     case 'trapArm': noiseBurst(0.05, 0.3, 3000); tone(900, 900, 0.05, 'square', 0.15); break;
     case 'trapFire': noiseBurst(0.025, 0.5, 4200); tone(1560, 1240, 0.05, 'square', 0.12, 0.004); noiseBurst(0.08, 0.45, 2500, 0.012); tone(1000, 300, 0.12, 'square', 0.24, 0.012); plantNoise(0.012, 0.14, 2400, 500, 0.14); break; // M195: a hard leading edge first — the snap lands before the burn
-    case 'attack': plantNoise(0, 0.16, 500, 1500, 0.10); noiseBurst(0.12, 0.4, 900); tone(160, 70, 0.16, 'sine', 0.6); break; // M191: a rising breath before the impact
-    case 'block': tone(240, 180, 0.09, 'square', 0.4); noiseBurst(0.05, 0.3, 500); tone(1244, 1180, 0.14, 'sine', 0.10); tone(1866, 1800, 0.10, 'sine', 0.06, 0.01); break; // M191: a faint metal ring over the thud
+    case 'attack': plantNoise(0, 0.16, 500, 1500, 0.10); if (lastCombatBlow >= 5) { noiseBurst(0.12, 0.4, 900); tone(150, 60, 0.20, 'sine', 0.6); tone(88, 38, 0.30, 'sine', 0.5, 0.02); noiseBurst(0.07, 0.32, 500, 0.09); } else if (lastCombatBlow <= 2) { noiseBurst(0.08, 0.3, 1100); tone(200, 95, 0.10, 'sine', 0.4); } else { noiseBurst(0.12, 0.4, 900); tone(160, 70, 0.16, 'sine', 0.6); } break; // M191: a rising breath before the impact. M201: the impact LAYERS by the size of the blow — a skirmish snaps light and high, a big body lands with a sub thump and a delayed second crack; the mid branch is the shipped recipe
+    case 'block': tone(240, 180, 0.09, 'square', 0.4); noiseBurst(0.05, 0.3, 500); tone(1244, 1180, 0.14, 'sine', 0.10); tone(1866, 1800, 0.10, 'sine', 0.06, 0.01); break; // M191: a faint metal ring over the thud — the CONTACT sound, kept
+    case 'guard': tone(150, 105, 0.10, 'square', 0.28); plantNoise(0, 0.10, 700, 1800, 0.05); tone(1244, 1244, 0.12, 'sine', 0.05, 0.02); if (lastBlockSize >= 5) tone(96, 60, 0.18, 'sine', 0.3, 0.01); break; // M201: GUARD UP — the moment blockers are DECLARED (the human confirms, or the foe's blockers step in against your lunge): a woody knock, a breath drawn in, a faint ring of readiness; a big body guarding adds a low brace
     case 'plant': tone(1150, 880, 0.14, 'sine', 0.26); tone(1725, 1320, 0.14, 'sine', 0.09, 0.02); break;
     case 'counter': tone(880, 110, 0.22, 'sawtooth', 0.22); break;
     case 'heroHurt': var hv = Math.min(0.65, 0.38 + (lastHurtAmt || 1) * 0.045); tone(230, 52, 0.3, 'sine', hv); noiseBurst(0.13, 0.2, 420); tone(110, 82, 0.3, 'triangle', hv * 0.4, 0.02); break; // M191: a hero taking damage lands as weight, scaled by the blow
@@ -5267,11 +5268,11 @@ function sfx(name) {
     case 'flip': tone(280, 940, 0.20, 'sine', 0.24); tone(1560, 1560, 0.14, 'sine', 0.10, 0.09); noiseBurst(0.10, 0.10, 1800); break;
     case 'stun': tone(620, 620, 0.07, 'square', 0.14); tone(520, 520, 0.07, 'square', 0.14, 0.09); tone(430, 380, 0.10, 'square', 0.13, 0.18); break;
     case 'miracle': tone(880, 880, 0.12, 'sine', 0.16); tone(1174, 1174, 0.14, 'sine', 0.15, 0.08); tone(1568, 1568, 0.22, 'sine', 0.14, 0.16); break;
-    case 'death': tone(140, 55, 0.28, 'sine', 0.30); noiseBurst(0.16, 0.12, 300); break;
+    case 'death': if (lastDeathClass === 'big') { tone(110, 34, 0.45, 'sine', 0.42); noiseBurst(0.24, 0.14, 260); tone(392, 190, 0.40, 'sine', 0.035, 0.03); } else if (lastDeathClass === 'small') { tone(180, 80, 0.16, 'sine', 0.20); noiseBurst(0.09, 0.08, 380); } else { tone(140, 55, 0.28, 'sine', 0.30); noiseBurst(0.16, 0.12, 300); } break; // M201: the rattle speaks in the dead creature's size class — a big body falls heavy and long with the faintest falling breath of a tone, a small one barely thuds; the mid branch is the recipe as shipped
     case 'heroFall': tone(110, 33, 0.85, 'sine', 0.5); tone(165, 49, 0.7, 'triangle', 0.22, 0.03); flowNoise(0, 0.8, 0.11, 620, 130, 0.5); tone(1318, 1318 * 0.9439, 0.55, 'sine', 0.02, 0.1); tone(1244, 1244 * 0.9439, 0.5, 'sine', 0.016, 0.12); noiseBurst(0.3, 0.10, 240, 0.02); break; // M195: a HERO falls — sub drop, breath rushing down, the shimmer dying. Distinct from a creature's death and from the end-screen fanfare
     case 'heal': tone(523, 523, 0.12, 'sine', 0.20); tone(784, 784, 0.16, 'sine', 0.18, 0.07); break;
-    case 'victory': [523, 659, 784, 1046].forEach(function (f, i) { tone(f, f, 0.22, 'triangle', 0.42, i * 0.11); }); tone(1568, 1568, 0.3, 'sine', 0.10, 0.46); noiseBurst(0.25, 0.05, 3600, 0.1); break;
-    case 'defeat': [392, 330, 262, 196].forEach(function (f, i) { tone(f, f, 0.25, 'triangle', 0.38, i * 0.13); }); tone(98, 65, 0.7, 'sine', 0.20, 0.1); break;
+    case 'victory': tone(196, 196, 0.5, 'sine', 0.10); [392, 523, 659, 784].forEach(function (f, i) { tone(f, f, 0.22, 'triangle', 0.42, 0.05 + i * 0.12); }); tone(1568, 1568, 0.3, 'sine', 0.10, 0.55); noiseBurst(0.25, 0.05, 3600, 0.15); break; // M201: the two stingers rebuilt as ONE motif — both open on the same low bell body (196) and step at the same 0.12 spacing; victory climbs the ladder and crowns, defeat (below) descends it. Same world; the win is brighter
+    case 'defeat': tone(196, 196, 0.5, 'sine', 0.10); [392, 330, 262, 196].forEach(function (f, i) { tone(f, f, 0.25, 'triangle', 0.38, 0.05 + i * 0.12); }); tone(98, 49, 0.7, 'sine', 0.20, 0.15); flowNoise(0, 0.6, 0.05, 500, 160, 0.3); break; // M201: defeat descends the shared ladder into a deeper sub than before, the air going out of it
   }
 }
 /* M37: the coliseum itself — a soft brown-noise crowd murmur under the
@@ -5389,6 +5390,9 @@ function toggleMute() {
    get their sounds AND visual effects without threading hooks through the engine. */
 var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null };
 var lastHurtAmt = 1; // M191: the size of the most recent hero blow — the hurt sound scales with it
+var lastCombatBlow = 2; // M201: the biggest body in the current combat declaration — the attack impact layers by it
+var lastBlockSize = 0; // M201: the biggest blocker body in the current combat — the guard-up knock scales with it
+var lastDeathClass = 'mid'; // M201: size class of the most recent creature death — the rattle speaks in it
 var shakeUid = null;
 /* M60 (Jesse): mana-shortage errors never become text — the faded card IS
    the message. The failed card just shakes. Other errors still speak. */
@@ -5543,6 +5547,20 @@ function pathLen(P) {
   for (var i = 1; i <= 12; i++) { var pt = pathPoint(P, i / 12); sum += Math.hypot(pt.x - prev.x, pt.y - prev.y); prev = pt; }
   return sum;
 }
+/* M201 ROUND 5: the head's path-time curve for the plant/drain ribbons.
+   M192-M199 ran a pure ease-out (1-(1-u)^e) — born at full speed,
+   decelerating forever; the M201 timing readout showed 38% of the path
+   gone by 25% of the life and the head parked at the pile from u~0.65.
+   Living smoke GATHERS, SURGES, SETTLES: blend 28% ease-out with 72%
+   smoothstep — the launch slope drops to ~0.38x cruise (the gather),
+   the mid-flight surge steepens, the arrival still eases to a stop.
+   Only the Nightmare ribbons opt in (o.flow); the draw tails and grave
+   flights keep the legacy curve untouched. */
+function streamTe(u, e) {
+  var eo = 1 - Math.pow(1 - u, e);
+  var ss = u * u * (3 - 2 * u);
+  return eo * 0.28 + ss * 0.72;
+}
 /* One ribbon of smoke: segs sprite segments chained along path P. The
    head (segment 0) rides the eased timeline; segment j samples the path
    at te*(1+lag) - lag*frac, so the tail trails behind, then chases and
@@ -5615,15 +5633,15 @@ function spawnRibbon(layer, P, o) {
     var frames = [];
     for (var s2 = 0; s2 <= SAMPLES; s2++) {
       var u = s2 / SAMPLES;
-      var te = 1 - Math.pow(1 - u, o.ease);
+      var te = o.flow ? streamTe(u, o.ease) : 1 - Math.pow(1 - u, o.ease);
       var sj = te * (1 + maxLag) - lagj; if (sj < 0) sj = 0; if (sj > 1) sj = 1;
       var pt = pathPoint(P, sj);
       var pt2 = pathPoint(P, Math.min(1, sj + 0.012));
       var tx = pt2.x - pt.x, ty = pt2.y - pt.y, tl = Math.sqrt(tx * tx + ty * ty) || 1;
       var env = Math.sin(Math.PI * Math.min(1, sj * 1.1));
-      var wob = Math.sin(u * o.wfreq + segPhase + sj * o.waveK) * o.writhe * env;
+      var wob = Math.sin(u * o.wfreq + segPhase + sj * o.waveK) * o.writhe * env * (o.flow ? 0.72 + 0.5 * Math.sin(u * 3.4 + phase * 1.7) : 1); // M201 R2: on the nightmare ribbons the undulation BREATHES — a slow swell rides the writhe instead of a metronome
       var x = pt.x + (-ty / tl) * (wob + dc.jit * env), y = pt.y + (tx / tl) * (wob + dc.jit * env);
-      var girth = 0.8 + 0.45 * Math.pow(Math.sin(Math.PI * Math.min(1, sj)), 1.2); // the body swells mid-path
+      var girth = 0.8 + 0.45 * Math.pow(Math.sin(Math.PI * Math.min(1, sj)), 1.2) + (o.flow ? 0.1 * Math.sin(u * 6.3 + segPhase) : 0); // the body swells mid-path; M201 R2: on the nightmare ribbons a slow pulse also travels through the girth
       var impl = sj > 0.86 ? 1 - ((sj - 0.86) / 0.14) * 0.6 : 1; // and funnels into the pile
       var sc = girth * impl * (sj <= 0 ? 0.35 : 1);
       var fi = sj <= 0 ? 0 : Math.min(1, sj / 0.05);
@@ -5632,7 +5650,7 @@ function spawnRibbon(layer, P, o) {
       var ang = Math.atan2(ty, tx) * 57.2958 + rotJit + Math.sin(u * o.wfreq + segPhase) * 5; // M195: the segment's long axis rides the tangent
       frames.push({ transform: 'translate(' + (x - size / 2).toFixed(1) + 'px,' + (y - size / 2).toFixed(1) + 'px) rotate(' + ang.toFixed(1) + 'deg) scale(' + (flipX * sc * dc.stretch).toFixed(3) + ',' + (flipY * sc * dc.squash).toFixed(3) + ')', opacity: +op.toFixed(3), offset: u });
     }
-    flyNode(el, frames, o.dur, o.delay, 'linear'); // easing is baked into the samples
+    flyNode(el, frames, o.flow ? o.dur * (1 + 0.16 * dc.frac) : o.dur, o.delay, 'linear'); // easing is baked into the samples; M201 R2: on the nightmare ribbons each segment's clock stretches by its tail fraction, so the body pours in AFTER the head lands (head frac 0 unchanged)
   });
 }
 var fxFlightMs = 1300; // M192: the current volley's flight time — sfxPlant reads it so the sound tracks the picture
@@ -5660,7 +5678,12 @@ function spawnStreams(fromIdx, toIdx, n) {
     var layer = document.createElement('div');
     layer.className = 'fx-vapor';
     document.body.appendChild(layer);
-    var flight = calm ? 750 : 1250 + Math.random() * 300;
+    /* M201 ROUND 5: the clock gets Round 4's distance treatment — a 785px
+       portrait flight and a 427px landscape flight used to share one
+       ~1.25-1.55s draw, so the long flight's smoke moved ~1.9x faster.
+       Scale by anchor distance around a 620px reference (Calm stays flat). */
+    var durScale = Math.min(1.3, Math.max(0.85, dist / 620));
+    var flight = calm ? 750 : (1250 + Math.random() * 300) * durScale;
     fxFlightMs = flight;
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
@@ -5671,7 +5694,7 @@ function spawnStreams(fromIdx, toIdx, n) {
       var wScale = (0.8 + 0.5 * (count > 1 ? k / (count - 1) : 0.5)) * (0.85 + Math.random() * 0.3) * Math.min(1.28, Math.max(0.92, dist / 640));
       var laneK = count > 1 ? (k - (count - 1) / 2) * 30 * laneScale : 0;
       var P = ribbonPath(src, dst, { jitter: 1.6, wander: [60, 210], skim: true, lift: 1, side: sideK, wScale: wScale, lane: laneK });
-      spawnRibbon(layer, P, { segs: Math.round((calm ? 10 : 18) * segScale), lag: 0.32, dur: dur, delay: delay, size: (52 + Math.random() * 16) * boost, opacity: 0.34, ease: 1.35, writhe: calm ? 5 : 11, wfreq: 9 + Math.random() * 4, waveK: 6.5, halo: true, underlay: undK });
+      spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 10 : 18) * segScale), lag: 0.32, dur: dur, delay: delay, size: (52 + Math.random() * 16) * boost, opacity: 0.34, ease: 1.35, writhe: calm ? 5 : 11, wfreq: 9 + Math.random() * 4, waveK: 6.5, halo: true, underlay: undK });
       if (delay + dur > maxEnd) maxEnd = delay + dur;
     }
     spawnPilePulse(layer, dst, Math.round(flight * 0.5 + 120));
@@ -5714,12 +5737,12 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     spawnPilePulse(layer, src, 40);
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
-      var dur = 640 + Math.random() * 180, delay = k * 55;
+      var dur = (640 + Math.random() * 180) * Math.min(1.25, Math.max(0.85, distD / 620)), delay = k * 55;
       var sideD = count > 1 ? (k % 2 === 0 ? 1 : -1) : 0;
       if (sideD && Math.random() < 0.3) sideD = -sideD;
       var laneD = count > 1 ? (k - (count - 1) / 2) * 20 * laneScaleD : 0;
       var P = ribbonPath(src, dst, { jitter: 0.6, wander: [20, 88], skim: false, lift: 0.55, side: sideD, wScale: 0.85 + 0.35 * (count > 1 ? k / (count - 1) : 0.5), lane: laneD });
-      spawnRibbon(layer, P, { segs: Math.round((calm ? 8 : 14) * segScaleD), lag: 0.27, dur: dur, delay: delay, size: 46 + Math.random() * 14, opacity: 0.36, ease: 1.8, writhe: calm ? 3 : 7, wfreq: 11 + Math.random() * 4, waveK: 7, halo: true, underlay: undD });
+      spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 8 : 14) * segScaleD), lag: 0.27, dur: dur, delay: delay, size: 46 + Math.random() * 14, opacity: 0.36, ease: 1.8, writhe: calm ? 3 : 7, wfreq: 11 + Math.random() * 4, waveK: 7, halo: true, underlay: undD });
       if (delay + dur > maxEnd) maxEnd = delay + dur;
     }
     setTimeout(function () { if (layer.parentNode) layer.parentNode.removeChild(layer); }, maxEnd + 600);
@@ -6401,13 +6424,18 @@ function soundWatch() {
   var flipN = 0, stunN = 0;
   G.players.forEach(function (p) { p.board.forEach(function (c) { var dc = D(c); if (dc.afterFlip) flipN++; if (c.stunned) stunN++; }); });
   if (sndSnap.flips != null && flipN > sndSnap.flips) sfx('flip');
-  var graveC = 0; G.players.forEach(function (p) { p.graveyard.forEach(function (c) { if (D(c).type === 'creature') graveC++; }); });
-  if (sndSnap.graveC != null && graveC > sndSnap.graveC) sfx('death');
+  var graveC = 0, graveIds = {}; G.players.forEach(function (p) { p.graveyard.forEach(function (c) { graveIds[c.uid] = c; if (D(c).type === 'creature') graveC++; }); });
+  if (sndSnap.graveC != null && graveC > sndSnap.graveC) { // M201: name the dead before the rattle — the biggest new corpse sets the size class
+    var biggestCorpse = null;
+    Object.keys(graveIds).forEach(function (u) { if (sndSnap.graveIds && sndSnap.graveIds[u]) return; var inst = graveIds[u]; if (D(inst).type !== 'creature') return; if (!biggestCorpse || D(inst).cost > D(biggestCorpse).cost) biggestCorpse = inst; });
+    if (biggestCorpse) { var bcd = D(biggestCorpse); lastDeathClass = (bcd.cost >= 6 || (bcd.power || 0) + (bcd.health || 0) >= 10) ? 'big' : (bcd.cost <= 2 ? 'small' : 'mid'); }
+    sfx('death');
+  }
   var mirN = 0; G.log.forEach(function (l) { if (String(l).indexOf('Miracle!') >= 0) mirN++; });
   if (sndSnap.mirN != null && mirN > sndSnap.mirN) sfx('miracle');
   if (sndSnap.stuns != null && stunN > sndSnap.stuns) sfx('stun');
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, mirN: mirN };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
 }
 /* M4.3 battlefield staging: one-shot figure animations computed by the
@@ -8687,6 +8715,10 @@ async function declareAttack() {
   var attackers = G.players[humanIdx].board.filter(function (c) { return attackSet.has(c.uid); });
   var blockers = chooseBlockers(G, aiIdx, attackers);
   var names = Object.keys(blockers).length;
+  lastCombatBlow = attackers.reduce(function (m, c) { return Math.max(m, D(c).power + c.permPower); }, 0); // M201: combat weight reads
+  var foeBlockUids = Object.keys(blockers).map(function (k) { return blockers[k]; });
+  lastBlockSize = G.players[aiIdx].board.reduce(function (m, c) { return foeBlockUids.indexOf(c.uid) >= 0 ? Math.max(m, D(c).health + c.permHealth) : m; }, 0);
+  if (names) sfx('guard'); // M201: the foe's blockers step in as the lunge begins
   var canAnimate = attackers.some(function (c) { var el = emblemEl(c.uid); return el && typeof el.animate === 'function'; });
   if (canAnimate) {
     busyAnim = true;
@@ -8737,7 +8769,10 @@ function assignBlocker(uid) {
   render();
 }
 function confirmBlocks() {
-  if (Object.keys(blockMap).length) { tone(190, 140, .09, 'square', .5, 0); tone(1250, 900, .06, 'triangle', .3, .01); } // M32: block clang
+  if (Object.keys(blockMap).length) { // M201: confirming blockers is a DECLARATION — the guard-up sounds (the M32 raw-tone clang retires; the contact clang still sounds when the blows land)
+    lastBlockSize = G.players[humanIdx].board.reduce(function (m, c) { return Object.keys(blockMap).some(function (k) { return blockMap[k] === c.uid; }) ? Math.max(m, D(c).health + c.permHealth) : m; }, 0);
+    sfx('guard');
+  }
   var resolver = blockResolver; blockResolver = null;
   if (resolver) resolver();
 }
@@ -8764,6 +8799,7 @@ async function runAiTurn() {
   if (finishCheck()) return;
   var attackers = aiPickAttackers(G, aiIdx);
   if (attackers.length) {
+    lastCombatBlow = attackers.reduce(function (m, a) { return Math.max(m, D(a).power + a.permPower); }, 0); // M201: combat weight read
     aiAttackers = attackers; blockMap = {}; blockPick = null; mode = 'blocking'; msg = hintOnce('block', 'Hold any creature to read it.');
     sfx('attack');
     say('Enemy attacks with ' + attackers.map(function (a) { return D(a).name; }).join(', ') + '!', 'bad');

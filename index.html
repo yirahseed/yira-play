@@ -30,6 +30,7 @@
   .pagescroll { flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; width:100%; }
   h1.logo { text-align:center; letter-spacing:.35em; margin:14px 0 2px; font-size:34px; color:var(--title); }
   .tagline { text-align:center; color:#a793d6; margin:0 0 14px; font-size:13px; }
+  .tagline2 { text-align:center; color:#8d7bb8; margin:0 0 12px; font-size:11.5px; } /* M213: the collection's originals line gets its own deliberate line — as a tail on the 13px tagline it wrapped to a one-word orphan (M211 leftover) */
   .panel { background: rgba(255,255,255,.05); border:1px solid rgba(200,170,255,.25); border-radius:14px; padding:14px; margin:10px 0; }
   .panel h2 { margin:2px 0 10px; font-size:17px; color:var(--title); }
   label { font-size:13px; color:#cbbcf2; display:block; margin:10px 0 4px; }
@@ -894,8 +895,8 @@
   /* M159: NON-CARD overlay panels (profile, PvP gates, prompts) wear their own
      dark-glass identity — not the bronze card frame. Card-flavoured content
      (.ctext parchment inside .sheet) stays card-flavoured on purpose. */
-  .bigcard.sheet { background:linear-gradient(168deg, rgba(26,19,44,.97), rgba(15,11,28,.97)); border:1.5px solid rgba(216,180,84,.5); border-radius:18px; box-shadow:0 14px 44px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08); padding:20px 18px; text-align:center; }
-  .bigcard.sheet .cname { background:none; background-image:none; background-color:transparent; color:#e9d8a6; text-shadow:none; box-shadow:none; padding:0; font-size:20px; white-space:normal; }
+  .bigcard.sheet { background:linear-gradient(168deg, rgba(26,19,44,.97), rgba(15,11,28,.97)); border:1.5px solid rgba(216,180,84,.5); border-radius:18px; box-shadow:0 14px 44px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08); padding:20px 18px; text-align:center; max-height:88vh; overflow-y:auto; } /* M213: a sheet taller than a landscape viewport (profile 463px, a full picker ~640px vs 402px) now scrolls internally like the filter sheets — its top can no longer park off-screen */
+  .bigcard.sheet .cname { background:none; background-image:none; background-color:transparent; color:#e9d8a6; text-shadow:none; box-shadow:none; padding:0; font-size:20px; white-space:normal; clip-path:none; filter:none; } /* M213: clip-path/filter also reset — the base nameplate's pointed-end clip was slicing the first glyphs of the left-aligned profile name */
   .bigcard.sheet .ctext { background:none; background-image:none; color:#cfc2ee; box-shadow:none; padding:0; }
 
   .ladder { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin:8px 0 4px; }
@@ -1530,7 +1531,7 @@
   .collschools { margin:7px 2px 0; }
   .collshare { display:flex; height:6px; border-radius:3px; overflow:hidden; background:rgba(10,6,20,.65); box-shadow:inset 0 1px 3px rgba(0,0,0,.7); }
   .collshare i { display:block; height:100%; }
-  .colllegend { display:flex; flex-wrap:wrap; gap:4px 12px; margin-top:5px; font-size:11.5px; color:#a793d6; }
+  .colllegend { display:flex; flex-wrap:wrap; gap:4px 8px; margin-top:5px; font-size:11px; color:#a793d6; }
   /* Draft theatre: the three picks rise in, staggered, with a glow pass. */
   .draftpick { animation:draftRise .45s cubic-bezier(.3,.7,.3,1) both; }
   @keyframes draftRise { from { opacity:0; transform:translateY(16px) scale(.96); } to { opacity:1; transform:none; } }
@@ -7952,13 +7953,13 @@ function gameOverHtml() {
   }
   if (climb) {
     var r = climb.rung;
-    if (won && r < 5) {
+    if (won && r < CLIMB_RUNGS.length) { // M213: was r < 5, a stale constant from the 5-rung ladder — on the 10-rung ladder a win at rungs 5-9 fell into the SUMMIT branch below
       var next = CLIMB_RUNGS[r];
       return box('🧗 Rung ' + r + ' cleared!', 'Next up: ' + esc(HEROES[next.hero].name) + ' with +' + next.bonus + ' bonus life. Your hero, your deck — fresh shuffle, no mercy.',
         '<button class="big" onclick="climbNext()">⬆️ Climb to rung ' + (r + 1) + '</button>' +
         '<button class="ghost big" onclick="backToMenu()">End climb</button>');
     }
-    if (won) return box('🏔️ SUMMIT!', 'All 5 rungs cleared. The mountain is yours — Umbra at the top bows to no one now. Except you.',
+    if (won) return box('🏔️ SUMMIT!', 'All ' + CLIMB_RUNGS.length + ' rungs cleared. The mountain is yours — Umbra at the top bows to no one now. Except you.',
       '<button class="big" onclick="startClimb()">Climb again</button>' +
       '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
     return box('🧗 You fell — the ladder remembers', 'You fell on rung ' + r + ' of ' + CLIMB_RUNGS.length + '. This rung stays yours to retry whenever you return — tomorrow counts. Best height on this device: ' + climbBest() + ' rung' + (climbBest() === 1 ? '' : 's') + ' cleared.',
@@ -8402,13 +8403,13 @@ function collProgHtml(ids) {
   var segs = order.filter(function (s) { return counts[s] > 0; }).map(function (s) { return '<i style="width:' + (counts[s] / rec * 100).toFixed(2) + '%;background:' + ((SCHOOL_COLORS[s] || ['#9a8a72'])[0]) + '" title="' + (SCHOOL_META[s] ? SCHOOL_META[s].name : 'Neutral') + ' — ' + counts[s] + ' recovered"></i>'; }).join('');
   var legend = order.filter(function (s) { return counts[s] > 0; }).map(function (s) { return '<span>' + (SCHOOL_META[s] ? SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name : '⚪ Neutral') + ' ' + counts[s] + '</span>'; }).join('');
   return '<div class="collprog" title="' + rec + ' of the 466 originals recovered"><i style="width:' + pct + '%"></i></div>' +
-    '<div class="collschools"><div class="collshare">' + segs + '</div><div class="colllegend oneline">' + legend + '</div></div>';
+    '<div class="collschools"><div class="collshare">' + segs + '</div><div class="colllegend">' + legend + '</div></div>';
 }
 function renderCollection() {
   var ids = Object.keys(CARDS);
   var groupsHtml = collectionGroupsHtml();
   var nAct = collActiveFilters().length;
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the collection \u00B7 showing <span id="collCount">' + collShown + '</span> of ' + ids.length + ' cards \u00B7 ' + ids.filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered</p>' + collProgHtml(ids) +
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline" style="margin-bottom:3px">the collection \u00B7 showing <span id="collCount">' + collShown + '</span> of ' + ids.length + ' cards</p><p class="tagline2">' + ids.filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered</p>' + collProgHtml(ids) +
     '<div class="collbar">' +
     '<div class="filterrow"><button class="ghost hit backmini" onclick="backToMenu()" aria-label="Back to menu">\u2190</button>' +
     '<input id="collSearch" type="text" placeholder="\uD83D\uDD0D Search name or rules text\u2026" value="' + esc(collectionQuery) + '" oninput="setCollectionQuery(this.value)">' +
@@ -8449,6 +8450,7 @@ function builderActiveFilters() {
   if (builderKeyword !== 'all') out.push([KW_LABELS[builderKeyword] || builderKeyword, 'keyword']);
   return out;
 }
+function clearBuilderFilters() { builderQuery = ''; builderSchoolF = 'all'; builderType = 'all'; builderCost = 'all'; builderKeyword = 'all'; render(); } // M213: the pool's empty state offers the same one-tap reset the collection's does
 function clearBuilderDim(dim) {
   if (dim === 'query') builderQuery = ''; else if (dim === 'school') builderSchoolF = 'all';
   else if (dim === 'type') builderType = 'all'; else if (dim === 'cost') builderCost = 'all';
@@ -8458,7 +8460,7 @@ function clearBuilderDim(dim) {
 function builderFilterHtml(shown) {
   var act = builderActiveFilters();
   return '<button class="ghost hit filterbtn" onclick="builderFiltersOpen=true;render()">\u2699\uFE0F Filters' + (act.length ? ' \u00B7 ' + act.length : '') + '</button>' +
-    '<span style="font-size:12.5px;color:#a793d6">' + shown + ' cards in the pool.</span>' +
+    '<span style="font-size:12.5px;color:#a793d6">' + shown + (shown === 1 ? ' card' : ' cards') + ' in the pool.</span>' +
     (act.length ? '<span class="fchips" style="margin-top:0">' + act.map(function (a) { return '<button class="ghost hit fchip" onclick="clearBuilderDim(\'' + a[1] + '\')">' + esc(a[0]) + ' \u2715</button>'; }).join('') + '</span>' : '');
 }
 function builderFilterSheetHtml() {
@@ -8671,8 +8673,8 @@ function renderBuilder() {
   $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">deck builder · build your own 30</p>' +
     '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
     '<div class="panel"><h2>🃏 Deck builder</h2>' +
-    '<label>Hero</label><select onchange="builderSetHero(this.value)">' + Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id) { return '<option value="' + id + '"' + (id === heroId ? ' selected' : '') + '>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</option>'; }).join('') + '</select>' + // M185 audit: the builder's hero picker excludes held heroes (they have no DECKS entry to open)
-    '<label>\uD83D\uDDC4\uFE0F Deck</label><select onchange="builderPickDeck(this.value)">' + (curDeck ? '' : '<option value="__new" selected>\u2726 ' + esc(builderDeckName || 'New deck') + ' (unsaved)</option>') + myDecks.map(function (dd) { return '<option value="' + dd.id + '"' + (curDeck && dd.id === curDeck.id ? ' selected' : '') + '>' + esc(dd.name) + (activeId === dd.id ? ' \u2605 active' : '') + '</option>'; }).join('') + '</select>' +
+    '<div style="display:flex;gap:8px"><div style="flex:1;min-width:0"><label>Hero</label><select onchange="builderSetHero(this.value)">' + Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id) { return '<option value="' + id + '"' + (id === heroId ? ' selected' : '') + '>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</option>'; }).join('') + '</select></div><div style="flex:1;min-width:0">' + // M185 audit: the builder's hero picker excludes held heroes (they have no DECKS entry to open)
+    '<label>\uD83D\uDDC4\uFE0F Deck</label><select onchange="builderPickDeck(this.value)">' + (curDeck ? '' : '<option value="__new" selected>\u2726 ' + esc(builderDeckName || 'New deck') + ' (unsaved)</option>') + myDecks.map(function (dd) { return '<option value="' + dd.id + '"' + (curDeck && dd.id === curDeck.id ? ' selected' : '') + '>' + esc(dd.name) + (activeId === dd.id ? ' \u2605 active' : '') + '</option>'; }).join('') + '</select></div></div>' +
     '<label>Deck name</label><div style="display:flex;gap:8px"><input id="bdeckname" type="text" value="' + esc(builderDeckName || '') + '" onchange="builderSetDeckName(this.value)" style="flex:1;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px"><button class="ghost" onclick="builderRenameDeck()">Rename</button></div>' +
     '<div class="herodesc">This hero draws from ' + (HERO_SCHOOLS[heroId] || []).map(function (x) { return SCHOOL_META[x].icon + ' ' + SCHOOL_META[x].name; }).join(' and ') + ' — the pool below holds only those schools, neutral cards, and this hero\'s own signatures.</div>' +
     '<button class="ghost hit loadoutbtn" onclick="builderLoadoutOpen=!builderLoadoutOpen;render()">\uD83C\uDFEB ' + SCHOOLS[chosenSchool(heroId)].name + ' \u00B7 ' + STANCES[chosenStance(heroId)].name + (builderLoadoutOpen ? ' \u25B2' : ' \u25BC') + '</button>' +
@@ -8706,7 +8708,7 @@ function renderBuilder() {
     group('SPELLS', pool.filter(function (id) { return CARDS[id].type === 'spell' && !CARDS[id].signatureFor; })) +
     group('TRAPS', pool.filter(function (id) { return CARDS[id].type === 'trap' && !CARDS[id].signatureFor; })) +
     group('ARTIFACTS', pool.filter(function (id) { return CARDS[id].type === 'artifact' && !CARDS[id].signatureFor; })) +
-     +
+    (pool.length ? '' : '<p style="color:#c4b6e8;font-size:14px;text-align:center;margin:18px 10px">No cards match those filters. <button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearBuilderFilters()">\u21BA Clear all filters</button></p>') +
     '<div class="panel" id="builderDeckPanel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty \u2014 add cards from the pool above.</p>') + '</div>' +
     '<div style="height:16px"></div></div>' + (builderFiltersOpen ? builderFilterSheetHtml() : '');
   if (pulseHit) builderPulseId = null; // M199: the stamp is spent by the render that printed it — it can never flash twice
@@ -8787,7 +8789,7 @@ function finishCheck() {
       if (climb) {
         if (G.winner === humanIdx) {
           if (climb.rung > climbBest()) { try { localStorage.setItem('yira_climb_best', String(climb.rung)); } catch (e) {} }
-          parkClimb(climb.rung >= 5 ? 0 : climb.rung + 1); // M119: park the next rung (summit clears the park)
+          parkClimb(climb.rung >= CLIMB_RUNGS.length ? 0 : climb.rung + 1); // M119: park the next rung (summit clears the park). M213: the summit test reads the ladder — as a literal 5 it cleared the park after a rung-5 win on the 10-rung ladder
         } else parkClimb(climb.rung); // M119: a fall parks the rung that beat you — resume retries it
       }
     }

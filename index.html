@@ -1457,6 +1457,31 @@
   .playbanner .pbsub { font-size:13px; color:#e6dcff; }
   .playbanner .pbplay { margin-top:auto; align-self:flex-start; min-width:170px; font-size:18px; padding:13px 26px; box-shadow:0 8px 22px rgba(0,0,0,.45); }
   .collbar { position:sticky; top:0; z-index:6; background:rgba(13,8,26,.93); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); padding:10px 2px 8px; margin:0 -2px; border-bottom:1px solid rgba(216,180,84,.3); border-radius:0 0 12px 12px; } /* M155: collection filters ride along while the library scrolls */
+  /* M211 (2026-11-10): the slim filter bar + sheets. The bar is one
+     search row now; the full filter set rides in an .overlay sheet. */
+  .filterrow { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .filterrow #collSearch { margin-top:0; flex:1; min-width:0; }
+  .backmini { padding:9px 12px; font-size:15px; flex:none; }
+  .filterbtn { padding:9px 12px; font-size:13px; flex:none; white-space:nowrap; }
+  .fchips { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+  .fchip { padding:4px 10px; font-size:12px; border-color:rgba(255,209,102,.55); color:#ffe9b0; }
+  .fchip.clear { border-color:rgba(255,255,255,.25); color:#cfc4f2; }
+  .jumpmeta { display:flex; gap:5px; align-items:center; flex-wrap:nowrap; overflow-x:auto; margin-top:6px; scrollbar-width:none; }
+  .jumpmeta::-webkit-scrollbar { display:none; }
+  .jumpmeta button { padding:5px 10px; font-size:12px; white-space:nowrap; flex:none; }
+  .jumpcap { font-size:11.5px; color:#a793d6; flex:none; }
+  .filtersheet .box { max-width:430px; max-height:88vh; overflow-y:auto; text-align:left; }
+  .filtersheet h2 { text-align:center; }
+  .colllegend.oneline { flex-wrap:nowrap; overflow:hidden; }
+  .colllegend.oneline span { white-space:nowrap; }
+  .loadoutbtn { width:100%; text-align:left; padding:9px 12px; font-size:13.5px; margin:2px 0 4px; }
+  /* M211: the first-run steps — hero rows and deck rows */
+  .frhero { display:flex; gap:10px; align-items:center; width:100%; text-align:left; padding:8px 10px; margin-top:8px; }
+  .frava { width:52px; height:52px; flex:none; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:rgba(124,80,220,.18); font-size:26px; }
+  .frmain { font-size:13px; line-height:1.45; color:#cfc4f2; }
+  .frmain b { color:#fff; font-size:14.5px; }
+  .frdeck { display:block; width:100%; text-align:left; padding:10px 12px; margin-top:8px; font-size:13px; line-height:1.45; color:#cfc4f2; }
+  .frdeck b { color:#fff; }
   .hubnav { position:sticky; bottom:0; z-index:5; display:grid; grid-template-columns:repeat(4, 1fr); gap:2px; margin:14px -2px -4px; padding:7px 6px calc(7px + env(safe-area-inset-bottom)); background:rgba(13,8,26,.94); border-top:1px solid rgba(216,180,84,.4); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-radius:14px 14px 0 0; }
   .navtab { background:none; border:none; color:#a793d6; font:inherit; font-size:11.5px; display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 2px; border-radius:10px; cursor:pointer; touch-action:manipulation; }
   .navtab > * { pointer-events:none; }
@@ -7326,9 +7351,50 @@ function showVsSplash() {
 var introStep = -2;
 function introSeen() { try { return !!localStorage.getItem('yira_intro_seen'); } catch (e) { return true; } }
 function openIntro() { introStep = 0; render(); }
-function closeIntro() { try { localStorage.setItem('yira_intro_seen', '1'); } catch (e) {} introStep = -1; render(); }
+function closeIntro() { try { localStorage.setItem('yira_intro_seen', '1'); } catch (e) {} introStep = -1; if (firstRunPending) { firstRunPending = false; firstRunStage = 'hero'; } render(); }
+/* ---------- M211: THE FIRST RUN \u2014 choose a hero, then a deck, then
+   fight (Jesse's ruling, 2026-11-10 evening: "in the real game, when a
+   player enters, they won't start as any character; they'll have to
+   choose a character and build a deck"). A fresh profile (the intro
+   never seen) closes the intro onto hero choice; the deck step offers
+   that hero's decks \u2014 Default plus the vault \u2014 with a door into the
+   builder; fighting from there starts the first match on the chosen
+   hero and the chosen deck. Returning players never see any of it:
+   firstRunPending is set only when the intro itself was new, and the
+   hub fast path (quick match included) is untouched. The steps ride
+   as overlays over the hub, the intro's own pattern. ------------ */
+var firstRunStage = null, firstRunPending = false;
+function firstRunPickHero(id) { if (!HEROES[id] || HEROES[id].held) return; setup.me = id; if (setup.foe === id) setup.foe = (id === 'weaver') ? 'bruiser' : 'weaver'; firstRunStage = 'deck'; try { sfx('click'); } catch (e) {} render(); }
+function firstRunUseDeck(id) { if (id) { setActiveDeck(setup.me, id); } else { var v = loadVault(); if (v.active[setup.me]) { delete v.active[setup.me]; saveVault(v); } } firstRunStage = null; startMatch(); }
+function firstRunOpenBuilder() { openBuilder(); } // the deck step waits behind the builder \u2014 its Back returns to the menu, where the step still stands
+function firstRunSkip() { firstRunStage = null; render(); }
+function firstRunHtml() {
+  if (firstRunStage === 'hero') {
+    return '<div class="overlay"><div class="box" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\u2694\uFE0F Choose your hero</h2>' +
+      '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">Every duel starts before the first card. Your hero\u2019s passive is always on \u2014 pick the one whose plan fits you. You can change heroes any time from the hub.</p>' +
+      Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id) {
+        var p = (typeof PORTRAITS !== 'undefined' && PORTRAITS[id]) ? '<img src="' + PORTRAITS[id] + '" alt="" style="width:100%;height:100%;object-fit:cover">' : heroMedallion(id);
+        return '<button class="ghost frhero" onclick="firstRunPickHero(\'' + id + '\')"><span class="frava">' + p + '</span><span class="frmain"><b>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</b> \u00B7 ' + HEROES[id].life + ' life<br><span>' + (HERO_SCHOOLS[id] || []).map(function (sc) { return SCHOOL_META[sc].icon + ' ' + SCHOOL_META[sc].name; }).join(' + ') + ' \u2014 ' + esc(HEROES[id].blurb) + '</span></span></button>';
+      }).join('') +
+      '<button class="ghost big" style="margin-top:10px" onclick="firstRunSkip()">Look around the hub first \u2192</button></div></div>';
+  }
+  if (firstRunStage === 'deck') {
+    var v = loadVault(); var decks = vaultDecksFor(v, setup.me); var actId = v.active[setup.me] || null;
+    var houseName = (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[setup.me]) || 'Default deck';
+    function deckRow(id, name, sub) { return '<button class="ghost frdeck" onclick="firstRunUseDeck(' + (id ? '\'' + id + '\'' : 'null') + ')"><b>\u2694\uFE0F Fight with: ' + esc(name) + '</b><br><span>' + sub + '</span></button>'; }
+    return '<div class="overlay"><div class="box" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\uD83C\uDCCF Choose your deck</h2>' +
+      '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">' + (SIGILS[setup.me] || '') + ' <b>' + esc(HEROES[setup.me].name) + '</b> fights with the deck you pick \u2014 the tuned default, or one of your own from the vault. Build or change a deck any time in the deck builder.</p>' +
+      deckRow(null, houseName + ' (default)', actId ? 'The house build.' : 'The house build \u2014 in use now.') +
+      decks.map(function (d) { return deckRow(d.id, d.name, d.cards.length + ' cards' + (actId === d.id ? ' \u00B7 in use now' : ' \u00B7 from your vault')); }).join('') +
+      '<button class="big" style="margin-top:10px" onclick="firstRunOpenBuilder()">\u270F\uFE0F Build or edit a deck first</button>' +
+      '<button class="ghost big" onclick="firstRunStage=\'hero\';render()">\u2190 Choose a different hero</button>' +
+      '<button class="ghost big" onclick="firstRunSkip()">Look around the hub first \u2192</button></div></div>';
+  }
+  return '';
+}
 function introHtml() {
   var steps = [
+    ['⚔️', 'First: a hero and a deck', 'Every duel starts before the first card is drawn. When the intro ends you will choose your hero — their passive is always on — and then the deck they fight with: the tuned default, or one of your own, built and named in the deck builder.'],
     ['🃏', 'Your hand lives at the bottom', 'Your hand rests fanned at the bottom of the field — <b>tap it</b> to bring it up, and tap the field to rest it again. <b>Hold</b> any card to read it big, and <b>drag</b> it onto the field to play it. Dragging is the only way to play.'],
     ['⚔️', 'Combat, the Coliseum way', 'Play creatures, then attack when you are ready. The <b>defender chooses the blockers</b>, one for one — and damage is <b>permanent</b>: a wounded creature stays wounded. Attackers never tap, so your creatures can attack and still block next turn.'],
     ['🪤', 'Traps, mana, and falling', 'Mana grows and refills every turn. <b>Traps</b> are armed face-down on your turn and fire themselves when their moment comes; their mana stays reserved while they wait \u2014 and an unfired trap stands down at the start of your next turn, freeing its mana. A hero falls at 0 life — or by ending their own turn with an empty deck.'],
@@ -7560,7 +7626,7 @@ function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
-  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (deckPickOpen) $app.innerHTML += deckPickHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
+  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (deckPickOpen) $app.innerHTML += deckPickHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) { introStep = introSeen() ? -1 : 0; if (introStep === 0) firstRunPending = true; } if (introStep >= 0) $app.innerHTML += introHtml(); if (firstRunStage) $app.innerHTML += firstRunHtml(); return; }
   if (mode === 'collection') { renderCollection(); if (inspectCardId !== null) $app.innerHTML += inspectHtml(); return; }
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); if (deckCodeOpen) $app.innerHTML += deckCodeHtml(); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
@@ -8144,15 +8210,68 @@ var KW_LABELS = { flying: '\uD83E\uDEBD Flying', reach: '\uD83C\uDFAF Reach', ha
 function cycleCollectionKeyword() { var keys = ['all'].concat(Object.keys(KW_LABELS)); collectionKeyword = keys[(keys.indexOf(collectionKeyword) + 1) % keys.length]; render(); }
 var collectionShowTokens = true;
 var collectionArt = 'all';
-function setCollectionArt(v) { collectionArt = v; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
+function setCollectionArt(v) { collectionArt = v; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
 var collectionOnlySig = false, collectionOnlyLeg = false;
-function setCollectionOnly(kind) { if (kind === 'sig') collectionOnlySig = !collectionOnlySig; else collectionOnlyLeg = !collectionOnlyLeg; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
-function setCollectionTokens(v) { collectionShowTokens = v; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
-function setCollectionSort(s) { collectionSort = s; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
-function setCollectionQuery(v) { collectionQuery = v; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); var c = document.getElementById('collCount'); if (c) c.textContent = collShown; }
+function setCollectionOnly(kind) { if (kind === 'sig') collectionOnlySig = !collectionOnlySig; else collectionOnlyLeg = !collectionOnlyLeg; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
+function setCollectionTokens(v) { collectionShowTokens = v; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
+function setCollectionSort(s) { collectionSort = s; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
+function setCollectionQuery(v) { collectionQuery = v; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); var c = document.getElementById('collCount'); if (c) c.textContent = collShown; var ch = document.getElementById('collChips'); if (ch && ch.id === 'collChips') ch.innerHTML = collChipsInner(); }
+/* ---------- M211: SLIM FILTER BAR + FILTER SHEET (Jesse's overnight
+   directive, 2026-11-10: "the card library and deck builder are
+   cluttered and difficult to navigate; the filters take up all the
+   screen real estate"). Measured before: the collection's sticky
+   filter bar stood 411px of an 874px portrait screen (47%) and 246px
+   of a 402px landscape one (61%) — in portrait not one card was
+   visible above the fold. The default state is now a slim bar: back,
+   search, one Filters button carrying the active count, a removable
+   chip per active filter, and a one-line jump row for the sections.
+   The FULL filter set lives in a sheet (collFiltersOpen) — the four
+   rows below are the pre-M211 bar's rows, moved verbatim; every
+   dimension still reads the same state vars, so filters persist
+   across visits exactly as before and nothing was removed. ------- */
+var collFiltersOpen = false;
+function collActiveFilters() {
+  var out = [];
+  if (collectionQuery) out.push(['\uD83D\uDD0D \u201C' + collectionQuery + '\u201D', 'query']);
+  if (collectionSchool !== 'all') out.push([(SCHOOL_META[collectionSchool] ? SCHOOL_META[collectionSchool].icon + ' ' + SCHOOL_META[collectionSchool].name : '\u26AA Neutral'), 'school']);
+  if (collectionType !== 'all') out.push(['Type: ' + ({ creature: 'Creatures', spell: 'Spells', trap: 'Traps', artifact: 'Artifacts', sig: 'Signatures', gen: 'Generated' })[collectionType], 'type']);
+  if (collectionCost !== 'all') out.push(['Cost: ' + ({ '01': '0\u20131', '23': '2\u20133', '45': '4\u20135', '6p': '6+' })[collectionCost] + ' \uD83D\uDCA7', 'cost']);
+  if (collectionSort !== 'cost') out.push(['Sort: ' + (collectionSort === 'name' ? 'Name' : 'Newest'), 'sort']);
+  if (collectionKeyword !== 'all') out.push([KW_LABELS[collectionKeyword] || collectionKeyword, 'keyword']);
+  if (collectionArt !== 'all') out.push(['Art: ' + (collectionArt === 'painted' ? 'painted' : 'glyphs'), 'art']);
+  if (collectionOnlySig) out.push(['\u25C6 Signatures', 'sig']);
+  if (collectionOnlyLeg) out.push(['\uD83D\uDC51 Legendaries', 'leg']);
+  if (!collectionShowTokens) out.push(['Tokens hidden', 'tokens']);
+  return out;
+}
+function collChipsInner() {
+  var act = collActiveFilters();
+  if (!act.length) return '';
+  return act.map(function (a) { return '<button class="ghost hit fchip" onclick="clearCollDim(\'' + a[1] + '\')">' + esc(a[0]) + ' \u2715</button>'; }).join('') + (act.length > 1 ? '<button class="ghost hit fchip clear" onclick="clearCollectionFilters()">\u21BA Clear all</button>' : '');
+}
+function collChipsHtml() { var i = collChipsInner(); return i ? '<div class="fchips" id="collChips">' + i + '</div>' : ''; }
+function clearCollDim(dim) {
+  if (dim === 'query') collectionQuery = ''; else if (dim === 'school') collectionSchool = 'all';
+  else if (dim === 'type') collectionType = 'all'; else if (dim === 'cost') collectionCost = 'all';
+  else if (dim === 'sort') collectionSort = 'cost'; else if (dim === 'keyword') collectionKeyword = 'all';
+  else if (dim === 'art') collectionArt = 'all'; else if (dim === 'sig') collectionOnlySig = false;
+  else if (dim === 'leg') collectionOnlyLeg = false; else if (dim === 'tokens') collectionShowTokens = true;
+  render();
+}
+function collJump(id) { try { var n = document.getElementById(id); if (n && n.scrollIntoView) n.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); } catch (e) {} }
+function collFilterSheetHtml() {
+  return '<div class="overlay filtersheet" onclick="collFiltersOpen=false;render()"><div class="box" onclick="event.stopPropagation()"><h2>\u2699\uFE0F Collection filters</h2>' +
+'<div style="margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px">' + [['all', '🌐 All'], ['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (sc) {
+      return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionSchool === sc[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionSchool(\'' + sc[0] + '\')">' + sc[1] + '</button>';
+    }).join('') + '</div>' +
+    '<div style="margin:8px 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#a793d6">Sort:</span>' + [['cost', '💧 Cost'], ['name', '🔤 Name'], ['new', '✨ Newest']].map(function (s) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionSort === s[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionSort(\'' + s[0] + '\')">' + s[1] + '</button>'; }).join('') + '<span style="font-size:12px;color:#a793d6">' + ['tides', 'ember', 'grave', 'dawn', 'worldroot'].map(function (s) { return SCHOOL_META[s].icon + ' ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].cardSchool === s && !CARDS[id].generatedOnly; }).length; }).join(' · ') + ' playable</span><button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="setCollectionTokens(!collectionShowTokens)">' + (collectionShowTokens ? '🫥 Hide tokens' : '👀 Show tokens') + '</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionOnlySig ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'sig\')">◆ Signatures</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionOnlyLeg ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'leg\')">👑 Legendaries</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="cycleCollectionKeyword()">' + (collectionKeyword === 'all' ? '🔑 Keyword: any' : '🔑 ' + KW_LABELS[collectionKeyword]) + '</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="setCollectionArt(collectionArt === \'all\' ? \'painted\' : collectionArt === \'painted\' ? \'glyph\' : \'all\')">' + (collectionArt === 'all' ? '🎨 Art: all' : collectionArt === 'painted' ? '🎨 Art: painted' : '✦ Art: glyphs') + '</button></div>' +
+    '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Type:</span>' + [['all', '🌐 All'], ['creature', '🐾 Creatures'], ['spell', '✨ Spells'], ['trap', '🪤 Traps'], ['artifact', '🏺 Artifacts'], ['sig', '◆ Signatures'], ['gen', '🔮 Generated']].map(function (t) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionType === t[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionType(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div>' +
+    '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Cost:</span>' + [['all', 'Any'], ['01', '0–1'], ['23', '2–3'], ['45', '4–5'], ['6p', '6+']].map(function (t) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionCost === t[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionCost(\'' + t[0] + '\')">' + t[1] + ' 💧</button>'; }).join('') + '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></div>' +
+    '<button class="big" style="margin-top:14px" onclick="collFiltersOpen=false;render()">Done \u2014 see the cards</button></div></div>';
+}
 function collectionGroupsHtml() {
   collShown = 0;
-  function group(title, ids, tag) {
+  function group(title, ids, tag, anchor) {
     if (collectionType !== 'all' && tag !== collectionType) return '';
     ids = ids.filter(function (id) { return collectionSchool === 'all' || (CARDS[id].cardSchool || 'none') === collectionSchool; });
     if (collectionCost !== 'all') ids = ids.filter(function (id) { return costIn(collectionCost, CARDS[id].cost); });
@@ -8167,24 +8286,24 @@ function collectionGroupsHtml() {
     if (collectionArt === 'glyph') ids = ids.filter(function (id) { return !(typeof CARD_ART !== 'undefined' && CARD_ART[id]); });
     if (!ids.length) return '';
     collShown += ids.length;
-    return '<div class="board-label" style="margin-top:14px">' + title + ' · ' + ids.length + '</div><div class="hand">' +
+    return '<div class="board-label"' + (anchor ? ' id="' + anchor + '"' : '') + ' style="margin-top:14px">' + title + ' · ' + ids.length + '</div><div class="hand">' +
       ids.map(function (id) { return cardHtml(fakeInst(id), 0, { showType: true, ribbon: !!NEW_CARDS[id], onclick: 'openInspectCard(\'' + id + '\')' }); }).join('') + '</div>';
   }
   var ids = Object.keys(CARDS);
   var byHero = function (h) { return ids.filter(function (id) { return CARDS[id].signatureFor === h; }); };
   var plain = function (t) { return ids.filter(function (id) { return CARDS[id].type === t && !CARDS[id].signatureFor && !CARDS[id].generatedOnly; }); };
-  return group('🌑 SIGNATURES — UMBRA', byHero('weaver'), 'sig') +
+  return group('🌑 SIGNATURES — UMBRA', byHero('weaver'), 'sig', 'grp-sig') +
     group('👁️ SIGNATURES — THE PATIENT WARDEN', byHero('controller'), 'sig') +
     group('🌿 SIGNATURES — THE VERDANT KEEPER', byHero('keeper'), 'sig') +
     group('🪦 SIGNATURES — MORVANE', byHero('graven'), 'sig') +
     group('👻 SIGNATURES — SISTER VESPER', byHero('unchained'), 'sig') +
     group('🐗 SIGNATURES — BRAM', byHero('unbridled'), 'sig') +
     group('☄️ SIGNATURES — KAEL', byHero('torchbearer'), 'sig') +
-    group('CREATURES', plain('creature'), 'creature') +
-    group('SPELLS', plain('spell'), 'spell') +
-    group('TRAPS', plain('trap'), 'trap') +
-    group('ARTIFACTS', plain('artifact'), 'artifact') +
-    group('✨ GENERATED ONLY — NEVER START IN A DECK', ids.filter(function (id) { return CARDS[id].generatedOnly; }), 'gen') +
+    group('CREATURES', plain('creature'), 'creature', 'grp-creature') +
+    group('SPELLS', plain('spell'), 'spell', 'grp-spell') +
+    group('TRAPS', plain('trap'), 'trap', 'grp-trap') +
+    group('ARTIFACTS', plain('artifact'), 'artifact', 'grp-artifact') +
+    group('✨ GENERATED ONLY — NEVER START IN A DECK', ids.filter(function (id) { return CARDS[id].generatedOnly; }), 'gen', 'grp-gen') +
     (collShown === 0 ? '<p style="color:#c4b6e8;font-size:14px;text-align:center;margin:26px 10px">No cards match those filters. <button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></p>' : '') +
     '<p style="color:#a793d6;font-size:12.5px;margin-top:14px">Karg the Unbroken has no signature cards. Karg <i>is</i> the signature.</p>';
 }
@@ -8205,24 +8324,22 @@ function collProgHtml(ids) {
   var segs = order.filter(function (s) { return counts[s] > 0; }).map(function (s) { return '<i style="width:' + (counts[s] / rec * 100).toFixed(2) + '%;background:' + ((SCHOOL_COLORS[s] || ['#9a8a72'])[0]) + '" title="' + (SCHOOL_META[s] ? SCHOOL_META[s].name : 'Neutral') + ' — ' + counts[s] + ' recovered"></i>'; }).join('');
   var legend = order.filter(function (s) { return counts[s] > 0; }).map(function (s) { return '<span>' + (SCHOOL_META[s] ? SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name : '⚪ Neutral') + ' ' + counts[s] + '</span>'; }).join('');
   return '<div class="collprog" title="' + rec + ' of the 466 originals recovered"><i style="width:' + pct + '%"></i></div>' +
-    '<div class="collschools"><div class="collshare">' + segs + '</div><div class="colllegend">' + legend + '</div></div>';
+    '<div class="collschools"><div class="collshare">' + segs + '</div><div class="colllegend oneline">' + legend + '</div></div>';
 }
 function renderCollection() {
   var ids = Object.keys(CARDS);
   var groupsHtml = collectionGroupsHtml();
-  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the collection · showing <span id="collCount">' + collShown + '</span> of ' + ids.length + ' cards · ' + ids.filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered</p>' + collProgHtml(ids) +
-    '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
+  var nAct = collActiveFilters().length;
+  $app.innerHTML = '<div class="pagescroll"><h1 class="logo">YIRA</h1><p class="tagline">the collection \u00B7 showing <span id="collCount">' + collShown + '</span> of ' + ids.length + ' cards \u00B7 ' + ids.filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered</p>' + collProgHtml(ids) +
     '<div class="collbar">' +
-    '<input id="collSearch" type="text" placeholder="🔍 Search name or rules text…" value="' + esc(collectionQuery) + '" oninput="setCollectionQuery(this.value)">' +
-    '<div style="margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px">' + [['all', '🌐 All'], ['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (sc) {
-      return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionSchool === sc[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionSchool(\'' + sc[0] + '\')">' + sc[1] + '</button>';
-    }).join('') + '</div>' +
-    '<div style="margin:8px 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#a793d6">Sort:</span>' + [['cost', '💧 Cost'], ['name', '🔤 Name'], ['new', '✨ Newest']].map(function (s) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionSort === s[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionSort(\'' + s[0] + '\')">' + s[1] + '</button>'; }).join('') + '<span style="font-size:12px;color:#a793d6">' + ['tides', 'ember', 'grave', 'dawn', 'worldroot'].map(function (s) { return SCHOOL_META[s].icon + ' ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].cardSchool === s && !CARDS[id].generatedOnly; }).length; }).join(' · ') + ' playable</span><button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="setCollectionTokens(!collectionShowTokens)">' + (collectionShowTokens ? '🫥 Hide tokens' : '👀 Show tokens') + '</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionOnlySig ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'sig\')">◆ Signatures</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionOnlyLeg ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'leg\')">👑 Legendaries</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="cycleCollectionKeyword()">' + (collectionKeyword === 'all' ? '🔑 Keyword: any' : '🔑 ' + KW_LABELS[collectionKeyword]) + '</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="setCollectionArt(collectionArt === \'all\' ? \'painted\' : collectionArt === \'painted\' ? \'glyph\' : \'all\')">' + (collectionArt === 'all' ? '🎨 Art: all' : collectionArt === 'painted' ? '🎨 Art: painted' : '✦ Art: glyphs') + '</button></div>' +
-    '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Type:</span>' + [['all', '🌐 All'], ['creature', '🐾 Creatures'], ['spell', '✨ Spells'], ['trap', '🪤 Traps'], ['artifact', '🏺 Artifacts'], ['sig', '◆ Signatures'], ['gen', '🔮 Generated']].map(function (t) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionType === t[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionType(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div>' +
-    '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Cost:</span>' + [['all', 'Any'], ['01', '0–1'], ['23', '2–3'], ['45', '4–5'], ['6p', '6+']].map(function (t) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionCost === t[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionCost(\'' + t[0] + '\')">' + t[1] + ' 💧</button>'; }).join('') + '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></div>' +
+    '<div class="filterrow"><button class="ghost hit backmini" onclick="backToMenu()" aria-label="Back to menu">\u2190</button>' +
+    '<input id="collSearch" type="text" placeholder="\uD83D\uDD0D Search name or rules text\u2026" value="' + esc(collectionQuery) + '" oninput="setCollectionQuery(this.value)">' +
+    '<button class="ghost hit filterbtn" onclick="collFiltersOpen=true;render()">\u2699\uFE0F Filters' + (nAct ? ' \u00B7 ' + nAct : '') + '</button></div>' +
+    collChipsHtml() +
+    '<div class="jumpmeta"><span class="jumpcap">Jump:</span>' + [['grp-sig', '\u25C6 Signatures'], ['grp-creature', '\uD83D\uDC3E Creatures'], ['grp-spell', '\u2728 Spells'], ['grp-trap', '\uD83E\uDEA4 Traps'], ['grp-artifact', '\uD83C\uDF7A Artifacts'], ['grp-gen', '\uD83D\uDD2E Generated']].map(function (j) { return '<button class="ghost hit" onclick="collJump(\'' + j[0] + '\')">' + j[1] + '</button>'; }).join('') + '</div>' +
     '</div>' +
     '<div id="collGroups">' + groupsHtml + '</div>' +
-    '<div style="height:16px"></div></div>';
+    '<div style="height:16px"></div></div>' + (collFiltersOpen ? collFilterSheetHtml() : '');
 }
 
 
@@ -8241,15 +8358,40 @@ function isClassCard(id) { return !!CLASS_CARD_IDS[id]; }
 function deckClassCount(ids) { return ids.filter(function (id) { return isClassCard(id); }).length; }
 var deckCodeOpen = false, deckCodeMode = 'export', deckCodeMsg = ''; // M164: the in-app deck-code sheet (no native prompt/alert)
 var builderSchoolF = 'all', builderType = 'all', builderCost = 'all', builderKeyword = 'all';
+var builderFiltersOpen = false, builderLoadoutOpen = false, builderMoreOpen = false; // M211 folds: sheet, loadout, secondary verbs
+function builderJumpDeck() { try { var n = document.getElementById('builderDeckPanel'); if (n && n.scrollIntoView) n.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); } catch (e) {} }
 function cycleBuilderKeyword() { var keys = ['all'].concat(Object.keys(KW_LABELS)); builderKeyword = keys[(keys.indexOf(builderKeyword) + 1) % keys.length]; render(); }
 function setBuilderFilter(kind, v) { if (kind === 'school') builderSchoolF = v; else if (kind === 'type') builderType = v; else builderCost = v; render(); }
-function builderFilterHtml(shown) {
-  function chip(kind, v, label, cur) { return '<button class="ghost hit" style="padding:4px 10px;font-size:12px' + (cur === v ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setBuilderFilter(\'' + kind + '\', \'' + v + '\')">' + label + '</button>'; }
-  return '<p style="color:#a793d6;font-size:12.5px;margin:2px 0 6px">' + shown + ' cards in the pool.</p>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">' + chip('school', 'all', '🌐 All', builderSchoolF) + [['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (t) { return chip('school', t[0], t[1], builderSchoolF); }).join('') + '</div>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">' + chip('type', 'all', 'All types', builderType) + [['creature', 'Creatures'], ['spell', 'Spells'], ['trap', 'Traps'], ['artifact', 'Artifacts']].map(function (t) { return chip('type', t[0], t[1], builderType); }).join('') + '</div>' +
-    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px">' + chip('cost', 'all', 'Any 💧', builderCost) + [['01', '0–1'], ['23', '2–3'], ['45', '4–5'], ['6p', '6+']].map(function (t) { return chip('cost', t[0], t[1] + ' 💧', builderCost); }).join('') + '<button class="ghost hit" style="padding:4px 10px;font-size:12px' + (builderKeyword !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="cycleBuilderKeyword()">' + (builderKeyword === 'all' ? '🔑 Keyword: any' : '🔑 ' + KW_LABELS[builderKeyword]) + '</button></div>';
+function builderActiveFilters() {
+  var out = [];
+  if (builderQuery) out.push(['\uD83D\uDD0D \u201C' + builderQuery + '\u201D', 'query']);
+  if (builderSchoolF !== 'all') out.push([(builderSchoolF === 'none' ? '\u26AA Neutral' : SCHOOL_META[builderSchoolF].icon + ' ' + SCHOOL_META[builderSchoolF].name), 'school']);
+  if (builderType !== 'all') out.push(['Type: ' + builderType, 'type']);
+  if (builderCost !== 'all') out.push(['Cost: ' + ({ '01': '0\u20131', '23': '2\u20133', '45': '4\u20135', '6p': '6+' })[builderCost] + ' \uD83D\uDCA7', 'cost']);
+  if (builderKeyword !== 'all') out.push([KW_LABELS[builderKeyword] || builderKeyword, 'keyword']);
+  return out;
 }
+function clearBuilderDim(dim) {
+  if (dim === 'query') builderQuery = ''; else if (dim === 'school') builderSchoolF = 'all';
+  else if (dim === 'type') builderType = 'all'; else if (dim === 'cost') builderCost = 'all';
+  else if (dim === 'keyword') builderKeyword = 'all';
+  render();
+}
+function builderFilterHtml(shown) {
+  var act = builderActiveFilters();
+  return '<button class="ghost hit filterbtn" onclick="builderFiltersOpen=true;render()">\u2699\uFE0F Filters' + (act.length ? ' \u00B7 ' + act.length : '') + '</button>' +
+    '<span style="font-size:12.5px;color:#a793d6">' + shown + ' cards in the pool.</span>' +
+    (act.length ? '<span class="fchips" style="margin-top:0">' + act.map(function (a) { return '<button class="ghost hit fchip" onclick="clearBuilderDim(\'' + a[1] + '\')">' + esc(a[0]) + ' \u2715</button>'; }).join('') + '</span>' : '');
+}
+function builderFilterSheetHtml() {
+  function chip(kind, v, label, cur) { return '<button class="ghost hit" style="padding:4px 10px;font-size:12px' + (cur === v ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setBuilderFilter(\'' + kind + '\',\'' + v + '\')">' + label + '</button>'; }
+  return '<div class="overlay filtersheet" onclick="builderFiltersOpen=false;render()"><div class="box" onclick="event.stopPropagation()"><h2>\u2699\uFE0F Pool filters</h2>' +
+'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">' + chip('school', 'all', '🌐 All', builderSchoolF) + [['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (t) { return chip('school', t[0], t[1], builderSchoolF); }).join('') + '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">' + chip('type', 'all', 'All types', builderType) + [['creature', 'Creatures'], ['spell', 'Spells'], ['trap', 'Traps'], ['artifact', 'Artifacts']].map(function (t) { return chip('type', t[0], t[1], builderType); }).join('') + '</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:4px">' + chip('cost', 'all', 'Any 💧', builderCost) + [['01', '0–1'], ['23', '2–3'], ['45', '4–5'], ['6p', '6+']].map(function (t) { return chip('cost', t[0], t[1] + ' 💧', builderCost); }).join('') + '<button class="ghost hit" style="padding:4px 10px;font-size:12px' + (builderKeyword !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="cycleBuilderKeyword()">' + (builderKeyword === 'all' ? '🔑 Keyword: any' : '🔑 ' + KW_LABELS[builderKeyword]) + '</button></div>' +
+    '<button class="big" style="margin-top:12px" onclick="builderFiltersOpen=false;render()">Done</button></div></div>';
+}
+
 function setBuilderQuery(v) { builderQuery = v; render(); try { var inp = document.getElementById('bq'); if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); } } catch (e) {} }
 /* ---------- M6: school + stance choices per hero, saved on device ---------- */
 var CHAIN_SCHOOL = { wizard: 'tides', warlock: 'grave', paladin: 'dawn', barbarian: 'ember', druid: 'worldroot' };
@@ -8455,16 +8597,20 @@ function renderBuilder() {
     '<label>\uD83D\uDDC4\uFE0F Deck</label><select onchange="builderPickDeck(this.value)">' + (curDeck ? '' : '<option value="__new" selected>\u2726 ' + esc(builderDeckName || 'New deck') + ' (unsaved)</option>') + myDecks.map(function (dd) { return '<option value="' + dd.id + '"' + (curDeck && dd.id === curDeck.id ? ' selected' : '') + '>' + esc(dd.name) + (activeId === dd.id ? ' \u2605 active' : '') + '</option>'; }).join('') + '</select>' +
     '<label>Deck name</label><div style="display:flex;gap:8px"><input id="bdeckname" type="text" value="' + esc(builderDeckName || '') + '" onchange="builderSetDeckName(this.value)" style="flex:1;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px"><button class="ghost" onclick="builderRenameDeck()">Rename</button></div>' +
     '<div class="herodesc">This hero draws from ' + (HERO_SCHOOLS[heroId] || []).map(function (x) { return SCHOOL_META[x].icon + ' ' + SCHOOL_META[x].name; }).join(' and ') + ' — the pool below holds only those schools, neutral cards, and this hero\'s own signatures.</div>' +
-    '<label>🏫 School (three-stage chain)</label><select onchange="builderSetSchool(this.value)">' + ['none'].concat(Object.keys(SCHOOLS).filter(function (id) { return (HERO_SCHOOLS[heroId] || []).includes(CHAIN_SCHOOL[id]); })).map(function (id) { var cur = chosenSchool(heroId) || 'none'; return '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + (id === 'none' ? 'No school' : SCHOOLS[id].icon + ' ' + esc(SCHOOLS[id].name)) + '</option>'; }).join('') + '</select>' +
+    '<button class="ghost hit loadoutbtn" onclick="builderLoadoutOpen=!builderLoadoutOpen;render()">\uD83C\uDFEB ' + SCHOOLS[chosenSchool(heroId)].name + ' \u00B7 ' + STANCES[chosenStance(heroId)].name + (builderLoadoutOpen ? ' \u25B2' : ' \u25BC') + '</button>' +
+    (builderLoadoutOpen ? '<div style="margin-top:8px">' + '<label>🏫 School (three-stage chain)</label><select onchange="builderSetSchool(this.value)">' + ['none'].concat(Object.keys(SCHOOLS).filter(function (id) { return (HERO_SCHOOLS[heroId] || []).includes(CHAIN_SCHOOL[id]); })).map(function (id) { var cur = chosenSchool(heroId) || 'none'; return '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + (id === 'none' ? 'No school' : SCHOOLS[id].icon + ' ' + esc(SCHOOLS[id].name)) + '</option>'; }).join('') + '</select>' +
     '<div class="herodesc">' + (chosenSchool(heroId) ? esc(SCHOOLS[chosenSchool(heroId)].blurb) : 'No chain — just your 30 cards.') + '</div>' +
     '<label>🎚️ Stance (your land slot)</label><select onchange="builderSetStance(this.value)">' + Object.keys(STANCES).map(function (id) { return '<option value="' + id + '"' + (id === chosenStance(heroId) ? ' selected' : '') + '>' + STANCES[id].icon + ' ' + esc(STANCES[id].name) + '</option>'; }).join('') + '</select>' +
-    '<div class="herodesc">' + esc(STANCES[chosenStance(heroId)].blurb) + '</div>' +
+    '<div class="herodesc">' + esc(STANCES[chosenStance(heroId)].blurb) + '</div>' + '</div>' : '') +
     '<div style="margin:10px 0 4px;font-size:15px">Deck: <b>' + esc(builderDeckName || (curDeck ? curDeck.name : 'New deck')) + '</b> · <b>' + d.length + ' / 30</b> cards' + (curDeck ? (activeId === curDeck.id ? ' · \u2605 active \u2014 this deck fights' : ' · saved in your vault') + (isSaved ? '' : ' · unsaved changes') : ' · new deck \u2014 Save puts it in your vault') + (!activeId ? ' · the default deck fights for this hero' : '') + '</div>' +
     '<div class="curve">' + (function () { var byCost = {}, types = {}, sum = 0; d.forEach(function (id) { var c = CARDS[id]; if (!c) return; var b = Math.min(c.cost, 8); byCost[b] = (byCost[b] || 0) + 1; types[c.type] = (types[c.type] || 0) + 1; sum += c.cost; }); var max = 1; Object.keys(byCost).forEach(function (k) { if (byCost[k] > max) max = byCost[k]; }); var bars = ''; for (var b2 = 0; b2 <= 8; b2++) { var n2 = byCost[b2] || 0; bars += '<span class="cbar"><i style="height:' + Math.max(2, Math.round(n2 / max * 30)) + 'px"></i><em>' + (b2 === 8 ? '8+' : b2) + '</em></span>'; } return bars + '<span class="cmeta">' + (d.length ? 'avg ' + (sum / d.length).toFixed(1) + ' mana · ' : '') + Object.keys(types).map(function (t) { return types[t] + ' ' + t + (types[t] === 1 ? '' : 's'); }).join(' · ') + (function () { var pk = 0, pkn = 0; Object.keys(byCost).forEach(function (k) { if (byCost[k] > pkn) { pkn = byCost[k]; pk = k; } }); return d.length ? ' · curve peak 💧' + pk + ' (' + pkn + ')' : ''; })() + (function () { var sc = {}; d.forEach(function (id) { var s2 = CARDS[id] && CARDS[id].cardSchool; if (s2 && s2 !== 'none') sc[s2] = (sc[s2] || 0) + 1; }); var ks = Object.keys(sc); return ks.length ? ' · ' + ks.map(function (k) { return SCHOOL_META[k].icon + ' ' + sc[k]; }).join(' ') : ''; })() + '</span>'; })() + '</div>' +
     (d.length >= 20 && !cheapN ? '<div class="berr" style="border-color:rgba(255,209,102,.5);color:#ffe9b0">⚠ No plays before turn 3 — this deck has nothing costing 2 or less.</div>' : '') +
     (errs.length ? errs.map(function (e) { return '<div class="berr">⚠ ' + esc(e) + '</div>'; }).join('') : '<div class="bok">✓ Legal deck' + (isSaved ? ' — saved' + (curDeck && activeId === curDeck.id ? ' and in use' : '') : '') + '</div>') +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
     '<button class="big" style="flex:1" onclick="builderSave()"' + (errs.length ? ' disabled' : '') + '>' + (curDeck ? '💾 Save & use this deck' : '💾 Save to vault & use') + '</button>' +
+    '<button class="ghost hit" onclick="builderJumpDeck()">\uD83C\uDCCF View deck \u2193</button>' +
+    '<button class="ghost hit" onclick="builderMoreOpen=!builderMoreOpen;render()">More actions ' + (builderMoreOpen ? '\u25B2' : '\u25BC') + '</button></div>' +
+    (builderMoreOpen ? '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">' +
     '<button class="ghost" onclick="builderReset()">↩ Reset to default build</button>' +
     '<button class="ghost" onclick="builderClear()">Clear</button>' +
     '<button class="ghost" onclick="builderAuto()">🪄 Auto-complete to 30</button>' +
@@ -8474,15 +8620,17 @@ function renderBuilder() {
     '<button class="ghost" onclick="builderExport()">📤 Export code</button>' +
     '<button class="ghost" onclick="builderImport()">📥 Import code</button>' +
     (activeId ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
-    '</div></div>' +
-    '<div class="panel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty — add cards from the pool below.</p>') + '</div>' +
-    '<div class="panel"><h2>Card pool</h2><div class="collbar"><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') + builderFilterHtml(pool.length) + '</div>' +
+    '</div>' : '') +
+    '</div>' +
+    '<div class="panel"><h2>Card pool</h2><div class="collbar"><div class="filterrow"><input id="bq" type="text" placeholder="\uD83D\uDD0E Search the pool \u2014 name, text, school\u2026" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="flex:1;min-width:130px;box-sizing:border-box;margin:0;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px">' + builderFilterHtml(pool.length) + '</div>' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:6px 0 0">' + pool.length + ' cards match.</p>' : '') + '</div>' +
     group('SIGNATURES', pool.filter(function (id) { return CARDS[id].signatureFor === heroId; })) +
     group('CREATURES', pool.filter(function (id) { return CARDS[id].type === 'creature' && !CARDS[id].signatureFor; })) +
     group('SPELLS', pool.filter(function (id) { return CARDS[id].type === 'spell' && !CARDS[id].signatureFor; })) +
     group('TRAPS', pool.filter(function (id) { return CARDS[id].type === 'trap' && !CARDS[id].signatureFor; })) +
     group('ARTIFACTS', pool.filter(function (id) { return CARDS[id].type === 'artifact' && !CARDS[id].signatureFor; })) +
-    '</div><div style="height:16px"></div></div>';
+     +
+    '<div class="panel" id="builderDeckPanel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty \u2014 add cards from the pool above.</p>') + '</div>' +
+    '<div style="height:16px"></div></div>' + (builderFiltersOpen ? builderFilterSheetHtml() : '');
   if (pulseHit) builderPulseId = null; // M199: the stamp is spent by the render that printed it — it can never flash twice
 }
 

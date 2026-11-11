@@ -499,6 +499,25 @@
   .wisp-head { filter:blur(1.1px) saturate(1.28) brightness(1.22); }
   .wisp-pulse { position:absolute; left:0; top:0; border-radius:50%; mix-blend-mode:screen; pointer-events:none;
     background:radial-gradient(circle, rgba(196,152,255,.85) 0%, rgba(124,72,235,.38) 45%, rgba(0,0,0,0) 70%); }
+  /* M209 (Jesse, 2026-11-10): NIGHTMARES GO BLACK. The plant + drain layers
+     carry .fx-nightmare, and inside them the violet smoke becomes black
+     smoke. Screen blend cannot draw black (black is its identity colour —
+     it would vanish), so the nightmare layers blend NORMALLY and the
+     sprite is crushed toward charcoal: grayscale strips the violet,
+     brightness drops the body to soot while the sprite's own bright
+     tendrils survive as ash-grey rims, and contrast keeps the ribbon's
+     edge. The head rides lighter (.66) than the body (.46) — an ash-lit
+     leading edge, the same brighter-head read the violet build had.
+     Everything outside .fx-nightmare (draw tails, grave flights, summon
+     breath, school tints) keeps the violet system untouched. */
+  .fx-nightmare .wisp { mix-blend-mode:normal; filter:blur(1.6px) grayscale(.86) brightness(.55) contrast(1.24);
+    background:radial-gradient(circle, rgba(6,5,9,.52) 0%, rgba(14,12,18,.26) 55%, rgba(0,0,0,0) 80%), var(--smoke-img, none) center / 160% no-repeat; }
+  .fx-nightmare .wisp-streak { filter:blur(1.9px) grayscale(.86) brightness(.58) contrast(1.22); }
+  .fx-nightmare .wisp-head { filter:blur(1.1px) grayscale(.78) brightness(.74) contrast(1.18); }
+  .fx-nightmare .wisp-halo { filter:blur(7px) grayscale(.88) brightness(.48) contrast(1.12); }
+  .fx-nightmare .wisp-under { filter:blur(10px) grayscale(.88) brightness(.50); }
+  .fx-nightmare .wisp-pulse { mix-blend-mode:normal;
+    background:radial-gradient(circle, rgba(10,8,14,.60) 0%, rgba(24,20,32,.28) 45%, rgba(0,0,0,0) 70%); }
   /* M198: school tints for one-off vapor (the summon breath). The smoke
      sprite's native hue is violet (the Grave's own colour); the other
      schools are the same smoke turned on the colour wheel, in the
@@ -691,11 +710,13 @@
   .held-num { display:block; color:#ff9dd1; font-size:10.5px; font-weight:700; text-align:center; }
   /* --- M35: frameless HUD, smaller hand, rebalanced faces --- */
   .shell.stage .herobar { background:transparent; border-color:transparent; box-shadow:none; padding:4px 6px; }
-  /* M74: the battle-log button — a small round seal at the arena's top-left,
-     the corner the foe's pile strip vacated. */
+  /* M74: the pause button — a small round seal at the arena's top-left,
+     the corner the foe's pile strip vacated. M209 (Jesse B1): it has worn
+     this corner alone in practice all along — the separate battle-log
+     button shared its class, rendered beneath it and could never be
+     tapped; that button is retired and the log lives in the pause sheet. */
   body { touch-action: manipulation; }
-  .shell.stage .pause-btn { left:auto; right:8px; }
-  .shell.stage .log-btn { position:absolute; top:8px; left:8px; z-index:11; width:38px; height:38px; border-radius:50%; padding:0; font-size:17px; line-height:38px; text-align:center; background:rgba(16,10,28,.78); border:1.5px solid rgba(220,180,100,.55); box-shadow:0 2px 8px rgba(0,0,0,.5); }
+  .shell.stage .pause-btn { position:absolute; top:8px; left:8px; z-index:11; width:38px; height:38px; border-radius:50%; padding:0; font-size:17px; line-height:38px; text-align:center; background:rgba(16,10,28,.78); border:1.5px solid rgba(220,180,100,.55); box-shadow:0 2px 8px rgba(0,0,0,.5); }
   .shell.stage .pile { font-size:12px; }
   .shell.stage .msg { align-self:center; background:rgba(16,10,28,.55); border:1px solid rgba(200,170,255,.25); border-radius:999px; padding:2px 14px; margin:2px auto; position:relative; z-index:8; }
   .shell.stage #log { position:absolute; top:106px; left:50%; transform:translateX(-50%); width:min(440px,88%); max-height:42px; overflow:hidden; pointer-events:none; background:linear-gradient(rgba(10,6,18,.55), rgba(10,6,18,.18)); border:none; border-radius:10px; z-index:9; font-size:11px; text-align:center; }
@@ -850,8 +871,8 @@
      new min-height must not stretch deliberately small controls. */
   .hit { position:relative; min-height:0; }
   .hit::after, .beye::after, .brow button::after, .review-chip::after { content:''; position:absolute; left:50%; top:50%; width:max(44px,100%); height:44px; transform:translate(-50%,-50%); }
-  .shell.stage .log-btn { min-height:0; }
-  .shell.stage .log-btn::after { content:''; position:absolute; inset:-3px; border-radius:50%; }
+  .shell.stage .pause-btn { min-height:0; }
+  .shell.stage .pause-btn::after { content:''; position:absolute; inset:-3px; border-radius:50%; }
   .amedal-eye::after { content:''; position:absolute; width:44px; height:44px; top:-20px; right:-20px; border-radius:50%; }
   .profilebar .psub .pseg { white-space:nowrap; }
   .profilebar .profbtn { font-size:13px; padding:8px 11px; }
@@ -1095,7 +1116,7 @@
   .shell.stage.casting .field, .shell.stage.casting .herobar { filter:brightness(.68) saturate(.88); transition:filter .16s ease; }
   .shell.stage .field, .shell.stage .herobar { transition:filter .3s ease; }
   .createdby { font-size:8px; line-height:1.15; color:#d9b8ff; text-align:center; font-style:italic; padding:0 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .log-btn.hasnews { animation: medalPulse 1.4s ease-in-out infinite; border-color:rgba(255,209,102,.85); }
+  .pause-btn.hasnews { animation: medalPulse 1.4s ease-in-out infinite; border-color:rgba(255,209,102,.85); }
   .ribbon { position:relative; margin:2px auto 12px; max-width:92%; background:linear-gradient(180deg,#8a6a1f,#6d5316); color:#ffe9a8; font-family:Georgia,'Times New Roman',serif; font-size:21px; font-weight:800; letter-spacing:2.5px; text-align:center; padding:9px 18px; border:1px solid rgba(255,220,130,.65); box-shadow:0 6px 18px rgba(0,0,0,.55); }
   .ribbon::before, .ribbon::after { content:''; position:absolute; top:6px; border-style:solid; }
   .ribbon::before { left:-13px; border-width:13px 13px 13px 0; border-color:transparent #54400f transparent transparent; }
@@ -1298,7 +1319,7 @@
   @media (orientation: landscape) and (max-height: 540px) { .artdock.me { bottom:196px; } }
   @media (prefers-reduced-motion: reduce) {
     .motes, .winburst { display:none !important; }
-    .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand i, .log-btn.hasnews { animation: none !important; }
+    .shell.stage.peril-life::before, .amedal.ready, .fragile-gem, button.pass-ready, .foehand i, .pause-btn.hasnews { animation: none !important; }
   }
 
   /* ===== M86: sixth compare-and-polish batch ===== */
@@ -1416,6 +1437,12 @@
      of the action cluster, with a crisper count pill on its top corner. */
   .shell.stage .field > .passive-emblem { position:fixed; right:10px; left:auto; top:auto; bottom:calc(196px + env(safe-area-inset-bottom)); z-index:9; width:46px; height:46px; font-size:22px; border:2px solid #b18cff; background:radial-gradient(circle at 35% 30%, #54387d, #241736 78%); box-shadow:0 4px 14px rgba(0,0,0,.6), 0 0 10px rgba(140,90,255,.35); }
   .shell.stage .passive-emblem .pe-count { right:-6px; top:-6px; bottom:auto; font-size:11.5px; padding:1px 6px; min-width:12px; text-align:center; color:#fff; background:#5b21b6; border:1.5px solid #d6bcff; box-shadow:0 2px 6px rgba(0,0,0,.5); }
+  /* M209: Umbra's weave emblem wears the Nightmares' new colours — a soot
+     seal with an ash rim, its count pill charcoal with a pale edge (the
+     count itself stays white-on-dark: legibility first). Other heroes'
+     emblems keep the violet seal; theirs are not Nightmare counts. */
+  .shell.stage .field > .passive-emblem.pe-weave { border-color:#3a3644; background:radial-gradient(circle at 35% 30%, #4a4552, #100e14 78%); box-shadow:0 4px 14px rgba(0,0,0,.6), 0 0 10px rgba(0,0,0,.5); }
+  .shell.stage .passive-emblem.pe-weave .pe-count { background:#17141d; border-color:#8f8a9c; }
   .card .cname { padding:2px 17px 2px 8px; }
   .bigcard .cname { padding:4px 20px 4px 12px; }
   /* M154: sectioned hub — the featured Play banner + bottom nav */
@@ -1609,7 +1636,7 @@ const CARDS = {
   warding_flame: { icon: "🕯️", name: 'Warding Flame', cost: 1, type: 'spell', effect: { kind: 'damageAny', amount: 1 }, miracle: { kind: 'damageRandomEnemy', amount: 1 }, text: 'Deal 1 damage to an enemy. Miracle: Deal 1 damage to a random enemy.', cardSchool: 'ember', orig: "Warding Flame", src: "Video digest 4A F18 (draft screen, full face): cost 1, both lines verbatim — a clean Miracle face. School: FORGE ASSIGNMENT Ember (flame; ran in Ral lists per wave 4B) — flagged." },
   exiles_road: { icon: "🛤️", name: 'Path to Exile', cost: 3, type: 'spell', effect: { kind: 'pathExile' }, text: 'Destroy an enemy creature. Your opponent gets an empty mana gem.', cardSchool: 'dawn', orig: "Path to Exile", src: "Video digest 4A F16 (full inspect face): cost 3, text verbatim. Renamed (the original title is a famous Magic card)." },
   jarring_insight: { icon: "💡", name: 'Jarring Insight', cost: 1, type: 'spell', effect: { kind: 'millDrawBoth' }, text: 'Each player mills a card, then draws a card.', cardSchool: 'tides', orig: "Jarring Insight", src: "Video digest 4A F18 (draft screen, full face): cost 1, text verbatim." },
-  dawns_judgment: { icon: "⚖️", name: "Dawn's Judgment", cost: 3, type: 'spell', effect: { kind: 'pacify' }, text: "Give an enemy creature can't attack.", cardSchool: 'dawn', orig: "Serra's Judgment", src: "Video digest 4A F12 (full face): cost 3, text verbatim. Renamed (Serra is a Magic planeswalker). Pacify = a permanent cantAttack keyword grant." },
+  dawns_judgment: { icon: "⚖️", name: "Dawn's Judgment", cost: 3, type: 'spell', signatureFor: 'banneret', effect: { kind: 'pacify' }, text: "Give an enemy creature can't attack.", cardSchool: 'dawn', orig: "Serra's Judgment", src: "Video digest 4A F12 (full face): cost 3, text verbatim. Renamed (Serra is a Magic planeswalker). Pacify = a permanent cantAttack keyword grant. M209 (2026-11-10): SIGNATURE of Ser Aldric — Jesse ruled it corrected to match the record (cards.csv row 259 subtypes the original 'Signature of Serra'); it takes the standard signature treatment and leaves the general Dawn pool (his default deck fields it in place of the second Flame Shot — the M118 standing rule: a hero's default fields its signatures, as his fields the Shrine)." },
   aether_figment: { icon: "🫧", name: 'Aether Figment', cost: 3, type: 'creature', power: 3, health: 2, subtype: 'illusion', freeIfDrafted: true, text: "Costs 0 if you've drafted this turn.", cardSchool: 'tides', orig: "Aether Figment", src: "Video digest 4A F9 (draft screen, full face): cost 3, 3/2 Illusion, text verbatim." },
   greatwood_tusker: { icon: "🦣", name: 'Greatwood Tusker', cost: 2, type: 'creature', power: 4, health: 3, subtype: 'beast', cardSchool: 'worldroot', orig: "Kalonian Tusker", src: "Video digest 4A F9 (draft screen, full face): cost 2, 4/3, vanilla. Renamed (Kalonian is a Magic plane name)." },
   overgrown_iguana: { icon: "🦎", name: 'Overgrown Iguana', cost: 2, type: 'creature', power: 4, health: 2, subtype: 'beast', keywords: ['trample'], text: 'Trample', cardSchool: 'worldroot', orig: "Overgrown Iguana", src: "Video digest 4A F14 (full face): cost 2, 4/2 Beast, Trample is its whole text." },
@@ -1837,7 +1864,7 @@ const CARDS = {
   veilcursed_hunter: { icon: "\uD83D\uDC3A", name: 'Veil-Cursed Predator', cost: 5, type: 'creature', power: 5, health: 4, subtype: 'beast', signatureFor: 'unbridled', debut: { kind: 'fightWeakest' }, orig: "Veil-Cursed Predator", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — Garruk signature #3 (hero panel + face agree); completes Bram's set" },
   crimson_raid: { icon: "\uD83E\uDE78", name: 'Crimson Raid', cost: 4, type: 'spell', effect: { kind: 'drainCreatureOrDamage', amount: 5, subtype: 'vampire' }, orig: "Crimson Raid", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   cranial_consultant: { icon: "\uD83E\uDDE0", name: 'Cranial Consultant', cost: 1, type: 'creature', power: 2, health: 2, subtype: 'zombie', discardSpellWhenBlocked: true, orig: "Cranial Consultant", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
-  shell_game: { icon: "\uD83D\uDC1A", name: 'Shell Game', cost: 4, type: 'spell', effect: { kind: 'transformFriendly', into: 'stone_turtle' }, orig: "Shell Game", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — cost read 4 (R9) vs 3 (R8) across two videos, likely a balance change between eras; 4 shipped, conflict flagged" },
+  shell_game: { icon: "\uD83D\uDC1A", name: 'Shell Game', cost: 4, type: 'spell', effect: { kind: 'transformCreature', into: 'stone_turtle' }, text: 'Transform an enemy creature into a Stone Turtle.', orig: "Shell Game", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — cost read 4 (R9) vs 3 (R8) across two videos, likely a balance change between eras; 4 shipped, conflict flagged. M209 (2026-11-10): TARGET CORRECTED to the record's verbatim text (cards.csv: 'Transform an enemy creature into a Stone Turtle.') under Jesse's B6 ruling — the M-era build aimed it at a FRIENDLY creature (kind 'transformFriendly'); the kind is renamed 'transformCreature' and now answers the ward gate like every enemy-targeted spell." },
   // ---------- M70: Moonlight + the Davriel set completed ----------
   hermit_of_the_flock: { icon: "\uD83D\uDC11", name: 'Hermit of the Flock', cost: 3, type: 'creature', power: 1, health: 4, subtype: 'civilian', moonlight: true, flipsTo: 'protector_of_the_meek', debut: { kind: 'summonToken', cardId: 'sheep' }, orig: "Hermit of the Flock", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01 — its in-game tooltip DEFINES Moonlight: 'Flips if you end your turn with 2 available mana'" },
   protector_of_the_meek: { icon: "\uD83D\uDEE1\uFE0F", name: 'Protector of the Meek', cost: 0, type: 'creature', power: 4, health: 4, generatedOnly: true, afterFlip: { kind: 'healPerSheep' }, orig: "Protector of the Meek (flip side)", src: "VIDEO-DIGEST waves 2-3 (YouTube face-verified), 2026-11-01" },
@@ -1942,7 +1969,7 @@ const CARDS = {
   towering_shieldbearer: { icon: "\uD83D\uDEE1\uFE0F", name: 'Towering Shieldbearer', cost: 3, type: 'creature', power: 1, health: 7, subtype: 'soldier', text: '', cardSchool: 'dawn', orig: "Towering Shieldbearer", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 3, 1/7, text field empty on a complete row: a true vanilla (record, cards.csv)" },
   ceremonial_guard: { icon: "\u2694\uFE0F", name: 'Ceremonial Guard', cost: 4, type: 'creature', power: 5, health: 6, subtype: 'soldier', text: '', cardSchool: 'dawn', orig: "Ceremonial Guard", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 4, 5/6, text field empty on a complete row: a true vanilla (record, cards.csv)" },
   ornery_leonine: { icon: "\uD83E\uDD81", name: 'Ornery Leonine', cost: 4, type: 'creature', power: 6, health: 5, subtype: 'beast', text: '', cardSchool: 'worldroot', orig: "Ornery Leotau", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 4, 6/5, text field empty on a complete row: a true vanilla (record, cards.csv); renamed: 'Leotau' is Magic's coined creature word, the Leonin standard under Jesse's 2026-11-03 ruling ('leonine' is the ordinary English adjective)" },
-  rotting_baboon: { icon: "\uD83D\uDC35", name: 'Rotting Baboon', cost: 3, type: 'creature', power: 3, health: 5, subtype: 'zombie', text: '', cardSchool: 'grave', orig: "Rotting Baboon", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 3, 3/5, text field empty on a complete row: a true vanilla (record, cards.csv)" },
+  rotting_baboon: { icon: "\uD83D\uDC35", name: 'Rotting Baboon', cost: 3, type: 'creature', power: 3, health: 5, subtype: 'zombie beast', text: '', cardSchool: 'grave', orig: "Rotting Baboon", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 3, 3/5, text field empty on a complete row: a true vanilla (record, cards.csv). M209 (2026-11-10): subtype carries BOTH kinds — the face prints ZOMBIE BEAST (M179 hover face) and Jesse ruled 'could be both — why not both'; subtype reads are token-aware (engine subtypeHas), so the Baboon counts in Zombie and Beast paths alike." },
   foundry_giant: { icon: "\uD83C\uDFED", name: 'Foundry Giant', cost: 6, type: 'creature', power: 10, health: 6, subtype: 'giant', text: '', cardSchool: 'ember', orig: "Ghirapur Giant", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 6, 10/6, text field empty on a complete row: a true vanilla (record, cards.csv); renamed: 'Ghirapur' is a Magic city name, the invented-word standard under Jesse's 2026-11-03 ruling" },
   ember_firecat: { icon: "\uD83D\uDC08", name: 'Ember Firecat', cost: 2, type: 'creature', power: 5, health: 1, subtype: 'elemental', text: '', cardSchool: 'ember', orig: "Regathan Firecat", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 2, 5/1, text field empty on a complete row: a true vanilla (record, cards.csv); renamed: 'Regatha' is a Magic plane name, the invented-word standard under Jesse's 2026-11-03 ruling" },
   dawnkite_guide: { icon: "\uD83E\uDD85", name: 'Dawnkite Guide', cost: 4, type: 'creature', power: 2, health: 3, subtype: 'soldier', keywords: ['flying'], debut: { kind: 'grantKeyword', keyword: 'flying', temp: true }, text: 'Flying. Debut: Give another friendly creature Flying this turn.', cardSchool: 'dawn', orig: "Aven Tour Guide", src: "Fan sheet (TEXT-SOURCE, fan-made) \u2014 cost 4, 2/3 Flying, text verbatim (record, cards.csv); renamed: 'Aven' is Magic's invented bird-people word, the Dawnkite standard; the grant is TEMPORARY ('this turn') via tempKeywords, new in M109" },
@@ -2165,7 +2192,7 @@ const TRAP_POOL = ['beginners_luck', 'champions_grit', 'envenom', 'step_over', '
 const HEROES = {
   weaver: {
     name: 'Umbra', life: 22, passive: 'weave', nightmareTopN: 10,
-    blurb: 'Plants Nightmares into the top of the enemy deck whenever a card that did not start in his deck enters or leaves his hand.',
+    blurb: 'Plants Nightmares into the top of the enemy deck whenever a card that did not start in his deck enters his hand, and again when it is played.',
   },
   controller: {
     name: 'The Warden', life: 25, passive: 'trapDraw',
@@ -2280,7 +2307,7 @@ const HEROES = {
   // deck, no live passive key. M187 builds her.
   veilwarden: {
     name: 'Veyla, the Veil Huntress', orig: 'Kaya', life: 24, passive: 'freeSpiritMissions',
-    blurb: 'Free Spirit: deal 3 damage to the enemy hero during your turn and an Unchained Spirit joins your hand. Each mission asks 1 more.',
+    blurb: 'Free Spirit: deal 3 damage to the enemy hero during your turn and a Sly or Somber Spirit joins your hand. Each mission asks 1 more.',
     nameProposed: "Forge's proposal (M184): 'Veyla', from the veil she walks \u2014 Kaya crosses between the living and the dead and hunts what crosses back; the two-syllable huntress register matches the roster (Sura, Suyin, Volric). PROPOSED ONLY, recorded for Jesse's ruling \u2014 pending his confirm (M187 builds under it; a rename is one field).",
     passiveRecorded: { name: "Free Spirit", text: "Mission: deal 3 damage to your opponent during your turn to receive a random Unchained Spirit in your hand. Each following mission needs +1 more damage.", src: "Harvest record (the Kaya deck video szckYMhLC2E + the day's hero data, 2026-11-08): passive name, life 24 and colours (white + black \u2014 Dawn/Grave) recorded; the mission text is the record's substance, portrait/profile grade \u2014 held as recorded, not face-verbatim. NAME COLLISION NOTED: Sister Vesper's shipped passive key is also 'freeSpirit' (Davriel's mechanic \u2014 a different effect wearing the same original name); Kaya's engine key is 'freeSpiritMissions', distinct on purpose \u2014 the two are never conflated." },
     missing: ["her signature faces \u2014 Cut Down (1-cost spell; the CSV row: B, Opening Ceremony, named in official bug-fix notes), Ghost Blades (2) and Kaya's Enforcer (2-cost 2/1) are portrait/name-grade only, held as unverified-for-build beyond what is stated \u2014 she launches SIG-LESS at M187", "Stalwart Spirit \u2014 named among her Unchained Spirits, text unread (Sly Spirit, 2-cost 2/1 Sneak, and Somber Spirit, 2-cost 2/1 with 'Finale: drain your opponent for 2', are face-read and BUILT at M187 \u2014 the mission award pool is the two built spirits until Stalwart's text lands)", "verbatim passive text \u2014 the mission wording above is recorded substance, not a face transcription; the mission SEMANTICS the wording leaves unpinned are Forge's flagged interpretation, ledgered in SPRINT M187 (per-turn counting on her own turn, immediate award the moment the threshold is met, the completing blow's excess does not carry, unmet progress resets at her next turn start)"],
@@ -2322,7 +2349,7 @@ const DECKS = {
   keeper: ["beastcall_arrow","beastcall_arrow","tasty_morsel","tasty_morsel","sheep","sheep","venom_grub","venom_grub","deep_rooting","deep_rooting","grove_sentinel","grove_sentinel","beastkeeper","beastkeeper","thornwood_archer","thornwood_archer","desperate_prayer","desperate_prayer","tollwarden_captain","wardens_acolyte","wardens_acolyte","oakenhide","oakenhide","heartswap_tree","radiant_intercessor","returnwing_angel","quakehoof_behemoth","firstroot_titan","horncharge_lantern","daughter_of_runes"],
   bruiser: ["searing_chains","tasty_morsel","searing_chains","sheep","venom_grub","venom_grub","flame_shot","flame_shot","embermaw_devil","embermaw_devil","blitzing_minotaur","blitzing_minotaur","ember_deathraider","ember_deathraider","cinder_court_embermage","cinder_court_embermage","beastkeeper","beastkeeper","thornwood_archer","thornwood_archer","kindling_pyromancer","kindling_pyromancer","archwing_ravager","archwing_ravager","grove_sentinel","grove_sentinel","cinder_titan","quakehoof_behemoth","bag_of_tricks","spiked_baloth"],
   torchbearer: ["desperate_prayer","desperate_prayer","flame_shot","flame_shot","tollwarden_captain","embermaw_devil","embermaw_devil","vainglorious_hero","vainglorious_hero","blitzing_minotaur","blitzing_minotaur","ash_pyromancer","ash_pyromancer","evenhand_paragon","wardens_acolyte","wardens_acolyte","cinder_court_embermage","cinder_court_embermage","radiant_intercessor","radiant_intercessor","kindling_pyromancer","kindling_pyromancer","returnwing_angel","returnwing_angel","archwing_ravager","archwing_ravager","dawn_titan","cinder_titan","cinder_elemental","rod_of_ruin"],
-  banneret: ["desperate_prayer","desperate_prayer","tollwarden_captain","knight_militant","wardens_staff","shrine_of_valor","flame_shot","flame_shot","vainglorious_hero","vainglorious_hero","wardens_acolyte","wardens_acolyte","blitzing_minotaur","blitzing_minotaur","knight_militant","team_captain","evenhand_paragon","evenhand_paragon","eager_smith","eager_smith","radiant_intercessor","radiant_intercessor","returnwing_angel","returnwing_angel","second_suns_dawn","dawn_titan","daybreak_verdict","captain_of_the_guard","daughter_of_runes","knight_of_the_tusk"],
+  banneret: ["desperate_prayer","desperate_prayer","tollwarden_captain","knight_militant","wardens_staff","shrine_of_valor","flame_shot","dawns_judgment","vainglorious_hero","vainglorious_hero","wardens_acolyte","wardens_acolyte","blitzing_minotaur","blitzing_minotaur","knight_militant","team_captain","evenhand_paragon","evenhand_paragon","eager_smith","eager_smith","radiant_intercessor","radiant_intercessor","returnwing_angel","returnwing_angel","second_suns_dawn","dawn_titan","daybreak_verdict","captain_of_the_guard","daughter_of_runes","knight_of_the_tusk"],
   // M184 (2026-11-08): Zombify joins — adjudicated Liliana's third signature from the record (SPRINT M184), and the census expects a verified signature in its owner's deck: one Void Harvest copy makes room (2 -> 1).
   graven: ["diehard_fan","widow_matron","widow_matron","tasty_morsel","tasty_morsel","venom_grub","venom_grub","gravemaw","gravemaw","grave_cantor","morvanes_goliath","creeping_doom","creeping_doom","oakenhide","oakenhide","decaying_ghoul","decaying_ghoul","grave_gladiator","vein_drainlord","court_command","sanguine_pact","thirteenth_hour","grave_gladiator","void_harvest","zombify","sepulcher_titan","hollowgrin_giant","ghoulcallers_grimoire","corpse_conveyer","undead_striker"],
   unchained: ["tempest_giant","widow_matron","widow_matron","runeshell_crab","runeshell_crab","paincast_demon","wound_priest","wound_priest","cerulean_dragon","cerulean_dragon","vein_drainlord","vein_drainlord","paincast_demon","drain_blood","scourge_of_the_pact","drownscale","recall","recall","thirteenth_hour","fatetwist","nights_whisper","sanguine_pact","void_harvest","void_harvest","gazemaw","nightscale_revenant","fear_the_grave","fear_the_grave","thirteenth_hour","drain_blood"],
@@ -2463,6 +2490,14 @@ function makeInstance(cardId, starterOwner) {
   };
 }
 const def = (inst) => CARDS[inst.cardId];
+// M209 (Jesse B7, 2026-11-10): subtype reads are TOKEN-AWARE — a printed
+// compound subtype counts for EACH of its kinds ('zombie beast' is a Zombie
+// and a Beast; 'zombie wizard' is a Zombie). This supersedes the M178
+// strict-string reading, which was Forge's conservative invention, never
+// Jesse's word: he ruled the Rotting Baboon "both — why not both," and the
+// tribal-natural reading generalises from his ruling. The M178-era pins
+// that encoded strictness are revised with dated notes in the test file.
+const subtypeHas = (d, sub) => !!d && typeof d.subtype === 'string' && d.subtype.split(' ').includes(sub);
 // Keywords a creature actually has: its printed ones plus any it has gained
 // (Mindveil Sovereign's debut absorption stores them on the instance).
 const keywordsOf = (inst) => {
@@ -2709,7 +2744,7 @@ class Game {
     }
     // M111 (Champion of the Perished): standing Champions grow as Zombies
     // enter under their controller — the entering Zombie never feeds itself.
-    if (inst && def(inst).subtype === 'zombie') {
+    if (inst && subtypeHas(def(inst), 'zombie')) {
       for (const c of p.board) if (c !== inst && def(c).growsAsZombiesEnter) { c.permPower += 1; c.permHealth += 1; this.log.push(`${def(c).name} grows as a Zombie enters (+1/+1)`); }
     }
     // M112 (Crippling Bolt): the foe's summon-traps answer a fresh arrival
@@ -2732,10 +2767,10 @@ class Game {
     }
     // M114 (Seraphelle, Unsealed): a standing Unsealed remakes each
     // non-Angel its controller summons into a random Angel, healing 1.
-    if (inst && def(inst).type === 'creature' && def(inst).subtype !== 'angel' && !this._angelTransformBusy) {
+    if (inst && def(inst).type === 'creature' && !subtypeHas(def(inst), 'angel') && !this._angelTransformBusy) {
       const host = p.board.find((c) => c !== inst && def(c).transformSummonsToAngels);
       if (host) {
-        const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === 'angel' && !CARDS[id].generatedOnly && id !== inst.cardId);
+        const pool = Object.keys(CARDS).filter((id) => subtypeHas(CARDS[id], 'angel') && !CARDS[id].generatedOnly && id !== inst.cardId);
         if (pool.length) {
           this._angelTransformBusy = true;
           const to = this.rng.pick(pool);
@@ -2853,7 +2888,7 @@ class Game {
   // the drafted card is never destroyed by the cap).
   resolveDraftGrave(i, chosen, label) {
     const p = this.players[i];
-    const gi = p.graveyard.findIndex((c) => c.cardId === chosen.cardId && def(c).subtype === 'zombie');
+    const gi = p.graveyard.findIndex((c) => c.cardId === chosen.cardId && subtypeHas(def(c), 'zombie'));
     if (gi < 0) { this.log.push(`${label}: the chosen Zombie is gone from the graveyard — the call goes unanswered`); return; }
     const [risen] = p.graveyard.splice(gi, 1);
     risen.damage = 0; risen.tempPower = 0; risen.tempHealth = 0; risen.summonedTurn = this.turnNumber;
@@ -3777,7 +3812,7 @@ class Game {
     if (!effect) return;
     const p = this.players[i]; const foe = this.players[this.opp(i)];
     // Ward: a warded enemy creature cannot be singled out by spells or effects.
-    if (target && target.kind === 'creature' && (['damageAny', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'pathExile', 'pacify', 'stealCreature', 'debuffCreature', 'debuffPerZombieGrave', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'stunCreature', 'stunPermanent', 'drainCreature', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'damageCreatureHeal', 'healAny', 'damagePerGem'].includes(effect.kind) || (effect.kind === 'grantKeyword' && effect.foeTarget))) { // M200: the grantKeyword clause sat OUTSIDE the target guard (|| precedence) — a foeTarget grant with no target in hand (Goblin Shortcutter's Debut / Burn Through's second step on an empty enemy field) dereferenced target.inst and threw a TypeError instead of fizzling. The grantKeyword case itself already fizzles on a null target; the gate now only speaks when there is a creature target to protect.
+    if (target && target.kind === 'creature' && (['damageAny', 'bounce', 'wither', 'smiteByBoard', 'destroyFlyer', 'doom', 'pathExile', 'pacify', 'stealCreature', 'debuffCreature', 'debuffPerZombieGrave', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'fightOnce', 'stealPower', 'stunCreature', 'stunPermanent', 'drainCreature', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'damageCreatureHeal', 'healAny', 'damagePerGem', 'transformCreature'].includes(effect.kind) || (effect.kind === 'grantKeyword' && effect.foeTarget))) { // M200: the grantKeyword clause sat OUTSIDE the target guard (|| precedence) — a foeTarget grant with no target in hand (Goblin Shortcutter's Debut / Burn Through's second step on an empty enemy field) dereferenced target.inst and threw a TypeError instead of fizzling. The grantKeyword case itself already fizzles on a null target; the gate now only speaks when there is a creature target to protect.
       const ownerIdx = this.players.findIndex((q) => q.board.includes(target.inst));
       if (ownerIdx >= 0 && ownerIdx !== i && this.wardActive(target.inst)) {
         this.log.push(`${def(target.inst).name}'s Ward turns aside ${def(sourceInst).name}`);
@@ -3915,7 +3950,7 @@ class Game {
           p.tempManaTurn = p.ownTurns;
         }
         this.log.push(`${def(sourceInst).name}: ${p.hero.name} gains ${effect.amount} mana${effect.carry ? ' until their next turn' : ' this turn'}`); break; }
-      case 'summonPerCount': { const n = effect.count === 'foeCreatures' ? this.players[this.opp(i)].board.length : p.board.filter((c) => def(c).subtype === effect.subtype).length; let s = 0; for (let k = 0; k < n && p.board.length < 5; k++) { this.summonToken(p, effect.token); s++; } if (s) this.log.push(`${def(sourceInst).name}: ${s} ${def(effect.token) ? '' : ''}thrall${s === 1 ? '' : 's'} answer${s === 1 ? 's' : ''} the call`); break; }
+      case 'summonPerCount': { const n = effect.count === 'foeCreatures' ? this.players[this.opp(i)].board.length : p.board.filter((c) => subtypeHas(def(c), effect.subtype)).length; let s = 0; for (let k = 0; k < n && p.board.length < 5; k++) { this.summonToken(p, effect.token); s++; } if (s) this.log.push(`${def(sourceInst).name}: ${s} ${def(effect.token) ? '' : ''}thrall${s === 1 ? '' : 's'} answer${s === 1 ? 's' : ''} the call`); break; }
       case 'debuffAll': { // M110: foesOnly (Wavelash Viper) lashes one side of the field
         const boards = effect.foesOnly ? [foe] : this.players;
         for (const q of boards) for (const c of q.board) { c.permPower += effect.power; c.permHealth += effect.health; }
@@ -3925,12 +3960,12 @@ class Game {
       case 'draftFromDeck': this.offerDeckDraft(i, srcName); break; // M174 (Anticipate): draft the deck's own top instances; the pick is drawn, the rest are gone
       case 'debutChoice': this.offerChoice(i, sourceInst, effect.options, srcName); break; // M174 (Ragerunner): the Debut is a choice of keyword for the creature itself
       case 'destroyAndSelfDamage': { if (target && target.kind === 'creature') { const pw = powerOf(target.inst); const diedAlready = (this.turnDeaths || 0) > 0; target.inst.damage = 9999; this.cleanupDeaths(); if (!diedAlready) { p.life -= pw; p.damageTakenCurrTurn += pw; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + pw; this.log.push(`${srcName}: the fury recoils for ${pw}`); this.checkWin(); } } break; }
-      case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].subtype === effect.subtype && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
+      case 'addRandomSubtype': { const pool = Object.keys(CARDS).filter((id) => subtypeHas(CARDS[id], effect.subtype) && !CARDS[id].generatedOnly); if (pool.length) this.addToHand(i, makeInstance(this.rng.pick(pool), null), srcName); break; }
       case 'debuffAndAdd': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.cleanupDeaths(); } this.addToHand(i, makeInstance(effect.cardId, null), srcName); break; }
       case 'draftFromFoeStart': { const foe = this.players[this.opp(i)]; const zones = [foe.deck, foe.hand, foe.board, foe.graveyard, foe.traps]; const ids = []; for (const z of zones) for (const c of z) if (c.starterOwner === this.opp(i) && !ids.includes(c.cardId)) ids.push(c.cardId); if (ids.length) this.offerDraft(i, ids, srcName, 'foeStart'); break; } // M188 (Jesse's playtest bug, 2026-11-09: "it's just pulling a random card instead of allowing you to draft a card from their starting deck"): the old line hand-rolled an rng.pick and handed the card straight over, bypassing offerDraft and Jesse's draft law entirely. The pool derivation (distinct starterOwner cards across the foe's zones — a COPY; the originals stay) is unchanged; the DELIVERY now rides offerDraft, so a human seat gets the pending pick-1-of-3 and an auto-draft seat takes the priciest instantly. The Figment window rides offerDraft's flag now (the M184 direct set is retired with the old line)
       case 'stealDeckBottom': { const foe = this.players[this.opp(i)]; if (foe.deck.length) { const taken = foe.deck.pop(); this.addToHand(i, taken, srcName); this.log.push(`${srcName}: ${p.hero.name} takes the bottom card of ${foe.hero.name}'s deck (${def(taken).name})`); } break; }
       case 'fightWeakest': { const me = sourceInst; const fwFoes = []; for (let round = 0; round < 8; round++) { const foe = this.players[this.opp(i)]; if (!foe.board.length || !p.board.includes(me) || me.damage >= healthOf(me)) break; const prey = foe.board.slice().sort((x, y) => powerOf(x) - powerOf(y))[0]; if (!fwFoes.includes(prey)) fwFoes.push(prey); this.fightRidersBefore(me, prey); if (!p.board.includes(me) || !foe.board.includes(prey)) { this.cleanupDeaths(); if (!p.board.includes(me)) break; continue; } const mp = powerOf(me), pp = powerOf(prey); const dealtPrey = this.hurtCreature(prey, mp); const dealtMe = this.hurtCreature(me, pp); this.log.push(`${def(me).name} fights ${def(prey).name}`); this.fightRidersAfter(me, prey, i, this.opp(i)); this.checkVengeance(i, me, prey, dealtMe); this.checkVengeance(this.opp(i), prey, me, dealtPrey); this.cleanupDeaths(); if (!p.board.includes(me)) break; } this.checkSurvivorTraps([me, ...fwFoes]); break; }
-      case 'drainCreatureOrDamage': { if (target && target.kind === 'creature') { const hasKin = p.board.some((c) => def(c).subtype === effect.subtype); this.hurtCreature(target.inst, effect.amount); if (hasKin) { this.gainLife(p, effect.amount); this.log.push(`${srcName}: drains ${effect.amount} from ${def(target.inst).name}`); } this.cleanupDeaths(); } break; }
+      case 'drainCreatureOrDamage': { if (target && target.kind === 'creature') { const hasKin = p.board.some((c) => subtypeHas(def(c), effect.subtype)); this.hurtCreature(target.inst, effect.amount); if (hasKin) { this.gainLife(p, effect.amount); this.log.push(`${srcName}: drains ${effect.amount} from ${def(target.inst).name}`); } this.cleanupDeaths(); } break; }
       case 'summonToken': { // M200: every sibling summon path checks the field first (playCard's own throw, summonTokens, summonPerCount, the Shrine, the Miracle rider, the stance recruit) — this one did not, so a Debut/attack token (Hermit of the Flock's Sheep, Grave Titan's Zombie, Knight Militant's Soldier, Goblin Fieldrusher's Raging Goblin) could take a field to 6 against the locked 5-cap. The token now answers only when there is room, exactly like its siblings.
         if (p.board.length < 5) this.summonToken(p, effect.cardId);
         else this.log.push(`${srcName}: the field is full — the ${CARDS[effect.cardId] ? CARDS[effect.cardId].name : 'token'} cannot take the field`);
@@ -3939,7 +3974,7 @@ class Game {
       case 'gainFragileGem': if (!p.fragileGem) { p.fragileGem = true; this.log.push(`${p.hero.name} gains a fragile mana gem`); } break;
       case 'markCreature': if (target && target.kind === 'creature') { sourceInst.markUid = target.inst.uid; this.log.push(`${srcName}: marks ${def(target.inst).name}`); } break;
       case 'damageMarked': { const foe = this.players[this.opp(i)]; const marked = foe.board.find((c) => c.uid === sourceInst.markUid); if (marked) { this.hurtCreature(marked, powerOf(sourceInst)); this.log.push(`${def(sourceInst).name} strikes its marked prey ${def(marked).name} for ${powerOf(sourceInst)}`); this.cleanupDeaths(); } break; }
-      case 'flipDamageNonWerewolf': for (const q of this.players) for (const c of q.board) if (def(c).subtype !== 'werewolf') this.hurtCreature(c, effect.amount); this.cleanupDeaths(); break;
+      case 'flipDamageNonWerewolf': for (const q of this.players) for (const c of q.board) if (!subtypeHas(def(c), 'werewolf')) this.hurtCreature(c, effect.amount); this.cleanupDeaths(); break;
       case 'healPerSheep': { const n = p.board.filter((c) => c.cardId === 'sheep').length; if (n) { const sheltered = this.gainLife(p, 2 * n); this.log.push(`${def(sourceInst).name}: the flock shelters ${p.hero.name} (+${sheltered} life)`); } break; }
       case 'drawSpells': { let drawn = 0; for (let k = 0; k < p.deck.length && drawn < effect.count;) if (def(p.deck[k]).type === 'spell') { const [s] = p.deck.splice(k, 1); this.addToHand(i, s, srcName); drawn++; } else k++; if (effect.selfDamage) { p.life -= effect.selfDamage; p.selfDamageThisTurn = (p.selfDamageThisTurn || 0) + effect.selfDamage; p.damageTakenCurrTurn += effect.selfDamage; this.log.push(`${srcName}: the whisper costs ${effect.selfDamage} life`); this.checkWin(); } break; }
       case 'copyFromFoeGrave': { const foe = this.players[this.opp(i)]; const nCopies = effect.count || 1; for (let cn = 0; cn < nCopies && foe.graveyard.length; cn++) { const src = this.rng.pick(foe.graveyard); this.addToHand(i, makeInstance(src.cardId, null), srcName); this.log.push(`${srcName}: copies ${def(src).name} from ${foe.hero.name}'s graveyard`); } break; } // M168: effect.count (Scour the Void copies 4; count-less callers still copy 1)
@@ -3997,10 +4032,10 @@ class Game {
       case 'attackDebuffRandom': { // M169 (Nightsoul Dragon): on attack, a random enemy creature withers by the printed numbers
         if (foe.board.length) { const victim = this.rng.pick(foe.board); victim.permPower -= (effect.power || 1); victim.permHealth -= (effect.health || 1); this.log.push(`${def(sourceInst).name} breathes night: ${def(victim).name} withers (${-(effect.power || 1)}/${-(effect.health || 1)})`); this.cleanupDeaths(); } break; }
       case 'attackBuffRandomHand': { // M169 (Dragonspeaker): on attack, a random matching creature in hand grows
-        const pool = p.hand.filter((c) => def(c).type === 'creature' && (!effect.subtype || def(c).subtype === effect.subtype));
+        const pool = p.hand.filter((c) => def(c).type === 'creature' && (!effect.subtype || subtypeHas(def(c), effect.subtype)));
         if (pool.length) { const pick = this.rng.pick(pool); pick.permPower += effect.power || 0; pick.permHealth += effect.health || 0; this.log.push(`${def(sourceInst).name} speaks fire into the ${def(pick).name} in hand (+${effect.power || 0}/+${effect.health || 0})`); } break; }
       case 'grantFinaleSubtype': { // M169 (Caller of the Cursed): friendly creatures of the subtype gain its finale — cleanupDeaths reads inst.grantedFinale beside the printed one
-        for (const c of p.board) if (def(c).subtype === effect.subtype) { c.grantedFinale = effect.finale; this.log.push(`${def(c).name} is sworn to the Cursed's finale`); } break; }
+        for (const c of p.board) if (subtypeHas(def(c), effect.subtype)) { c.grantedFinale = effect.finale; this.log.push(`${def(c).name} is sworn to the Cursed's finale`); } break; }
       case 'returnStrongestFromGrave': { // M169 (Gravedigger): the strongest creature in your graveyard returns to your hand (power breaks ties by grave order)
         const grave = p.graveyard.filter((c) => def(c).type === 'creature');
         if (grave.length) { let best = grave[0]; for (const c of grave) if (powerOf(c) > powerOf(best)) best = c; p.graveyard.splice(p.graveyard.indexOf(best), 1); this.addToHand(i, best, srcName); this.log.push(`${srcName} digs ${def(best).name} back into ${p.hero.name}'s hand`); } break; }
@@ -4020,8 +4055,8 @@ class Game {
         }
         if (n) this.log.push(`${srcName}: ${n} bolt${n === 1 ? '' : 's'} — one for each of the ${p.spellsPlayedThisGame} spells ${p.hero.name} has played this game`);
         break; }
-      case 'draftGraveZombie': { // M184 (Zombify): draft from your own graveyard — up to 3 DISTINCT Zombies (strict subtype, the standing rule); an empty grave fizzles gracefully (the mana is spent and the card is gone — the playCard flow already paid both)
-        const pool = [...new Set(p.graveyard.filter((c) => def(c).subtype === 'zombie').map((c) => c.cardId))];
+      case 'draftGraveZombie': { // M184 (Zombify): draft from your own graveyard — up to 3 DISTINCT Zombies (token-aware subtype since M209); an empty grave fizzles gracefully (the mana is spent and the card is gone — the playCard flow already paid both)
+        const pool = [...new Set(p.graveyard.filter((c) => subtypeHas(def(c), 'zombie')).map((c) => c.cardId))];
         if (pool.length) this.offerDraft(i, pool, srcName, 'graveZombie', { graveSummon: true });
         else this.log.push(`${srcName}: no Zombie lies in ${p.hero.name}'s graveyard — the call goes unanswered`);
         break; }
@@ -4072,8 +4107,8 @@ class Game {
       case 'markedCopy': { if (sourceInst && sourceInst.markedSpellUid === undefined) this.rollMark(p, sourceInst); const marked = sourceInst ? p.graveyard.find((c) => c.uid === sourceInst.markedSpellUid && def(c).type === 'spell') : null; if (marked) { const copy = makeInstance(marked.cardId, null); copy.temporary = true; this.addToHand(i, copy, srcName); this.log.push(`${srcName}: the marked ${def(marked).name} returns as a temporary copy`); } else if (p.graveyard.some((c) => def(c).type === 'spell')) this.log.push(`${srcName}: the marked spell is gone — no copy`); break; } // M132: the debut copies THE MARK (a random graveyard spell, held on the instance and re-rolled each turn) — Jesse's ruling supersedes the M72 most-recent resolution
       case 'refillMana': p.manaSpent = 0; this.log.push(`${p.hero.name}'s mana gems refill`); break;
       case 'buffAndDoom': if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; target.inst.doomedEOT = true; this.log.push(`${def(target.inst).name} swells with borrowed might — and is doomed at turn's end`); } break;
-      case 'transformFriendly': { if (target && target.kind === 'creature') { target.inst.cardId = effect.into; target.inst.damage = 0; target.inst.permPower = 0; target.inst.permHealth = 0; target.inst.tempPower = 0; target.inst.tempHealth = 0; this.log.push(`${srcName}: becomes a ${CARDS[effect.into].name}`); } break; }
-      case 'buffSubtype': for (const c of p.board) if (c !== sourceInst && def(c).subtype === effect.subtype) { c.permPower += effect.power; c.permHealth += effect.health; } break;
+      case 'transformCreature': { if (target && target.kind === 'creature') { target.inst.cardId = effect.into; target.inst.damage = 0; target.inst.permPower = 0; target.inst.permHealth = 0; target.inst.tempPower = 0; target.inst.tempHealth = 0; this.log.push(`${srcName}: becomes a ${CARDS[effect.into].name}`); } break; }
+      case 'buffSubtype': for (const c of p.board) if (c !== sourceInst && subtypeHas(def(c), effect.subtype)) { c.permPower += effect.power; c.permHealth += effect.health; } break;
       case 'buffOtherCreatures': { for (const c of p.board) if (c !== sourceInst) { c.permPower += effect.power; c.permHealth += effect.health; } this.log.push(`${def(sourceInst).name}: the others rise +${effect.power}/+${effect.health}`); break; }
       case 'summonCopy': { const nCopies = effect.count || 1; let madeCopies = 0; while (madeCopies < nCopies && p.board.length < 5) { this.summonToken(p, sourceInst.cardId); madeCopies++; } if (madeCopies === 1) this.log.push(`${def(sourceInst).name} arrives with its twin`); else if (madeCopies > 1) this.log.push(`${def(sourceInst).name} arrives with ${madeCopies} copies of itself`); break; }
       case 'stunCreature': { if (target && target.kind === 'creature') { if (keywordsOf(target.inst).includes('cantStun')) { this.log.push(`${def(target.inst).name} cannot be stunned`); break; } target.inst.stunned = true; this.log.push(`${def(sourceInst).name} stuns ${def(target.inst).name} \u2014 it cannot attack next turn`); } break; }
@@ -4087,7 +4122,7 @@ class Game {
       }
       case 'drainCreature': { if (target && target.kind === 'creature') { const before = Math.max(0, healthOf(target.inst) - target.inst.damage); const dealt = Math.min(this.hurtCreature(target.inst, effect.amount), before); this.gainLife(p, dealt); this.log.push(`${def(sourceInst).name} drains ${dealt} from ${def(target.inst).name}`); this.cleanupDeaths(); } break; }
       case 'healLock': { foe.healLocked = true; this.log.push(`${def(sourceInst).name}: ${foe.hero.name} cannot heal until ${p.hero.name}'s next turn`); break; }
-      case 'millPerZombieGrave': { const z = p.graveyard.filter((c) => def(c).subtype === 'zombie').length; const n = Math.min(effect.max || 10, z); for (let k = 0; k < n; k++) this.drawCard(foe.idx, { mill: true }); if (n) this.log.push(`${def(sourceInst).name}: ${foe.hero.name} mills ${n} \u2014 one per Zombie in the grave`); break; }
+      case 'millPerZombieGrave': { const z = p.graveyard.filter((c) => subtypeHas(def(c), 'zombie')).length; const n = Math.min(effect.max || 10, z); for (let k = 0; k < n; k++) this.drawCard(foe.idx, { mill: true }); if (n) this.log.push(`${def(sourceInst).name}: ${foe.hero.name} mills ${n} \u2014 one per Zombie in the grave`); break; }
       case 'scryTop': { if (p.deck.length) { this.pendingScry = { player: i }; this.log.push(`${def(sourceInst).name}: ${p.hero.name} studies the top of the deck`); } break; }
       case 'addRandomArtifact': { const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'artifact' && !CARDS[id].generatedOnly); if (pool.length) { const id = this.rng.pick(pool); this.addToHand(i, makeInstance(id, null), def(sourceInst).name); this.log.push(`${def(sourceInst).name}: a ${CARDS[id].name} joins ${p.hero.name}'s hoard`); } break; }
       case 'stunStrongest': { const foes = foe.board.slice().sort((x, y) => powerOf(y) - powerOf(x)); if (foes.length) { foes[0].stunned = true; this.log.push(`${def(sourceInst).name} stuns ${def(foes[0]).name} \u2014 it cannot attack next turn`); } break; }
@@ -4154,10 +4189,10 @@ class Game {
       case 'swapStats': { if (target && target.kind === 'creature') { const t = target.inst; const p0 = powerOf(t), h0 = healthOf(t); t.permPower += (h0 - p0); t.permHealth += (p0 - h0); this.log.push(`${def(t).name}'s power and health switch (${p0}/${h0} \u2192 ${powerOf(t)}/${healthOf(t)})`); this.cleanupDeaths(); } break; }
       case 'grantKeyword': { if (target && target.kind === 'creature') { const t = target.inst; if (effect.power || effect.health) { t.permPower += effect.power || 0; t.permHealth += effect.health || 0; } if (effect.keyword) { if (effect.keyword === 'armor') t.armorGranted = true; else { const bag = effect.temp ? 'tempKeywords' : 'gainedKeywords'; t[bag] = t[bag] || []; if (!keywordsOf(t).includes(effect.keyword)) t[bag].push(effect.keyword); if (effect.keyword === 'ward' && !effect.temp) t.wardTurn = this.turnNumber; } } this.log.push(`${def(t).name} gains ${effect.keyword}${effect.power || effect.health ? ` (+${effect.power || 0}/+${effect.health || 0})` : ''} from ${def(sourceInst).name}`); } break; } // M169: 'armor' lands as armorGranted — hurtCreature reads the printed keyword or that flag, never the keyword bag (Holy Armor); no earlier def granted armor this way
       case 'debuffCreature': { if (target && target.kind === 'creature') { target.inst.permPower += effect.power; target.inst.permHealth += effect.health; this.log.push(`${def(target.inst).name} is enfeebled (${effect.power}/${effect.health})`); this.cleanupDeaths(); } break; }
-      case 'debuffPerZombieGrave': { // M178 (Corpse Trawler): -1/-0 for each Zombie in YOUR graveyard \u2014 the strict subtype rule (exactly 'zombie'; a 'zombie wizard' does not count), the millPerZombieGrave precedent
-        if (target && target.kind === 'creature') { const z = p.graveyard.filter((c) => def(c).subtype === 'zombie').length; target.inst.permPower -= z; this.log.push(`${srcName}: ${def(target.inst).name} is dragged down by the grave (-${z}/-0)`); this.cleanupDeaths(); } break; }
+      case 'debuffPerZombieGrave': { // M178 (Corpse Trawler): -1/-0 for each Zombie in YOUR graveyard — token-aware subtype since M209 (Jesse's Baboon ruling: a 'zombie wizard' counts as a Zombie), superseding the M178 strict-string reading
+        if (target && target.kind === 'creature') { const z = p.graveyard.filter((c) => subtypeHas(def(c), 'zombie')).length; target.inst.permPower -= z; this.log.push(`${srcName}: ${def(target.inst).name} is dragged down by the grave (-${z}/-0)`); this.cleanupDeaths(); } break; }
       case 'discountHandSubtype': { // M178 (Diehard Fan's finale): each Zombie in hand costs less \u2014 the per-instance discount (effectiveCost's inst.discount term) stamped on the cards in hand at this moment; cards drawn later are untouched
-        let n = 0; for (const c of p.hand) if (def(c).subtype === effect.subtype) { c.discount = (c.discount || 0) + (effect.amount || 1); n++; } if (n) this.log.push(`${srcName}: ${n} Zombie${n === 1 ? '' : 's'} in ${p.hero.name}'s hand cost ${effect.amount || 1} less`); break; }
+        let n = 0; for (const c of p.hand) if (subtypeHas(def(c), effect.subtype)) { c.discount = (c.discount || 0) + (effect.amount || 1); n++; } if (n) this.log.push(`${srcName}: ${n} Zombie${n === 1 ? '' : 's'} in ${p.hero.name}'s hand cost ${effect.amount || 1} less`); break; }
       case 'millTopCreatureSummon': { // M178 (Corpse Conveyer): 'Mill the top creature from your deck' \u2014 the topmost creature is the milled one: the belt mills from the top until a creature is milled (cards above it mill too) and the Zombie answers only if one was; a creatureless deck mills out and summons nothing
         let milled = null; while (p.deck.length) { const topIsCreature = def(p.deck[0]).type === 'creature'; const gone = this.drawCard(i, { mill: true }); if (!gone) break; if (topIsCreature) { milled = gone; break; } }
         if (milled) { if (p.board.length < 5) { const t = this.summonToken(p, effect.token); this.log.push(`${srcName}: ${def(milled).name} feeds the belt \u2014 a ${def(t).name} shambles out`); } else this.log.push(`${srcName}: ${def(milled).name} feeds the belt, but the field is full`); }
@@ -4169,7 +4204,7 @@ class Game {
       case 'damagePerGem': { // M194 (Ground Assault): 1 damage to an enemy creature for each of the caster's mana gems — the gem count is the maximum mana the game tracks (the reading flagged on the def).
         if (target && target.kind === 'creature') { const amount = p.maxMana; this.hurtCreature(target.inst, amount); this.log.push(`${def(sourceInst).name} strikes ${def(target.inst).name} for ${amount} (one per mana gem)`); this.cleanupDeaths(); } break; }
       case 'destroyAllCreatures': { for (const q of this.players) for (const c of q.board) c.damage = 999; this.log.push(`${def(sourceInst).name} falls: every creature is destroyed`); break; }
-      case 'destroyAllExceptSubtype': { for (const q of this.players) for (const c of q.board) if (def(c).subtype !== effect.subtype) c.damage = 999; this.log.push(`${def(sourceInst).name}: every creature except the ${effect.subtype}s is destroyed`); break; }
+      case 'destroyAllExceptSubtype': { for (const q of this.players) for (const c of q.board) if (!subtypeHas(def(c), effect.subtype)) c.damage = 999; this.log.push(`${def(sourceInst).name}: every creature except the ${effect.subtype}s is destroyed`); break; }
       case 'grantKeywordAll': { // M110: mass grant (Barreling Hippo permanent, Overrun temp via sequence)
         for (const c of p.board) {
           if (effect.excludeSelf && sourceInst && c.uid === sourceInst.uid) continue;
@@ -4228,7 +4263,7 @@ class Game {
       case 'copyLastSpell': { if (p.lastSpellId) { const cpy = makeInstance(p.lastSpellId, null); cpy.temporary = true; cpy.costOverride = 1; this.addToHand(i, cpy, srcName); this.log.push(`${def(sourceInst).name}: a fleeting copy of ${def(cpy).name}, its cost changed to 1`); } else this.log.push(`${def(sourceInst).name} finds no spell cast this turn to copy`); break; }
       case 'addCard': this.addToHand(i, makeInstance(effect.cardId, null), srcName); break;
       // M116 (Bag of Tricks, face-read): a random Beast of the cost cap joins the hand.
-      case 'addRandomBeast': { const pool = Object.keys(CARDS).filter((id) => { const dd = CARDS[id]; return dd.type === 'creature' && dd.subtype === 'beast' && (dd.cost || 0) <= (effect.maxCost || 3) && !dd.generatedOnly; }); if (pool.length) { const id = pool[this.rng.int(pool.length)]; this.addToHand(i, makeInstance(id, null), srcName); this.log.push(`${srcName} produces a ${CARDS[id].name}`); } break; }
+      case 'addRandomBeast': { const pool = Object.keys(CARDS).filter((id) => { const dd = CARDS[id]; return dd.type === 'creature' && subtypeHas(dd, 'beast') && (dd.cost || 0) <= (effect.maxCost || 3) && !dd.generatedOnly; }); if (pool.length) { const id = pool[this.rng.int(pool.length)]; this.addToHand(i, makeInstance(id, null), srcName); this.log.push(`${srcName} produces a ${CARDS[id].name}`); } break; }
       // M116 (Ghoulcaller's Grimoire, face-read): the chosen friendly creature is
       // destroyed, and the strongest creature in the graveyard takes the field.
       case 'sacrificeStrongestGrave': { if (target && target.kind === 'creature') { target.inst.damage = healthOf(target.inst); this.cleanupDeaths(); const grave = p.graveyard.filter((c) => def(c).type === 'creature'); if (grave.length && p.board.length < 5) { let best = grave[0]; for (const c of grave) if (powerOf(c) > powerOf(best)) best = c; p.graveyard.splice(p.graveyard.indexOf(best), 1); best.damage = 0; best.tempPower = 0; best.tempHealth = 0; best.summonedTurn = this.turnNumber; p.board.push(best); this.leaveGraveyard(best); this.noteSummon(p, best); this.log.push(`${srcName} raises ${def(best).name}, the strongest in the graveyard`); } } break; }
@@ -4616,7 +4651,7 @@ class Game {
     // gain funnels through gainLife, so a heal-lock holds; the health
     // threshold reads AFTER the drain lands. The +1/+0 is a temp buff:
     // the standing end-of-turn wipe retires it.
-    if (atk.hero.passive === 'endlessIndulgence' && this.winner === null && dfn.life > 0 && liveAttackers.some((a) => def(a).subtype === 'vampire')) {
+    if (atk.hero.passive === 'endlessIndulgence' && this.winner === null && dfn.life > 0 && liveAttackers.some((a) => subtypeHas(def(a), 'vampire'))) {
       this.hurtHero(dfn.idx, 1, atkIdx); dfn.tookDamageThisTurn = true;
       const drunk = this.gainLife(atk, 1);
       this.log.push(`${atk.hero.name}'s Endless Indulgence: the court drinks — ${dfn.hero.name} is drained for 1${drunk > 0 ? ` and ${atk.hero.name} gains ${drunk}` : ''}`);
@@ -4894,11 +4929,9 @@ function targetFor(game, i, inst) {
     if (target) return { kind: 'creature', inst: target };
     return { kind: 'hero' };
   }
-  if (eff.kind === 'transformFriendly') {
-    const mine = game.players[i].board; // M200: was g.players — a ReferenceError the play loops' try/catch swallowed, so Shell Game was unplayable in AI hands (same swallowed-variable class as the M180 Thwack! fix and this wave's scry fix)
-    if (!mine.length) return undefined;
-    const weakest = mine.slice().sort((a, b) => (a.damage - b.damage))[0];
-    return { kind: 'creature', inst: mine.slice().sort((x, y) => (def(x).power + def(x).health) - (def(y).power + def(y).health))[0] };
+  if (eff.kind === 'transformCreature') { // M209 (Jesse B6): Shell Game turns an ENEMY creature into a Stone Turtle (the record's verbatim text) — spend it on the foe's biggest body. (M200 history: the friendly-era line here carried a g-for-game ReferenceError; the re-aim keeps the fixed variable.)
+    if (!foe.board.length) return undefined;
+    return { kind: 'creature', inst: foe.board.slice().sort((x, y) => (powerOf(y) + healthOf(y)) - (powerOf(x) + healthOf(x)))[0] };
   }
   if (eff.kind === 'buffCreature') {
     const mine = game.players[i].board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0];
@@ -4937,7 +4970,7 @@ function targetFor(game, i, inst) {
     return target ? { kind: 'creature', inst: target } : null;
   }
   if (eff.kind === 'buffAndDoom') {
-    const mine = game.players[i].board; // M200: same g-for-game slip as the transformFriendly line above — Sadistic Mindflayer's Debut could never be aimed by the AI
+    const mine = game.players[i].board; // M200: same g-for-game slip as the old Shell Game line above — Sadistic Mindflayer's Debut could never be aimed by the AI
     if (!mine.length) return undefined;
     return { kind: 'creature', inst: mine.slice().sort((a, b) => powerOf(b) - powerOf(a))[0] };
   }
@@ -4999,14 +5032,15 @@ function playMainPhase(game, i) {
     const k = eff2 && eff2.kind;
     if ((k === 'wither' || k === 'smiteByBoard' || k === 'doom' || k === 'tuckIntoDeck' || k === 'debuffPerZombieGrave') && !foeBoard()) return false; // needs a victim (tuckIntoDeck: M169)
     if (k === 'stealFromGrave' && game.players[game.opp(i)].graveyard.length === 0) return false;
-    if (k === 'draftGraveZombie' && !p.graveyard.some((c) => def(c).subtype === 'zombie')) return false; // M184: Zombify waits for a Zombie worth raising
+    if (k === 'draftGraveZombie' && !p.graveyard.some((c) => subtypeHas(def(c), 'zombie'))) return false; // M184: Zombify waits for a Zombie worth raising
     if (k === 'becomeLegendary' && !p.board.length) return false; // M184: the Herald's crown needs a standing friendly creature in AI hands (its target is chosen before it lands)
     if (k === 'transformBoard' && p.board.length === 0) return false;
     if (k === 'destroyFlyer' && !game.players[game.opp(i)].board.some((c) => (def(c).keywords || []).includes('flying'))) return false;
     if (k === 'destroyArtifact' && !game.players[game.opp(i)].artifacts.length) return false; // M165: Naturalize waits for an artifact worth unmaking
     if ((k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify' || k === 'stealPower' || k === 'damageCreatureHeal') && !foeBoard()) return false;
     if (k === 'stealCreature' && (!foeBoard() || p.board.length >= 5)) return false; // Possessing needs a victim AND room to receive it
-    if ((k === 'transformFriendly' || k === 'buffAndDoom') && !p.board.length) return false;
+    if (k === 'buffAndDoom' && !p.board.length) return false;
+    if (k === 'transformCreature' && !foeBoard()) return false; // M209: Shell Game answers an enemy creature — no foe field, no play
     if (k === 'grimEchoes' && p.board.length === 0) return false;
     if (k === 'healCreatureFull' && def(c).effect && !p.board.some((x) => x.damage > 0)) return false; // the Nuzzle SPELL waits for a wound; a heal DEBUT rides its body in regardless
     if (k === 'swapStats' && !foeBoard() && !p.board.length) return false;
@@ -5014,7 +5048,7 @@ function playMainPhase(game, i) {
     if (k === 'damageAny' && eff2.amountFrom && !p.board.length) return false; // M110: Blindside with no creature standing is a swung fist at air
     if (k === 'grantKeyword' && eff2.foeTarget && !foeBoard()) return false;
     if (k === 'summonPerCount' && eff2.count === 'foeCreatures' && !foeBoard()) return false;
-    if (k === 'summonPerCount' && eff2.count === 'yourVampires' && !p.board.some((c) => def(c).subtype === eff2.subtype)) return false;
+    if (k === 'summonPerCount' && eff2.count === 'yourVampires' && !p.board.some((c) => subtypeHas(def(c), eff2.subtype))) return false;
     if (k === 'rageStrongest' && (!foeBoard() || !p.board.length)) return false;
     if (k === 'sacrificeDamage' && !p.board.length) return false; // M172: Fling needs a body to throw
     if (k === 'sacrificeDraftArtifact' && !spareArtifact(game, i)) return false; // M180: Tinker waits until an artifact can be spared
@@ -5684,7 +5718,7 @@ function spawnStreams(fromIdx, toIdx, n) {
     var segScale = Math.min(1.4, Math.max(1, dist / 560));
     var undK = Math.min(1, Math.max(0, (dist - 430) / 380)) * (calm ? 0.6 : 1);
     var layer = document.createElement('div');
-    layer.className = 'fx-vapor';
+    layer.className = 'fx-vapor fx-nightmare';
     document.body.appendChild(layer);
     /* M201 ROUND 5: the clock gets Round 4's distance treatment — a 785px
        portrait flight and a 427px landscape flight used to share one
@@ -5741,7 +5775,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     var segScaleD = Math.min(1.3, Math.max(1, distD / 560));
     var undD = Math.min(1, Math.max(0, (distD - 430) / 380)) * (calm ? 0.6 : 1);
     var layer = document.createElement('div');
-    layer.className = 'fx-vapor';
+    layer.className = 'fx-vapor fx-nightmare';
     document.body.appendChild(layer);
     spawnPilePulse(layer, src, 40);
     var maxEnd = 0;
@@ -5806,7 +5840,7 @@ function effTargetKind(eff) { // M109: a targeted SEQUENCE (Burn Through) aims b
 function defNeedsTarget(d) {
   var eff = d && (d.effect || d.debut);
   if (eff && eff.kind === 'fightOnce' && eff.random) return false; // a random fight needs no click
-  return !!(eff && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'bounceOwnSetCost', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'tuckIntoDeck', 'grantAttackEffect', 'grantEndTurn', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(eff.kind) >= 0); // M169 kinds + M172 pair kinds + M185 (Lightning Helix aims at a creature; Tinker aims at your own artifact)
+  return !!(eff && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'bounceOwnSetCost', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformCreature', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'tuckIntoDeck', 'grantAttackEffect', 'grantEndTurn', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(eff.kind) >= 0); // M169 kinds + M172 pair kinds + M185 (Lightning Helix aims at a creature; Tinker aims at your own artifact)
 }
 /* M172: the two-target kinds describe their two picks as ordered steps —
    which side of the table each pick must come from. 'anyEnemy' may also
@@ -6639,7 +6673,7 @@ function effectText(d) {
       case 'stealDeckBottom': return 'Draw the bottom card of your opponent\'s deck.';
       case 'fightWeakest': return 'Fights the enemy creature with the least power. If this survives, repeat.';
       case 'drainCreatureOrDamage': return 'Deal ' + e.amount + ' damage to an enemy creature. If you control a ' + e.subtype + ', instead Drain ' + e.amount + ' from it.';
-      case 'transformFriendly': return 'Transform a friendly creature into a ' + (CARDS[e.into] ? CARDS[e.into].name : 'token') + '.';
+      case 'transformCreature': return 'Transform an enemy creature into a ' + (CARDS[e.into] ? CARDS[e.into].name : 'token') + '.';
       case 'summonToken': return 'Summon a ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'token') + '.';
       case 'summonTokens': return 'Summon ' + (e.count || 1) + ' ' + (CARDS[e.token] ? CARDS[e.token].name : 'token') + 's.';
       case 'tempBuffAll': return 'Give all friendly creatures +' + (e.power || 0) + '/+' + (e.health || 0) + ' this turn.';
@@ -6932,7 +6966,7 @@ function emblemHtml(inst, ownerIdx, opts) {
   if (allKw.indexOf('flying') >= 0) kwBig += '<span class="kw-wings" title="Flying"></span>';
   var wardNow = false; try { wardNow = !!(G && G.wardActive(inst)); } catch (e) {} // the arc marks the LIVE ward window (M116), not the bare keyword — a lapsed ward wears no arc
   if (wardNow) kwBig += '<span class="kw-ward" title="Ward"></span>';
-  if (allKw.indexOf('sneak') >= 0) kwBig += '<span class="kw-sneak" title="Sneak"></span>';
+  if (allKw.indexOf('sneak') >= 0 && (!inst.sneakUsed || d.sneakInfinite)) kwBig += '<span class="kw-sneak" title="Sneak"></span>'; // M209 (Jesse B9): the veil marks LIVE sneak only — once spent, the creature wears its normal face again; sneakInfinite never spends, so its veil never lifts
   return '<div class="emblem' + (opts.cls || '') + openHit + wounded + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' + kwBig +
     '<span class="emblem-pow' + (inst.permPower > 0 ? ' buffed' : inst.permPower < 0 ? ' debuffed' : '') + '">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span>' +
@@ -7135,7 +7169,7 @@ function boardHtml(p, isMe) {
         var okPick = (stepNow === 'friendlyCreature' && isMe) || ((stepNow === 'enemyCreature' || stepNow === 'anyEnemy') && !isMe && !warded);
         if (okPick) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' targetable clickable'; }
         if (pendingFirst && pendingFirst.inst === inst) opts.cls = (opts.cls || '') + ' selected-attacker';
-      } else if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'debuffPerZombieGrave' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify' || k === 'stealCreature' || k === 'setHealth' || k === 'halveStats' || k === 'destroyIfPower' || k === 'damagePerGem' || k === 'fightOnce' || k === 'stealPower' || k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures' || k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges' || k === 'damageCreatureHeal') && !warded) || (k === 'grantKeyword' && (d.effect || d.debut).foeTarget && !warded) || (k === 'destroyFlyer' && flying && !warded) || (k === 'debuffCreature' && !warded))) || (isMe && (k === 'buffCreature' || (k === 'grantKeyword' && !(d.effect || d.debut).foeTarget) || k === 'healCreatureFull' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'transformFriendly' || k === 'buffAndDoom' || (k === 'pacify' && d.debut) || k === 'becomeLegendary')) || k === 'bounce' || k === 'swapStats' || (isMe && sacrificePick)) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' targetable clickable'; } // M185: damageCreatureHeal (Lightning Helix) rides the enemy-creature list in the big condition above
+      } else if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'debuffPerZombieGrave' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify' || k === 'stealCreature' || k === 'setHealth' || k === 'halveStats' || k === 'destroyIfPower' || k === 'damagePerGem' || k === 'fightOnce' || k === 'stealPower' || k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures' || k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges' || k === 'damageCreatureHeal' || k === 'transformCreature') && !warded) || (k === 'grantKeyword' && (d.effect || d.debut).foeTarget && !warded) || (k === 'destroyFlyer' && flying && !warded) || (k === 'debuffCreature' && !warded))) || (isMe && (k === 'buffCreature' || (k === 'grantKeyword' && !(d.effect || d.debut).foeTarget) || k === 'healCreatureFull' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'buffAndDoom' || (k === 'pacify' && d.debut) || k === 'becomeLegendary')) || k === 'bounce' || k === 'swapStats' || (isMe && sacrificePick)) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' targetable clickable'; } // M185: damageCreatureHeal (Lightning Helix) rides the enemy-creature list in the big condition above
     }
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
     window.__faces = window.__faces || {};
@@ -7260,7 +7294,7 @@ function sheetHtml() {
     '<button class="ghost big" onclick="sheetOpen=false;backToMenu()">🚪 Abandon match — back to menu</button>' +
     '<p style="font-size:12px;color:#a793d6;text-align:center">Turn ' + (typeof G !== 'undefined' && G ? G.turnNumber : '—') + (typeof G !== 'undefined' && G && G.winner === null ? (G.active === humanIdx ? ' · your move' : ' · their move') : '') + ' · ❤️ you ' + (typeof G !== 'undefined' && G ? G.players[humanIdx].life : '—') + ' · foe ' + (typeof G !== 'undefined' && G ? G.players[aiIdx].life : '—') + (typeof climb !== 'undefined' && climb ? ' · ⛰️ Climb rung ' + climb.rung + ' of 5' : '') + '<br>The foe waits. Nothing moves while you are here.</p></div></div>';
 }
-function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
+function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.pause-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
 function logHtml() {
   return '<div class="overlay" onclick="closeLog()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">📜 Recent events</h2><div id="log" style="font-size:13px;line-height:1.55">' +
@@ -7495,7 +7529,7 @@ function m81Watch() {
       if (was > 3 && now <= 3 && now > 0) m81Pill((pi === humanIdx ? 'Your deck: ' : 'Enemy deck: ') + now + ' card' + (now === 1 ? '' : 's') + ' left!');
       if (was > 0 && now === 0) m81Pill(pi === humanIdx ? 'Your deck is empty!' : 'The enemy deck is empty!'); }
     // log pulse: events landed while you weren't looking
-    if (G.log.length > __m81LogLen) { __m81LogLen = G.log.length; if (mode === 'aiTurn' && !logOpen) { var lb = document.querySelector('.log-btn'); if (lb) lb.classList.add('hasnews'); } }
+    if (G.log.length > __m81LogLen) { __m81LogLen = G.log.length; if (mode === 'aiTurn' && !logOpen) { var lb = document.querySelector('.pause-btn'); if (lb) lb.classList.add('hasnews'); /* M209: the news pulse rides the pause button now — the log's home since B1 */ } }
   } catch (e) {}
 }
 function m81Pill(txt) {
@@ -7546,8 +7580,7 @@ function renderBody() {
   var shellStyle = (typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.20), rgba(15,9,27,.38)), url(' + PORTRAITS.arena + ')"' : '';
   if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
   var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep' + (G.active === aiIdx ? ' foe' : '') + '"></div>' : '');
-  html += '<button class="log-btn" aria-label="Battle log" onclick="showLog()" title="Battle log — recent events">📜</button>';
-  html += '<button class="log-btn pause-btn" aria-label="Pause menu" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
+  html += '<button class="pause-btn" aria-label="Pause menu" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
   sweepPending = false;
   html += heroBarHtml(foe, false);
   html += '<div class="field">' + heroFigure(foe.heroId, 'foe') + heroFigure(me.heroId, 'me') + '<div class="motes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>';
@@ -7624,13 +7657,13 @@ function renderBody() {
   }
   /* M74: sound lives on the menu screen now — the stage cluster is the phase button alone. */
   html += '</div>';
-  html += '<div class="passive-emblem" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + (me.hero.passive === 'trapDraw' ? '<span class="pe-count">' + (me.trapsArmedCount % 3) + '/3</span>' : '') + (me.hero.passive === 'unbridled' ? '<span class="pe-count">' + (me.summonCount % 5) + '/5</span>' : '') + '</div>';
+  html += '<div class="passive-emblem' + (me.hero.passive === 'weave' ? ' pe-weave' : '') + '" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + (me.hero.passive === 'trapDraw' ? '<span class="pe-count">' + (me.trapsArmedCount % 3) + '/3</span>' : '') + (me.hero.passive === 'unbridled' ? '<span class="pe-count">' + (me.summonCount % 5) + '/5</span>' : '') + '</div>';
   html += '</div>';
   html += '<div class="mybar-wrap">' + heroBarHtml(me, true) + '</div>';
   html += msg ? '<div class="msg">' + esc(msg) + '</div>' : '';
   /* M74 (Jesse, from the original's portrait footage): no pile strips on
      the bars — deck/hand/grave counts live behind the portrait tap, and
-     the battle log behind the 📜 button at the arena's top-left. */
+     the battle log lives in the pause sheet behind the \u2630 button at the arena's top-left (M209: the separate \uD83D\uDCDC button retired — Jesse's B1 ruling, the log stays in the pause sheet). */
   html += '</div><div class="handzone' + (handOpen ? ' open' : ' closed') + '"' + (handOpen ? '' : ' onclick="toggleHand(true)"') + '>';
   var fanCards = me.hand.concat(me.traps); var hn = fanCards.length, hMid = (hn - 1) / 2; /* M102 (Jesse): armed traps stay IN the hand with a glow — no chip, no announcement; their reserved mana reads off the portrait pips */
   /* M34: a real held fan (Jesse) — cards overlap, and whatever part of a
@@ -7993,10 +8026,10 @@ function renderMenu() {
     '<button class="ghost big" onclick="openIntro()">🎓 How to play — 30 seconds</button>' +
     '<div class="record">Your record on this device: ' + rec.w + ' wins · ' + rec.l + ' losses' + ((rec.w + rec.l) > 0 ? ' · ' + Math.round(rec.w / (rec.w + rec.l) * 100) + '% win rate' : '') + '</div></div>' : '') +
     (hubTab === 'play' ? '<div class="panel" id="panel-climb"><h2>🧗 The Climb</h2>' +
-    '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Five rungs with the hero you picked above. You lead every rung; each enemy starts with more bonus life than the last. Karg guards the base — and Umbra waits at the summit. Pause whenever you like — the ladder remembers where you left off, even between days.</p>' +
+    '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Ten rungs with the hero you picked above. You lead every rung; each enemy starts with more bonus life than the last. Karg guards the base — and Umbra waits at the summit. Pause whenever you like — the ladder remembers where you left off, even between days.</p>' +
     '<div class="ladder">' + CLIMB_RUNGS.map(function (r, i) { var done = climbBest() > i; return '<span class="rung' + (done ? ' done' : '') + '">' + (done ? '✓ ' : '') + (i + 1) + ' · ' + (SIGILS[r.hero] || '') + ' ' + esc(HEROES[r.hero].name) + (r.bonus ? ' +' + r.bonus + '♥' : '') + '</span>'; }).join('<span class="pip-sep">›</span>') + '</div>' +
     (function () { var nb = climbBest(); if (nb >= CLIMB_RUNGS.length) return ''; var nx = CLIMB_RUNGS[nb]; return '<p style="color:#c4b6e8;font-size:12.5px;text-align:center;margin:6px 0 0">Next guardian: ' + esc(HEROES[nx.hero].name) + ' — ' + esc(HEROES[nx.hero].blurb || '') + (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[nx.hero] ? ' Running \u201C' + esc(DECK_NAMES[nx.hero]) + '.\u201D' : '') + '</p>'; })() +
-    (climbBest() ? '<div class="record">Best height on this device: ' + climbBest() + ' of 5 rungs cleared' + (climbBest() >= 5 ? ' — SUMMITED 🏔️' : '') + '</div>' : '') +
+    (climbBest() ? '<div class="record">Best height on this device: ' + climbBest() + ' of ' + CLIMB_RUNGS.length + ' rungs cleared' + (climbBest() >= CLIMB_RUNGS.length ? ' — SUMMITED 🏔️' : '') + '</div>' : '') +
     (function () { var pk = climbParked(); if (!pk) return ''; var rr = CLIMB_RUNGS[pk - 1]; return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0"><button class="big" onclick="resumeClimb()">▶ Resume at rung ' + pk + ' — ' + esc(HEROES[rr.hero].name) + '</button><span style="font-size:12px;color:#a793d6">Your place is saved on this device.</span></div>'; })() +
     '<button class="big" onclick="startClimb()">' + (climbParked() ? '↺ Start fresh at rung 1' : 'Start The Climb') + '</button>' +
     (climbBest() > 1 ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center"><span style="font-size:12px;color:#a793d6">Practice a cleared rung:</span>' + CLIMB_RUNGS.slice(0, climbBest()).map(function (r, i) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="startClimbAt(' + (i + 1) + ')">↺ Rung ' + (i + 1) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '') +
@@ -8059,24 +8092,35 @@ function mullPressStart(uid) { mullPressEnd(); mullHoldTimer = setTimeout(functi
 function mullPressEnd() { if (mullHoldTimer) { clearTimeout(mullHoldTimer); mullHoldTimer = null; } }
 function toggleRedraw(uid) { if (Date.now() - mullHoldAt < 700) return; try { sfx('click'); } catch (e) {} redrawSet.has(uid) ? redrawSet.delete(uid) : redrawSet.add(uid); render(); }
 
-/* ---------- The Climb: 5-rung gauntlet, escalating enemy bonus life ---------- */
+/* ---------- The Climb: 10-rung gauntlet, escalating enemy bonus life ---------- */
+/* M209 (Jesse, 2026-11-10): the 5-rung ladder fell "far too easily" — the
+   ladder doubles to ten rungs on the existing levers only. Rungs 1-4 keep
+   the old opening exactly; the old summit (+12) becomes the MIDPOINT
+   (Morvane at rung 5), and the back half climbs past it in +3 steps to
+   Umbra at +27 (49 life) on the summit. No hero guards more than twice;
+   Karg still guards the base and Umbra still waits at the top. */
 var CLIMB_RUNGS = [
   { hero: 'bruiser', bonus: 0 },
   { hero: 'keeper', bonus: 3 },
   { hero: 'controller', bonus: 6 },
   { hero: 'bruiser', bonus: 9 },
-  { hero: 'weaver', bonus: 12 },
+  { hero: 'graven', bonus: 12 },
+  { hero: 'tidemother', bonus: 15 },
+  { hero: 'banneret', bonus: 18 },
+  { hero: 'unchained', bonus: 21 },
+  { hero: 'controller', bonus: 24 },
+  { hero: 'weaver', bonus: 27 },
 ];
-var climb = null; // { rung: 1..5 } while a climb is live
+var climb = null; // { rung: 1..CLIMB_RUNGS.length } while a climb is live
 function climbBest() { try { var n = parseInt(localStorage.getItem('yira_climb_best') || '0', 10) || 0; return Math.max(0, Math.min(CLIMB_RUNGS.length, n)); } catch (e) { return 0; } } // M205: clamp the stored value to the ladder — a corrupt negative ('-5') passed parseInt untouched and crashed the hub render at CLIMB_RUNGS[nb].hero; climbParked has always range-checked its own key the same way
 /* M119 (Jesse): the ladder remembers — a climb run parks its next rung on
    this device, so a run can pause for days and resume where it left off. */
-function climbParked() { try { var n = parseInt(localStorage.getItem('yira_climb_run') || '0', 10) || 0; return (n >= 1 && n <= 5) ? n : 0; } catch (e) { return 0; } }
-function parkClimb(n) { try { if (n >= 1 && n <= 5) localStorage.setItem('yira_climb_run', String(n)); else localStorage.removeItem('yira_climb_run'); } catch (e) {} }
+function climbParked() { try { var n = parseInt(localStorage.getItem('yira_climb_run') || '0', 10) || 0; return (n >= 1 && n <= CLIMB_RUNGS.length) ? n : 0; } catch (e) { return 0; } }
+function parkClimb(n) { try { if (n >= 1 && n <= CLIMB_RUNGS.length) localStorage.setItem('yira_climb_run', String(n)); else localStorage.removeItem('yira_climb_run'); } catch (e) {} }
 function resumeClimb() { var n = climbParked(); if (n) startClimbAt(n); }
 function startClimb() { parkClimb(1); climb = { rung: 1 }; startMatch(); }
 function startClimbAt(n) { parkClimb(n); climb = { rung: n }; startMatch(); }
-function climbNext() { if (climb && climb.rung < 5) { climb.rung++; parkClimb(climb.rung); } startMatch(); }
+function climbNext() { if (climb && climb.rung < CLIMB_RUNGS.length) { climb.rung++; parkClimb(climb.rung); } startMatch(); }
 
 /* ---------- card collection ---------- */
 function openCollection() { try { sfx('click'); } catch (e) {} hubTab = 'collection'; mode = 'collection'; render(); }
@@ -8454,7 +8498,7 @@ function clickHand(uid) {
   }
   if (d.altSummonSacrifice && G.availableMana(me) < G.effectiveCost(me, inst) && me.board.length > 0) { pendingUid = uid; sacrificePick = true; mode = 'targeting'; msg = 'Choose a friendly creature to destroy for the summoning.'; render(); return; }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
-  if (targetedEff && !(targetedEff.kind === 'fightOnce' && targetedEff.random) && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformFriendly', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(targetedEff.kind) >= 0) { // M172: stripCharges joins (Gear Render's debut was unroutable here — a drive-by repair), plus the pair kinds and Gear Mender's friendly-artifact debut; M185: Lightning Helix + Tinker join the routed kinds
+  if (targetedEff && !(targetedEff.kind === 'fightOnce' && targetedEff.random) && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformCreature', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(targetedEff.kind) >= 0) { // M172: stripCharges joins (Gear Render's debut was unroutable here — a drive-by repair), plus the pair kinds and Gear Mender's friendly-artifact debut; M185: Lightning Helix + Tinker join the routed kinds
     var k = effTargetKind(targetedEff);
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'bounce') ? true : (k === 'damageAny' ? (targetedEff.creatureOnly ? foe.board.length > 0 : true) : (k === 'grimEchoes' ? me.board.length > 0 : (k === 'buffCreature' || k === 'healCreatureFull' || (k === 'grantKeyword' && !targetedEff.foeTarget) ? me.board.length > 0 : (k === 'pacify' && d.debut ? me.board.length > 0 : (k === 'swapStats' ? (me.board.length + foe.board.length) > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0))))));
@@ -8625,7 +8669,7 @@ function panTargetExists(hd) { // M187: could the woken Debut be aimed at all ri
   if (k === 'destroyArtifact' || k === 'stripCharges' || k === 'damageOrStripCharges') return foe.artifacts.length > 0;
   if (k === 'addChargeArtifact' || k === 'targetOwnArtifact') return me.artifacts.length > 0;
   if (k === 'destroyFlyer') return foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; });
-  if (['buffCreature', 'healCreatureFull', 'grimEchoes', 'transformFriendly', 'buffAndDoom', 'becomeLegendary'].indexOf(k) >= 0 || (k === 'grantKeyword' && !hd.debut.foeTarget) || (k === 'pacify' && hd.debut)) return me.board.length > 0;
+  if (['buffCreature', 'healCreatureFull', 'grimEchoes', 'buffAndDoom', 'becomeLegendary'].indexOf(k) >= 0 || (k === 'grantKeyword' && !hd.debut.foeTarget) || (k === 'pacify' && hd.debut)) return me.board.length > 0;
   return foe.board.length > 0;
 }
 function finishPan(dt) { // M187: the woken Debut's target has landed \u2014 the activation fires with it riding as debutTarget

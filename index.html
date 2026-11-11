@@ -513,8 +513,9 @@
      breath, school tints) keeps the violet system untouched. */
   .fx-nightmare .wisp { mix-blend-mode:normal; filter:blur(1.2px) grayscale(.86) brightness(.55) contrast(1.24); /* M212 (P3): blur 1.6->1.2 so the sprite's fibre survives the crush */
     background:radial-gradient(circle, rgba(6,5,9,.52) 0%, rgba(14,12,18,.26) 55%, rgba(0,0,0,0) 80%), var(--smoke-img, none) center / 160% no-repeat; }
-  .fx-nightmare .wisp-streak { filter:blur(1.4px) grayscale(.86) brightness(.58) contrast(1.22); } /* M212 (P3): the grain layer sharpens with the body */
-  .fx-nightmare .wisp-head { filter:blur(1.1px) grayscale(.78) brightness(.8) contrast(1.18); } /* M212 (P4): the ash-lit leading edge lifts one step (.74->.8) so the knot reads en route */
+  .fx-nightmare .wisp-streak { filter:blur(1.8px) grayscale(.86) brightness(.58) contrast(1.22); } /* M216 (Q2): eased back from M212's 1.4 — at round-7 lengths and contrast the grain drew rope fibre; flow segments also carry a size-keyed inline blur */
+  .fx-nightmare .wisp-head { filter:blur(1.1px) grayscale(.78) brightness(.92) contrast(1.18); } /* M216 (Q5): the ash-lit leading edge lifts again (.8->.92) — the M216 pixel readout showed the head no brighter than its own body en route */
+  .fx-nightmare .wisp-headglow { filter:blur(6px) grayscale(.35) brightness(1.5) contrast(1.02); } /* M216 (Q5): the ash-glow riding the head — a soft pale bloom so the leader reads by light against the dark arena and its own darker body */
   .fx-nightmare .wisp-halo { filter:blur(7px) grayscale(.88) brightness(.48) contrast(1.12); }
   .fx-nightmare .wisp-under { filter:blur(10px) grayscale(.88) brightness(.50); }
   .fx-nightmare .wisp-pulse { mix-blend-mode:normal;
@@ -5616,7 +5617,7 @@ function sfxDrain(n) {
   }
 }
 function ribbonPath(src, dst, wild) {
-  var ox = src.x + (Math.random() * 40 - 20) * wild.jitter, oy = src.y + (Math.random() * 26 - 13) * wild.jitter;
+  var ox = src.x + (wild.oOff ? wild.oOff.x : 0) + (Math.random() * 40 - 20) * wild.jitter, oy = src.y + (wild.oOff ? wild.oOff.y : 0) + (Math.random() * 26 - 13) * wild.jitter; // M216 (Q4): an optional origin offset — the plant/drain fan their streams' starting points across the source so the volley leaves as a sheaf, not a knot; without it (draw tails, grave flights) origins are exactly as before
   var ax = dst.x + (Math.random() * 18 - 9) * wild.jitter, ay = dst.y + (Math.random() * 14 - 7) * wild.jitter;
   var dxv = ax - ox, dyv = ay - oy;
   var len = Math.sqrt(dxv * dxv + dyv * dyv) || 1;
@@ -5685,23 +5686,29 @@ function spawnRibbon(layer, P, o) {
      no two streams share a corridor. */
   var descs = [];
   if (o.halo) descs.push({ frac: 0.015, sizeMul: o.flow ? 1.3 : 1.65, opMul: o.flow ? 0.3 : 0.34, cls: 'wisp wisp-halo', sprite: 'smoke', crop: 'core', stretch: 1.15, squash: 1.1, jit: 0 }); // M212 (P2/P4): on the nightmare ribbons the halo tightens onto the head instead of ballooning around it // M199: jit:0 — without it the frame math read undefined, the halo's transform went NaN and every halo since M195 sat parked at the viewport's top-left corner instead of flying with its head (found by this wave's probe)
+  if (o.flow) descs.push({ frac: 0.045, sizeMul: 2.1, opMul: 0.55, cls: 'wisp wisp-headglow', sprite: 'smoke', crop: 'core', stretch: 1.25, squash: 1.05, jit: 0 }); // M216 (Q5): the ash-glow riding just behind the head — the leader carries light, because density contrast alone never survived the crush to black (M216 pixel readout: head luminance == body luminance en route)
   if (o.underlay > 0) { // M199 (gap 1): on long flights, two slow, large, soft washes ride mid-body UNDER the fibrous segments — one continuous body the weather happens inside, instead of parallel ropes with dark gaps between them
     descs.push({ frac: 0.34, sizeMul: o.flow ? 1.9 : 2.6, opMul: (o.flow ? 0.20 : 0.30) * o.underlay, cls: 'wisp wisp-under', sprite: 'smoke', crop: 'core', stretch: 2.5, squash: 1.5, jit: 0 }); // M212 (P2): slimmer, dimmer — a body the weather happens inside, not two boulders
     descs.push({ frac: 0.58, sizeMul: o.flow ? 1.6 : 2.15, opMul: (o.flow ? 0.16 : 0.24) * o.underlay, cls: 'wisp wisp-under', sprite: 'smoke', crop: 'core', stretch: 2.7, squash: 1.45, jit: 0 });
   }
+  var calPh = Math.random() * 6.28, calFr = 4.2 + Math.random() * 1.8; // M216 (Q1): this ribbon's belly/neck wave — the per-segment factors below are constant per segment, so the churn travels downstream with the smoke instead of boiling in place
   for (var j = 0; j < N; j++) {
     var frac = N === 1 ? 0 : j / (N - 1); // 0 = head, 1 = tail tip
     var isHead = j === 0, isTail = frac > 0.78;
     var useStreak = !isHead && !isTail && !!streakImg && (o.flow ? (j % 3 === 1) : (j % 4 === 1)); // M212 (P3): flow ribbons fly the streak grain every 3rd segment
+    var calEnv = o.flow && !isHead ? Math.sin(Math.PI * Math.min(1, frac * 1.2)) : 0; // M216 (Q1): the belly/neck envelope — zero at the head, full mid-body, calm at the tip
+    var calN = 1 + 0.15 * Math.sin(frac * calFr + calPh) * calEnv; // M216 (Q1): smooth calibre noise along the body — the stream necks and bellies instead of holding one cord gauge
+    var denN = 1 + 0.18 * Math.sin(frac * calFr * 0.9 + calPh + 1.9) * calEnv; // M216 (Q1): density noise on a different phase, so the body shimmers instead of reading as even material
+    var leadK = o.flow && j === 1; // M216 (Q5): the segment behind the head shares its mass — a leading pair, not a point
     descs.push({
       frac: frac,
-      sizeMul: isHead ? (o.flow ? 1.3 : 1.24) : (o.flow ? (1 - 0.5 * Math.pow(frac, 1.25)) : (1 - 0.42 * Math.pow(frac, 1.25))) * (0.9 + Math.random() * 0.2), // M212 (P2/P4): a denser knot at the head, a harder taper down the body
-      opMul: o.flow ? (isHead ? 1.42 : (1 - 0.45 * frac) * (useStreak ? 0.8 : 1)) : (1 - 0.6 * frac) * (useStreak ? 0.62 : 1), // M212 (P1/P3): density moves to the head; the body stays a veil; streaks carry more of it
+      sizeMul: isHead ? (o.flow ? 1.3 : 1.24) : (o.flow ? (1 - 0.5 * Math.pow(frac, 1.25)) * calN * (leadK ? 1.08 : 1) : (1 - 0.42 * Math.pow(frac, 1.25))) * (0.9 + Math.random() * 0.2), // M212 (P2/P4) + M216 (Q1/Q5)
+      opMul: o.flow ? (isHead ? 1.5 : (1 - 0.45 * frac) * (useStreak ? 0.62 : 1) * denN * (leadK ? 1.18 : 1)) : (1 - 0.6 * frac) * (useStreak ? 0.62 : 1), // M212 (P1/P3) + M216 (Q1/Q2/Q5): density at the head, a whispering grain, churn along the body
       cls: isHead ? 'wisp wisp-head' : (useStreak ? 'wisp wisp-streak' : 'wisp'),
       sprite: useStreak ? 'streak' : 'smoke',
       jit: (Math.random() * 6 - 3),
       crop: (isHead || isTail) ? 'core' : 'rim',
-      stretch: o.flow ? (isHead ? 1.15 : 1.9 + 0.6 * frac) : (isHead ? 1.3 : 1.55 + 0.5 * frac), // M212 (P3): longer grain along the path
+      stretch: o.flow ? (isHead ? 1.15 : (useStreak ? 1.55 + 0.4 * frac : 1.7 + 0.45 * frac)) : (isHead ? 1.3 : 1.55 + 0.5 * frac), // M212 (P3) + M216 (Q2): the grain eased back — at round-7 lengths and contrast it drew rope fibre
       squash: o.flow ? (isHead ? 1.0 : 0.72 - 0.14 * frac) : (isHead ? 1.05 : 0.84 - 0.2 * frac) // M212 (P2): a thinner cross-section — width is the cloud
     });
   }
@@ -5758,6 +5765,10 @@ function spawnRibbon(layer, P, o) {
       el.style.backgroundPosition = (44 + Math.random() * 12).toFixed(0) + '% ' + (44 + Math.random() * 12).toFixed(0) + '%';
     }
     layer.appendChild(el);
+    if (o.flow && dc.cls !== 'wisp wisp-head' && dc.cls !== 'wisp wisp-halo' && dc.cls.indexOf('wisp-under') < 0 && dc.cls.indexOf('headglow') < 0) { // M216 (Q3): feather scales with calibre — the nightmare class blur was a flat 1.2px whatever the segment's size, drawing a tube edge on the fat ones; this inline chain restates the .fx-nightmare class filter with a size-keyed blur (flow ribbons fly only in .fx-nightmare layers; head/halo/underlay/glow keep their class filters)
+      var bp = (1.1 + size * 0.03).toFixed(2);
+      el.style.filter = dc.sprite === 'streak' ? 'blur(' + bp + 'px) grayscale(.86) brightness(.58) contrast(1.22)' : 'blur(' + bp + 'px) grayscale(.86) brightness(.55) contrast(1.24)';
+    }
     var peak = o.opacity * dc.opMul;
     var rotJit = Math.random() * 14 - 7;
     var flipX = Math.random() < 0.5 ? -1 : 1, flipY = Math.random() < 0.5 ? -1 : 1;
@@ -5821,6 +5832,7 @@ function spawnStreams(fromIdx, toIdx, n) {
     var laneScale = Math.min(1.5, Math.max(1, dist / 540));
     var segScale = Math.min(1.4, Math.max(1, dist / 560));
     var undK = Math.min(1, Math.max(0, (dist - 430) / 380)) * (calm ? 0.6 : 1);
+    var dxu = dst.x - src.x, dyu = dst.y - src.y, dlu = Math.hypot(dxu, dyu) || 1; var pxu = -dyu / dlu, pyu = dxu / dlu; // M216 (Q4): the unit perpendicular of the flight — origins fan along it
     var layer = document.createElement('div');
     layer.className = 'fx-vapor fx-nightmare';
     document.body.appendChild(layer);
@@ -5839,8 +5851,8 @@ function spawnStreams(fromIdx, toIdx, n) {
       if (sideK && Math.random() < 0.3) sideK = -sideK;
       var wScale = (0.8 + 0.5 * (count > 1 ? k / (count - 1) : 0.5)) * (0.85 + Math.random() * 0.3) * Math.min(1.28, Math.max(0.92, dist / 640));
       var laneK = count > 1 ? (k - (count - 1) / 2) * 30 * laneScale : 0;
-      var P = ribbonPath(src, dst, { jitter: 1.6, wander: [60, 210], skim: true, lift: 1, side: sideK, wScale: wScale, lane: laneK });
-      spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 12 : 22) * segScale), lag: 0.32, dur: dur, delay: delay, size: (44 + Math.random() * 12) * boost, opacity: 0.26, ease: 1.35, writhe: calm ? 5 : 11, wfreq: 9 + Math.random() * 4, waveK: 6.5, halo: true, underlay: undK }); // M212 (P1/P2): thinner segments, more of them, a lower alpha budget — a veil, not a pillar
+      var P = ribbonPath(src, dst, { jitter: 1.6, wander: [60, 210], skim: true, lift: 1, side: sideK, wScale: wScale, lane: laneK, oOff: { x: pxu * laneK * 0.55, y: pyu * laneK * 0.55 } }); // M216 (Q4): the origin fans with the lane — the volley leaves across the emblem's shoulders as a sheaf
+      spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 12 : 22) * segScale), lag: 0.32, dur: dur, delay: delay, size: (40 + (Math.random() + Math.random()) * 8) * boost, opacity: 0.26 * (0.82 + Math.random() * 0.36), ease: 1.35, writhe: calm ? 5 : 11, wfreq: 9 + Math.random() * 4, waveK: 6.5, halo: true, underlay: undK }); // M212 (P1/P2) + M216 (Q1): a triangular size draw (40-56 — top capped at the old max, variance in the middle) and a per-ribbon opacity identity, so no two siblings are the same stream
       if (delay + dur > maxEnd) maxEnd = delay + dur;
     }
     spawnPilePulse(layer, dst, Math.round(maxEnd * 0.52)); // M202: retimed to the M201 clock — under gather/surge/settle the heads land around 0.7 of their clocks, so the pile's answer now peaks as the pour begins (the old flight*0.5+120 was tuned to the pre-M201 arrival and fired mid-flight)
@@ -5878,6 +5890,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     var laneScaleD = Math.min(1.35, Math.max(1, distD / 540));
     var segScaleD = Math.min(1.3, Math.max(1, distD / 560));
     var undD = Math.min(1, Math.max(0, (distD - 430) / 380)) * (calm ? 0.6 : 1);
+    var dxd = dst.x - src.x, dyd = dst.y - src.y, dld = Math.hypot(dxd, dyd) || 1; var pxd = -dyd / dld, pyd = dxd / dld; // M216 (Q4): the drain's unit perpendicular — its origins fan along it
     var layer = document.createElement('div');
     layer.className = 'fx-vapor fx-nightmare';
     document.body.appendChild(layer);
@@ -5888,8 +5901,8 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
       var sideD = count > 1 ? (k % 2 === 0 ? 1 : -1) : 0;
       if (sideD && Math.random() < 0.3) sideD = -sideD;
       var laneD = count > 1 ? (k - (count - 1) / 2) * 20 * laneScaleD : 0;
-      var P = ribbonPath(src, dst, { jitter: 0.6, wander: [20, 88], skim: false, lift: 0.55, side: sideD, wScale: 0.85 + 0.35 * (count > 1 ? k / (count - 1) : 0.5), lane: laneD });
-      spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 10 : 16) * segScaleD), lag: 0.27, dur: dur, delay: delay, size: 40 + Math.random() * 12, opacity: 0.28, ease: 1.8, writhe: calm ? 3 : 7, wfreq: 11 + Math.random() * 4, waveK: 7, halo: true, underlay: undD }); // M212 (P1/P2): same discipline as the plant
+      var P = ribbonPath(src, dst, { jitter: 0.6, wander: [20, 88], skim: false, lift: 0.55, side: sideD, wScale: 0.85 + 0.35 * (count > 1 ? k / (count - 1) : 0.5), lane: laneD, oOff: { x: pxd * laneD * 0.8, y: pyd * laneD * 0.8 } }); // M216 (Q4): the drain's knot (measured 9x12px for 3 streams) opens with the lane
+      spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 10 : 16) * segScaleD), lag: 0.27, dur: dur, delay: delay, size: 38 + (Math.random() + Math.random()) * 7, opacity: 0.28 * (0.85 + Math.random() * 0.3), ease: 1.8, writhe: calm ? 3 : 7, wfreq: 11 + Math.random() * 4, waveK: 7, halo: true, underlay: undD }); // M212 (P1/P2) + M216 (Q1/Q4): same discipline as the plant
       if (delay + dur > maxEnd) maxEnd = delay + dur;
     }
     spawnPilePulse(layer, dst, Math.round(maxEnd * 0.66)); // M202: the drain's arrival answers too — a pulse at the weaver's bar as the stolen vapor lands (the source pile's tear-out pulse above stays as it was)

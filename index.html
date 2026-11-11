@@ -7292,7 +7292,7 @@ function sheetHtml() {
     '<button class="ghost big" onclick="sheetOpen=false;startMatch()">↻ Restart match</button>' +
     '<button class="ghost big" onclick="sheetConcede()">' + (concedeArmed ? '🏳 Tap again to yield the match' : '🏳 Concede') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;backToMenu()">🚪 Abandon match — back to menu</button>' +
-    '<p style="font-size:12px;color:#a793d6;text-align:center">Turn ' + (typeof G !== 'undefined' && G ? G.turnNumber : '—') + (typeof G !== 'undefined' && G && G.winner === null ? (G.active === humanIdx ? ' · your move' : ' · their move') : '') + ' · ❤️ you ' + (typeof G !== 'undefined' && G ? G.players[humanIdx].life : '—') + ' · foe ' + (typeof G !== 'undefined' && G ? G.players[aiIdx].life : '—') + (typeof climb !== 'undefined' && climb ? ' · ⛰️ Climb rung ' + climb.rung + ' of 5' : '') + '<br>The foe waits. Nothing moves while you are here.</p></div></div>';
+    '<p style="font-size:12px;color:#a793d6;text-align:center">Turn ' + (typeof G !== 'undefined' && G ? G.turnNumber : '—') + (typeof G !== 'undefined' && G && G.winner === null ? (G.active === humanIdx ? ' · your move' : ' · their move') : '') + ' · ❤️ you ' + (typeof G !== 'undefined' && G ? G.players[humanIdx].life : '—') + ' · foe ' + (typeof G !== 'undefined' && G ? G.players[aiIdx].life : '—') + (typeof climb !== 'undefined' && climb ? ' · ⛰️ Climb rung ' + climb.rung + ' of ' + CLIMB_RUNGS.length : '') + '<br>The foe waits. Nothing moves while you are here.</p></div></div>';
 }
 function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.pause-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
@@ -7311,8 +7311,8 @@ function showVsSplash() {
     node.className = 'vs-splash';
     var TIPS = ['Traps fire on their own — arm one and hold the mana in reserve.', 'Damage is permanent. A wounded creature stays wounded.', 'Attackers do not tap: your creatures can attack, then block next turn.', 'You only lose to an empty deck if your turn ENDS with it empty.', 'Hold any card to read it big. Drag is the only way to play.', 'A card that did not start in Umbra\'s deck plants a Nightmare when it reaches his hand — and again when played.', 'Sneak creatures cannot be blocked on their first attack — if a block was possible.', 'Playing your class card starts its chain: each stage slips the next into the top of your deck.', 'The second player starts with a fragile gem: +1 mana for their first turn only.'];
     var stOf = function (p) { var s = p && (p.stanceId || p.stance); return (s && STANCES[s]) ? STANCES[s] : STANCES.open; };
-    var climbBit = (typeof climb !== 'undefined' && climb) ? ' · ⛰️ Climb rung ' + climb.rung + ' of 5' : '';
-    node.innerHTML = '<div class="vs-row"><div class="vs-side"><div class="portrait">' + heroPortrait(me.heroId) + '</div><b>' + esc(me.hero.name) + '</b><small>' + esc(me.hero.blurb || '') + '<br>' + HERO_SCHOOLS[me.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div><div class="vs-x">⚔️</div><div class="vs-side"><div class="portrait">' + heroPortrait(foe.heroId) + '</div><b>' + esc(foe.hero.name) + '</b><small>' + esc(foe.hero.blurb || '') + '<br>' + HERO_SCHOOLS[foe.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div></div><div class="vs-meta">' + (humanIdx === 0 ? 'You lead — the foe starts with the fragile gem' : 'The foe leads — you start with the fragile gem') + ' · your stance ' + stOf(me).icon + ' ' + esc(stOf(me).name) + ' · foe ' + stOf(foe).icon + ' ' + esc(stOf(foe).name) + climbBit + '</div><div class="vs-tip">💡 ' + TIPS[Math.floor(Math.random() * TIPS.length)] + '</div><div class="vs-tap">tap anywhere to begin</div>';
+    var climbBit = (typeof climb !== 'undefined' && climb) ? ' · ⛰️ Climb rung ' + climb.rung + ' of ' + CLIMB_RUNGS.length : '';
+    node.innerHTML = '<div class="vs-row"><div class="vs-side"><div class="portrait">' + heroPortrait(me.heroId) + '</div><b>' + esc(me.hero.name) + '</b><small>' + esc(me.hero.blurb || '') + '<br>' + HERO_SCHOOLS[me.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '<br>\uD83C\uDCCF ' + esc(fightingDeckLabel(me.heroId)) + '</small></div><div class="vs-x">⚔️</div><div class="vs-side"><div class="portrait">' + heroPortrait(foe.heroId) + '</div><b>' + esc(foe.hero.name) + '</b><small>' + esc(foe.hero.blurb || '') + '<br>' + HERO_SCHOOLS[foe.heroId].map(function (s) { return SCHOOL_META[s].icon; }).join(' ') + '</small></div></div><div class="vs-meta">' + (humanIdx === 0 ? 'You lead — the foe starts with the fragile gem' : 'The foe leads — you start with the fragile gem') + ' · your stance ' + stOf(me).icon + ' ' + esc(stOf(me).name) + ' · foe ' + stOf(foe).icon + ' ' + esc(stOf(foe).name) + climbBit + '</div><div class="vs-tip">💡 ' + TIPS[Math.floor(Math.random() * TIPS.length)] + '</div><div class="vs-tap">tap anywhere to begin</div>';
     document.body.appendChild(node);
     sfx('legendary');
     var vsGone = false;
@@ -7560,7 +7560,7 @@ function renderBody() {
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
-  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
+  if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (deckPickOpen) $app.innerHTML += deckPickHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) introStep = introSeen() ? -1 : 0; if (introStep >= 0) $app.innerHTML += introHtml(); return; }
   if (mode === 'collection') { renderCollection(); if (inspectCardId !== null) $app.innerHTML += inspectHtml(); return; }
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); if (deckCodeOpen) $app.innerHTML += deckCodeHtml(); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
@@ -7817,7 +7817,7 @@ function gameOverHtml() {
     if (won) return box('🏔️ SUMMIT!', 'All 5 rungs cleared. The mountain is yours — Umbra at the top bows to no one now. Except you.',
       '<button class="big" onclick="startClimb()">Climb again</button>' +
       '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
-    return box('🧗 You fell — the ladder remembers', 'You fell on rung ' + r + ' of 5. This rung stays yours to retry whenever you return — tomorrow counts. Best height on this device: ' + climbBest() + ' rung' + (climbBest() === 1 ? '' : 's') + ' cleared.',
+    return box('🧗 You fell — the ladder remembers', 'You fell on rung ' + r + ' of ' + CLIMB_RUNGS.length + '. This rung stays yours to retry whenever you return — tomorrow counts. Best height on this device: ' + climbBest() + ' rung' + (climbBest() === 1 ? '' : 's') + ' cleared.',
       '<button class="big" onclick="resumeClimb()">▶ Resume at rung ' + r + '</button>' +
       '<button class="ghost big" onclick="startClimb()">Restart from rung 1</button>' +
       '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
@@ -7835,12 +7835,12 @@ function gameOverHtml() {
 /* M4.2: face-off showcase on the menu — the two selected heroes' concept renders. */
 function versusHtml() {
   if (typeof PORTRAITS === 'undefined') return ''; // M191: a portrait-less hero's card wears the medallion instead of cancelling the face-off
-  function card(id, role) {
+  function card(id, role, deckLine) {
     var pos = (PORTRAIT_POS[id] || ['50% 15%', '50% 15%'])[1];
     return '<div class="vcard">' + (PORTRAITS[id] ? '<img src="' + PORTRAITS[id] + '" style="object-position:' + pos + '" alt="">' : '<div class="vmedal">' + heroMedallion(id) + '</div>') +
-      '<div class="vname">' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</div><div class="vrole">' + role + '</div><div style="font-size:11px;color:#c4b6e8;padding:2px 10px 9px;line-height:1.35">' + esc(HEROES[id].blurb || '') + '</div></div>';
+      '<div class="vname">' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</div><div class="vrole">' + role + (deckLine ? '<br>\uD83C\uDCCF ' + esc(deckLine) : '') + '</div><div style="font-size:11px;color:#c4b6e8;padding:2px 10px 9px;line-height:1.35">' + esc(HEROES[id].blurb || '') + '</div></div>';
   }
-  return '<div class="versus">' + card(setup.me, 'You play · ' + HEROES[setup.me].life + ' life') + '<div class="vvs">⚔️</div>' + card(setup.foe, 'Enemy AI · ' + HEROES[setup.foe].life + ' life') + '</div>';
+  return '<div class="versus">' + card(setup.me, 'You play · ' + HEROES[setup.me].life + ' life', fightingDeckLabel(setup.me)) + '<div class="vvs">⚔️</div>' + card(setup.foe, 'Enemy AI · ' + HEROES[setup.foe].life + ' life') + '</div>';
 }
 
 var LEAGUE_TIERS = [[0, '🌱', 'Seedling'], [3, '🛡️', 'Bronze'], [6, '⚔️', 'Silver'], [10, '🏅', 'Gold'], [15, '💠', 'Platinum'], [25, '👑', 'Mythic']];
@@ -7880,7 +7880,7 @@ function playBannerHtml() {
   return '<div class="playbanner">' + (p ? '<div class="pbart" style="background-image:url(' + p + ');background-position:' + pos + '"></div>' : '') + '<div class="pbshade"></div>' +
     '<div class="pbcore"><div class="pbkick">\u2694\uFE0F QUICK MATCH</div>' +
     '<div class="pbhero">' + (SIGILS[setup.me] || '') + ' ' + esc(HEROES[setup.me].name) + '</div>' +
-    '<div class="pbsub">vs ' + esc(HEROES[setup.foe].name) + ' \u00B7 ' + (setup.seat === 'first' ? 'you lead' : 'enemy leads') + '</div>' +
+    '<div class="pbsub">vs ' + esc(HEROES[setup.foe].name) + ' \u00B7 ' + (setup.seat === 'first' ? 'you lead' : 'enemy leads') + ' \u00B7 \uD83C\uDCCF ' + esc(fightingDeckLabel(setup.me)) + '</div>' +
     '<button class="big pbplay" onclick="startMatch()">\u25B6 PLAY</button></div></div>';
 }
 function settingsHtml() {
@@ -7903,13 +7903,13 @@ function hubHtml(rec) {
   var ava = (typeof PORTRAITS !== 'undefined' && PORTRAITS[setup.me]) ? '<img src="' + PORTRAITS[setup.me] + '" alt="">' : (SIGILS[setup.me] || '\u2726');
   var lvl = 1 + Math.floor(rec.w / 5);
   return '<div class="profilebar"><div class="pava">' + ava + '</div><div class="pwho">' +
-    '<div class="pname">Wanderer <span style="font-size:10.5px;color:#ffd166;border:1px solid rgba(255,209,102,.5);border-radius:6px;padding:1px 6px;vertical-align:2px;letter-spacing:.05em">LOCAL</span></div>' +
+    '<div class="pname">' + esc(profileName()) + ' <span style="font-size:10.5px;color:#ffd166;border:1px solid rgba(255,209,102,.5);border-radius:6px;padding:1px 6px;vertical-align:2px;letter-spacing:.05em">LOCAL</span></div>' +
     '<div class="psub"><span class="pseg">' + lg.icon + ' ' + lg.name + ' League</span><span class="pdot"> \u00B7 </span><span class="pseg">' + rec.w + 'W\u2013' + rec.l + 'L</span>' + (stk >= 2 ? '<span class="pdot"> \u00B7 </span><span class="pseg">\uD83D\uDD25 ' + stk + ' streak</span>' : '') + '<span class="pdot"> \u00B7 </span><span class="pseg plv">Lv ' + lvl + '</span></div>' +
     '<div class="xpbar"><i style="width:' + (rec.w % 5) * 20 + '%"></i></div></div>' +
     '<button class="ghost profbtn" style="flex:0 0 auto" onclick="profileOpen=true;render()">\uD83D\uDC64 Profile</button></div>' +
     '<div class="hubtiles">' +
     hubTile('\u2694\uFE0F', 'Quick Match', 'Face the AI \u2014 your heroes, your decks', 'hubShow(\'play\')', false) +
-    hubTile('\uD83E\uDDD7', 'The Climb', climbParked() ? ('Paused at rung ' + climbParked() + ' of 5 — resume anytime') : (climbBest() > 0 ? ('Best: rung ' + climbBest() + ' of 5 \u00B7 Umbra waits at the summit') : 'Five rungs. Umbra waits at the summit'), 'hubShow(\'play\')', false) +
+    hubTile('\uD83E\uDDD7', 'The Climb', climbParked() ? ('Paused at rung ' + climbParked() + ' of ' + CLIMB_RUNGS.length + ' — resume anytime') : (climbBest() > 0 ? ('Best: rung ' + climbBest() + ' of ' + CLIMB_RUNGS.length + ' \u00B7 Umbra waits at the summit') : (CLIMB_RUNGS.length + ' rungs. Umbra waits at the summit')), 'hubShow(\'play\')', false) +
     hubTile('\uD83D\uDC65', 'PvP', 'Friend codes first, then matchmaking', 'pvpOpen=true;render()', true) +
     hubTile('\uD83C\uDCCF', 'Deck Builder', 'Your 30, your way', 'hubShow(\'decks\')', false) +
     hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' cards \u2014 search & filter them all', 'hubShow(\'collection\')', false) +
@@ -7966,7 +7966,7 @@ function glossaryHtml() {
 function profileHtml() {
   var rec = record(); var lg = leagueOf(rec.w);
   var games = rec.w + rec.l;
-  var decks = 0; try { decks = Object.keys(localStorage).filter(function (k) { return k.indexOf('yira_custom_') === 0; }).length; } catch (e) {}
+  var decks = 0; try { decks = loadVault().decks.length; } catch (e) {}
   var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {}
   var lvl = 1 + Math.floor(rec.w / 5);
   var colN = Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length;
@@ -7974,15 +7974,14 @@ function profileHtml() {
   function stat(b, label) { return '<div class="stat"><b>' + b + '</b><span>' + label + '</span></div>'; }
   return '<div class="overlay"><div class="bigcard sheet" style="max-width:430px;width:94%">' +
     '<div style="display:flex;gap:12px;align-items:center"><div style="width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid #d8b454;background:#241640;display:flex;align-items:center;justify-content:center;font-size:28px;color:#efe9ff;flex:0 0 auto">' + ava + '</div>' +
-    '<div><div class="cname" style="text-align:left;margin:0">Wanderer</div><div class="ctext" style="text-align:left">Local profile \u00B7 on this device \u00B7 Lv ' + lvl + '</div></div></div>' +
+    '<div><div class="cname" style="text-align:left;margin:0">' + esc(profileName()) + '</div><div class="ctext" style="text-align:left">Local profile \u00B7 on this device \u00B7 Lv ' + lvl + '</div></div></div>' +
+    '<label style="display:block;text-align:left;margin:10px 0 4px;color:#c4b6e8;font-size:12.5px">Your name</label><div style="display:flex;gap:8px"><input id="pnameInput" type="text" value="' + esc(profileName()) + '" onchange="setProfileName(this.value)" style="flex:1;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px"><button class="ghost" onclick="setProfileName(document.getElementById(\'pnameInput\') ? document.getElementById(\'pnameInput\').value : \'\')">Save name</button></div>' +
     '<div class="statgrid">' +
     stat(rec.w, 'WINS') + stat(rec.l, 'LOSSES') + stat(games ? Math.round(rec.w / games * 100) + '%' : '\u2014', 'WIN RATE') +
-    stat(lg.icon + ' ' + lg.name, 'LEAGUE') + stat(climbBest() + ' / 5', 'CLIMB BEST') + stat(stk >= 2 ? '\uD83D\uDD25 ' + stk : '0', 'WIN STREAK') +
+    stat(lg.icon + ' ' + lg.name, 'LEAGUE') + stat(climbBest() + ' / ' + CLIMB_RUNGS.length, 'CLIMB BEST') + stat(stk >= 2 ? '\uD83D\uDD25 ' + stk : '0', 'WIN STREAK') +
     '</div>' +
-    '<div class="ctext">\uD83D\uDCDA ' + colN + ' of the 466 originals recovered in the library \u00B7 \uD83C\uDCCF ' + decks + ' custom deck' + (decks === 1 ? '' : 's') + ' saved</div>' +
-    '<div class="signin-frame"><div style="font-weight:700;color:#fff;font-size:15px">Accounts are being forged</div>' +
-    '<div class="ctext">Sign-in arrives with online play. Your record, decks and climb live on this device \u2014 and they carry over.</div>' +
-    '<div style="display:flex;gap:8px;justify-content:center;margin-top:6px"><button class="big" disabled style="opacity:.45">Sign in</button><button class="ghost" disabled style="opacity:.45">Create account</button></div></div>' +
+    '<div class="ctext">\uD83D\uDCDA ' + colN + ' of the 466 originals recovered in the library \u00B7 \uD83D\uDDEF\uFE0F ' + decks + ' deck' + (decks === 1 ? '' : 's') + ' in your vault</div>' +
+    '<div class="ctext" style="margin-top:8px">This profile lives on this device \u2014 no account, no sign-in, nothing leaves the phone.</div>' +
     '<button class="ghost big" style="margin-top:12px" onclick="profileOpen=false;render()">Close</button></div></div>';
 }
 function pvpHtml() {
@@ -8019,6 +8018,7 @@ function renderMenu() {
     '<div class="panel" id="panel-match"><h2>New match</h2>' +
     '<label>You play</label>' + heroChips(setup.me, 'me') + '<div class="herodesc">' + esc(HEROES[setup.me].blurb) + ' · ' + HERO_SCHOOLS[setup.me].map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' + ') + '</div>' +
     '<div class="herodesc">' + loadoutLine(setup.me) + '</div>' +
+    '<div class="herodesc">\uD83C\uDCCF Fighting deck: <b>' + esc(fightingDeckLabel(setup.me)) + '</b><button class="ghost hit" style="padding:3px 10px;font-size:12px;margin-left:6px" onclick="openDeckPicker()">Switch deck</button></div>' +
     '<label>Enemy (AI)</label>' + heroChips(setup.foe, 'foe') + '<div class="herodesc">' + esc(HEROES[setup.foe].blurb) + '</div>' +
     '<label>Turn order</label><select id="selSeat" onchange="setup.seat=this.value"><option value="first"' + (setup.seat === 'first' ? ' selected' : '') + '>I go first (3-card hand)</option><option value="second"' + (setup.seat === 'second' ? ' selected' : '') + '>I go second (4-card hand + fragile gem)</option></select>' +
     versusHtml() +
@@ -8034,8 +8034,8 @@ function renderMenu() {
     '<button class="big" onclick="startClimb()">' + (climbParked() ? '↺ Start fresh at rung 1' : 'Start The Climb') + '</button>' +
     (climbBest() > 1 ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center"><span style="font-size:12px;color:#a793d6">Practice a cleared rung:</span>' + CLIMB_RUNGS.slice(0, climbBest()).map(function (r, i) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="startClimbAt(' + (i + 1) + ')">↺ Rung ' + (i + 1) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '') +
     (hubTab === 'decks' ? '<div class="panel"><h2>🃏 Deck builder</h2>' +
-    '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Build a custom 30-card deck for your hero — it will be used in matches and The Climb. The AI keeps its tuned default decks.</p>' +
-    (activeDeckFor(setup.me) ? '<div class="record">🃏 ' + esc(HEROES[setup.me].name) + ' is using your custom deck</div>' : '') +
+    '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Build and name decks in your vault \u2014 the active one fights in matches and The Climb. The AI keeps its tuned default decks.</p>' +
+    (activeDeckFor(setup.me) ? '<div class="record">\uD83C\uDCCF ' + esc(HEROES[setup.me].name) + ' is using your custom deck \u2014 \u201C' + esc(fightingDeckLabel(setup.me)) + '\u201D</div>' : '<div class="record">\uD83C\uDCCF ' + esc(HEROES[setup.me].name) + ' fights with the default deck \u2014 \u201C' + esc(fightingDeckLabel(setup.me)) + '\u201D</div>') +
     '<button class="big" onclick="openBuilder()">Open the deck builder</button></div>' : '') +
     (hubTab === 'more' ? '<div class="panel"><h2>📚 Card collection</h2>' +
     '<button class="big" onclick="openCollection()">Browse all ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' cards</button>' +
@@ -8049,7 +8049,8 @@ function renderMenu() {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px">' +
     '<button class="tile" onclick="openIntro()"><div class="tico">🎓</div><div class="tt">How to Play</div><div class="ts">Thirty seconds to your first duel</div></button>' +
     '<button class="tile" onclick="openGlossary()"><div class="tico">📖</div><div class="tt">Glossary</div><div class="ts">Every keyword & rule, in plain words</div></button></div>' +
-    '<button class="big" style="margin-top:10px" onclick="settingsOpen=true;render()">⚙️ Settings — theme, sound, motion, volume</button>' : '') +
+    '<button class="big" style="margin-top:10px" onclick="profileOpen=true;render()">\uD83D\uDC64 Profile \u2014 ' + esc(profileName()) + '</button>' +
+    '<button class="big" style="margin-top:10px" onclick="settingsOpen=true;render()">\u2699\uFE0F Settings \u2014 theme, sound, motion, volume</button>' : '') +
     hubNavHtml() + '</div>';
 }
 /* M198: MOUNT-ONCE DEAL-IN. The M65 deal-in animated every .mullgrid
@@ -8227,6 +8228,7 @@ function renderCollection() {
 
 /* ---------- M5: deck builder (custom 30-card decks per hero, saved on device) ---------- */
 var builderHero = null, builderDeck = null, builderQuery = '';
+var builderDeckId = null, builderDeckName = '', deckDeleteArmed = false, deckPickOpen = false; // M210: the deck in the builder is a VAULT deck (builderDeckId) or an unsaved new one (null); deckDeleteArmed is the two-tap delete confirm
 var builderPulseId = null, builderPulseAt = 0; // M199 (gap 12): the add/remove acknowledgement stamp — set by builderAdd/builderRemove, consumed by the renderBuilder pass that prints it, so the flash can never replay on a later re-render (mount-once, the M198 discipline)
 // M188 (Jesse's class-card law, 2026-11-09): the five class cards are the
 // SCHOOLS stage-1s — the SAME set the engine's seeding reads (SCHOOLS[key]
@@ -8267,7 +8269,72 @@ try {
 function customDeckKey(heroId) { return 'yira_custom_' + heroId; }
 var RETIRED_CARDS = { rushhorn_minotaur: 'blitzing_minotaur' }; // M150: cards retired by a merge (M147) — saved decks and codes heal forward to the surviving card instead of breaking
 function migrateDeckIds(a) { return a.map(function (id) { return RETIRED_CARDS[id] || id; }).filter(function (id) { return CARDS[id]; }); }
-function loadCustomDeck(heroId) { try { var a = JSON.parse(localStorage.getItem(customDeckKey(heroId)) || 'null'); return Array.isArray(a) ? migrateDeckIds(a) : null; } catch (e) { return null; } }
+function loadCustomDeck(heroId) { try { var a = JSON.parse(localStorage.getItem(customDeckKey(heroId)) || 'null'); return Array.isArray(a) ? migrateDeckIds(a) : null; } catch (e) { return null; } } // M210: the LEGACY reader — kept for the migration below and the M150 healing pins; battles no longer read it
+/* ---------- M210: THE DECK VAULT + ON-DEVICE PROFILE (Jesse's overnight
+   directive, 2026-11-10). One profile, on this device only: a name, and a
+   vault of NAMED decks per hero with one ACTIVE deck that fights. The old
+   one-deck-per-hero keys (yira_custom_<hero>) are read ONCE into the
+   vault and left in place — never deleted; from then on the vault is the
+   source of truth, and builderSave keeps the legacy key mirrored to the
+   active deck for any older build that still reads it. Migration names
+   the player's own deck "My <Hero> Deck" so it never impersonates the
+   tuned default build that shares its hero. A garbage vault value falls
+   back to an empty vault (the M205 discipline): the hub must never brick
+   over a corrupt store. ---------- */
+var VAULT_KEY = 'yira_deck_vault', PROFILE_NAME_KEY = 'yira_profile_name', vaultSeq = 0;
+function profileName() { try { var v = localStorage.getItem(PROFILE_NAME_KEY); if (typeof v === 'string' && v.trim()) return v.trim().slice(0, 28); } catch (e) {} return 'Wanderer'; }
+function setProfileName(v) { var clean = String(v || '').replace(/\s+/g, ' ').trim().slice(0, 28); try { localStorage.setItem(PROFILE_NAME_KEY, clean); } catch (e) {} render(); }
+function heroShortName(heroId) { return ((HEROES[heroId] && HEROES[heroId].name) || heroId).split(',')[0].replace(/^The /, ''); }
+function cleanDeckName(v) { var n = String(v || '').replace(/\s+/g, ' ').trim().slice(0, 40); return n || 'Untitled deck'; }
+function newDeckId() { return 'd' + Date.now().toString(36) + (++vaultSeq).toString(36) + Math.floor(Math.random() * 1296).toString(36); }
+function emptyVault() { return { version: 1, decks: [], active: {} }; }
+function sanitizeVaultDeck(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  var heroId = raw.heroId;
+  if (!HEROES[heroId] || HEROES[heroId].held || !Array.isArray(raw.cards)) return null;
+  var cards = migrateDeckIds(raw.cards);
+  if (!cards.length) return null;
+  return { id: (typeof raw.id === 'string' && raw.id) ? raw.id : newDeckId(), heroId: heroId, name: cleanDeckName(raw.name), cards: cards, updatedAt: (typeof raw.updatedAt === 'number' && raw.updatedAt > 0) ? raw.updatedAt : Date.now() };
+}
+function normalizeVault(raw) {
+  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.decks)) return null;
+  var v = emptyVault(), seen = {};
+  raw.decks.forEach(function (r) { var d = sanitizeVaultDeck(r); if (!d) return; if (seen[d.id]) d.id = d.id + '-x' + (++vaultSeq); seen[d.id] = 1; v.decks.push(d); });
+  if (raw.active && typeof raw.active === 'object') Object.keys(raw.active).forEach(function (h) { var id = raw.active[h]; if (v.decks.some(function (d) { return d.id === id && d.heroId === h; })) v.active[h] = id; });
+  return v;
+}
+function saveVault(v) { try { localStorage.setItem(VAULT_KEY, JSON.stringify(v)); } catch (e) {} }
+function loadVault() {
+  var present = false, raw = null;
+  try { var stored = localStorage.getItem(VAULT_KEY); if (stored !== null && stored !== undefined) { present = true; raw = JSON.parse(stored); } } catch (e) { present = true; raw = null; }
+  if (present) { var nv = normalizeVault(raw); return nv || emptyVault(); } // a corrupt vault reads as an empty one — sane fallback, never a bricked hub
+  var v = emptyVault(); // first sight of the vault: migrate every legacy single deck, once
+  Object.keys(HEROES).filter(function (h) { return !HEROES[h].held; }).forEach(function (h) {
+    var legacy = null;
+    try { var a = JSON.parse(localStorage.getItem(customDeckKey(h)) || 'null'); if (Array.isArray(a)) legacy = migrateDeckIds(a); } catch (e) {}
+    if (legacy && legacy.length) { var d = { id: 'legacy-' + h, heroId: h, name: uniqueDeckName(v, h, 'My ' + heroShortName(h) + ' Deck', null), cards: legacy, updatedAt: Date.now() }; v.decks.push(d); v.active[h] = d.id; }
+  });
+  saveVault(v);
+  return v;
+}
+function vaultDecksFor(v, heroId) { return v.decks.filter(function (d) { return d.heroId === heroId; }); }
+function vaultDeckById(v, id) { for (var i = 0; i < v.decks.length; i++) if (v.decks[i].id === id) return v.decks[i]; return null; }
+function vaultNameTaken(v, heroId, name, exceptId) { var n = String(name).toLowerCase(); return v.decks.some(function (d) { return d.heroId === heroId && d.id !== exceptId && d.name.toLowerCase() === n; }); }
+function uniqueDeckName(v, heroId, base, exceptId) { var name = cleanDeckName(base); if (!vaultNameTaken(v, heroId, name, exceptId)) return name; var i = 2; while (vaultNameTaken(v, heroId, name + ' ' + i, exceptId)) i++; return name + ' ' + i; }
+function activeDeckRecordFor(heroId) { var v = loadVault(); var id = v.active[heroId]; if (!id) return null; var d = vaultDeckById(v, id); return (d && d.heroId === heroId && !deckErrors(heroId, d.cards).length) ? d : null; }
+function fightingDeckLabel(heroId) { var v = loadVault(); var id = v.active[heroId]; var d = id ? vaultDeckById(v, id) : null; if (d && d.heroId === heroId) return d.name; return ((typeof DECK_NAMES !== 'undefined' && DECK_NAMES[heroId]) || 'Default deck') + ' (default)'; }
+function mirrorLegacyDeck(heroId, cards) { try { localStorage.setItem(customDeckKey(heroId), JSON.stringify(cards)); } catch (e) {} }
+function setActiveDeck(heroId, id) { var v = loadVault(); if (id) { var d = vaultDeckById(v, id); if (!d || d.heroId !== heroId) return; v.active[heroId] = id; mirrorLegacyDeck(heroId, d.cards); } else { delete v.active[heroId]; } saveVault(v); deckPickOpen = false; render(); }
+function openDeckPicker() { deckPickOpen = true; render(); }
+function deckPickHtml() {
+  var heroId = setup.me, v = loadVault(), decks = vaultDecksFor(v, heroId), activeId = v.active[heroId] || null;
+  function row(label, sub, isActive, onclick) { return '<button class="big" style="display:block;width:100%;margin-top:8px;text-align:left" onclick="' + onclick + '">' + (isActive ? '\u2605 ' : '') + esc(label) + '<div style="font-size:12px;font-weight:400;color:#d9ccff">' + esc(sub) + '</div></button>'; }
+  return '<div class="overlay" onclick="deckPickOpen=false;render()"><div class="bigcard sheet" style="max-width:430px;width:94%" onclick="event.stopPropagation()"><div class="cname">\uD83C\uDCCF ' + esc(HEROES[heroId].name) + ' \u2014 fighting deck</div><div class="ctext">Pick the deck ' + esc(HEROES[heroId].name) + ' takes into battle and The Climb.</div>' +
+    row('Default \u2014 ' + ((typeof DECK_NAMES !== 'undefined' && DECK_NAMES[heroId]) || 'Default deck'), 'The tuned house build', !activeId, "setActiveDeck('" + heroId + "', null)") +
+    decks.map(function (d) { return row(d.name, d.cards.length + ' cards \u00B7 saved in your vault on this device', activeId === d.id, "setActiveDeck('" + heroId + "', '" + d.id + "')"); }).join('') +
+    '<button class="ghost big" style="margin-top:10px" onclick="deckPickOpen=false;openBuilder()">Open the deck builder</button><button class="ghost big" style="margin-top:8px" onclick="deckPickOpen=false;render()">Close</button></div></div>';
+}
+
 function heroPool(heroId) { return Object.keys(CARDS).filter(function (id) { var d = CARDS[id]; return (!d.generatedOnly || d.schoolStage === 1) && (!d.signatureFor || d.signatureFor === heroId) && cardLegalFor(heroId, id); }); }
 function deckErrors(heroId, ids) {
   var errs = [];
@@ -8286,9 +8353,16 @@ function deckErrors(heroId, ids) {
   if (deckClassCount(ids) > 1) errs.push('A deck may start with only one class card (this one has ' + deckClassCount(ids) + ')'); // M188: Jesse's class-card law — the save path refuses it (builderSave, activeDeckFor)
   return errs;
 }
-function activeDeckFor(heroId) { var c = loadCustomDeck(heroId); return (c && !deckErrors(heroId, c).length) ? c : null; }
-function openBuilder() { try { sfx('click'); } catch (e) {} hubTab = 'decks'; builderHero = setup.me; builderDeck = (loadCustomDeck(builderHero) || DECKS[builderHero]).slice(); mode = 'builder'; render(); }
-function builderSetHero(h) { try { sfx('click'); } catch (e) {} builderHero = h; builderDeck = (loadCustomDeck(h) || DECKS[h]).slice(); render(); }
+function activeDeckFor(heroId) { var d = activeDeckRecordFor(heroId); return d ? d.cards.slice() : null; } // M210: the ACTIVE VAULT deck fights (quick match + the Climb both read this); Default when none is active or the active deck is illegal
+function builderLoadHero(h) { builderHero = h; deckDeleteArmed = false; var v = loadVault(); var id = v.active[h]; var d = id ? vaultDeckById(v, id) : null; if (d && d.heroId === h) { builderDeckId = d.id; builderDeckName = d.name; builderDeck = d.cards.slice(); } else { builderDeckId = null; builderDeck = (DECKS[h] || []).slice(); builderDeckName = uniqueDeckName(v, h, (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[h]) || ('My ' + heroShortName(h) + ' Deck'), null); } }
+function openBuilder() { try { sfx('click'); } catch (e) {} hubTab = 'decks'; builderLoadHero(setup.me); mode = 'builder'; render(); }
+function builderSetHero(h) { try { sfx('click'); } catch (e) {} builderLoadHero(h); render(); }
+function builderPickDeck(id) { if (!id || id === '__new') return; var v = loadVault(); var d = vaultDeckById(v, id); if (!d || d.heroId !== builderHero) return; builderDeckId = d.id; builderDeckName = d.name; builderDeck = d.cards.slice(); deckDeleteArmed = false; render(); }
+function builderNewDeck() { var v = loadVault(); builderDeckId = null; builderDeck = (DECKS[builderHero] || []).slice(); builderDeckName = uniqueDeckName(v, builderHero, (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[builderHero]) || ('My ' + heroShortName(builderHero) + ' Deck'), null); deckDeleteArmed = false; render(); }
+function builderDuplicateDeck() { if (!builderDeckId) return; var v = loadVault(); var src = vaultDeckById(v, builderDeckId); if (!src || src.heroId !== builderHero) return; var name = uniqueDeckName(v, builderHero, (builderDeckName || src.name) + ' copy', null); var d = { id: newDeckId(), heroId: builderHero, name: name, cards: builderDeck.slice(), updatedAt: Date.now() }; v.decks.push(d); saveVault(v); builderDeckId = d.id; builderDeckName = name; deckDeleteArmed = false; render(); } // duplicates the deck as it stands in the builder; the copy is saved, NOT made active
+function builderDeleteDeck() { if (!builderDeckId) return; if (!deckDeleteArmed) { deckDeleteArmed = true; render(); return; } var v = loadVault(); var id = builderDeckId; v.decks = v.decks.filter(function (d) { return d.id !== id; }); if (v.active[builderHero] === id) delete v.active[builderHero]; saveVault(v); deckDeleteArmed = false; builderLoadHero(builderHero); render(); } // two-tap confirm, the game's own idiom; deleting the last deck is fine — Default always remains
+function builderSetDeckName(v) { builderDeckName = String(v || '').slice(0, 60); }
+function builderRenameDeck() { try { var f = document.getElementById('bdeckname'); if (f && typeof f.value === 'string' && f.value) builderDeckName = f.value; } catch (e) {} var v = loadVault(); var name = uniqueDeckName(v, builderHero, builderDeckName, builderDeckId); builderDeckName = name; if (builderDeckId) { var d = vaultDeckById(v, builderDeckId); if (d && d.heroId === builderHero) { d.name = name; d.updatedAt = Date.now(); saveVault(v); } } render(); }
 function builderAdd(id) { var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.length >= 30) return; if (builderDeck.filter(function (x) { return x === id; }).length >= cap) return; if (isClassCard(id) && deckClassCount(builderDeck) >= 1) return; // M188: the deck already holds its one class card — the slot is taken
   builderDeck.push(id); builderPulseId = id; builderPulseAt = Date.now(); render(); }
 function builderRemove(id) { var i = builderDeck.indexOf(id); if (i >= 0) { builderDeck.splice(i, 1); builderPulseId = id; builderPulseAt = Date.now(); } render(); }
@@ -8304,7 +8378,7 @@ function builderAuto() {
   }
   render();
 }
-function deckCodeString() { return 'YV1.' + btoa(JSON.stringify({ h: builderHero, d: builderDeck })); }
+function deckCodeString() { return 'YV1.' + btoa(JSON.stringify({ h: builderHero, d: builderDeck, n: builderDeckName || '' })); } // M210: codes carry the deck name; pre-M210 codes (no n) still import
 function builderExport() { deckCodeOpen = true; deckCodeMode = 'export'; deckCodeMsg = ''; render(); }
 function builderImport() { deckCodeOpen = true; deckCodeMode = 'import'; deckCodeMsg = ''; render(); }
 function importDeckCode(raw) {
@@ -8316,29 +8390,35 @@ function importDeckCode(raw) {
     if (!HEROES[obj.h] || HEROES[obj.h].held || !Array.isArray(obj.d)) { deckCodeMsg = 'That code is damaged.'; render(); return; } // M185 audit: a deck code naming a held hero is not importable — it has no deck to stand on
     var migrated = migrateDeckIds(obj.d);
     if (deckClassCount(migrated) > 1) { deckCodeMsg = 'That deck starts with more than one class card — the law allows a deck one.'; render(); return; } // M188: the same rejection surface as a held hero — the code names an illegal deck
-    builderHero = obj.h; builderDeck = migrated; deckCodeOpen = false; deckCodeMsg = ''; render();
+    builderHero = obj.h; deckCodeOpen = false; deckCodeMsg = ''; deckDeleteArmed = false;
+    if (!deckErrors(obj.h, migrated).length) { var vI = loadVault(); var nmI = uniqueDeckName(vI, obj.h, (typeof obj.n === 'string' && obj.n.trim()) ? obj.n : ('Imported \u2014 ' + heroShortName(obj.h)), null); var ndI = { id: newDeckId(), heroId: obj.h, name: nmI, cards: migrated.slice(), updatedAt: Date.now() }; vI.decks.push(ndI); saveVault(vI); builderDeckId = ndI.id; builderDeckName = nmI; builderDeck = migrated.slice(); }
+    else { builderDeckId = null; builderDeck = migrated; builderDeckName = uniqueDeckName(loadVault(), obj.h, (typeof obj.n === 'string' && obj.n.trim()) ? obj.n : ((typeof DECK_NAMES !== 'undefined' && DECK_NAMES[obj.h]) || 'Imported deck'), null); }
+    render();
   } catch (e) { deckCodeMsg = 'That code could not be read.'; render(); }
 }
 function deckCodeHtml() {
   var inner = deckCodeMode === 'export'
     ? '<div class="cname">📤 Your deck code</div><div class="ctext">Share this code — anyone can import the deck from it.</div><textarea id="deckCodeField" readonly rows="4" style="width:100%;box-sizing:border-box;font-size:13px;padding:10px;border-radius:9px;background:rgba(20,12,38,.85);border:1px solid rgba(177,140,255,.4);color:#efe9ff" onclick="this.select()">' + esc(deckCodeString()) + '</textarea><button class="big" style="margin-top:10px" onclick="copyDeckCode()">Copy code</button>'
-    : '<div class="cname">📥 Import a deck code</div><div class="ctext">Paste a YV1.… code and the builder loads that deck.</div><textarea id="deckCodeField" rows="4" placeholder="YV1.…" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:9px;background:rgba(20,12,38,.85);border:1px solid rgba(177,140,255,.4);color:#efe9ff"></textarea>' + (deckCodeMsg ? '<div style="color:#e8a0b4;font-size:13px;margin-top:6px">' + esc(deckCodeMsg) + '</div>' : '') + '<button class="big" style="margin-top:10px" onclick="importDeckCode(document.getElementById(\'deckCodeField\').value)">Load this deck</button>';
+    : '<div class="cname">📥 Import a deck code</div><div class="ctext">Paste a YV1.… code \u2014 a legal deck is saved straight into your vault, name and all.</div><textarea id="deckCodeField" rows="4" placeholder="YV1.…" style="width:100%;box-sizing:border-box;font-size:16px;padding:10px;border-radius:9px;background:rgba(20,12,38,.85);border:1px solid rgba(177,140,255,.4);color:#efe9ff"></textarea>' + (deckCodeMsg ? '<div style="color:#e8a0b4;font-size:13px;margin-top:6px">' + esc(deckCodeMsg) + '</div>' : '') + '<button class="big" style="margin-top:10px" onclick="importDeckCode(document.getElementById(\'deckCodeField\').value)">Load this deck</button>';
   return '<div class="overlay" onclick="deckCodeOpen=false;render()"><div class="bigcard sheet" style="max-width:430px;width:94%" onclick="event.stopPropagation()">' + inner + '<button class="ghost big" style="margin-top:12px" onclick="deckCodeOpen=false;render()">Close</button></div></div>';
 }
 function copyDeckCode() {
   try { var f = document.getElementById('deckCodeField'); if (f) { f.select(); } if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(deckCodeString()); else if (f) document.execCommand('copy'); } catch (e) {}
   deckCodeMsg = ''; render();
 }
-function builderSave() { if (deckErrors(builderHero, builderDeck).length) return; try { localStorage.setItem(customDeckKey(builderHero), JSON.stringify(builderDeck)); } catch (e) {} render(); }
-function builderUseDefault() { try { localStorage.removeItem(customDeckKey(builderHero)); } catch (e) {} builderDeck = DECKS[builderHero].slice(); render(); }
+function builderSave() { if (deckErrors(builderHero, builderDeck).length) return; var v = loadVault(); var name = uniqueDeckName(v, builderHero, builderDeckName, builderDeckId); var d = builderDeckId ? vaultDeckById(v, builderDeckId) : null; if (d && d.heroId === builderHero) { d.name = name; d.cards = builderDeck.slice(); d.updatedAt = Date.now(); } else { d = { id: newDeckId(), heroId: builderHero, name: name, cards: builderDeck.slice(), updatedAt: Date.now() }; v.decks.push(d); builderDeckId = d.id; } builderDeckName = name; v.active[builderHero] = d.id; saveVault(v); mirrorLegacyDeck(builderHero, d.cards); deckDeleteArmed = false; render(); } // M210: Save writes the vault deck being edited (creating it if new) and makes it the active deck — never lossy, never a second hidden copy
+function builderUseDefault() { var v = loadVault(); delete v.active[builderHero]; saveVault(v); builderDeckId = null; builderDeck = (DECKS[builderHero] || []).slice(); builderDeckName = uniqueDeckName(v, builderHero, (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[builderHero]) || ('My ' + heroShortName(builderHero) + ' Deck'), null); deckDeleteArmed = false; render(); } // M210: Default becomes the fighting deck; vault decks are NOT deleted (the pre-vault build removed the saved deck here — the vault keeps it)
 function renderBuilder() {
   var heroId = builderHero, d = builderDeck;
   var counts = {}; d.forEach(function (id) { counts[id] = (counts[id] || 0) + 1; });
   var pulseId = (builderPulseId && Date.now() - builderPulseAt < 1500) ? builderPulseId : null, pulseHit = false; // M199: a stale stamp (>1.5s) never fires
   var errs = deckErrors(heroId, d);
   var cheapN = d.filter(function (id) { return CARDS[id] && CARDS[id].cost <= 2; }).length;
-  var saved = loadCustomDeck(heroId);
-  var isSaved = !!saved && saved.slice().sort().join(',') === d.slice().sort().join(',');
+  var vault = loadVault(); // M210: the builder edits a vault deck (curDeck) or an unsaved new deck; isSaved compares against the vault copy, not the retired single-deck key
+  var curDeck = builderDeckId ? vaultDeckById(vault, builderDeckId) : null; if (curDeck && curDeck.heroId !== heroId) curDeck = null;
+  var activeId = vault.active[heroId] || null;
+  var myDecks = vaultDecksFor(vault, heroId);
+  var isSaved = !!curDeck && curDeck.cards.slice().sort().join(',') === d.slice().sort().join(',');
   function row(id, inPool) {
     var c = CARDS[id], n = counts[id] || 0, cap = c.legendary ? 1 : 2;
     var stats = c.type === 'creature' ? c.power + '⚔ ' + c.health + '♥ · ' : '';
@@ -8372,23 +8452,28 @@ function renderBuilder() {
     '<button class="ghost" onclick="backToMenu()">← Back to menu</button>' +
     '<div class="panel"><h2>🃏 Deck builder</h2>' +
     '<label>Hero</label><select onchange="builderSetHero(this.value)">' + Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id) { return '<option value="' + id + '"' + (id === heroId ? ' selected' : '') + '>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</option>'; }).join('') + '</select>' + // M185 audit: the builder's hero picker excludes held heroes (they have no DECKS entry to open)
+    '<label>\uD83D\uDDC4\uFE0F Deck</label><select onchange="builderPickDeck(this.value)">' + (curDeck ? '' : '<option value="__new" selected>\u2726 ' + esc(builderDeckName || 'New deck') + ' (unsaved)</option>') + myDecks.map(function (dd) { return '<option value="' + dd.id + '"' + (curDeck && dd.id === curDeck.id ? ' selected' : '') + '>' + esc(dd.name) + (activeId === dd.id ? ' \u2605 active' : '') + '</option>'; }).join('') + '</select>' +
+    '<label>Deck name</label><div style="display:flex;gap:8px"><input id="bdeckname" type="text" value="' + esc(builderDeckName || '') + '" onchange="builderSetDeckName(this.value)" style="flex:1;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px"><button class="ghost" onclick="builderRenameDeck()">Rename</button></div>' +
     '<div class="herodesc">This hero draws from ' + (HERO_SCHOOLS[heroId] || []).map(function (x) { return SCHOOL_META[x].icon + ' ' + SCHOOL_META[x].name; }).join(' and ') + ' — the pool below holds only those schools, neutral cards, and this hero\'s own signatures.</div>' +
     '<label>🏫 School (three-stage chain)</label><select onchange="builderSetSchool(this.value)">' + ['none'].concat(Object.keys(SCHOOLS).filter(function (id) { return (HERO_SCHOOLS[heroId] || []).includes(CHAIN_SCHOOL[id]); })).map(function (id) { var cur = chosenSchool(heroId) || 'none'; return '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + (id === 'none' ? 'No school' : SCHOOLS[id].icon + ' ' + esc(SCHOOLS[id].name)) + '</option>'; }).join('') + '</select>' +
     '<div class="herodesc">' + (chosenSchool(heroId) ? esc(SCHOOLS[chosenSchool(heroId)].blurb) : 'No chain — just your 30 cards.') + '</div>' +
     '<label>🎚️ Stance (your land slot)</label><select onchange="builderSetStance(this.value)">' + Object.keys(STANCES).map(function (id) { return '<option value="' + id + '"' + (id === chosenStance(heroId) ? ' selected' : '') + '>' + STANCES[id].icon + ' ' + esc(STANCES[id].name) + '</option>'; }).join('') + '</select>' +
     '<div class="herodesc">' + esc(STANCES[chosenStance(heroId)].blurb) + '</div>' +
-    '<div style="margin:10px 0 4px;font-size:15px">Deck: <b>' + esc(saved ? 'Custom deck' : ((typeof DECK_NAMES !== 'undefined' && DECK_NAMES[heroId]) || 'Default deck')) + '</b> · <b>' + d.length + ' / 30</b> cards' + (saved ? ' · a custom deck is saved for this hero' : ' · this hero is using the default deck') + '</div>' +
+    '<div style="margin:10px 0 4px;font-size:15px">Deck: <b>' + esc(builderDeckName || (curDeck ? curDeck.name : 'New deck')) + '</b> · <b>' + d.length + ' / 30</b> cards' + (curDeck ? (activeId === curDeck.id ? ' · \u2605 active \u2014 this deck fights' : ' · saved in your vault') + (isSaved ? '' : ' · unsaved changes') : ' · new deck \u2014 Save puts it in your vault') + (!activeId ? ' · the default deck fights for this hero' : '') + '</div>' +
     '<div class="curve">' + (function () { var byCost = {}, types = {}, sum = 0; d.forEach(function (id) { var c = CARDS[id]; if (!c) return; var b = Math.min(c.cost, 8); byCost[b] = (byCost[b] || 0) + 1; types[c.type] = (types[c.type] || 0) + 1; sum += c.cost; }); var max = 1; Object.keys(byCost).forEach(function (k) { if (byCost[k] > max) max = byCost[k]; }); var bars = ''; for (var b2 = 0; b2 <= 8; b2++) { var n2 = byCost[b2] || 0; bars += '<span class="cbar"><i style="height:' + Math.max(2, Math.round(n2 / max * 30)) + 'px"></i><em>' + (b2 === 8 ? '8+' : b2) + '</em></span>'; } return bars + '<span class="cmeta">' + (d.length ? 'avg ' + (sum / d.length).toFixed(1) + ' mana · ' : '') + Object.keys(types).map(function (t) { return types[t] + ' ' + t + (types[t] === 1 ? '' : 's'); }).join(' · ') + (function () { var pk = 0, pkn = 0; Object.keys(byCost).forEach(function (k) { if (byCost[k] > pkn) { pkn = byCost[k]; pk = k; } }); return d.length ? ' · curve peak 💧' + pk + ' (' + pkn + ')' : ''; })() + (function () { var sc = {}; d.forEach(function (id) { var s2 = CARDS[id] && CARDS[id].cardSchool; if (s2 && s2 !== 'none') sc[s2] = (sc[s2] || 0) + 1; }); var ks = Object.keys(sc); return ks.length ? ' · ' + ks.map(function (k) { return SCHOOL_META[k].icon + ' ' + sc[k]; }).join(' ') : ''; })() + '</span>'; })() + '</div>' +
     (d.length >= 20 && !cheapN ? '<div class="berr" style="border-color:rgba(255,209,102,.5);color:#ffe9b0">⚠ No plays before turn 3 — this deck has nothing costing 2 or less.</div>' : '') +
-    (errs.length ? errs.map(function (e) { return '<div class="berr">⚠ ' + esc(e) + '</div>'; }).join('') : '<div class="bok">✓ Legal deck' + (isSaved ? ' — saved and in use' : '') + '</div>') +
+    (errs.length ? errs.map(function (e) { return '<div class="berr">⚠ ' + esc(e) + '</div>'; }).join('') : '<div class="bok">✓ Legal deck' + (isSaved ? ' — saved' + (curDeck && activeId === curDeck.id ? ' and in use' : '') : '') + '</div>') +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
-    '<button class="big" style="flex:1" onclick="builderSave()"' + (errs.length ? ' disabled' : '') + '>💾 Save & use this deck</button>' +
+    '<button class="big" style="flex:1" onclick="builderSave()"' + (errs.length ? ' disabled' : '') + '>' + (curDeck ? '💾 Save & use this deck' : '💾 Save to vault & use') + '</button>' +
     '<button class="ghost" onclick="builderReset()">↩ Reset to default build</button>' +
     '<button class="ghost" onclick="builderClear()">Clear</button>' +
     '<button class="ghost" onclick="builderAuto()">🪄 Auto-complete to 30</button>' +
+    '<button class="ghost" onclick="builderNewDeck()">\u2726 New deck</button>' +
+    (curDeck ? '<button class="ghost" onclick="builderDuplicateDeck()">\u29C9 Duplicate</button>' : '') +
+    (curDeck ? '<button class="ghost" onclick="builderDeleteDeck()">' + (deckDeleteArmed ? '\u26A0 Tap again to delete \u201C' + esc(curDeck.name) + '\u201D' : '\uD83D\uDDD1 Delete deck') + '</button>' : '') +
     '<button class="ghost" onclick="builderExport()">📤 Export code</button>' +
     '<button class="ghost" onclick="builderImport()">📥 Import code</button>' +
-    (saved ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
+    (activeId ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
     '</div></div>' +
     '<div class="panel"><h2>Your deck (' + d.length + ')</h2>' + (deckIds.length ? deckIds.map(function (id) { return row(id, false); }).join('') : '<p style="color:#a793d6">Empty — add cards from the pool below.</p>') + '</div>' +
     '<div class="panel"><h2>Card pool</h2><div class="collbar"><input id="bq" type="text" placeholder="🔎 Search the pool — name, text, school…" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="width:100%;box-sizing:border-box;margin:4px 0 8px;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px">' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:0 0 6px">' + pool.length + ' cards match.</p>' : '') + builderFilterHtml(pool.length) + '</div>' +
@@ -8430,7 +8515,7 @@ function startMatch() {
   var ai = G.players[aiIdx];
   var throwback = ai.hand.filter(function (c) { return D(c).cost >= 5; }).map(function (c) { return c.uid; });
   if (throwback.length) G.mulligan(aiIdx, throwback);
-  if (climb) say('🧗 The Climb — rung ' + climb.rung + ' of 5: ' + G.players[aiIdx].hero.name + (climbBonus ? ' starts with +' + climbBonus + ' bonus life' : '') + '.', 'good');
+  if (climb) say('🧗 The Climb — rung ' + climb.rung + ' of ' + CLIMB_RUNGS.length + ': ' + G.players[aiIdx].hero.name + (climbBonus ? ' starts with +' + climbBonus + ' bonus life' : '') + '.', 'good');
   say('Match started: ' + G.players[humanIdx].hero.name + ' vs ' + G.players[aiIdx].hero.name + '. You go ' + seat + '.', 'good');
   handOpen = false; mode = 'mulligan'; render(); showVsSplash(); sfx('shuffle');
 }

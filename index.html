@@ -1864,7 +1864,7 @@ const CARDS = {
   day_of_reckoning: { icon: "\u2600\uFE0F", name: 'Day of Judgment', cost: 7, type: 'spell', effect: { kind: 'destroyAllCreatures' }, orig: "Day of Judgment", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01" },
   withering_blight: { icon: "\uD83E\uDD40", name: 'Infest', cost: 4, type: 'spell', effect: { kind: 'debuffAll', power: -2, health: -2 }, orig: "Infest", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Give all creatures -2/-2' (permanent, the game's stat-change language)" },
   flood_of_ideas: { icon: "\uD83D\uDCA1", name: 'Jolt of Inspiration', cost: 4, type: 'spell', effect: { kind: 'generateSpells', count: 3 }, orig: "Jolt of Inspiration", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — 'Add 3 random spells to your hand'" },
-  spark_of_insight: { icon: "\u2728", name: 'Spark of Genius', cost: 0, type: 'spell', effect: { kind: 'draftSpell' }, orig: "Spark of Genius", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — draft is pick-1-of-3 (the random-pick simplification was retired in M122, 2026-11-04, on Jesse's ruling that draft means choose between 3)" },
+  spark_of_insight: { icon: "\u2728", name: 'Spark of Genius', cost: 0, type: 'spell', effect: { kind: 'draftSpell' }, signatureFor: 'stormconduit', orig: "Spark of Genius", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — draft is pick-1-of-3 (the random-pick simplification was retired in M122, 2026-11-04, on Jesse's ruling that draft means choose between 3). M219 (2026-11-11): marked Ral's SIGNATURE — official patch notes v0.16.00 name Spark of Genius a Ral signature (the M182 record note) and the M218 hunt's Ral signature set concurs; the card was already built from this face, so the duplicate-conversion law adds the mark, not a second def. Volric fields it in his default deck." },
   counterfeiter: { icon: "\uD83C\uDFAD", name: 'Counterfeiter', cost: 2, type: 'creature', power: 2, health: 1, subtype: 'rogue', keywords: ['sneak'], stealOnHeroDamage: true, orig: "Counterfeiter", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — two independent face sightings agree exactly" },
   scourge_of_the_pact: { icon: "\uD83D\uDE08", name: 'Scourge of the Pact', cost: 3, type: 'creature', power: 2, health: 2, subtype: 'demon', keywords: ['flying'], signatureFor: 'unchained', spellDrain: 1, orig: "Davriel's Scourge", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — played-face values (3, 2/2); an official v1.05.00 render reads 2, 1/2 — conflict flagged, the played face governs" },
   infectious_scorpion: { icon: "\uD83E\uDD82", name: 'Infectious Scorpion', cost: 2, type: 'creature', power: 2, health: 3, subtype: 'pest', finale: { kind: 'addCard', cardId: 'fatal_infection' }, orig: "Infectious Scorpion", src: "VIDEO-DIGEST batches 1-3 (YouTube face-verified), 2026-11-01 — face-verified twice (Roxora tech + Garruk deck); sits in the BLACK section of a played Ashiok deck view, hence Grave" },
@@ -2181,13 +2181,20 @@ const CARDS = {
   // face, the Drizzt #3 faces) plus the Wurm token one of them summons.
   // Held heroes' signatures are built and collectible and enter no deck
   // (the M182 pattern). ----------
-  chaos_lightning: { icon: "⚡", name: 'Chaos Lightning', cost: 5, type: 'spell', effect: { kind: 'chaosLightning' }, text: "Deal 1 damage at random among enemies for each spell you've played this game (max 10).", signatureFor: 'stormconduit', orig: "Chaos Lightning", src: "FACE (KEY CARDS Rebalanced, Xn-G2Rx6j3U, 2026-11-08): 5-cost spell, text verbatim — identical in both eras; the V1.01.00 cost raise 3 -> 5 is patch-final (official patch notes via the CSV row). Ral's signature (the CSV's Ral tempo analysis; VIDEO-DIGEST §3) — marked for Volric under the one-to-one law; he stays held, so it is built and collectible and enters no deck. SCHOOLING NOTE: the CSV prints UR; built Ember (the damage half of Ral's identity) — a one-word flip if Jesse rules dual. The count reads the new spellsPlayedThisGame counter (spells only, post-counter), and the Lightning counts itself: the counter increments as the spell is played, before its effect resolves — pinned in the M184 tests." },
+  chaos_lightning: { icon: "⚡", name: 'Chaos Lightning', cost: 5, type: 'spell', effect: { kind: 'chaosLightning' }, text: "Deal 1 damage at random among enemies for each spell you've played this game (max 10).", signatureFor: 'stormconduit', orig: "Chaos Lightning", src: "FACE (KEY CARDS Rebalanced, Xn-G2Rx6j3U, 2026-11-08): 5-cost spell, text verbatim — identical in both eras; the V1.01.00 cost raise 3 -> 5 is patch-final (official patch notes via the CSV row). Ral's signature (the CSV's Ral tempo analysis; VIDEO-DIGEST §3) — marked for Volric under the one-to-one law. M219 (2026-11-11): Volric TAKES THE FIELD on the M218 hunt's face data — Chaos Lightning fields in his default deck. SCHOOLING NOTE: the CSV prints UR; built Ember (the damage half of Ral's identity) — a one-word flip if Jesse rules dual. The count reads the new spellsPlayedThisGame counter (spells only, post-counter), and the Lightning counts itself: the counter increments as the spell is played, before its effect resolves — pinned in the M184 tests." },
   zombify: { icon: "\uD83E\uDDDF", name: 'Zombify', cost: 2, type: 'spell', effect: { kind: 'draftGraveZombie' }, text: 'Draft a Zombie from your graveyard and summon it.', signatureFor: 'graven', orig: "Zombify", src: "FACE (Liliana #3 harvest, l7n9o2lxItU, 2026-11-08): 2-cost spell, text verbatim. SIGNATURE ADJUDICATION (M184): the record names it in Liliana's trio (VIDEO-DIGEST §3 gap map) and TheGamer names Diehard Fan 'Signature card of Liliana (named alongside Zombify)' (the CSV's Diehard Fan row) — two convergent record lines plus the face place it as her third signature; the CSV's own Zombify row carries no signature tag and an older [PROBABLE] function note ('returns a creature from a graveyard'), which the face now supersedes with the draft-and-summon text. 'Zombie' reads by the engine's strict-subtype rule (the Caller of the Cursed precedent): subtype exactly 'zombie'. The draft obeys Jesse's draft law (pick 1 of 3 distinct Zombies, fewer if fewer lie there); the pick leaves the graveyard through leaveGraveyard, so Morvane's graveAmbition answers when she casts it." },
   wurms_wake: { icon: "\uD83E\uDEB1", name: "Wurm's Wake", cost: 3, type: 'trap', trigger: { kind: 'foeTurnEnd' }, effect: { kind: 'summonTokens', token: 'wurm', count: 1 }, text: "At the end of your opponent's turn, summon a Wurm.", orig: "Wurm's Wake", src: "FACE (2026-11-08 harvest): G 3-cost Trap (the CSV row: Opening Ceremony, Common) — the mtgazone guide's wording ('You get a 5/5') matches the face's Wurm. Fires in endTurn's foeTurnEnd dispatch beside Dance with Devils. Joins TRAP_POOL." },
   wurm: { icon: "\uD83E\uDEB1", name: 'Wurm', cost: 5, type: 'creature', power: 5, health: 5, subtype: 'wurm', generatedOnly: true, orig: "Wurm (token)", src: "FACE (Wurm's Wake, 2026-11-08): the 5/5 the Wake summons; cost printed as its body for display — generatedOnly, never collected or drafted. The guide's 'can't block the turn it comes in' never binds in practice: the Wake fires at the end of the foe's turn, so the Wurm first defends a full turn later, past any summoning window." },
   seraph: { icon: "👼", name: 'Dawn Seraph', cost: 5, type: 'creature', power: 4, health: 4, subtype: 'angel', keywords: ['flying'], generatedOnly: true, orig: "Serra Angel (token)", src: "FACE (Boss of Blades white-cards video, Sep 22 2023): Shrine of Valor's second charge summons 'a Serra Angel' — a summoned TOKEN body (4/4 Flying), distinct from the collectible Dawn Seraph card, which the M177 build wrongly summoned; corrected M184 (appended scope) on this face. Cost printed as its body for display — generatedOnly, never collected or drafted." },
-  heroes_call: { icon: "\uD83C\uDFC5", name: "Hero's Call", cost: 3, type: 'spell', effect: { kind: 'draftLegendary' }, text: 'Draft a legendary creature and add it to your hand. Reduce its cost by 2.', signatureFor: 'hallchampion', orig: "Hero's Call", src: "FACE (Drizzt #3 harvest — Boss of Blades 9S2K-Cds00s deck view, 2026-11-08): 3-cost spell, text verbatim; the CSV row agrees (D&D Icons, GW, 'Signature of Drizzt', cost 3). Drizzt's signature — marked for Zareth under the one-to-one law; he stays held, so it is built and collectible and enters no deck. The draft pool is ALL collectible legendaries (LEGENDARY_POOL) with no school limit — the original's draft offered cross-colour legendaries (the off-colour legendary singletons in Drizzt's seen decks are this card at work); the pick carries a -2 instance discount (effectiveCost's inst.discount term)." },
-  zareths_herald: { icon: "\uD83D\uDCEF", name: "Zareth's Herald", cost: 2, type: 'creature', power: 3, health: 2, subtype: 'bard', debut: { kind: 'becomeLegendary' }, text: 'Debut: A friendly creature becomes legendary.', signatureFor: 'hallchampion', orig: "Drizzt's Herald", src: "FACE (Drizzt #3 harvest — Boss of Blades 9S2K-Cds00s, 2026-11-08): 2-cost 3/2 Bard, text verbatim — 'can target itself' (the mtgazone line in the CSV row agrees; the Debut resolves after the body lands, so self-targeting works). Display name follows the Morvane's Goliath precedent (the Yira hero's possessive takes the signature). RECORD CONFLICT, ledgered: the CSV's subtype field tags this card 'Class card' where Hero's Call's row tags 'Signature of Drizzt' — the face places the Herald in Drizzt's signature set, and it is built as Zareth's second signature on the face's evidence. 'Becomes legendary' lands as an instance flag (becameLegendary) — the engine's legendary reads are def-level today, so the flag is the record of the change until a legendary-matters consumer (Guenhwyvar's Aid) is built. M188 (2026-11-09): the UI targeting mirror landed — becomeLegendary rides the full targeted-kinds treatment (the Tinker/Helix precedent), and the harness crowns through the real UI." },
+  // ---------- M219 (2026-11-11): the hunt's harvest — Guenhwyvar herself,
+  // and the M217 audit's two orphans (Hungry Goat, Grave Disturbance).
+  // Stitcher's Supplier needed no build: it already stands as gravestitcher
+  // (M217's seeded sample re-verified the def against its row field by field).
+  guenhwyvar: { icon: "\uD83D\uDC06", name: 'Guenhwyvar', cost: 1, type: 'creature', power: 0, health: 2, subtype: 'panther', attackEffect: { kind: 'selfGrowth', power: 1, health: 0 }, generatedOnly: true, orig: "Guenhwyvar", src: "FACE (M218 hunt, 2026-11-11 — the game's own Drizzt profile screen, m218-profile-drizzt.jpg): cost 1, 0/2, 'Trample. Attack: Gets +1/+0 permanently. Can't trigger traps.' — PATCH-FINAL strikes the Trample (removed by the Sep 2022 Drizzt balance patch; the face omits it), so she carries no keyword. She is SUMMONED by Guenhwyvar's Aid, never cast: the printed cost rides the def for display (the Wurm token precedent); generatedOnly, never collected or drafted. Subtype 'panther' from the record's own description of her (Drizzt's astral panther companion, cards.csv). The +1/+0 rides a standing attackEffect (the Predator Ooze selfGrowth shape), so she strikes at 1/2 on her first attack — attack triggers resolve before the damage step. 'Can't trigger traps' is wired in the engine: her summon bypasses the foe-summon trap door and she never counts as a trap trigger herself (see guenhwyvarAid in engine.js); declaration-level traps still answer the attack as a whole — the scope reading is ledgered in SPRINT M219. Her growth is PER-SUMMON instance growth (each summon a fresh 0/2): the face's 'permanently' speaks of the buff, the record is silent on cross-summon persistence, and Jesse's sightings (variable across appearances) fit per-instance growth — flagged in SPRINT M219." },
+  hungry_goat: { icon: "\uD83D\uDC10", name: 'Hungry Goat', cost: 4, type: 'creature', power: 4, health: 4, subtype: 'beast', debut: { kind: 'destroyArtifactOrGrow', power: 2, health: 0 }, text: 'Debut: Destroy an enemy artifact. If there are none, this gets +2+0.', orig: "Hungry Goat", src: "Fan sheet (TEXT-SOURCE, fan-made) — G, Common, 4-cost 4/4 Beast, text verbatim (record, cards.csv; the M217 audit read the row build-complete and no wave had ever taken it). The conditional rides a new kind, destroyArtifactOrGrow: a chosen enemy artifact is destroyed (the Naturalize destroyArtifact body); with none standing, the Goat takes the printed +2/+0 instead — both branches pinned in the M219 tests." },
+  grave_disturbance: { icon: "\uD83E\uDEA6", name: 'Grave Disturbance', cost: 1, type: 'trap', trigger: { kind: 'afterAttackDeclared' }, effect: { kind: 'summonToken', cardId: 'zombie' }, text: 'After your opponent attacks, summon a Zombie.', orig: "Grave Disturbance", src: "Fan sheet grid read (record, cards.csv) — B, 1-cost Trap, text as recorded; the row family carries the grid's truncated-text note, so the timing was re-verified before building (M219): 'after your opponent attacks' is the declaration trigger — the same afterAttackDeclared shape as Transparent Hallway and Molten Misstep — and the summoned body is the built Zombie token (1-cost 2/2). Joins TRAP_POOL." },
+  heroes_call: { icon: "\uD83C\uDFC5", name: "Hero's Call", cost: 3, type: 'spell', effect: { kind: 'draftLegendary' }, text: 'Draft a legendary creature and add it to your hand. Reduce its cost by 2.', signatureFor: 'hallchampion', orig: "Hero's Call", src: "FACE (Drizzt #3 harvest — Boss of Blades 9S2K-Cds00s deck view, 2026-11-08): 3-cost spell, text verbatim; the CSV row agrees (D&D Icons, GW, 'Signature of Drizzt', cost 3). Drizzt's signature — marked for Zareth under the one-to-one law. M219 (2026-11-11): Zareth TAKES THE FIELD on the M218 hunt's verbatim data — Hero's Call fields in his default deck. The draft pool is ALL collectible legendaries (LEGENDARY_POOL) with no school limit — the original's draft offered cross-colour legendaries (the off-colour legendary singletons in Drizzt's seen decks are this card at work); the pick carries a -2 instance discount (effectiveCost's inst.discount term)." },
+  zareths_herald: { icon: "\uD83D\uDCEF", name: "Zareth's Herald", cost: 2, type: 'creature', power: 3, health: 2, subtype: 'bard', debut: { kind: 'becomeLegendary' }, text: 'Debut: A friendly creature becomes legendary.', signatureFor: 'hallchampion', orig: "Drizzt's Herald", src: "FACE (Drizzt #3 harvest — Boss of Blades 9S2K-Cds00s, 2026-11-08): 2-cost 3/2 Bard, text verbatim — 'can target itself' (the mtgazone line in the CSV row agrees; the Debut resolves after the body lands, so self-targeting works). Display name follows the Morvane's Goliath precedent (the Yira hero's possessive takes the signature). RECORD CONFLICT, ledgered: the CSV's subtype field tags this card 'Class card' where Hero's Call's row tags 'Signature of Drizzt' — the face places the Herald in Drizzt's signature set, and it is built as Zareth's second signature on the face's evidence. 'Becomes legendary' lands as an instance flag (becameLegendary) — the engine's legendary reads are def-level today, so the flag is the record of the change until a legendary-matters consumer (Guenhwyvar's Aid) is built. M219 (2026-11-11): that consumer HAS landed — the Aid reads becameLegendary, and the Herald fields in Zareth's default deck. M188 (2026-11-09): the UI targeting mirror landed — becomeLegendary rides the full targeted-kinds treatment (the Tinker/Helix precedent), and the harness crowns through the real UI." },
   // --- M187 (2026-11-09): VEYLA TAKES THE FIELD + the two face-complete
   // artifacts the earlier waves recorded but could not yet build: the
   // Panharmonicon (Kaya harvest face) and Survivor's Regalia (Drizzt
@@ -2214,7 +2221,7 @@ const CARDS = {
   rampaging_ogre: { icon: "\uD83E\uDDCC", name: 'Rampaging Ogre', cost: 4, type: 'creature', power: 5, health: 5, subtype: 'monster', debut: { kind: 'stripArmorAll' }, text: 'Debut: All enemy creatures lose armor.', orig: "Rampaging Ogre", src: "Fan sheet (TEXT-SOURCE, fan-made) via cards.csv: R, Common, 4-cost 5/5 Monster, text verbatim. M194: the stripArmorAll kind is new with this card — 'lose armor' lands as the engine's own armorBroken state, the gone-state a blocking blow leaves, for printed and granted armor alike." },
 
 };
-const TRAP_POOL = ['beginners_luck', 'champions_grit', 'envenom', 'step_over', 'ancestors_vengeance', 'mana_short', 'molten_misstep', 'crippling_bolt', 'quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil', 'countersign', 'broken_focus', 'sudden_growth', 'opening_salvo', 'raise_the_guard', 'ready_to_rumble', 'transparent_hallway', 'resilient_sphere', 'dance_with_devils', 'shields_up', 'under_my_watch', 'wurms_wake']; // M184: Wurm's Wake joins the draftable traps // M174: Under My Watch joins the draftable traps // M169: the Devils' dance and Shields Up join the draftable traps // M104: the two vetted traps join // M73: Raise the Guard joins (Soldier token closed by wave 4C) // M62 purge: only verified traps remain — M72: the M68/M69/M72 verified traps join the draft pool
+const TRAP_POOL = ['beginners_luck', 'champions_grit', 'envenom', 'step_over', 'ancestors_vengeance', 'mana_short', 'molten_misstep', 'crippling_bolt', 'quiet_snare', 'iron_verdict', 'snare_of_no', 'sunmirror_glare', 'vindictive_retort', 'flockguard_vigil', 'countersign', 'broken_focus', 'sudden_growth', 'opening_salvo', 'raise_the_guard', 'ready_to_rumble', 'transparent_hallway', 'resilient_sphere', 'dance_with_devils', 'shields_up', 'under_my_watch', 'wurms_wake', 'grave_disturbance']; // M219: Grave Disturbance joins the draftable traps (the M217 orphan; its Zombie-token blocker was already built) // M184: Wurm's Wake joins the draftable traps // M174: Under My Watch joins the draftable traps // M169: the Devils' dance and Shields Up join the draftable traps // M104: the two vetted traps join // M73: Raise the Guard joins (Soldier token closed by wave 4C) // M62 purge: only verified traps remain — M72: the M68/M69/M72 verified traps join the draft pool
 
 const HEROES = {
   weaver: {
@@ -2292,11 +2299,18 @@ const HEROES = {
   // Their entries keep `passiveRecorded` as the face's provenance and gain
   // the live `passive` key + `blurb` every playable hero carries. The other
   // three (stormconduit, wildhuntress, hallchampion) stay held, untouched.
+  // M219 (2026-11-11, later still): TWO MORE LEAVE THE SHELF — Volric
+  // (stormconduit) and Zareth (hallchampion) take the field on the M218
+  // hunt's face data (lives, verbatim passives, Guenhwyvar's face). Wrenna
+  // (wildhuntress) alone stays held, and on the upgrade pool alone now:
+  // both her abilities are face-recorded, but the pool Nurture draws from
+  // is a bounded partial, not a buildable set.
   stormconduit: {
-    name: 'Volric, the Storm Conduit', orig: 'Ral', held: true,
-    passiveRecorded: { name: "Storm Conduit", text: null, src: "Name recorded (Zendesk 'Picking Your Hero'; official patch notes v0.17.00 / v0.21.00). Mechanics prose-grade only: Hipsters' top-10 'slingers paraphrases it \u2014 every third spell you cast has its cost reduced by two, and Ral deals an additional 1 damage to your opponent; v0.21.00: 'Storm Conduit now deals 1 damage to your opponent in addition to reducing spell costs.' No face-verbatim text exists in the record, and the discount's exact trigger/target semantics are unpinned." },
-    missing: ['life total (no hero panel was ever read for Ral; no patch note prints it)', 'verbatim passive text (Storm Conduit)'],
-    src: "M182 (2026-11-08): Ral's own entry under Jesse's one-to-one ruling; schools RECORDED [tides, ember] \u2014 he is UR (cards.csv: Chaos Lightning UR row 113, Mizzium Monstrosity UR row 27, Jolt of Inspiration UR). The M177 doubling onto the Warden is superseded: the Warden is Teferi (blue-white), Ral is blue-red, and they are not the same hero. His signatures stay data-held as cards (Chaos Lightning: cost only; Mizzium Monstrosity: stats only; a third, Spark of Genius, is named a Ral signature in official patch notes v0.16.00 with no data beyond the name).",
+    name: 'Volric, the Storm Conduit', orig: 'Ral', life: 25, passive: 'stormConduit',
+    blurb: "Storm Conduit: every third spell you play during a turn costs 2 less \u2014 and deals 1 damage to your opponent.",
+    passiveRecorded: { name: "Storm Conduit", text: "Every third spell you play during a turn has its cost reduced by 2 and deals 1 damage to your opponent.", src: "FACE-VERBATIM (M218 hunt, 2026-11-11 \u2014 the game's own Ral profile screen, m218-profile-ral.jpg, read via the Tap & Sac host): text as printed here; life 25 off the same profile. Patch cross-check: no v1.00-v1.05 note changes Ral's health or Storm Conduit; v0.21.00 added the damage rider to the standing discount. The M182 prose-grade state (name + a Hipsters paraphrase, no verbatim) is superseded by the face." },
+    missing: ["Magnum Opus \u2014 a Ral signature by the record (it summons Mizzium Monstrosity, official v0.17.00 notes), but its own face text was never read (the CSV row holds only 'Cost reduced 4 -> 3') and Mizzium Monstrosity's effect text is likewise unread \u2014 the card stays UNBUILT (the M219 ledger); Volric fields the two signatures the record completes: Chaos Lightning and Spark of Genius"],
+    src: "M182 (2026-11-08): Ral's own entry under Jesse's one-to-one ruling; schools RECORDED [tides, ember] \u2014 he is UR (cards.csv: Chaos Lightning UR row 113, Mizzium Monstrosity UR row 27, Jolt of Inspiration UR). The M177 doubling onto the Warden is superseded: the Warden is Teferi (blue-white), Ral is blue-red, and they are not the same hero. His signatures stay data-held as cards (Chaos Lightning: cost only; Mizzium Monstrosity: stats only; a third, Spark of Genius, is named a Ral signature in official patch notes v0.16.00 with no data beyond the name). M219 (2026-11-11): the M218 hunt closed the hero data and VOLRIC TAKES THE FIELD \u2014 Storm Conduit is engine-implemented (a per-turn spell counter: the third spell of a turn, and the sixth, ninth, costs 2 less at cast and pings the foe hero for 1 on resolution; a countered spell consumes no slot \u2014 the M184 counter precedent), Spark of Genius is marked his (it was already built from its face as spark_of_insight; the duplicate-conversion law forbids a second def), and he fields a default deck + the Tides chain below. The deck is FORGE-CONSTRUCTED \u2014 no recorded Ral 30 exists in the record \u2014 under the standing discipline, flagged here and in SPRINT M219.",
   },
   skydancer: {
     name: 'Suyin, the Sky Dancer', orig: 'Mu Yanling', life: 24, passive: 'tempestsInsight',
@@ -2312,16 +2326,17 @@ const HEROES = {
   },
   wildhuntress: {
     name: 'Wrenna, the Wild Huntress', orig: 'Vivien', held: true, life: 26,
-    passiveRecorded: { name: "Nurture", text: "1 mana, Activate: Store a random upgrade. The next creature you summon gets that upgrade.", src: "Face-verbatim off the hero profile screen (VIDEO-DIGEST-3A, 2026-11-01). Life 26 from the same panel. Her second profile ability, Nature ('Your deck can have up to 8 creatures of any color'), is a deck-building splash rule." },
-    missing: ["the upgrade system itself \u2014 Nurture is upgrade-dependent by design and is held WITH it (the same shelf as her Arkbow)"],
+    passiveRecorded: { name: "Nurture", text: "1 mana, Activate: Store a random upgrade. The next creature you summon gets that upgrade.", src: "Face-verbatim off the hero profile screen (VIDEO-DIGEST-3A, 2026-11-01). Life 26 from the same panel. Her second profile ability, Nature, is a deck-building splash rule \u2014 FACE-VERBATIM at M218 (2026-11-11, m218-profile-vivien.jpg): 'Your deck can have up to 8 creatures of any colors.' (the M182 parenthetical read 'color' singular; the face reads 'colors')." },
+    missing: ["the upgrade POOL alone (M219 revision, 2026-11-11): Nurture's verbatim text AND Nature's are both face-recorded now (M218) and her life stands at 26 \u2014 what keeps Wrenna held is only the pool Nurture stores from: its confirmed members are +3/+0, Haste, Flying, Sneak (press/official fragments), a bounded partial that is NOT a buildable pool. Her Arkbow stays data-held with her (upgrade-dependent)"],
     src: "M182 (2026-11-08): Vivien's own entry under Jesse's one-to-one ruling; schools RECORDED [worldroot] \u2014 mono-green: Vivien's Arkbow prints G (cards.csv row 28), Animal Arrow prints G (row 145), and Hipsters files her as the green Druid 'slinger. Mono-school per the record, as with the Sky Dancer. The M177 second-trio fold into the Keeper (Nissa's hero) is superseded. Animal Arrow stays held-regular (M177); Beast Bonder and the Arkbow stay data-held as cards.",
   },
   hallchampion: {
-    name: 'Zareth, the Hall Champion', orig: 'Drizzt', held: true,
-    passiveRecorded: { name: "Guenhwyvar's Aid", text: "Whenever you attack with one or more legendary creatures, summon an attacking Guenhwyvar. After Guenhwyvar deals damage or is destroyed, she returns to her figurine.", src: "FACE-READ (Drizzt #3 harvest — Boss of Blades 9S2K-Cds00s hero profile, 2026-11-08): the profile names the passive 'Guenhwyvar's Aid' and shows white + green as his colours; the text is the profile's recorded substance (attack with legendary creatures -> an attacking Guenhwyvar joins; she retreats to her figurine after dealing damage or dying). His second profile ability is the deck-building splash (Companions of the Hall): his deck may hold off-colour legendaries — see missing for the count, which the record holds only in fragments. The older Hipsters prose (a Guenhwyvar every attack, +1/+0 per attack) is superseded where it differs. M184: the passive stays DATA — Zareth is held, and Guenhwyvar's printed stats are still unpinned, so there is nothing honest to implement yet." },
+    name: 'Zareth, the Hall Champion', orig: 'Drizzt', passive: 'guenhwyvarsAid',
+    blurb: "Guenhwyvar's Aid: attack with a legendary creature and Guenhwyvar joins the attack \u2014 growing stronger with every strike, then retreating to her figurine. Companions of the Hall: his deck may hold up to 6 legendary creatures of any colours.",
+    passiveRecorded: { name: "Guenhwyvar's Aid", text: "After you attack with 1 or more legendary creatures, summon an attacking Guenhwyvar. After Guenhwyvar deals damage or dies, she retreats to her figurine.", src: "FACE-READ (Drizzt #3 harvest — Boss of Blades 9S2K-Cds00s hero profile, 2026-11-08): the profile names the passive 'Guenhwyvar's Aid' and shows white + green as his colours; the text is the profile's recorded substance (attack with legendary creatures -> an attacking Guenhwyvar joins; she retreats to her figurine after dealing damage or dying). His second profile ability is the deck-building splash (Companions of the Hall): his deck may hold off-colour legendaries — see missing for the count, which the record holds only in fragments. The older Hipsters prose (a Guenhwyvar every attack, +1/+0 per attack) is superseded where it differs. M218 HUNT (2026-11-11): the game's own profile screen (m218-profile-drizzt.jpg) gives the FACE-VERBATIM text above, superseding the substance paraphrase, and pins the second ability the same way \u2014 Companions of the Hall, verbatim: 'Your deck can have a total of 6 legendary creatures of any colors.' The count the record held only in fragments (3-5 seen in decks; a guide's 'up to six') is pinned at 6, counting legendary CREATURES (under the 1-copy legendary rule, copies and distinct cards coincide). Guenhwyvar's face is pinned on the same screen (cost 1, 0/2 \u2014 see her def). M219: both passives are engine-implemented \u2014 the Aid in engine.js, the splash in cardLegalFor + the builder." },
     life: 25, lifeNote: "M184 (2026-11-08): PATCH-FINAL 25 — the era chain: the launch profile reads 26 (Sep 2022, Boss of Blades 9S2K-Cds00s hero screen); 25 stands at five match starts from Nov 2022 on (kpReAGDTaaM among them). The 27 seen mid-match is a raised in-game total, not a printed maximum. Life is entered now that the chain resolves; the M182 evidence-only stance is superseded.",
-    missing: ["Guenhwyvar's printed stats — sightings conflict (2/2, 3/2, 3/4, 4/2 across the harvests), which suggests she scales (with attacks, per the older prose) — DO NOT pin a value until a face settles it", "Guenhwyvar's cost", "Defend with Twinkle — text face-verified ('Give a friendly creature +0/+2 and ward. Add a Strike with Icingdeath to your hand') and its cost pinned 3 as patch-final (2 in the Sep 2022 video; 3 in the later deck list and the CSV row), but it stays UNBUILT: it creates Strike with Icingdeath, whose text has never been read (cost 3 per a hand sighting)", "the splash rule's exact count — three seen decks run 3-5 off-colour legendaries, always singletons; a guide fragment says up to six; the verbatim rule is unrecorded (partial)"],
-    src: "M182 (2026-11-08): Drizzt's own entry under Jesse's one-to-one ruling; schools RECORDED [worldroot, dawn] \u2014 he is GW: his whole signature set prints GW (cards.csv rows 195\u2013198, Guenhwyvar included \u2014 the record does not read her mono-green), so the second school stands. FOUR-PIP WEIGHING (kpReAGDTaaM deck view, face-read 2026-11-08 evening): that deck shows white/blue/red/green pips \u2014 weighed as a candidate four-school identity [dawn, tides, ember, worldroot] and SET ASIDE: the pips enumerate that DECK's contents, and Companions of the Hall (above) admits up to six off-colour legendaries into exactly such a deck; Hipsters names him 'a green and white Spellslinger', and no hero in the record holds a four-colour identity. The M177 fold into Ser Aldric is superseded: Aldric keeps Serra's trio, whose buildable heart the record gives him; Drizzt's set is data-held whole (Survivor's Regalia and Guenhwyvar faces were not in kpReAGDTaaM either \u2014 both stay data-held as cards). M184 (2026-11-08): the Drizzt #3 harvest (Boss of Blades 9S2K-Cds00s) lands — life resolved to 25 patch-final (see lifeNote), the passive's name and substance face-read (Guenhwyvar's Aid, above), Hero's Call and Drizzt's Herald face-verified and BUILT as his signatures (heroes_call, zareths_herald — collectible, in no deck while he is held), Survivor's Regalia face-read in full (6-cost artifact, charges 2, 'Activate: Draft a legendary creature and add it to your hand') but NOT built in this wave, and Defend with Twinkle held on its unread Strike token.",
+    missing: ["Defend with Twinkle \u2014 text face-verified ('Give a friendly creature +0/+2 and ward. Add a Strike with Icingdeath to your hand') and its cost pinned 3 as patch-final (2 in the Sep 2022 video; 3 in the later deck list and the CSV row), but it stays UNBUILT: it creates Strike with Icingdeath, whose text has never been read (cost 3 per a hand sighting)"],
+    src: "M182 (2026-11-08): Drizzt's own entry under Jesse's one-to-one ruling; schools RECORDED [worldroot, dawn] \u2014 he is GW: his whole signature set prints GW (cards.csv rows 195\u2013198, Guenhwyvar included \u2014 the record does not read her mono-green), so the second school stands. FOUR-PIP WEIGHING (kpReAGDTaaM deck view, face-read 2026-11-08 evening): that deck shows white/blue/red/green pips \u2014 weighed as a candidate four-school identity [dawn, tides, ember, worldroot] and SET ASIDE: the pips enumerate that DECK's contents, and Companions of the Hall (above) admits up to six off-colour legendaries into exactly such a deck; Hipsters names him 'a green and white Spellslinger', and no hero in the record holds a four-colour identity. The M177 fold into Ser Aldric is superseded: Aldric keeps Serra's trio, whose buildable heart the record gives him; Drizzt's set is data-held whole (Survivor's Regalia and Guenhwyvar faces were not in kpReAGDTaaM either \u2014 both stay data-held as cards). M184 (2026-11-08): the Drizzt #3 harvest (Boss of Blades 9S2K-Cds00s) lands — life resolved to 25 patch-final (see lifeNote), the passive's name and substance face-read (Guenhwyvar's Aid, above), Hero's Call and Drizzt's Herald face-verified and BUILT as his signatures (heroes_call, zareths_herald — collectible, in no deck while he is held), Survivor's Regalia face-read in full (6-cost artifact, charges 2, 'Activate: Draft a legendary creature and add it to your hand') but NOT built in this wave, and Defend with Twinkle held on its unread Strike token. M219 (2026-11-11): the M218 hunt closed the rest and ZARETH TAKES THE FIELD \u2014 both passives engine-implemented, Guenhwyvar built from her face, and a default deck below. The deck is FORGE-CONSTRUCTED (no recorded Drizzt 30 exists; the record's seen decks run 3-5 off-colour legendary singletons \u2014 his fields four legendary creatures, two of them off-colour) under the standing discipline. His chain is the Wilds (druid) chain \u2014 an INFERENCE, ledgered like Veyla's Grave (M187): a ranger's chain affiliation is unrecorded; the deck seeds exactly one class card (thornwolf x1) under Jesse's class-card law.",
   },
 
   // --- M184 (2026-11-08): KAYA ENTERS THE RECORD (held) ---
@@ -2362,7 +2377,10 @@ const DECK_NAMES = {
  "skydancer": "Feathers on the Tide",
  "palelord": "The Pale Court",
  // M187 (2026-11-09): Veyla fields \u2014 a huntress\u2019s ledger of what crossed the veil and owes her a hunt.
- "veilwarden": "The Veil Hunt"
+ "veilwarden": "The Veil Hunt",
+ // M219 (2026-11-11): the hunt's two citizens field \u2014 the storm's ledger and the hall that stands.
+ "stormconduit": "The Gathering Storm",
+ "hallchampion": "The Hall Stands"
 };
 const DECKS = {
   // M186 (2026-11-08, Jesse's final list — supersedes his M120 list): the
@@ -2400,6 +2418,25 @@ const DECKS = {
  // The Panharmonicon rides x1 \u2014 her deck runs eleven Debuts to wake.
  // Sig-less by the record (her signature faces are portrait-grade only).
  veilwarden: ["gravebound_imp","sanguine_imp","sanguine_imp","widow_matron","widow_matron","decaying_ghoul","decaying_ghoul","dawnkite_cleric","dawnkite_cleric","daughter_of_runes","daughter_of_runes","crypt_pup","crypt_pup","wound_priest","wound_priest","merchant_of_death","merchant_of_death","desperate_prayer","desperate_prayer","seraph_disciple","seraph_disciple","envenom","champions_grit","crypt_noble","crypt_noble","panharmonicon","returnwing_angel","returnwing_angel","corvane_legion","vein_drainlord"],
+ // M219 (2026-11-11): Volric fields \u2014 "The Gathering Storm". FORGE-CONSTRUCTED
+ // (no recorded Ral 30 exists in the record), under the standing discipline:
+ // 30 cards, colour-true to [tides, ember], exactly ONE class card
+ // (tidewing_familiar x1), both his record-complete signatures fielded
+ // (chaos_lightning x1, spark_of_insight x2). Fifteen spells feed Storm
+ // Conduit honestly: cheap cantrips (Spark, Shock, Get Ahead) set the
+ // rhythm, the spell-synergy bodies (Spellmark Adept, Kindling Pyromancer,
+ // the Embermage) reward it, and Chaos Lightning cashes the game count.
+ stormconduit: ["tidewing_familiar","chaos_lightning","spark_of_insight","spark_of_insight","runeshell_crab","runeshell_crab","frostgrip_mage","frostgrip_mage","spellmark_adept","spellmark_adept","kindling_pyromancer","kindling_pyromancer","cinder_court_embermage","cinder_court_embermage","flood_of_ideas","flood_of_ideas","get_ahead","get_ahead","repulse","repulse","shock","shock","firemind_bolt","firemind_bolt","countersign","quiet_snare","echo_scepter","echo_scepter","abrade","lava_axe"],
+ // M219 (2026-11-11): Zareth fields \u2014 "The Hall Stands". FORGE-CONSTRUCTED
+ // (no recorded Drizzt 30 exists), under the standing discipline: 30 cards,
+ // exactly ONE class card (thornwolf x1 \u2014 the Wilds chain is the ledgered
+ // inference on his HEROES entry), both signatures fielded (heroes_call x1,
+ // zareths_herald x2), and Companions of the Hall exercised honestly: FOUR
+ // legendary creatures \u2014 Seraphelle and Frostreaver in his own colours,
+ // Gazemaw and the Mindveil Sovereign splashed off-colour as singletons,
+ // inside the verbatim cap of 6. The GW base is the Keeper's and the Dawn
+ // Company's shared stock: beasts, wardens and menders.
+ hallchampion: ["thornwolf","heroes_call","zareths_herald","zareths_herald","seraphelle_unsealed","frostreaver","gazemaw","mindveil_sovereign","beastcall_arrow","beastcall_arrow","tasty_morsel","tasty_morsel","sheep","sheep","venom_grub","venom_grub","grove_sentinel","grove_sentinel","beastkeeper","beastkeeper","thornwood_archer","thornwood_archer","wardens_acolyte","wardens_acolyte","desperate_prayer","desperate_prayer","radiant_intercessor","returnwing_angel","oakenhide","heartswap_tree"],
 };
 
 // --- Schools (class chains): one per deck, chosen beside the deck itself ---
@@ -2410,7 +2447,7 @@ const SCHOOLS = {
   barbarian: { name: 'Path of the Ember', icon: '🔥', stages: ['axe_of_pyre', 'reckless_wrath', 'unbroken_might'], blurb: 'Wrath chain: a burning axe, reckless damage from your strongest creature, then ruin for the foe — 5 damage whenever your giants attack, once per Indomitable Strength you have cast.' },
   druid:     { name: 'Circle of the Wilds', icon: '🌳', stages: ['thornwolf', 'barkhide_bloom', 'worldroot_titanosaur'], blurb: 'Wild chain: a healing wolf, a barkhide growth that feeds the wilds, then a warded brontosaurus that shields your life with its own.' },
 };
-const DEFAULT_SCHOOL = { weaver: 'wizard', controller: 'wizard', bruiser: 'barbarian', keeper: 'druid', torchbearer: 'barbarian', banneret: 'paladin', graven: 'warlock', unchained: 'warlock', unbridled: 'barbarian', sibilance: 'warlock', hammer: 'barbarian', tidemother: 'druid', skydancer: 'wizard', palelord: 'warlock', veilwarden: 'warlock' }; // M183 (2026-11-08): Suyin takes the Tides chain (wizard), Cassian the Grave chain (warlock) — both chains sit inside their recorded schools // M187 (2026-11-09): Veyla takes the Grave chain — an INFERENCE (her chain affiliation is unrecorded; the Grave half carries her missions and her Spirits school Grave), ledgered on her HEROES entry
+const DEFAULT_SCHOOL = { weaver: 'wizard', controller: 'wizard', bruiser: 'barbarian', keeper: 'druid', torchbearer: 'barbarian', banneret: 'paladin', graven: 'warlock', unchained: 'warlock', unbridled: 'barbarian', sibilance: 'warlock', hammer: 'barbarian', tidemother: 'druid', skydancer: 'wizard', palelord: 'warlock', veilwarden: 'warlock', stormconduit: 'wizard', hallchampion: 'druid' }; // M219 (2026-11-11): Volric takes the Tides chain (wizard \u2014 inside his recorded schools); Zareth takes the Wilds chain (druid) \u2014 an INFERENCE, ledgered on his HEROES entry (the Veyla precedent) // M183 (2026-11-08): Suyin takes the Tides chain (wizard), Cassian the Grave chain (warlock) — both chains sit inside their recorded schools // M187 (2026-11-09): Veyla takes the Grave chain — an INFERENCE (her chain affiliation is unrecorded; the Grave half carries her missions and her Spirits school Grave), ledgered on her HEROES entry
 
 // --- Stances (the land slot, renamed): one per deck, an all-game posture ---
 const STANCES = {
@@ -2439,6 +2476,8 @@ const SCHOOL_META = {
   none:      { name: 'Neutral',    icon: '⚪' },
 };
 const SCHOOL_OF = {
+  // M219 (2026-11-11): the wave's schooling — Guenhwyvar GW like her hero's other cards (the CSV prints GW), the Goat G, the Disturbance B, per their rows
+  guenhwyvar: ['worldroot', 'dawn'], hungry_goat: 'worldroot', grave_disturbance: 'grave',
   // Tides
   gazemaw:'tides', deepbreach_serpent:'tides', fatetwist:'tides', hollow_fathomer:'tides', twinfeather_sparrow:'tides', river_dragon:'tides', dawnkite_scholar:'tides', dawnkite_apprentice:'tides', countersign:'tides', broken_focus:'tides', extract_fear:'tides', get_ahead:'tides', shell_game:'tides', stone_turtle:'tides', aether_extractor:'tides', cruel_mindflayer:'tides', flood_of_ideas:'tides', spark_of_insight:'tides', frostgrip_mage:'tides', chill_wind:'tides', snapshell_turtle:'tides', echo_scepter:'tides', pilfer_dream:'tides', snare_of_no:'tides', ward_lens:'tides', spellmark_adept:'tides', tideshaper:'tides', unsummon:'tides',
   dawnkite_cleric:'dawn', dawnkite_medic:'dawn', dawnkite_spellbound:'dawn', dawnkite_messenger:'dawn', dawnkite_scribe:'dawn', dawnkite_knight:'dawn', dawnkite_spy:'dawn', seraphelle_unsealed:'dawn',
@@ -2496,6 +2535,12 @@ function cardLegalFor(heroId, cardId) {
   const d = CARDS[cardId];
   if (!d) return false;
   if (d.signatureFor) return d.signatureFor === heroId;
+  // M219 (Companions of the Hall, FACE-verbatim M218): Zareth's splash \u2014
+  // legendary CREATURES of any colours are legal in his deck. The 6-count
+  // cap is a deck-size rule, enforced where decks are counted (the UI's
+  // deckErrors + builder, and the census), not here. Every other hero
+  // reads exactly as before.
+  if (heroId === 'hallchampion' && d.type === 'creature' && d.legendary) return true;
   if (!d.cardSchool || d.cardSchool === 'none') return true;
   return schoolsOf(d).some((sch) => (HERO_SCHOOLS[heroId] || []).includes(sch));
 }
@@ -2570,7 +2615,7 @@ class Game {
         damageTakenPrevTurn: 0, damageTakenCurrTurn: 0, // M23: hero life lost per half-turn (rotated in startTurn)
         nextTrapDiscount: 0, fragileGem: false, tookDamageThisTurn: false, selfDamageThisTurn: 0,
         // M184: spellsPlayedThisGame counts SPELLS only (post-counter) for Chaos Lightning; playsThisGame counts spells + armed traps for Breaching Serpent — the two counters stay distinct on purpose
-        spellManaTurn: 0, deathsThisTurn: 0, playsThisGame: 0, spellsPlayedThisGame: 0, damageTakenGame: 0, creaturesToGraveThisTurn: 0, creaturesToGraveThisTurn: 0,
+        spellManaTurn: 0, deathsThisTurn: 0, playsThisGame: 0, spellsPlayedThisGame: 0, spellsCastThisTurn: 0, damageTakenGame: 0, creaturesToGraveThisTurn: 0, creaturesToGraveThisTurn: 0, // M219: spellsCastThisTurn joins the init object (it lived reset-only before) — Storm Conduit's per-turn count reads it in effectiveCost
         summonCount: 0, damageDealtThisTurn: 0, spiritThreshold: 3, beckonClaimed: [],
         // M187 (Veyla's Free Spirit missions): damage she deals to the foe
         // hero during HER turn accumulates in missionProgress toward
@@ -3045,6 +3090,14 @@ class Game {
     if (def(inst).type === 'trap' && p.nextTrapDiscount) cost = Math.max(0, cost - p.nextTrapDiscount);
     if (inst.discount) cost = Math.max(0, cost - inst.discount);
     if (inst.miracleDiscount && inst.miracleTurn === this.turnNumber) cost = Math.max(0, cost - inst.miracleDiscount);
+    // M219 (Storm Conduit, FACE-verbatim M218): the third spell Volric plays
+    // in a turn — and the sixth, ninth — costs 2 less. The count is of
+    // RESOLVED spells: spellsCastThisTurn increments only after a spell
+    // resolves (a countered spell returned early in playCard and never
+    // counts — the M184 precedent), so the spell being costed here is the
+    // (count + 1)-th, and the discount and playCard's resolution ping
+    // always land on the same spell.
+    if (p.hero.passive === 'stormConduit' && def(inst).type === 'spell' && ((p.spellsCastThisTurn || 0) + 1) % 3 === 0) cost = Math.max(0, cost - 2);
     if (def(inst).selfDamageDiscount && p.selfDamageThisTurn > 0) cost = Math.max(0, cost - def(inst).selfDamageDiscount); // M70 Paincast Demon
     if (def(inst).freeIfDrafted && p.draftedThisTurn) cost = 0; // M79 Aether Figment: drafted this turn -> free
     if (inst.giftTurn != null && inst.giftTurn === this.turnNumber) cost = 0; // M99: Malachar's gifts cost 0 until the turn ends
@@ -3510,6 +3563,11 @@ class Game {
       p.spellsCastThisTurn = (p.spellsCastThisTurn || 0) + 1;
       p.lastSpellId = inst.cardId; // M79: the Magnifier remembers the last spell cast
       if (p.spellsCastThisTurn >= 3) for (const c of p.board.slice()) if (def(c).flipOnSpells && def(c).flipsTo) this.flipCreature(i, c);
+      // M219 (Storm Conduit): the third resolved spell of the turn — and the
+      // sixth, ninth — crackles for 1 damage to the foe hero, funnelled
+      // through hurtHero like every hero-damage source (a standing guardian
+      // answers for its hero, the standing rule).
+      if (p.hero.passive === 'stormConduit' && p.spellsCastThisTurn % 3 === 0) { const foe2 = this.players[this.opp(i)]; this.hurtHero(foe2.idx, 1, i); this.log.push(`Storm Conduit crackles \u2014 ${foe2.hero.name} takes 1`); }
     }
     this.advanceSchool(p, d);
     this.cleanupDeaths();
@@ -3959,6 +4017,11 @@ class Game {
       case 'armBond': p.bondTurn = this.turnNumber; p._bondLife = p.life; this.log.push(`${def(sourceInst).name}: the pact is sealed — this turn, healing turns to harm`); break;
       case 'destroyArtifact': { // M165 (Naturalize): one chosen enemy artifact is unmade
         if (target && target.kind === 'artifact') { const fp = this.players[this.opp(i)]; const ai2 = fp.artifacts.indexOf(target.inst); if (ai2 >= 0) { fp.artifacts.splice(ai2, 1); fp.graveyard.push(target.inst); this.log.push(`${srcName} destroys ${def(target.inst).name}`); } }
+        break;
+      }
+      case 'destroyArtifactOrGrow': { // M219 (Hungry Goat): smash a chosen enemy artifact — or, if none stands, the Goat eats the disappointment and grows by the printed +2/+0
+        if (!foe.artifacts.length) { if (sourceInst) { sourceInst.permPower += effect.power || 0; sourceInst.permHealth += effect.health || 0; this.log.push(`${srcName}: no artifact to smash \u2014 it grows (+${effect.power || 0}/+${effect.health || 0})`); } break; }
+        if (target && target.kind === 'artifact') { const ai3 = foe.artifacts.indexOf(target.inst); if (ai3 >= 0) { foe.artifacts.splice(ai3, 1); foe.graveyard.push(target.inst); this.log.push(`${srcName} destroys ${def(target.inst).name}`); } }
         break;
       }
       case 'destroyRandomArtifactDouble': {
@@ -4488,6 +4551,34 @@ class Game {
     if (keywordsOf(inst).includes('haste')) return true;
     return inst.summonedTurn < this.turnNumber; // summoning sickness: not the turn it was played
   }
+  // M219 (Guenhwyvar's Aid, FACE-verbatim M218): "After you attack with 1 or
+  // more legendary creatures, summon an attacking Guenhwyvar." Every combat
+  // driver (the human attack flow, the AI turn in ui.js, ai.js takeTurn)
+  // calls this once the attackers are chosen and BEFORE blockers are picked,
+  // so she joins the SAME declaration (the M193 one-step law — never a
+  // second declareCombat) and can be blocked like any attacker. She is a
+  // SIXTH creature past the 5-cap (the Aid's own exception), stamped
+  // summonedAttacking so declareCombat's sickness check passes her, and her
+  // arrival bypasses the foe-summon trap door — "Can't trigger traps", wired
+  // through noteSummon's _summonTrapBusy guard. A crowned attacker counts:
+  // the Herald's becameLegendary is a legendary attacker for the Aid. Her
+  // retreat is declareCombat's tail. Returns her instance, or null when the
+  // Aid does not answer (not Zareth, no legendary attacker, already present).
+  guenhwyvarAid(atkIdx, attackerInsts) {
+    const atk = this.players[atkIdx];
+    if (!atk || atk.hero.passive !== 'guenhwyvarsAid') return null;
+    if (!attackerInsts.some((a) => a && (def(a).legendary || a.becameLegendary))) return null;
+    if (atk.board.some((c) => c.cardId === 'guenhwyvar')) return null;
+    const gw = makeInstance('guenhwyvar', null);
+    gw.summonedTurn = this.turnNumber; gw.damage = 0; gw.summonedAttacking = true;
+    this.applyStanceOnSummon(atk, gw);
+    atk.board.push(gw);
+    this._summonTrapBusy = true;
+    this.noteSummon(atk, gw);
+    this._summonTrapBusy = false;
+    this.log.push(`Guenhwyvar's Aid: Guenhwyvar springs from her figurine and joins the attack`);
+    return gw;
+  }
   declareCombat(atkIdx, attackerUids, blockerMap = {}) {
     const atk = this.players[atkIdx]; const dfn = this.players[this.opp(atkIdx)];
     // M193: an empty declaration is not a combat step — refuse it BEFORE
@@ -4498,7 +4589,7 @@ class Game {
     if (atk.combatDone) throw new Error('only one combat step per turn');
     const attackers = attackerUids.map((u) => atk.board.find((c) => c.uid === u));
     if (attackers.some((a) => !a)) throw new Error('attacker not on board');
-    for (const a of attackers) if (!this.canAttack(a, atk)) throw new Error('summoning sickness');
+    for (const a of attackers) if (!a.summonedAttacking && !this.canAttack(a, atk)) throw new Error('summoning sickness'); // M219: Guenhwyvar is summoned ATTACKING by the Aid — never sick for the combat she joins
     // Validate blockers: strictly 1-to-1, defender's creatures, flying rules.
     const usedBlockers = new Set();
     for (const [aUid, bUid] of Object.entries(blockerMap)) {
@@ -4687,6 +4778,15 @@ class Game {
         for (const a of liveAttackers) if (atk.board.includes(a)) { a.tempPower += 1; raised++; }
         if (raised) this.log.push(`${dfn.hero.name} reels at ${Math.max(0, dfn.life)} — ${atk.hero.name}'s attackers press the advantage (+1/+0 this turn)`);
       }
+    }
+    // M219 (Guenhwyvar's Aid): the combat she joined is over — she retreats
+    // to her figurine, leaving play entirely (no graveyard: she is a
+    // companion, and retreating is not dying). If she fell in the fighting,
+    // cleanupDeaths has already taken her to the graveyard like any
+    // creature — the face's other branch ("or dies").
+    if (atk.hero.passive === 'guenhwyvarsAid') {
+      const gi = atk.board.findIndex((c) => c.cardId === 'guenhwyvar');
+      if (gi >= 0) { atk.board.splice(gi, 1); this.log.push(`Guenhwyvar retreats to her figurine`); }
     }
     this.checkWin();
     return true;
@@ -4904,6 +5004,7 @@ function targetFor(game, i, inst) {
   if (eff.kind === 'drainCreature' || eff.kind === 'stunPermanent') { const t = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0]; return t ? { kind: 'creature', inst: t } : null; }
   if (eff.kind === 'stunOrDestroyArtifact' || eff.kind === 'damageOrStripCharges') { const t = foe.board.slice().sort((a, b) => powerOf(b) - powerOf(a))[0]; if (t) return { kind: 'creature', inst: t }; const art = foe.artifacts[0]; return art ? { kind: 'artifact', inst: art } : null; }
   if (eff.kind === 'destroyArtifact') { const art = foe.artifacts[0]; return art ? { kind: 'artifact', inst: art } : null; } // M165: Naturalize unmakes the first enemy artifact it sees
+  if (eff.kind === 'destroyArtifactOrGrow') { const art = foe.artifacts[0]; return art ? { kind: 'artifact', inst: art } : null; } // M219: the Goat smashes the first enemy artifact — and with none standing, a null target IS the play (the engine grows it instead)
   if (eff.kind === 'stripCharges') { const art = foe.artifacts[0]; return art ? { kind: 'artifact', inst: art } : null; } // M169: Gear Render strips the first enemy artifact it sees
   if (eff.kind === 'stunCreatures') { const ts = foe.board.filter((c) => !keywordsOf(c).includes('ward') && !keywordsOf(c).includes('cantStun')).sort((a, b) => powerOf(b) - powerOf(a)).slice(0, eff.count || 2); return ts.length ? { kind: 'creatures', insts: ts } : null; }
   if (eff.kind === 'stealPower') { // M110: rob the strongest — the most power on the table is the most worth taking
@@ -5046,6 +5147,7 @@ function priority(game, i, c) {
   if (d.effect && d.effect.kind === 'chaosLightning') s += 20 + 2 * (game.players[i].spellsPlayedThisGame || 0); // M184: the Lightning grows with the game — value it by the counter it reads
   if (d.debut && d.debut.kind === 'becomeLegendary') s += 15; // M184: the Herald's crown is real but quiet value
   if (d.doubler) s += 40;
+  if (d.type === 'spell' && game.players[i].hero.passive === 'stormConduit' && (game.players[i].spellsCastThisTurn || 0) % 3 === 2) s += 25; // M219: Storm Conduit — a spell that completes the third-spell rhythm (discount + ping) is worth real tempo, so Volric's seat spends toward it
   s += d.cost;
   return s;
 }
@@ -5187,6 +5289,7 @@ function takeTurn(game, i) {
   if (game.winner !== null) return;
   const attackers = aiPickAttackers(game, i);
   if (attackers.length) {
+    const gwAid = game.guenhwyvarAid(i, attackers); if (gwAid) attackers.push(gwAid); // M219: Guenhwyvar's Aid — she joins this same declaration
     const blockerMap = chooseBlockers(game, game.opp(i), attackers);
     try { game.declareCombat(i, attackers.map((a) => a.uid), blockerMap); } catch (e) { /* no combat */ }
     if (game.winner !== null) return;
@@ -5957,7 +6060,7 @@ function effTargetKind(eff) { // M109: a targeted SEQUENCE (Burn Through) aims b
 function defNeedsTarget(d) {
   var eff = d && (d.effect || d.debut);
   if (eff && eff.kind === 'fightOnce' && eff.random) return false; // a random fight needs no click
-  return !!(eff && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'bounceOwnSetCost', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformCreature', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'tuckIntoDeck', 'grantAttackEffect', 'grantEndTurn', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(eff.kind) >= 0); // M169 kinds + M172 pair kinds + M185 (Lightning Helix aims at a creature; Tinker aims at your own artifact)
+  return !!(eff && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'bounceOwnSetCost', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformCreature', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'destroyArtifactOrGrow', 'stripCharges', 'tuckIntoDeck', 'grantAttackEffect', 'grantEndTurn', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(eff.kind) >= 0); // M169 kinds + M172 pair kinds + M185 (Lightning Helix aims at a creature; Tinker aims at your own artifact) // M219: destroyArtifactOrGrow joins (the Goat's debut aims like Naturalize when an artifact stands)
 }
 /* M172: the two-target kinds describe their two picks as ordered steps —
    which side of the table each pick must come from. 'anyEnemy' may also
@@ -6750,6 +6853,7 @@ function effectText(d) {
       case 'drainCreature': return 'Drain ' + e.amount + ' from an enemy creature.';
       case 'stunOrDestroyArtifact': return 'Stun an enemy creature or destroy an enemy artifact.';
       case 'destroyArtifact': return 'Destroy an enemy artifact.';
+      case 'destroyArtifactOrGrow': return 'Destroy an enemy artifact. If there are none, this gets +' + (e.power || 0) + '/+' + (e.health || 0) + '.'; // M219: the Goat's conditional, in its printed shape
       case 'damageOrStripCharges': return 'Deal ' + e.amount + ' damage to an enemy creature or remove ' + e.amount + ' charges from an enemy artifact.';
       case 'stunCreatures': return 'Stun up to ' + e.count + ' enemy creatures.';
       case 'stunPermanent': return 'Stun an enemy creature for the rest of the game.';
@@ -7111,7 +7215,9 @@ var HERO_LINES = {
   tidemother: { start: 'The tide decides.', hurt: 'The sea does not kneel.', win: 'Washed away.', lose: 'The tide goes out…' },
   skydancer:  { start: 'Mind the updraft.', hurt: 'The wind only sharpens me.', win: 'Two wings, one sky.', lose: 'Even dancers must land.' },
   palelord:   { start: 'You are expected. Do sit.', hurt: 'Rude. I shall remember it.', win: 'The court is fed.', lose: '…The vintage was poor anyway.' },
-  veilwarden: { start: 'Something crossed over. I am here to send it back.', hurt: 'You should not have touched what is mine.', win: 'The veil is quiet again. For now.', lose: 'Then I hunt from the other side.' } // M187: Veyla's voice \u2014 the spectral huntress
+  veilwarden: { start: 'Something crossed over. I am here to send it back.', hurt: 'You should not have touched what is mine.', win: 'The veil is quiet again. For now.', lose: 'Then I hunt from the other side.' }, // M187: Veyla's voice \u2014 the spectral huntress
+  stormconduit: { start: 'Count with me. One. Two\u2026', hurt: 'Sparks fly both ways.', win: 'The third time pays for all.', lose: 'The storm\u2026 spends itself.' }, // M219: Volric's voice \u2014 the counter who loves the rhythm
+  hallchampion: { start: 'We stand together. All of us.', hurt: 'A scratch. She has had worse.', win: 'The hall endures.', lose: 'Even legends kneel\u2026 once.' } // M219: Zareth's voice \u2014 quiet, and never alone
 };
 var speech = {}, speechFlags = {};
 function heroLine(idx, kind) {
@@ -7335,7 +7441,7 @@ function foeArtifactTargetable() {
   var pc = G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; });
   if (!pc) return false;
   var eff = D(pc) && (D(pc).effect || D(pc).debut);
-  return !!(eff && (eff.kind === 'stunOrDestroyArtifact' || eff.kind === 'damageOrStripCharges' || eff.kind === 'destroyArtifact' || eff.kind === 'stripCharges')); // M169: stripCharges (Gear Render)
+  return !!(eff && (eff.kind === 'stunOrDestroyArtifact' || eff.kind === 'damageOrStripCharges' || eff.kind === 'destroyArtifact' || eff.kind === 'destroyArtifactOrGrow' || eff.kind === 'stripCharges')); // M169: stripCharges (Gear Render) // M219: the Goat aims at the same foe dock
 }
 function targetArtifact(uid) {
   var a = G.players[aiIdx].artifacts.find(function (x) { return x.uid === uid; });
@@ -8015,7 +8121,7 @@ function renderTitle() {
     '<div class="titlecore"><h1 class="logo">YIRA</h1>' +
     '<p class="tagline">the Enchanted Coliseum</p>' +
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
-    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 15 heroes</span><span class="tchip">\uD83C\uDCCF 423 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history) // M194 revision (2026-11-10): the chip count is hardcoded here — 410 -> 423 for the completion wave (the profile screen counts live)
+    '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 17 heroes</span><span class="tchip">\uD83C\uDCCF 425 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history) // M194 revision (2026-11-10): the chip count is hardcoded here — 410 -> 423 for the completion wave (the profile screen counts live) // M219 revision (2026-11-11): 423 -> 425 collectible (Hungry Goat + Grave Disturbance join) and 15 -> 17 heroes (Volric + Zareth take the field on the M218 hunt's data)
 }
 function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); try { var mp = document.querySelector('.menupage'); if (mp && mp.classList) mp.classList.add('hub-in'); } catch (e) {} } // M191: the hub settles in once, on entry only — the class rides this DOM, so later re-renders never replay it
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
@@ -8571,6 +8677,7 @@ function deckPickHtml() {
 }
 
 function heroPool(heroId) { return Object.keys(CARDS).filter(function (id) { var d = CARDS[id]; return (!d.generatedOnly || d.schoolStage === 1) && (!d.signatureFor || d.signatureFor === heroId) && cardLegalFor(heroId, id); }); }
+function legendaryCreatureCount(ids) { return ids.filter(function (id) { var d = CARDS[id]; return d && d.type === 'creature' && d.legendary; }).length; } // M219: the Companions count \u2014 legendary CREATURES (under the 1-copy legendary rule, copies and distinct cards coincide)
 function deckErrors(heroId, ids) {
   var errs = [];
   if (ids.length !== 30) errs.push('Deck has ' + ids.length + ' of 30 cards');
@@ -8585,6 +8692,7 @@ function deckErrors(heroId, ids) {
     var cap = d.legendary ? 1 : 2;
     if (counts[id] > cap) errs.push(d.name + ': ' + counts[id] + ' copies (max ' + cap + ')');
   });
+  if (heroId === 'hallchampion' && legendaryCreatureCount(ids) > 6) errs.push('Companions of the Hall: Zareth\'s deck may hold up to 6 legendary creatures of any colours \u2014 this one holds ' + legendaryCreatureCount(ids)); // M219: the verbatim splash cap (M218 face)
   if (deckClassCount(ids) > 1) errs.push('A deck may start with only one class card (this one has ' + deckClassCount(ids) + ')'); // M188: Jesse's class-card law — the save path refuses it (builderSave, activeDeckFor)
   return errs;
 }
@@ -8599,6 +8707,7 @@ function builderDeleteDeck() { if (!builderDeckId) return; if (!deckDeleteArmed)
 function builderSetDeckName(v) { builderDeckName = String(v || '').slice(0, 60); }
 function builderRenameDeck() { try { var f = document.getElementById('bdeckname'); if (f && typeof f.value === 'string' && f.value) builderDeckName = f.value; } catch (e) {} var v = loadVault(); var name = uniqueDeckName(v, builderHero, builderDeckName, builderDeckId); builderDeckName = name; if (builderDeckId) { var d = vaultDeckById(v, builderDeckId); if (d && d.heroId === builderHero) { d.name = name; d.updatedAt = Date.now(); saveVault(v); } } render(); }
 function builderAdd(id) { var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.length >= 30) return; if (builderDeck.filter(function (x) { return x === id; }).length >= cap) return; if (isClassCard(id) && deckClassCount(builderDeck) >= 1) return; // M188: the deck already holds its one class card — the slot is taken
+  if (builderHero === 'hallchampion' && CARDS[id].legendary && CARDS[id].type === 'creature' && legendaryCreatureCount(builderDeck) >= 6) return; // M219: Companions of the Hall \u2014 the hall holds at most 6 legendary creatures
   builderDeck.push(id); builderPulseId = id; builderPulseAt = Date.now(); render(); }
 function builderRemove(id) { var i = builderDeck.indexOf(id); if (i >= 0) { builderDeck.splice(i, 1); builderPulseId = id; builderPulseAt = Date.now(); } render(); }
 function builderReset() { builderDeck = DECKS[builderHero].slice(); render(); }
@@ -8608,7 +8717,7 @@ function builderAuto() {
   var guard = 0;
   while (builderDeck.length < 30 && guard++ < 400) {
     var added = false;
-    for (var i = 0; i < pool.length; i++) { var id = pool[i]; var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.filter(function (x) { return x === id; }).length < cap && !(isClassCard(id) && deckClassCount(builderDeck) >= 1)) { builderDeck.push(id); added = true; break; } } // M188: auto-fill respects the class-card slot too
+    for (var i = 0; i < pool.length; i++) { var id = pool[i]; var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.filter(function (x) { return x === id; }).length < cap && !(isClassCard(id) && deckClassCount(builderDeck) >= 1) && !(builderHero === 'hallchampion' && CARDS[id].legendary && CARDS[id].type === 'creature' && legendaryCreatureCount(builderDeck) >= 6)) { builderDeck.push(id); added = true; break; } } // M188: auto-fill respects the class-card slot too // M219: auto-fill respects the Companions cap too
     if (!added) break;
   }
   render();
@@ -8663,6 +8772,7 @@ function renderBuilder() {
       // card even after room is made; a full deck is the generic fallback.
       if (isClassCard(id) && deckClassCount(d) >= 1) whyNot = 'A deck may start with only one class card — yours is already in.';
       else if (n >= cap) whyNot = c.legendary ? 'Legendary — only one copy may start in a deck.' : 'Already at the most copies allowed (2).';
+      else if (heroId === 'hallchampion' && c.legendary && c.type === 'creature' && legendaryCreatureCount(d) >= 6) whyNot = 'Companions of the Hall: Zareth\'s deck may hold up to 6 legendary creatures \u2014 the hall is full.'; // M219: the cap says why, in plain words (the M191 pattern)
       else if (d.length >= 30) whyNot = 'Your deck is full — remove a card to make room.';
     }
     var btn = inPool
@@ -8824,13 +8934,15 @@ function clickHand(uid) {
   }
   if (d.altSummonSacrifice && G.availableMana(me) < G.effectiveCost(me, inst) && me.board.length > 0) { pendingUid = uid; sacrificePick = true; mode = 'targeting'; msg = 'Choose a friendly creature to destroy for the summoning.'; render(); return; }
   var targetedEff = d.effect || d.debut; // M25: a targeted Debut aims like a targeted spell
-  if (targetedEff && !(targetedEff.kind === 'fightOnce' && targetedEff.random) && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformCreature', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'stripCharges', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(targetedEff.kind) >= 0) { // M172: stripCharges joins (Gear Render's debut was unroutable here — a drive-by repair), plus the pair kinds and Gear Mender's friendly-artifact debut; M185: Lightning Helix + Tinker join the routed kinds
+  var goatNoArt = targetedEff && targetedEff.kind === 'destroyArtifactOrGrow' && G.players[aiIdx].artifacts.length === 0; // M219: the Goat with no artifact to smash never enters targeting \u2014 it plays straight onto the field and its Debut grows it instead
+  if (!goatNoArt && targetedEff && !(targetedEff.kind === 'fightOnce' && targetedEff.random) && ['damageAny', 'buffCreature', 'grantKeyword', 'healCreatureFull', 'swapStats', 'setHealth', 'halveStats', 'destroyIfPower', 'damagePerGem', 'fightOnce', 'stealPower', 'bounce', 'wither', 'debuffPerZombieGrave', 'smiteByBoard', 'destroyFlyer', 'doom', 'stunCreature', 'destroyCreature', 'debuffCreature', 'grimEchoes', 'debuffAndAdd', 'destroyAndSelfDamage', 'drainCreatureOrDamage', 'transformCreature', 'markCreature', 'buffAndDoom', 'pathExile', 'pacify', 'stealCreature', 'drainCreature', 'stunPermanent', 'stunOrDestroyArtifact', 'damageOrStripCharges', 'stunCreatures', 'destroyArtifact', 'destroyArtifactOrGrow', 'stripCharges', 'sacrificeDamage', 'sacrificeDestroy', 'fightPair', 'addChargeArtifact', 'damageCreatureHeal', 'sacrificeDraftArtifact', 'becomeLegendary'].indexOf(targetedEff.kind) >= 0) { // M172: stripCharges joins (Gear Render's debut was unroutable here — a drive-by repair), plus the pair kinds and Gear Mender's friendly-artifact debut; M185: Lightning Helix + Tinker join the routed kinds
     var k = effTargetKind(targetedEff);
     var foe = G.players[aiIdx];
     var hasTarget = (k === 'bounce') ? true : (k === 'damageAny' ? (targetedEff.creatureOnly ? foe.board.length > 0 : true) : (k === 'grimEchoes' ? me.board.length > 0 : (k === 'buffCreature' || k === 'healCreatureFull' || (k === 'grantKeyword' && !targetedEff.foeTarget) ? me.board.length > 0 : (k === 'pacify' && d.debut ? me.board.length > 0 : (k === 'swapStats' ? (me.board.length + foe.board.length) > 0 : (k === 'destroyFlyer' ? foe.board.some(function (c) { return (D(c).keywords || []).indexOf('flying') >= 0; }) : foe.board.length > 0))))));
     if (k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures') hasTarget = foe.board.length > 0;
     if (k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges') hasTarget = foe.board.length > 0 || foe.artifacts.length > 0;
     if (k === 'destroyArtifact') hasTarget = foe.artifacts.length > 0; // M165: Naturalize needs an artifact standing
+    if (k === 'destroyArtifactOrGrow') hasTarget = foe.artifacts.length > 0; // M219: the Goat aims only when an artifact stands (the no-artifact case never reaches this branch \u2014 see goatNoArt above)
     if (k === 'stripCharges') hasTarget = foe.artifacts.length > 0; // M172: Gear Render needs an enemy artifact standing
     var pspec2 = pairSpec(d);
     if (pspec2) hasTarget = me.board.length > 0 && (k === 'sacrificeDamage' || foe.board.length > 0); // M172: a pair cast needs its first pick standing (and its second, unless the hero can answer)
@@ -9102,6 +9214,7 @@ async function declareAttack() {
   if (busyAnim) return;
   if (!attackSet.size) { mode = 'main'; render(); return; }
   var attackers = G.players[humanIdx].board.filter(function (c) { return attackSet.has(c.uid); });
+  var gwAid = (typeof G.guenhwyvarAid === 'function') ? G.guenhwyvarAid(humanIdx, attackers) : null; if (gwAid) attackers.push(gwAid); // M219: Guenhwyvar's Aid \u2014 she joins THIS declaration, before blockers are chosen, and can be blocked
   var blockers = chooseBlockers(G, aiIdx, attackers);
   var names = Object.keys(blockers).length;
   lastCombatBlow = attackers.reduce(function (m, c) { return Math.max(m, D(c).power + c.permPower); }, 0); // M201: combat weight reads
@@ -9114,7 +9227,7 @@ async function declareAttack() {
     await animateCombat(attackers.map(function (c) { return { uid: c.uid, power: D(c).power + c.permPower, target: blockers[c.uid] || 'hero', dir: -1 }; }));
     busyAnim = false;
   }
-  try { G.declareCombat(humanIdx, Array.from(attackSet), blockers); sfx('attack'); say('You attack with ' + attackers.length + '. The enemy blocks ' + names + ' of them.', 'bad'); }
+  try { G.declareCombat(humanIdx, attackers.map(function (c) { return c.uid; }), blockers); sfx('attack'); say('You attack with ' + attackers.length + '. The enemy blocks ' + names + ' of them.', 'bad'); } // M219: the uid list is the attackers array itself now \u2014 it carries Guenhwyvar when the Aid answered
   catch (e) { msg = errMsg(e); }
   attackSet = new Set(); mode = 'main'; figFx.lunge = 'me'; flushEngineLog(); if (!finishCheck()) render();
 }
@@ -9188,6 +9301,7 @@ async function runAiTurn() {
   if (finishCheck()) return;
   var attackers = aiPickAttackers(G, aiIdx);
   if (attackers.length) {
+    var gwAidAi = (typeof G.guenhwyvarAid === 'function') ? G.guenhwyvarAid(aiIdx, attackers) : null; if (gwAidAi) attackers.push(gwAidAi); // M219: Guenhwyvar's Aid \u2014 she joins this same declaration, so the blocking phase renders her and she can be blocked
     lastCombatBlow = attackers.reduce(function (m, a) { return Math.max(m, D(a).power + a.permPower); }, 0); // M201: combat weight read
     aiAttackers = attackers; blockMap = {}; blockPick = null; mode = 'blocking'; msg = hintOnce('block', 'Hold any creature to read it.');
     sfx('attack');

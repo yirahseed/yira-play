@@ -5764,7 +5764,7 @@ function sfxDrain(n) {
 }
 function ribbonPath(src, dst, wild) {
   var ox = src.x + (wild.oOff ? wild.oOff.x : 0) + (Math.random() * 40 - 20) * wild.jitter, oy = src.y + (wild.oOff ? wild.oOff.y : 0) + (Math.random() * 26 - 13) * wild.jitter; // M216 (Q4): an optional origin offset — the plant/drain fan their streams' starting points across the source so the volley leaves as a sheaf, not a knot; without it (draw tails, grave flights) origins are exactly as before
-  var ax = dst.x + (Math.random() * 18 - 9) * wild.jitter, ay = dst.y + (Math.random() * 14 - 7) * wild.jitter;
+  var ax = dst.x + (wild.dOff ? wild.dOff.x : 0) + (Math.random() * 18 - 9) * wild.jitter, ay = dst.y + (wild.dOff ? wild.dOff.y : 0) + (Math.random() * 14 - 7) * wild.jitter; // M228 (round 9): an optional destination offset, the mirror of oOff — plant volleys fan their arrivals across the afflicted deck's face (see faceFan), so each stream terminates at its own point instead of every stream docking on the one pile anchor; without it (draw tails, grave flights) destinations are exactly as before
   var dxv = ax - ox, dyv = ay - oy;
   var len = Math.sqrt(dxv * dxv + dyv * dyv) || 1;
   var px = -dyv / len, py = dxv / len;
@@ -5783,6 +5783,21 @@ function ribbonPath(src, dst, wild) {
     x2: ox + dxv * 0.68 + px * (sCurve * w2 + lane * 0.8), y2: oy + dyv * 0.68 + py * (sCurve * w2 + lane * 0.8) + lift2,
     x3: ax, y3: ay
   };
+}
+/* M228 ROUND 9 — THE ARRIVAL (Jesse's standing refinement push; the
+   M212/M216 flags named the defect: streams leave across a ~185px sheaf
+   and land within ~26px of one another — the arrival zone was the
+   thickest remaining cloud cue, an anchor-geometry problem). faceFan
+   spreads a volley's streams across an ellipse — the deck chip's
+   face/edge zone — on a golden-angle spiral: deterministic per stream
+   index (the oOff fan's discipline), uniform-disc radii, the whole
+   pattern rotated by a per-volley phase so no two volleys land alike.
+   Used for plant arrivals (ribbonPath dOff) and for the drain's
+   tear-out origins in the afflicted deck (ribbonPath oOff). */
+function faceFan(k, count, rx, ry, phase) {
+  var a = phase + k * 2.39996;
+  var r = (0.6 + 0.4 * ((k + 0.5) / Math.max(count, 1))) * (count <= 1 ? 0.45 : 1); // the points ride the ellipse's OUTER BAND, not its middle — the first cut's sqrt radii parked the innermost streams back inside the old knot's core and left the drain's tear-outs closer together than the lane fan they replaced (both measured in the M228 probe); the face/edge zone is a rim, not a bullseye, and the destination jitter fills inward from it
+  return { x: Math.cos(a) * rx * r, y: Math.sin(a) * ry * r };
 }
 function pathPoint(P, t) { return { x: cubicAt(P.x0, P.x1, P.x2, P.x3, t), y: cubicAt(P.y0, P.y1, P.y2, P.y3, t) }; }
 /* M199 (gap 1): the sampled length of a ribbon path. The stream machinery
@@ -5862,6 +5877,14 @@ function spawnRibbon(layer, P, o) {
      landing spot near the pile anchor (5-13px off, squashed flat like
      the chip it lands on) instead of every segment of every stream
      converging on one mathematical point and dissolving there. */
+  /* M228 ROUND 9 — THE ARRIVAL, ANSWERED AT THE ANCHOR: round 6 spread
+     each ribbon's own segments around ONE shared anchor (5-13px);
+     round 9 spreads the STREAMS themselves — ribbonPath's dOff
+     (faceFan) gives every stream its own endpoint across the afflicted
+     deck's face/edge zone, and the seep (in the frame loop below,
+     keyed on sjA past 0.78) eases each segment's alpha down while its
+     calibre blooms a touch, so the stream reads as smoke soaking INTO
+     the deck rather than cords docking at a point. */
   /* M212 ROUND 7 (P6): on the flow ribbons, placement runs on ARC LENGTH,
      not the cubic's raw parameter — equal steps of path-time bunched where
      the curve crawls and stretched where it runs (the D6 readout: gap
@@ -5916,6 +5939,8 @@ function spawnRibbon(layer, P, o) {
       el.style.filter = dc.sprite === 'streak' ? 'blur(' + bp + 'px) grayscale(.86) brightness(.58) contrast(1.22)' : 'blur(' + bp + 'px) grayscale(.86) brightness(.55) contrast(1.24)';
     }
     var peak = o.opacity * dc.opMul;
+    var seepK = !o.flow ? 0 : (dc.cls === 'wisp wisp-head' || dc.cls === 'wisp wisp-headglow' || dc.cls === 'wisp wisp-halo' ? 1 : (dc.cls.indexOf('wisp-under') >= 0 ? 0.35 : 0.6)); // M228 (the seep): how completely this piece dissolves across the last stretch of arc — the head family goes first and furthest (no knot docks at the arrival and the leader's glow is spent before it lands; that light belongs to the launch end), the body seeps gentler, the underlay washes were already faint
+    var bloomK = !o.flow ? 0 : (seepK === 1 ? 0.6 : (seepK === 0.35 ? 0.5 : 1)); // M228: the calibre bloom paired with the seep — smoke spreading as it thins; the body blooms most, the dissolving head least
     var rotJit = Math.random() * 14 - 7;
     var flipX = Math.random() < 0.5 ? -1 : 1, flipY = Math.random() < 0.5 ? -1 : 1;
     var segPhase = phase + di * 0.62;
@@ -5943,12 +5968,13 @@ function spawnRibbon(layer, P, o) {
         : Math.sin(u * o.wfreq + segPhase + sj * o.waveK) * o.writhe * env;
       var x = pt.x + (-ty / tl) * (wob + dc.jit * env), y = pt.y + (tx / tl) * (wob + dc.jit * env);
       if (o.flow && sjW > 0.78) { var lw = (sjW - 0.78) / 0.22; lw = lw * lw * (3 - 2 * lw); var ov = Math.sin(Math.PI * Math.min(1, Math.max(0, (sjW - 0.86) / 0.14))) * 6; x += landX * lw + (tx / tl) * ov; y += landY * lw + (ty / tl) * ov; } // M202: the approach bends toward the landing spot, and momentum carries the smoke a few px PAST it near sj .93 before the pile drinks it back — a pour, not a parking
+      var seep = 0; if (o.flow && sjA > 0.78) { var swq = Math.min(1, (sjA - 0.78) / 0.22); seep = swq * swq * (3 - 2 * swq); } // M228: the seep envelope — a smoothstep across the last stretch of arc, read per segment off its own arc fraction, so each piece of the stream seeps as IT arrives
       var girth = o.flow ? 0.92 + 0.18 * Math.pow(Math.sin(Math.PI * sjW), 1.2) : 0.8 + 0.45 * Math.pow(Math.sin(Math.PI * Math.min(1, sj)), 1.2); // M212 (P2): the flow body breathes (0.92-1.10) instead of billowing to 1.25 — width is the cloud
       var impl = o.flow ? (sjA > 0.90 ? 1 - ((sjA - 0.90) / 0.10) * 0.55 : 1) : (sj > 0.86 ? 1 - ((sj - 0.86) / 0.14) * 0.6 : 1); // M212 (P7): the funnel starts later on flow ribbons, so the tail's last act stays visible
-      var sc = girth * impl * (sj <= 0 ? 0.35 : 1);
+      var sc = girth * impl * (sj <= 0 ? 0.35 : 1) * (1 + 0.30 * seep * bloomK); // M228: the seep's calibre bloom rides the scale — the last stretch widens slightly as it thins, diffusion instead of a funnel docking
       var fi = sj <= 0 ? 0 : Math.min(1, (o.flow ? sjA : sj) / 0.05);
       var fo = o.flow ? (sjA > 0.90 ? Math.max(0, (1 - sjA) / 0.10) : 1) : (sj > 0.85 ? Math.max(0, (1 - sj) / 0.15) : 1); // M212 (P7): fade lives in the last tenth now
-      var op = peak * fi * fo;
+      var op = peak * fi * fo * (1 - 0.78 * seep * seepK); // M228: the seep's alpha ease — the stream thins INTO the deck across its last stretch; the M212 (P7) last-tenth fade still closes what remains
       var ang = Math.atan2(ty, tx) * 57.2958 + rotJit + (o.flow ? 0 : Math.sin(u * o.wfreq + segPhase) * 5); // M195: the segment's long axis rides the tangent; M212: flow ribbons drop the per-segment wobble (boiling cue)
       var landFlat = o.flow ? (sjA > 0.90 ? 1 - ((sjA - 0.90) / 0.10) * 0.3 : 1) : 1; // M202: landing smoke flattens against the pile instead of shrinking as a ball
       frames.push({ transform: 'translate(' + (x - size / 2).toFixed(1) + 'px,' + (y - size / 2).toFixed(1) + 'px) rotate(' + ang.toFixed(1) + 'deg) scale(' + (flipX * sc * dc.stretch).toFixed(3) + ',' + (flipY * sc * dc.squash * landFlat).toFixed(3) + ')', opacity: +op.toFixed(3), offset: u });
@@ -5989,6 +6015,7 @@ function spawnStreams(fromIdx, toIdx, n) {
     var durScale = Math.min(1.3, Math.max(0.85, dist / 620));
     var flight = calm ? 750 : (1250 + Math.random() * 300) * durScale;
     fxFlightMs = flight;
+    var fanPh = Math.random() * 6.283; // M228: this volley's arrival-fan rotation — the pattern is deterministic per stream, the volley never lands the same way twice
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
       var dur = flight * (0.88 + Math.random() * 0.3);
@@ -5997,7 +6024,7 @@ function spawnStreams(fromIdx, toIdx, n) {
       if (sideK && Math.random() < 0.3) sideK = -sideK;
       var wScale = (0.8 + 0.5 * (count > 1 ? k / (count - 1) : 0.5)) * (0.85 + Math.random() * 0.3) * Math.min(1.28, Math.max(0.92, dist / 640));
       var laneK = count > 1 ? (k - (count - 1) / 2) * 30 * laneScale : 0;
-      var P = ribbonPath(src, dst, { jitter: 1.6, wander: [60, 210], skim: true, lift: 1, side: sideK, wScale: wScale, lane: laneK, oOff: { x: pxu * laneK * 0.55, y: pyu * laneK * 0.55 } }); // M216 (Q4): the origin fans with the lane — the volley leaves across the emblem's shoulders as a sheaf
+      var P = ribbonPath(src, dst, { jitter: 1.6, wander: [60, 210], skim: true, lift: 1, side: sideK, wScale: wScale, lane: laneK, oOff: { x: pxu * laneK * 0.55, y: pyu * laneK * 0.55 }, dOff: faceFan(k, count, 40, 22, fanPh) }); // M216 (Q4): the origin fans with the lane — the volley leaves across the emblem's shoulders as a sheaf // M228: and the arrival fans across the afflicted deck's face/edge zone (a 40x22 ellipse on the pile chip's centre) — each stream seeps into its own point of the deck
       spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 12 : 22) * segScale), lag: 0.32, dur: dur, delay: delay, size: (40 + (Math.random() + Math.random()) * 8) * boost, opacity: 0.26 * (0.82 + Math.random() * 0.36), ease: 1.35, writhe: calm ? 5 : 11, wfreq: 9 + Math.random() * 4, waveK: 6.5, halo: true, underlay: undK }); // M212 (P1/P2) + M216 (Q1): a triangular size draw (40-56 — top capped at the old max, variance in the middle) and a per-ribbon opacity identity, so no two siblings are the same stream
       if (delay + dur > maxEnd) maxEnd = delay + dur;
     }
@@ -6036,7 +6063,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     var laneScaleD = Math.min(1.35, Math.max(1, distD / 540));
     var segScaleD = Math.min(1.3, Math.max(1, distD / 560));
     var undD = Math.min(1, Math.max(0, (distD - 430) / 380)) * (calm ? 0.6 : 1);
-    var dxd = dst.x - src.x, dyd = dst.y - src.y, dld = Math.hypot(dxd, dyd) || 1; var pxd = -dyd / dld, pyd = dxd / dld; // M216 (Q4): the drain's unit perpendicular — its origins fan along it
+    var fanPhD = Math.random() * 6.283; // M228: this drain's tear-out fan rotation — the M216 (Q4) unit perpendicular is retired with its 1D lane fan (see the oOff below)
     var layer = document.createElement('div');
     layer.className = 'fx-vapor fx-nightmare';
     document.body.appendChild(layer);
@@ -6047,7 +6074,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
       var sideD = count > 1 ? (k % 2 === 0 ? 1 : -1) : 0;
       if (sideD && Math.random() < 0.3) sideD = -sideD;
       var laneD = count > 1 ? (k - (count - 1) / 2) * 20 * laneScaleD : 0;
-      var P = ribbonPath(src, dst, { jitter: 0.6, wander: [20, 88], skim: false, lift: 0.55, side: sideD, wScale: 0.85 + 0.35 * (count > 1 ? k / (count - 1) : 0.5), lane: laneD, oOff: { x: pxd * laneD * 0.8, y: pyd * laneD * 0.8 } }); // M216 (Q4): the drain's knot (measured 9x12px for 3 streams) opens with the lane
+      var P = ribbonPath(src, dst, { jitter: 0.6, wander: [20, 88], skim: false, lift: 0.55, side: sideD, wScale: 0.85 + 0.35 * (count > 1 ? k / (count - 1) : 0.5), lane: laneD, oOff: faceFan(k, count, 38, 20, fanPhD) }); // M228 SUPERSEDES the M216 (Q4) perpendicular lane fan at this end: the drain now tears out across the afflicted deck's whole face/edge zone (a 38x20 ellipse on the pile chip's centre) on the golden spiral — two-dimensional face coverage in the same spread band the 1D fan measured, not a line of exits along one axis
       spawnRibbon(layer, P, { flow: true, segs: Math.round((calm ? 10 : 16) * segScaleD), lag: 0.27, dur: dur, delay: delay, size: 38 + (Math.random() + Math.random()) * 7, opacity: 0.28 * (0.85 + Math.random() * 0.3), ease: 1.8, writhe: calm ? 3 : 7, wfreq: 11 + Math.random() * 4, waveK: 7, halo: true, underlay: undD }); // M212 (P1/P2) + M216 (Q1/Q4): same discipline as the plant
       if (delay + dur > maxEnd) maxEnd = delay + dur;
     }

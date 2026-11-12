@@ -338,9 +338,26 @@
             border-radius:10px; padding:9px 12px; font-size:14px; margin:8px 0; }
   .banner.blocking { background:rgba(255,93,115,.14); border-color:#ff5d73; color:#ffc4cd; }
   .banner.info { background:rgba(87,182,255,.1); border-color:#57b6ff; color:#cdeaff; }
-  #log { background:rgba(0,0,0,.35); border:1px solid rgba(200,170,255,.18); border-radius:10px; padding:8px 12px; max-height:58px; overflow-y:auto; font-size:12px;
-         font-size:12.5px; line-height:1.55; max-height:110px; overflow-y:auto; color:#cfc2ee; }
+  #log { background:rgba(0,0,0,.35); border:1px solid rgba(200,170,255,.18); border-radius:10px; padding:8px 12px; overflow-y:auto;
+         font-size:12.5px; line-height:1.55; max-height:110px; color:#cfc2ee; }
   #log .drain { color:#f0b3ff; font-weight:700; } #log .good { color:#9df0b6; } #log .bad { color:#ff9dab; }
+  /* M224: THE BATTLE LOG, RETHOUGHT (Jesse playtest, 2026-11-12: the Recent
+     events window was "fucking silly sized" — the old sheet's stray 52px cap
+     left 50px of readable content, ~2.5 lines, over a 1,000px log). The log
+     sheet is now a tall flex column (.logbox): the heading, then the log
+     flex-grown to fill everything down to the pinned Close. #log.loglist
+     out-specifies the base cap; the log scrolls internally (momentum) at a
+     reading size, entries as .logline blocks with .turnsep turn markers. */
+  .overlay .box.logbox { display:flex; flex-direction:column; height:min(88dvh, 840px); max-height:88dvh; text-align:left; }
+  .overlay .box.logbox h2 { flex:none; }
+  .overlay .box.logbox .big { flex:none; }
+  #log.loglist { flex:1 1 auto; min-height:0; max-height:none; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+    font-size:14.5px; line-height:1.6; padding:10px 14px; scrollbar-width:thin; scrollbar-color:rgba(200,170,255,.35) transparent; }
+  #log.loglist::-webkit-scrollbar { width:5px; }
+  #log.loglist::-webkit-scrollbar-thumb { background:rgba(200,170,255,.35); border-radius:3px; }
+  #log.loglist .logline { padding:2px 0; }
+  #log.loglist .turnsep { margin:10px 0 4px; padding-top:8px; border-top:1px solid rgba(200,170,255,.16);
+    font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#a793d6; text-align:center; }
   .msg { text-align:center; color:#ffe1a8; font-size:13.5px; min-height:20px; margin:4px 0; }
   .overlay { position:fixed; inset:0; background:rgba(8,5,16,.86); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; overflow-y:auto; } .overlay > * { margin:auto; } /* M125: a panel taller than the screen scrolls from its top instead of centering into the void */
   .overlay .box { background:var(--box); border:1.5px solid var(--title); border-radius:16px; padding:24px; max-width:440px; width:100%; text-align:center; }
@@ -467,7 +484,6 @@
   .field .actions { position:absolute; right:3px; top:50%; transform:translateY(-50%); flex-direction:column; align-items:stretch; z-index:6; margin:0; }
   .field .actions button { box-shadow:0 4px 14px rgba(0,0,0,.55); padding:13px 20px; font-size:15.5px; }
   @media (min-width:700px){ .field { padding-right:104px; } }
-  #log { max-height:52px; }
   /* M190: THE NIGHTMARE LEAP — the plant volley is volumetric vapor, not
      drawn lines: one fixed layer holds JS-flown smoke wisps (WAAPI
      transform/opacity only). Screen blend drops the sprite's black ground
@@ -5330,7 +5346,7 @@ const FX_ART = {"smoke":"data:image/webp;base64,UklGRgpRAABXRUJQVlA4IP5QAADQ9QGd
 var G = null, humanIdx = 0, aiIdx = 1;
 var mode = 'menu'; // menu | mulligan | main | targeting | attackSelect | blocking | aiTurn | over
 var titleDismissed = false; // M94: the press-start landing stands until the first tap or key
-var uiLog = [], lastEngineLog = 0, msg = '';
+var uiLog = [], uiLogTurn = [], lastEngineLog = 0, msg = ''; // M224: uiLogTurn stamps each entry 'turn:side' at say() time — the log sheet's turn separators read it
 var redrawSet = new Set(), pendingUid = null;
 var sacrificePick = false, pendingTargets = [], pendingFirst = null; // M113: alt-cost picks + multi-target casts · M172: pendingFirst holds a pair cast's first pick
 var attackSet = new Set(), blockMap = {}, blockPick = null, aiAttackers = [];
@@ -5346,7 +5362,7 @@ var $app = document.getElementById('app');
 var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
 function D(inst) { return CARDS[inst.cardId]; }
 function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
-function say(t, cls) { uiLog.push(cls ? '<span class="' + cls + '">' + esc(t) + '</span>' : esc(t)); if (uiLog.length > 80) uiLog.shift(); }
+function say(t, cls) { uiLog.push(cls ? '<span class="' + cls + '">' + esc(t) + '</span>' : esc(t)); uiLogTurn.push((typeof G !== 'undefined' && G) ? (G.turnNumber + ':' + (G.active === humanIdx ? 'you' : 'foe')) : ''); if (uiLog.length > 80) { uiLog.shift(); uiLogTurn.shift(); } }
 function flushEngineLog() {
   if (!G) return;
   while (lastEngineLog < G.log.length) {
@@ -7520,7 +7536,7 @@ function sheetHtml() {
   return '<div class="overlay" onclick="closeSheet()"><div class="box" style="max-width:340px" onclick="event.stopPropagation()"><h2 style="text-align:center">⏸ Paused</h2>' +
     '<button class="big" onclick="closeSheet()">▶ Resume</button>' +
     '<button class="ghost big" onclick="toggleMute();showSheet()">' + (muted ? '🔇 Sound: off' : '🔊 Sound: on') + '</button>' +
-    '<div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px"><span style="font-size:13px;color:#c4b6e8">Volume</span><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="flex:1;accent-color:#8b5cf6"></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;margin:4px 0 2px;min-height:44px"><span style="font-size:13px;color:#c4b6e8">Volume</span><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="flex:1;height:28px;accent-color:#8b5cf6"></div>' +
     '<button class="ghost big" onclick="toggleCalm()">' + (calm ? '🍃 Motion: calm (animations near-instant)' : '🎞️ Motion: full') + '</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;showLog()">📜 Battle log</button>' +
     '<button class="ghost big" onclick="sheetOpen=false;openIntro()">🎓 How to play</button>' +
@@ -7533,9 +7549,27 @@ function sheetHtml() {
 function showLog() { try { sfx('click'); } catch (e) {} logOpen = true; try { var lb = document.querySelector('.pause-btn'); if (lb) lb.classList.remove('hasnews'); } catch (e) {} render(); }
 function closeLog() { logOpen = false; render(); }
 function logHtml() {
-  return '<div class="overlay" onclick="closeLog()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">📜 Recent events</h2><div id="log" style="font-size:13px;line-height:1.55">' +
-    (uiLog.length ? uiLog.slice().reverse().map(function (l) { return l; }).join('<br>') : 'Nothing has happened yet.') +
-    '</div><button class="big" onclick="closeLog()">Close</button></div></div>';
+  /* M224: entries render CHRONOLOGICALLY (oldest first, newest last) as
+     block lines — render()'s standing scroll-to-bottom (end of render)
+     lands the reader on the newest entry, older entries one scroll up.
+     A quiet separator marks each turn change, read off the uiLogTurn
+     stamps say() leaves; entries keep their inner colour spans (.drain
+     pink for Nightmare plants, .good/.bad) untouched. */
+  var body = 'Nothing has happened yet.';
+  if (uiLog.length) {
+    var parts = [], lastStamp = '';
+    for (var li = 0; li < uiLog.length; li++) {
+      var stamp = uiLogTurn[li] || '';
+      if (li > 0 && stamp && stamp !== lastStamp) {
+        var sp = stamp.split(':');
+        parts.push('<div class="turnsep">Turn ' + sp[0] + (sp[1] === 'you' ? ' — your move' : ' — their move') + '</div>');
+      }
+      if (stamp) lastStamp = stamp;
+      parts.push('<div class="logline">' + uiLog[li] + '</div>');
+    }
+    body = parts.join('');
+  }
+  return '<div class="overlay" onclick="closeLog()"><div class="box logbox" onclick="event.stopPropagation()"><h2 style="text-align:center">📜 Recent events</h2><div id="log" class="loglist">' + body + '</div><button class="big" onclick="closeLog()">Close</button></div></div>';
 }
 /* M39: the matchup splash — every top card game frames the duel before
    it starts. Body-level so re-renders can't kill it mid-show. */
@@ -7682,6 +7716,7 @@ function inspectHtml() {
     '<button class="big" onclick="closeInspect()">Close</button></div>' + '<button class="polishtoggle" onclick="event.stopPropagation();toggleInspectPolish()">' + (inspectPolished ? '✦ Normal form' : '✦ Polished form') + '</button>' + assocHtmlFor(d, inst.cardId) + '</div>';
 }
 function captureScroll() { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; return n ? n.scrollTop : 0; } catch (e) { return 0; } }
+function captureLogScroll() { try { var n = document.getElementById('log'); if (!n || !n.scrollHeight) return null; return { top: n.scrollTop, gap: n.scrollHeight - n.clientHeight - n.scrollTop }; } catch (e) { return null; } } // M224: the reader's place in the battle log, captured before a re-render rebuilds the sheet
 function restoreScroll(y) { try { var n = document.querySelector ? document.querySelector('.pagescroll') : null; if (n) n.scrollTop = y; } catch (e) {} }
 var concedeArmed = false;
 function concede() { if (!G || G.winner !== null) return; if (!concedeArmed) { concedeArmed = true; msg = 'Concede? Tap the flag again to yield the match.'; render(); return; } concedeArmed = false; window.__conceded = true; G.winner = aiIdx; try { finishCheck(); } catch (e) {} render(); }
@@ -7835,6 +7870,7 @@ function render() {
   } catch (e) {}
 }
 function renderBody() {
+  var logKeep = captureLogScroll(); // M224: null when the log sheet is closed (a fresh open snaps to the newest entry)
   if (endArmFresh) endArmFresh = false; else endArmed = false;
   applyCalm();
   clearTargetLine();
@@ -8024,7 +8060,8 @@ function renderBody() {
   fanfareWatch();
   playRevealWatch();
   draftWatch();
-  var log = document.getElementById('log'); if (log) log.scrollTop = log.scrollHeight;
+  var log = document.getElementById('log');
+  if (log) { if (logKeep && logKeep.gap > 4) log.scrollTop = Math.min(logKeep.top, Math.max(0, log.scrollHeight - log.clientHeight)); else log.scrollTop = log.scrollHeight; } // M224: a reader scrolled up KEEPS their place across re-renders (entries only append below); a reader at the bottom stays pinned to the newest entry
 }
 var reviewField = false;
 var leagueCrossed = null, leagueSeen = false, endStep = 'result'; // M132: the post-match flow state
@@ -8870,7 +8907,7 @@ function startMatch() {
   gameOpts.autoDraft = humanIdx === 0 ? [false, true] : [true, false]; // the human picks their drafts; the AI takes its best
   G = new Game(gameOpts);
   if (climbBonus) G.players[aiIdx].life += climbBonus;
-  uiLog = []; lastEngineLog = 0; msg = ''; recordCounted = false;
+  uiLog = []; uiLogTurn = []; lastEngineLog = 0; msg = ''; recordCounted = false;
   speech = {}; speechFlags = {};
   introUntil = Date.now() + 2100; // M128: the heroes take the field
   setTimeout(function () { try { if (G && G.winner === null && mode !== 'menu' && mode !== 'collection' && mode !== 'builder') render(); } catch (e) {} }, 2180);

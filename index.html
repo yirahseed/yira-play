@@ -7870,7 +7870,7 @@ function fitAllText() {
     document.querySelectorAll('.bigcard .ctext').forEach(function (el) { fitTextEl(el, 10.5); });
     /* M71: board emblem names and hero names join the fit pass — no more
        ellipsis-clipped names ('Thornwood Ar…', 'Karg the Unbroke'). */
-    document.querySelectorAll('.emblem-name').forEach(function (el) { fitTextEl(el, 7); });
+    document.querySelectorAll('.emblem-name').forEach(function (el) { fitTextEl(el, 5.5); }); // M232: the floor drops to 5.5 — at SIX creatures on a board (Guenhwyvar's exception) long names (Frontline Paladin, Knight Militant) still hit the old 7px floor and ellipsised; the M71 no-clipped-names law holds at six-up too
     document.querySelectorAll('.hcluster .hname').forEach(function (el) { fitTextEl(el, 6); });
     /* M77: draft-offer cards fit deeper — a long signature name or text
        shrinks until it truly fits instead of clipping (Jesse screenshot). */
@@ -8653,7 +8653,7 @@ function collectionGroupsHtml() {
      8 heroes (Karg, Aldric, Sura, Suyin, Cassian, Mother Sibilance, Volric,
      Zareth) rendered in NO group and the library showed 461 of 474. Every
      hero who holds signatures gets a section, in roster order, forever. */
-  var SIG_TITLES = { weaver: '🌑 SIGNATURES — UMBRA', controller: '👁️ SIGNATURES — THE PATIENT WARDEN', keeper: '🌿 SIGNATURES — THE VERDANT KEEPER', graven: '🪦 SIGNATURES — MORVANE', unchained: '👻 SIGNATURES — SISTER VESPER', unbridled: '🐗 SIGNATURES — BRAM', torchbearer: '☄️ SIGNATURES — KAEL', bruiser: '🔥 SIGNATURES — KARG THE UNBROKEN', banneret: '⚔️ SIGNATURES — SER ALDRIC', sibilance: '🐍 SIGNATURES — MOTHER SIBILANCE', tidemother: '🐙 SIGNATURES — SURA', skydancer: '🕊️ SIGNATURES — SUYIN', palelord: '🦇 SIGNATURES — CASSIAN', stormconduit: '⚡ SIGNATURES — VOLRIC', hallchampion: '🐆 SIGNATURES — ZARETH' };
+  var SIG_TITLES = { weaver: '🌑 SIGNATURES — UMBRA', controller: '👁️ SIGNATURES — THE WARDEN', keeper: '🌿 SIGNATURES — THE VERDANT KEEPER', graven: '🪦 SIGNATURES — MORVANE', unchained: '👻 SIGNATURES — SISTER VESPER', unbridled: '🐗 SIGNATURES — BRAM', torchbearer: '☄️ SIGNATURES — KAEL', bruiser: '🔥 SIGNATURES — KARG THE UNBROKEN', banneret: '⚔️ SIGNATURES — SER ALDRIC', sibilance: '🐍 SIGNATURES — MOTHER SIBILANCE', tidemother: '🐙 SIGNATURES — SURA', skydancer: '🕊️ SIGNATURES — SUYIN', palelord: '🦇 SIGNATURES — CASSIAN', stormconduit: '⚡ SIGNATURES — VOLRIC', hallchampion: '🐆 SIGNATURES — ZARETH' };
   var sigGroups = '', sigAnchored = false;
   Object.keys(HEROES).forEach(function (h) { var hs = byHero(h); if (!hs.length) return; sigGroups += group(SIG_TITLES[h] || ((SIGILS[h] || '◆') + ' SIGNATURES — ' + HEROES[h].name.toUpperCase()), hs, 'sig', sigAnchored ? undefined : 'grp-sig'); sigAnchored = true; });
   return sigGroups +
@@ -8985,7 +8985,7 @@ function renderBuilder() {
     (activeId ? '<button class="ghost" onclick="builderUseDefault()">Use default deck instead</button>' : '') +
     '</div>' : '') +
     '</div>' +
-    '<div class="panel"><h2>Card pool</h2><div class="collbar"><div class="filterrow"><input id="bq" type="text" placeholder="\uD83D\uDD0E Search the pool \u2014 name, text, school\u2026" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="flex:1;min-width:130px;box-sizing:border-box;margin:0;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px">' + builderFilterHtml(pool.length) + '</div>' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:6px 0 0">' + pool.length + ' cards match.</p>' : '') + '</div>' +
+    '<div class="panel"><h2>Card pool</h2><div class="collbar"><div class="filterrow"><input id="bq" type="text" placeholder="\uD83D\uDD0E Search the pool \u2014 name, text, school\u2026" value="' + esc(builderQuery) + '" oninput="setBuilderQuery(this.value)" style="flex:1;min-width:130px;box-sizing:border-box;margin:0;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px">' + builderFilterHtml(pool.length) + '</div>' + (builderQuery ? '<p style="color:#a793d6;font-size:12.5px;margin:6px 0 0">' + (pool.length === 1 ? '1 card matches.' : pool.length + ' cards match.') + '</p>' : '') + '</div>' +
     group('SIGNATURES', pool.filter(function (id) { return CARDS[id].signatureFor === heroId; })) +
     group('CREATURES', pool.filter(function (id) { return CARDS[id].type === 'creature' && !CARDS[id].signatureFor; })) +
     group('SPELLS', pool.filter(function (id) { return CARDS[id].type === 'spell' && !CARDS[id].signatureFor; })) +

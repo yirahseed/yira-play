@@ -734,7 +734,7 @@
      button shared its class, rendered beneath it and could never be
      tapped; that button is retired and the log lives in the pause sheet. */
   body { touch-action: manipulation; }
-  .shell.stage .pause-btn { position:absolute; top:8px; left:8px; z-index:11; width:38px; height:38px; border-radius:50%; padding:0; font-size:17px; line-height:38px; text-align:center; background:rgba(16,10,28,.78); border:1.5px solid rgba(220,180,100,.55); box-shadow:0 2px 8px rgba(0,0,0,.5); }
+  .shell.stage .pause-btn { position:absolute; top:8px; left:8px; z-index:11; width:44px; height:44px; border-radius:50%; padding:0; font-size:18px; line-height:44px; text-align:center; background:rgba(16,10,28,.78); border:1.5px solid rgba(220,180,100,.55); box-shadow:0 2px 8px rgba(0,0,0,.5); }
   .shell.stage .pile { font-size:12px; }
   .shell.stage .msg { align-self:center; background:rgba(16,10,28,.55); border:1px solid rgba(200,170,255,.25); border-radius:999px; padding:2px 14px; margin:2px auto; position:relative; z-index:8; }
   .shell.stage #log { position:absolute; top:106px; left:50%; transform:translateX(-50%); width:min(440px,88%); max-height:42px; overflow:hidden; pointer-events:none; background:linear-gradient(rgba(10,6,18,.55), rgba(10,6,18,.18)); border:none; border-radius:10px; z-index:9; font-size:11px; text-align:center; }
@@ -1486,7 +1486,7 @@
   .fchip.clear { border-color:rgba(255,255,255,.25); color:#cfc4f2; }
   .jumpmeta { display:flex; gap:5px; align-items:center; flex-wrap:nowrap; overflow-x:auto; margin-top:6px; scrollbar-width:none; }
   .jumpmeta::-webkit-scrollbar { display:none; }
-  .jumpmeta button { padding:5px 10px; font-size:12px; white-space:nowrap; flex:none; }
+  .jumpmeta button { padding:8px 10px; font-size:12px; white-space:nowrap; flex:none; }
   .jumpcap { font-size:11.5px; color:#a793d6; flex:none; }
   .filtersheet .box { max-width:430px; max-height:88vh; overflow-y:auto; text-align:left; }
   .filtersheet h2 { text-align:center; }
@@ -7644,7 +7644,7 @@ function introHtml() {
     ['🃏', 'Your hand lives at the bottom', 'Your hand rests fanned at the bottom of the field — <b>tap it</b> to bring it up, and tap the field to rest it again. <b>Hold</b> any card to read it big, and <b>drag</b> it onto the field to play it. Dragging is the only way to play.'],
     ['⚔️', 'Combat, the Coliseum way', 'Play creatures, then attack when you are ready. The <b>defender chooses the blockers</b>, one for one — and damage is <b>permanent</b>: a wounded creature stays wounded. Attackers never tap, so your creatures can attack and still block next turn.'],
     ['🪤', 'Traps, mana, and falling', 'Mana grows and refills every turn. <b>Traps</b> are armed face-down on your turn and fire themselves when their moment comes; their mana stays reserved while they wait \u2014 and an unfired trap stands down at the start of your next turn, freeing its mana. A hero falls at 0 life — or by ending their own turn with an empty deck.'],
-    ['📖', 'When a word puzzles you', 'Cards speak in emblems. Any keyword — Ward, Armor, Relentless — is explained in plain words in the <b>Glossary</b>: find it on the hub, or in the ⏸ pause menu mid-duel.'],
+    ['📖', 'When a word puzzles you', 'Cards speak in emblems. Any keyword — Ward, Armor, Relentless — is explained in plain words in the <b>Glossary</b>: find it on the hub, or in the ☰ pause menu mid-duel.'],
     ['🗿', 'Artifacts hold their ground', 'Some cards are <b>artifacts</b> — they do not fight. They take a dock along the field\'s right edge and stay there. Tap yours on your turn to fire its effect: most hold a few <b>charges</b>, work <b>once per turn</b>, and break when the charges run dry.']
   ];
   var st = steps[introStep];
@@ -8203,7 +8203,7 @@ function settingsHtml() {
     '<label>Theme (skin)</label><select onchange="setTheme(this.value)">' + Object.keys(THEMES).map(function (id) { return '<option value="' + id + '"' + (id === theme ? ' selected' : '') + '>' + THEMES[id] + '</option>'; }).join('') + '</select>' +
     '<label>Sound</label><button class="ghost big" onclick="toggleMute()">' + (muted ? '\uD83D\uDD07 Sound: off' : '\uD83D\uDD0A Sound: on') + '</button>' +
     '<label>Motion</label><button class="ghost big" onclick="toggleCalm()">' + (calm ? '\uD83C\uDF43 Calm: on (animations near-instant)' : '\uD83C\uDF9E\uFE0F Calm: off') + '</button>' +
-    '<label>Volume</label><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="width:100%;accent-color:#8b5cf6">' +
+    '<label>Volume</label><input type="range" min="0" max="100" value="' + volume + '" oninput="setVolume(this.value)" onchange="volTick()" style="width:100%;height:28px;accent-color:#8b5cf6">' +
     '<button class="big" style="margin-top:14px" onclick="settingsOpen=false;render()">Done</button></div></div>';
 }
 function hubGo(id) { try { sfx('click'); } catch (e) {} var n = document.getElementById(id); if (n) n.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' }); }
@@ -8266,6 +8266,7 @@ var GLOSS_SYSTEMS = [
   ['\uD83E\uDE78', 'Drain', "Damage that pays the dealer back: whatever life drain takes from its target, the draining hero gains."],
   ['\u267B\uFE0F', 'Mill', "The top cards of a deck go straight into their owner\u2019s graveyard \u2014 never drawn, never played. A Nightmare buried in a milled card still wakes and drains its holder."],
   ['\uD83D\uDDA4', 'Paincast', "After you play a card with Paincast from your hand, your own hero takes damage equal to its Paincast number. A countered card exacts nothing."],
+  ['\uD83E\uDDD7', 'The Climb', 'A ten-rung ladder of duels: you lead every rung, each guardian starts with more bonus life than the last, and Umbra waits at the summit. Your place is saved between sittings \u2014 leave a run and resume it days later, exactly where you stopped.'],
   ['\uD83C\uDFAF', 'Free Spirit missions', "Veyla\u2019s calling: damage you deal to the enemy hero during your turn fills her current mission \u2014 3 the first time, then 4, then 5, each asking 1 more. The moment one fills, a Spirit joins her hand. Progress left unfinished fades when her next turn begins."],
   ['\uD83C\uDAD9\uFE0F', 'Stances', "Your land slot is a posture that lasts the whole duel, picked per hero in the deck builder: the Open Stance simply grows your mana each turn, while others feed you spells, legends, recruits, or hardier creatures."],
   ['\u23F3', 'Summoning sickness', "A creature can\u2019t attack on the turn it arrives \u2014 Haste is the exception. The \u23F3 chip on a creature marks one still under it."],
@@ -8354,7 +8355,7 @@ function renderMenu() {
     '<button class="big" onclick="openBuilder()">Open the deck builder</button></div>' : '') +
     (hubTab === 'more' ? '<div class="panel"><h2>📚 Card collection</h2>' +
     '<button class="big" onclick="openCollection()">Browse all ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' cards</button>' +
-    '<div class="record">The 1:1 library: ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly || CARDS[id].schoolStage === 1; }).length + ' playable · ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of the 466 originals recovered so far</div></div>' +
+    '<div class="record">The 1:1 library: ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly || CARDS[id].schoolStage === 1; }).length + ' playable · ' + Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' of them collectible, recovered from the 466 originals so far · the rest only ever join mid-duel</div></div>' +
     '<div class="panel"><details><summary>How it plays (30 seconds)</summary>' +
     'Each turn your mana grows by 1 and refills. Play creatures and spells, then attack <b>once</b>: the <b>defender chooses blockers, one per attacker</b>, damage is <b>permanent</b>, and attackers can still block next turn. There are no instant responses — instead you <b>arm Traps</b> with mana reserved, and they fire on their own when their condition hits.<br><br>' +
     '🌑 <b>Playing as Umbra:</b> whenever a card that did <i>not</i> start in your deck enters your hand (generated, drafted, stolen) a Nightmare is planted onto a random card in the <b>top 10</b> of the enemy deck — and again when you play it. When they draw or mill that card, the Nightmare wakes: they lose 1 life per Nightmare and you gain it. Your own draw step can hurt you the same way when enemy Umbra is planting in <i>your</i> deck. Watch the 🌑 counter on the hero bars.<br><br>' +
@@ -8541,20 +8542,22 @@ function collectionGroupsHtml() {
   var ids = Object.keys(CARDS);
   var byHero = function (h) { return ids.filter(function (id) { return CARDS[id].signatureFor === h; }); };
   var plain = function (t) { return ids.filter(function (id) { return CARDS[id].type === t && !CARDS[id].signatureFor && !CARDS[id].generatedOnly; }); };
-  return group('🌑 SIGNATURES — UMBRA', byHero('weaver'), 'sig', 'grp-sig') +
-    group('👁️ SIGNATURES — THE PATIENT WARDEN', byHero('controller'), 'sig') +
-    group('🌿 SIGNATURES — THE VERDANT KEEPER', byHero('keeper'), 'sig') +
-    group('🪦 SIGNATURES — MORVANE', byHero('graven'), 'sig') +
-    group('👻 SIGNATURES — SISTER VESPER', byHero('unchained'), 'sig') +
-    group('🐗 SIGNATURES — BRAM', byHero('unbridled'), 'sig') +
-    group('☄️ SIGNATURES — KAEL', byHero('torchbearer'), 'sig') +
+  /* M225: the signature sections are DATA-DRIVEN — the hand-written list
+     silently stopped at the M116-era roster, so 13 signature cards across
+     8 heroes (Karg, Aldric, Sura, Suyin, Cassian, Mother Sibilance, Volric,
+     Zareth) rendered in NO group and the library showed 461 of 474. Every
+     hero who holds signatures gets a section, in roster order, forever. */
+  var SIG_TITLES = { weaver: '🌑 SIGNATURES — UMBRA', controller: '👁️ SIGNATURES — THE PATIENT WARDEN', keeper: '🌿 SIGNATURES — THE VERDANT KEEPER', graven: '🪦 SIGNATURES — MORVANE', unchained: '👻 SIGNATURES — SISTER VESPER', unbridled: '🐗 SIGNATURES — BRAM', torchbearer: '☄️ SIGNATURES — KAEL', bruiser: '🔥 SIGNATURES — KARG THE UNBROKEN', banneret: '⚔️ SIGNATURES — SER ALDRIC', sibilance: '🐍 SIGNATURES — MOTHER SIBILANCE', tidemother: '🐙 SIGNATURES — SURA', skydancer: '🕊️ SIGNATURES — SUYIN', palelord: '🦇 SIGNATURES — CASSIAN', stormconduit: '⚡ SIGNATURES — VOLRIC', hallchampion: '🐆 SIGNATURES — ZARETH' };
+  var sigGroups = '', sigAnchored = false;
+  Object.keys(HEROES).forEach(function (h) { var hs = byHero(h); if (!hs.length) return; sigGroups += group(SIG_TITLES[h] || ((SIGILS[h] || '◆') + ' SIGNATURES — ' + HEROES[h].name.toUpperCase()), hs, 'sig', sigAnchored ? undefined : 'grp-sig'); sigAnchored = true; });
+  return sigGroups +
     group('CREATURES', plain('creature'), 'creature', 'grp-creature') +
     group('SPELLS', plain('spell'), 'spell', 'grp-spell') +
     group('TRAPS', plain('trap'), 'trap', 'grp-trap') +
     group('ARTIFACTS', plain('artifact'), 'artifact', 'grp-artifact') +
     group('✨ GENERATED ONLY — NEVER START IN A DECK', ids.filter(function (id) { return CARDS[id].generatedOnly; }), 'gen', 'grp-gen') +
     (collShown === 0 ? '<p style="color:#c4b6e8;font-size:14px;text-align:center;margin:26px 10px">No cards match those filters. <button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></p>' : '') +
-    '<p style="color:#a793d6;font-size:12.5px;margin-top:14px">Karg the Unbroken has no signature cards. Karg <i>is</i> the signature.</p>';
+    '<p style="color:#a793d6;font-size:12.5px;margin-top:14px">Korvash and Veyla have no signature cards in the recovered library.</p>'; // M225: the old footer joked that KARG had none — he holds two (Searing Chains, Ember Deathraider); the empty hooks are Korvash's and Veyla's
 }
 /* M176: the collection's completeness, made visible — a slim gold bar under
    the header count, in the collection's own idiom. Progress only; the count
@@ -8851,7 +8854,7 @@ function renderBuilder() {
     '<label>\uD83D\uDDC4\uFE0F Deck</label><select onchange="builderPickDeck(this.value)">' + (curDeck ? '' : '<option value="__new" selected>\u2726 ' + esc(builderDeckName || 'New deck') + ' (unsaved)</option>') + myDecks.map(function (dd) { return '<option value="' + dd.id + '"' + (curDeck && dd.id === curDeck.id ? ' selected' : '') + '>' + esc(dd.name) + (activeId === dd.id ? ' \u2605 active' : '') + '</option>'; }).join('') + '</select></div></div>' +
     '<label>Deck name</label><div style="display:flex;gap:8px"><input id="bdeckname" type="text" value="' + esc(builderDeckName || '') + '" onchange="builderSetDeckName(this.value)" style="flex:1;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:16px"><button class="ghost" onclick="builderRenameDeck()">Rename</button></div>' +
     '<div class="herodesc">This hero draws from ' + (HERO_SCHOOLS[heroId] || []).map(function (x) { return SCHOOL_META[x].icon + ' ' + SCHOOL_META[x].name; }).join(' and ') + ' — the pool below holds only those schools, neutral cards, and this hero\'s own signatures.</div>' +
-    '<button class="ghost hit loadoutbtn" onclick="builderLoadoutOpen=!builderLoadoutOpen;render()">\uD83C\uDFEB ' + SCHOOLS[chosenSchool(heroId)].name + ' \u00B7 ' + STANCES[chosenStance(heroId)].name + (builderLoadoutOpen ? ' \u25B2' : ' \u25BC') + '</button>' +
+    '<button class="ghost hit loadoutbtn" onclick="builderLoadoutOpen=!builderLoadoutOpen;render()">\uD83C\uDFEB ' + (chosenSchool(heroId) ? SCHOOLS[chosenSchool(heroId)].name : 'No school') + ' \u00B7 ' + STANCES[chosenStance(heroId)].name + (builderLoadoutOpen ? ' \u25B2' : ' \u25BC') + '</button>' +
     (builderLoadoutOpen ? '<div style="margin-top:8px">' + '<label>🏫 School (three-stage chain)</label><select onchange="builderSetSchool(this.value)">' + ['none'].concat(Object.keys(SCHOOLS).filter(function (id) { return (HERO_SCHOOLS[heroId] || []).includes(CHAIN_SCHOOL[id]); })).map(function (id) { var cur = chosenSchool(heroId) || 'none'; return '<option value="' + id + '"' + (id === cur ? ' selected' : '') + '>' + (id === 'none' ? 'No school' : SCHOOLS[id].icon + ' ' + esc(SCHOOLS[id].name)) + '</option>'; }).join('') + '</select>' +
     '<div class="herodesc">' + (chosenSchool(heroId) ? esc(SCHOOLS[chosenSchool(heroId)].blurb) : 'No chain — just your 30 cards.') + '</div>' +
     '<label>🎚️ Stance (your land slot)</label><select onchange="builderSetStance(this.value)">' + Object.keys(STANCES).map(function (id) { return '<option value="' + id + '"' + (id === chosenStance(heroId) ? ' selected' : '') + '>' + STANCES[id].icon + ' ' + esc(STANCES[id].name) + '</option>'; }).join('') + '</select>' +

@@ -2555,6 +2555,13 @@ let UID = 1;
 function makeInstance(cardId, starterOwner) {
   return {
     uid: UID++, cardId, starterOwner, // player index whose starting deck it came from; null = generated
+    // M223 BIRTH-STAMP DISCIPLINE: only the Game constructor's deck build
+    // may pass a player index. EVERY instance created after construction
+    // is generated and must be stamped null — a funnel that stamps its
+    // holder's index forges a starter, and the shared didNotStart reading
+    // (entry plant, play plant, Shadowstag discount, foeStart pool) then
+    // believes the lie for the instance's whole life. Two funnels did
+    // exactly that until M223 (draftCreatureUpgrade, Embermaw deathShuffle).
     nightmares: 0, nightmareOwner: null,
     damage: 0, permPower: 0, permHealth: 0, tempPower: 0, tempHealth: 0, discount: 0, summonedTurn: -1, sneakUsed: false,
     dynP: 0, dynH: 0, doom: 0,
@@ -4442,7 +4449,7 @@ class Game {
       }
       case 'draftCreatureUpgrade': {
         const pool = Object.keys(CARDS).filter((id) => CARDS[id].type === 'creature' && !CARDS[id].generatedOnly);
-        const inst2 = makeInstance(pool[this.rng.int(pool.length)], i);
+        const inst2 = makeInstance(pool[this.rng.int(pool.length)], null); // M223: a GENERATED card — null, never the holder's index (see the birth-stamp discipline at makeInstance). This site stamped i until M223: the upgraded card then read as a deck original, so it planted on neither hand-entry nor play — Jesse's playtest defect, 2026-11-12.
         const up = this.rng.int(3);
         if (up === 0) { inst2.permPower += 1; inst2.permHealth += 1; }
         else if (up === 1) { inst2.permHealth += 3; }
@@ -4844,7 +4851,7 @@ class Game {
         // Embermaw Devil: death is just a door — copies shuffle back into the deck.
         if (def(d).deathShuffle) {
           for (let k = 0; k < def(d).deathShuffle; k++) {
-            const copy = makeInstance(d.cardId, p.idx);
+            const copy = makeInstance(d.cardId, null); // M223: death-shuffled copies are CREATED cards (the Second Sun precedent, shuffleSecondSun) — null, never the holder's index. This site stamped p.idx until M223: a copy of a stolen/generated Devil then masqueraded as a starter.
             p.deck.splice(this.rng.int(p.deck.length + 1), 0, copy);
           }
           this.log.push(`${def(d).name} shuffles ${def(d).deathShuffle} copies of itself into ${p.hero.name}'s deck`);

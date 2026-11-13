@@ -5562,6 +5562,11 @@ function playMainPhase(game, i) {
           const dressed = p.board.slice().sort((x, y) => powerOf(y) - powerOf(x))[0];
           tgt = { kind: 'creature', inst: dressed };
         }
+        else if (ad.effect && ad.effect.kind === 'draftUpgrade') { // M238 (Wrenna's Arkbow): draft an upgrade for the strongest friendly creature — the Weapon Rack's discipline; an empty field spends nothing. Until M238 this kind had NO branch in this chain: tgt stayed null, the engine refused the targetless activation ('choose a target for the artifact'), and the loop's catch swallowed the refusal — the bow was attempted every turn and never fired in AI hands (deterministic probe: m238-work/m238-probe.js — 3 attempts / 0 successes over 3 AI turns, charges unmoved at 2)
+          if (!p.board.length) continue;
+          const dressed = p.board.slice().sort((x, y) => powerOf(y) - powerOf(x))[0];
+          tgt = { kind: 'creature', inst: dressed };
+        }
         else if (ad.effect && ad.effect.kind === 'retriggerDebut') { // M187 (Panharmonicon): wake the priciest Debut among creatures summoned this turn; the woken Debut aims by targetFor, as if the creature were played again
           const cands = p.board.filter((c) => c.summonedTurn === game.turnNumber && CARDS[c.cardId].debut);
           if (!cands.length) continue;

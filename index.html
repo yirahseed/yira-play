@@ -5811,7 +5811,7 @@ function sfx(name) {
     case 'click': tone(330, 235, 0.05, 'triangle', 0.14); noiseBurst(0.03, 0.045, 3200); break; // M192: a soft wooden tick, not an 8-bit blip
     case 'trapArm': noiseBurst(0.05, 0.3, 3000); tone(900, 900, 0.05, 'square', 0.15); break;
     case 'trapFire': noiseBurst(0.025, 0.38, 4200); tone(1560, 1240, 0.05, 'square', 0.12, 0.004); noiseBurst(0.08, 0.36, 2500, 0.012); tone(1000, 300, 0.12, 'square', 0.24, 0.012); plantNoise(0.012, 0.14, 2400, 500, 0.14); break; // M195: a hard leading edge first — the snap lands before the burn. M229: the two noise crests trimmed (0.5→0.38, 0.45→0.36) — they were the overlap stack's fastest transients, outrunning the mix bus; the snap's character is unchanged, its spike is not
-    case 'attack': plantNoise(0, 0.16, 500, 1500, 0.10); if (lastCombatBlow >= 5) { noiseBurst(0.12, 0.34, 900); tone(150, 60, 0.20, 'sine', 0.55); tone(88, 38, 0.30, 'sine', 0.45, 0.02); noiseBurst(0.07, 0.32, 500, 0.09); } else if (lastCombatBlow <= 2) { noiseBurst(0.08, 0.3, 1100); tone(200, 95, 0.10, 'sine', 0.4); } else { noiseBurst(0.12, 0.4, 900); tone(160, 70, 0.16, 'sine', 0.6); } break; // M191: a rising breath before the impact. M201: the impact LAYERS by the size of the blow — a skirmish snaps light and high, a big body lands with a sub thump and a delayed second crack; the mid branch is the shipped recipe. M229: the big branch's sub tones trimmed a step (0.6→0.55, 0.5→0.45) — the overlap census named it a leading contributor
+    case 'attack': plantNoise(0, 0.16, 500, 1500, 0.10); noiseBurst(0.08, 0.22, 1100); tone(190, 100, 0.10, 'sine', 0.30); break; // M191: a rising breath before the impact. M240: the sized impact MOVED to the contact frame (the 'impact' family below, classed like the floats) — the M240 audit measured this case landing ~650ms after the first contact, an echo of the whole combat; it is now the DECLARATION voice only (breath + a light body), fired once per combat on both seats' declaration paths
     case 'block': tone(240, 180, 0.09, 'square', 0.4); noiseBurst(0.05, 0.3, 500); tone(1244, 1180, 0.14, 'sine', 0.10); tone(1866, 1800, 0.10, 'sine', 0.06, 0.01); break; // M191: a faint metal ring over the thud — the CONTACT sound, kept
     case 'guard': tone(150, 105, 0.10, 'square', 0.28); plantNoise(0, 0.10, 700, 1800, 0.05); tone(1244, 1244, 0.12, 'sine', 0.05, 0.02); if (lastBlockSize >= 5) tone(96, 60, 0.18, 'sine', 0.3, 0.01); break; // M201: GUARD UP — the moment blockers are DECLARED (the human confirms, or the foe's blockers step in against your lunge): a woody knock, a breath drawn in, a faint ring of readiness; a big body guarding adds a low brace
     case 'counter': noiseBurst(0.05, 0.12, 3600); tone(880, 110, 0.22, 'sawtooth', 0.30); break; // M229: a negation is rarer and bigger than a trap springing, yet measured the quieter of the two (peak .207 vs trapFire .472) — a leading edge and more body
@@ -5829,6 +5829,45 @@ function sfx(name) {
     case 'activate': tone(660, 660, 0.03, 'square', 0.10); tone(740, 740, 0.03, 'square', 0.10, 0.045); tone(830, 830, 0.03, 'square', 0.10, 0.09); noiseBurst(0.03, 0.08, 3000); tone(990, 1320, 0.09, 'sine', 0.10, 0.10); break; // M229: a wound mechanism — three ratchet clicks and the release. An activation is a machine working, not a spell being cast (it wore 'spell' at all three sites)
     case 'levelup': tone(196, 196, 0.24, 'sine', 0.13); tone(587, 587, 0.12, 'sine', 0.16, 0.02); tone(880, 880, 0.20, 'sine', 0.15, 0.09); noiseBurst(0.10, 0.045, 3400, 0.06); break; // M229: a chain LEVELS — root, fifth, octave, a breath of shimmer. Deliberately smaller than 'legendary': chains climb mid-match, legends arrive
     case 'summon': tone(170, 105, 0.11, 'sine', 0.34); noiseBurst(0.05, 0.10, 650); break; // M229: an arrival the hand-play sites did not voice — a foe summon, an effect-born token — the creature family at half weight; the watcher layers the school tint
+    // M240: THE IMPACT FAMILY — the contact sound, classed EXACTLY like
+    // the floats (impactClsFor mirrors floatClsFor): a 1-2 blow ticks, a
+    // 3-4 blow thocks, a 5+ blow thumps with a low sine body under it;
+    // hero targets sit a register lower, the game's biggest bodies
+    // (9+, or a 7+ blow at a hero) earn a third sub layer — run at
+    // 0.16 after the M240 mix pass: the artificial over-stack (plant
+    // x6 + trapFire + max impact + heroHurt 8) peaked 1.01, and the
+    // stack's loudest contributor yields; no other solo moved.
+    case 'impact': {
+      var icls = impactClsFor(lastImpactAmt), ivol = lastImpactHero ? 1.06 : 1;
+      if (icls === 'big') { noiseBurst(0.10, 0.30 * ivol, 800); tone(140, 52, 0.24, 'sine', 0.52 * ivol); tone(82, 36, 0.32, 'sine', 0.42 * ivol, 0.015); if (lastImpactAmt >= 9 || (lastImpactHero && lastImpactAmt >= 7)) tone(58, 30, 0.38, 'sine', 0.16, 0.03); }
+      else if (icls === 'mid') { noiseBurst(0.09, 0.30 * ivol, 950); tone(165, 74, 0.15, 'sine', 0.48 * ivol); }
+      else { noiseBurst(0.05, 0.20, 1300); tone(215, 120, 0.07, 'sine', 0.26 * ivol); }
+      break; }
+    // M240: summon tiers voiced — a heavy body (cost 5-7) blooms low
+    // under its landing ring; an epic arrival (legendary or cost 8+)
+    // swells a beat longer, a shimmer rising over the body.
+    case 'summonBloom': tone(96, 58, 0.34, 'sine', 0.26); tone(144, 96, 0.26, 'triangle', 0.10, 0.03); noiseBurst(0.20, 0.05, 420, 0.02); break;
+    case 'summonEpic': tone(82, 46, 0.52, 'sine', 0.32); tone(123, 82, 0.42, 'triangle', 0.13, 0.05); tone(660, 990, 0.40, 'sine', 0.05, 0.10); flowNoise(0.05, 0.45, 0.05, 500, 1400, 0.7); break;
+    // M240: the death wisp's breath — a soft rise married to the dot's
+    // 540ms flight home to the pile; distinct from the death puff's
+    // rattle, which stays the puff's own voice.
+    case 'wisp': flowNoise(0, 0.54, 0.045, 620, 1350, 0.85); tone(523, 880, 0.50, 'sine', 0.022); break;
+    // M240: the turn flare's chime-sweep — one clean rising figure,
+    // fired once per turn at the flare stamp, never on replays.
+    case 'flare': tone(659, 659, 0.16, 'sine', 0.11); tone(880, 880, 0.20, 'sine', 0.09, 0.07); tone(1318, 1318, 0.26, 'sine', 0.07, 0.15); flowNoise(0, 0.30, 0.028, 900, 2200, 0.6); break;
+    // M240: the settle thock — a played spell LANDS; the recipe delays
+    // itself ~0.18s so the weight arrives as the card reaches the
+    // grave, scaled by the card's cost class (the spell-play landing
+    // impact M239 cut as a visual returns here, as sound).
+    case 'settle': {
+      var scost = lastSettleCost || 0;
+      if (scost >= 6) { noiseBurst(0.10, 0.20, 700, 0.18); tone(130, 55, 0.22, 'sine', 0.34, 0.18); }
+      else if (scost >= 3) { noiseBurst(0.08, 0.16, 900, 0.18); tone(170, 85, 0.14, 'sine', 0.26, 0.18); }
+      else { noiseBurst(0.05, 0.12, 1200, 0.16); tone(210, 130, 0.08, 'sine', 0.16, 0.16); }
+      break; }
+    // M240: the foe's spell cast, heard across the board — the spell
+    // family at foe presence: darker, a step quieter, no plant breath.
+    case 'foeCast': tone(440, 660, 0.16, 'triangle', 0.20); noiseBurst(0.09, 0.10, 800); tone(196, 147, 0.20, 'sine', 0.10, 0.03); break;
     case 'choose': tone(740, 740, 0.07, 'sine', 0.14); tone(988, 988, 0.11, 'sine', 0.12, 0.055); break; // M229: a modal decision settling (scry / choice) — two quiet notes, a made decision, not a cast (it wore 'spell')
     case 'victory': tone(196, 196, 0.5, 'sine', 0.10); [392, 523, 659, 784].forEach(function (f, i) { tone(f, f, 0.22, 'triangle', 0.42, 0.05 + i * 0.12); }); tone(1568, 1568, 0.3, 'sine', 0.10, 0.55); noiseBurst(0.25, 0.05, 3600, 0.15); break; // M201: the two stingers rebuilt as ONE motif — both open on the same low bell body (196) and step at the same 0.12 spacing; victory climbs the ladder and crowns, defeat (below) descends it. Same world; the win is brighter
     case 'defeat': tone(196, 196, 0.5, 'sine', 0.10); [392, 330, 262, 196].forEach(function (f, i) { tone(f, f, 0.25, 'triangle', 0.38, 0.05 + i * 0.12); }); tone(98, 49, 0.7, 'sine', 0.20, 0.15); flowNoise(0, 0.6, 0.05, 500, 160, 0.3); break; // M201: defeat descends the shared ladder into a deeper sub than before, the air going out of it
@@ -5970,6 +6009,20 @@ var lastCombatBlow = 2; // M201: the biggest body in the current combat declarat
 var lastBlockSize = 0; // M201: the biggest blocker body in the current combat — the guard-up knock scales with it
 var lastDeathClass = 'mid'; // M201: size class of the most recent creature death — the rattle speaks in it
 var sndPlayedUid = null; // M229: the card the hand-play sites just voiced — the watcher exempts its arrival/artifact from a second sound, then clears it
+/* M240: the sound-feel loop — ear and eye share ONE weight language.
+   impactClsFor(amt) mirrors floatClsFor exactly (1-2 plain, 3-4 mid,
+   5+ big) so a blow SOUNDS the size it LOOKS; the helpers set the class
+   vars the sfx cases read, the pattern lastCombatBlow established. */
+var lastImpactAmt = 0, lastImpactHero = false;
+var lastSettleCost = 0;
+var sndHeroImpactAt = [0, 0]; // M240: when each seat's hero last took a CONTACT impact — the watcher's heroHurt yields to it (one blow, one sound)
+var pendingFoeCasts = []; // M240: foe spell instances graveFxWatch caught leaving the foe's hand for the grave — the foe-cast cue's evidence
+var pendingImpactAmt = 0; // M240: the biggest watcher-floated creature blow this pass — boardFxWatch collects, soundWatch voices it once
+var lastWispSfxAt = 0; // M240: wisp-breath throttle for multi-death passes
+var lastFlareTurn = -1; // M240: the turn number the flare chime last sang for — the gem discipline, applied to sound
+function impactClsFor(amt) { return amt >= 5 ? 'big' : (amt >= 3 ? 'mid' : ''); }
+function sfxImpact(amt, hero) { lastImpactAmt = amt || 0; lastImpactHero = !!hero; sfx('impact'); }
+function sfxSettle(cost) { lastSettleCost = cost || 0; sfx('settle'); }
 var shakeUid = null;
 /* M60 (Jesse): mana-shortage errors never become text — the faded card IS
    the message. The failed card just shakes. Other errors still speak. */
@@ -6734,7 +6787,7 @@ function boardFxWatch() {
         var r2 = el2.getBoundingClientRect();
         if (r2.width || r2.height) {
           spawnBoardFloat(r2.left + r2.width / 2, r2.top + r2.height / 2, (dd > 0 ? '-' : '+') + Math.abs(dd), dd > 0 ? floatClsFor(dd) : 'heal');
-          if (dd > 0) pendingDmgFlash.push(uid);
+          if (dd > 0) { pendingDmgFlash.push(uid); if (dd > pendingImpactAmt && !(window.__combatAge <= 1 && window.__combatUids && window.__combatUids[uid])) pendingImpactAmt = dd; } // M240: the floated blow joins the impact family (soundWatch voices it once) — combat blows exempt under the m84Watch suppression rule: animateCombat already voiced them at the contact
         }
       }
     });
@@ -6765,6 +6818,7 @@ function spawnDeathPuff(x, y, ownerIdx) {
       dot.className = 'fx-wispdot';
       dot.style.left = x + 'px'; dot.style.top = y + 'px';
       document.body.appendChild(dot);
+      if (Date.now() - lastWispSfxAt > 170) { lastWispSfxAt = Date.now(); try { sfx('wisp'); } catch (e) {} } // M240: the wisp breathes as it travels — throttled, so a board-clear sings one rise rather than a chorus; Calm has no wisp visual, so it has no wisp voice either
       var pt = anchorPoint('pile-' + ownerIdx, null);
       if (pt && dot.animate) {
         var wdx = pt.x - x, wdy = pt.y - y;
@@ -6998,6 +7052,7 @@ function checkPhaseSweep() {
     node.textContent = phase === 'me' ? 'Your Turn' : "Opponent's Turn";
     document.body.appendChild(node);
     if (phase === 'me' && !calm) { var bf239 = document.querySelector ? document.querySelector('.bfig.me') : null; if (bf239) { bf239.classList.add('turnflare'); setTimeout(function () { bf239.classList.remove('turnflare'); }, 1000); } } // M239: your hero flares as your turn lands
+    if (phase === 'me' && G.turnNumber !== lastFlareTurn) { lastFlareTurn = G.turnNumber; try { sfx('flare'); } catch (e) {} } // M240: the flare's chime-sweep — the sweep's own transition guard makes it once per phase change; the turn number belts it against replays. Sound is not Calm-gated (draw and mana sing under Calm too); only the flare's light is
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, phase === 'foe' ? 1750 : 1300); // M198: the foe sweep is slower — it gets a longer stage
   } catch (e) {}
 }
@@ -7080,7 +7135,7 @@ function graveFxWatch() {
       Object.keys(prev).forEach(function (uid) {
         if (nowHeld[uid] || flew >= 3) return;
         var inst = prev[uid];
-        if (p.graveyard.indexOf(inst) >= 0) { spawnGraveFlight(p.idx, inst, flew * 70); flew++; }
+        if (p.graveyard.indexOf(inst) >= 0) { if (p.idx !== humanIdx && mode !== 'mulligan' && D(inst).type === 'spell') pendingFoeCasts.push(inst); spawnGraveFlight(p.idx, inst, flew * 70); flew++; } // M240: a foe spell leaving the foe's hand for the grave IS a cast — this watcher is the one place that sees it (the engine logs no uniform play line); soundWatch voices it as 'foeCast'
       });
       graveFxHeld[i] = nowHeld;
     });
@@ -7140,10 +7195,11 @@ function soundWatch() {
   if (!G) return;
   graveFxWatch(); // M198: hand->grave transitions, caught against the pre-render DOM
   boardFxWatch();
+  if (pendingImpactAmt > 0) { var pia240 = pendingImpactAmt; pendingImpactAmt = 0; try { sfxImpact(pia240, false); } catch (e) {} } // M240: spell/effect damage on creatures speaks once per pass, in the biggest blow's class — it floated in silence before
   try { // trap-arm click: your artifact row just grew
     if (!G.__artCounts) G.__artCounts = G.players.map(function (p) { return p.artifacts.length; });
     G.players.forEach(function (p, i) {
-      if (p.artifacts.length > G.__artCounts[i] && p.idx === humanIdx) { var newArt = p.artifacts[p.artifacts.length - 1]; if (!newArt || String(newArt.uid) !== String(sndPlayedUid)) sfx('artifact'); } // M229: ONE artifact family — an effect-gained artifact sounds here in the same voice; a hand-played one already sounded at its play site (the raw square blip is retired)
+      if (p.artifacts.length > G.__artCounts[i]) { var newArt = p.artifacts[p.artifacts.length - 1]; if (p.idx === humanIdx) { if (!newArt || String(newArt.uid) !== String(sndPlayedUid)) sfx('artifact'); } else sfx('artifact'); } // M229: ONE artifact family — an effect-gained artifact sounds here in the same voice; a hand-played one already sounded at its play site (the raw square blip is retired). M240: the foe's artifact plays join the same voice — the row growing is a clean signal on both seats
       G.__artCounts[i] = p.artifacts.length;
     });
   } catch (e) {}
@@ -7170,7 +7226,7 @@ function soundWatch() {
         if (sndSnap.life[p.idx] > 0 && p.life <= 0) { try { sfx('heroFall'); } catch (e) {} } // M195: the fall itself gets its sting, before any fanfare
         figFx.hurt[p.idx] = true;
         spawnHeroFloat(p.idx, '-' + (sndSnap.life[p.idx] - p.life), 'bad', sndSnap.life[p.idx] - p.life);
-        lastHurtAmt = sndSnap.life[p.idx] - p.life; try { sfx('heroHurt'); } catch (e) {} // M191: damage has a sound now, scaled by the blow
+        lastHurtAmt = sndSnap.life[p.idx] - p.life; try { if (Date.now() - (sndHeroImpactAt[p.idx] || 0) > 1500) sfx('heroHurt'); } catch (e) {} // M191: damage has a sound now, scaled by the blow. M240: a blow the contact impact already voiced does not sound twice — the float and freeze still fire; only the duplicate voice yields
         if (lastHurtAmt > maxHeroDrop) maxHeroDrop = lastHurtAmt; if (p.life <= 0) heroFell = true; // M239
         if (!speechFlags['hurt' + p.idx] && p.life > 0 && p.life <= Math.ceil(p.hero.life / 4)) {
           speechFlags['hurt' + p.idx] = true;
@@ -7198,13 +7254,28 @@ function soundWatch() {
   if (s.nightmareLifeDrained > sndSnap.drained) { var dDrain = s.nightmareLifeDrained - sndSnap.drained; sfxDrain(dDrain); var wv = G.players.find(function (p) { return p.hero.passive === 'weave'; }); if (wv) { figFx.flare = wv.idx; spawnDrainWisps(G.opp(wv.idx), wv.idx, dDrain); } }
   if (s.cardsCountered > sndSnap.countered) { sfx('counter'); trapReveal(); }
   else if (s.trapsTriggered > sndSnap.traps) { sfx('trapFire'); trapReveal(); }
+  try { // M240: the foe's spell casts, voiced once per pass in the biggest cast's school — graveFxWatch's hand->grave evidence (mills never enter the held set; armed traps stay in it until they fire, and a fired trap is the trapFire branch's moment). A countered cast belongs to the counter branch above, not this one
+    if (pendingFoeCasts.length) {
+      var foeCastsNow = pendingFoeCasts; pendingFoeCasts = [];
+      if (!(s.cardsCountered > sndSnap.countered)) {
+        var bigFoeCast = foeCastsNow[0];
+        foeCastsNow.forEach(function (fc) { if ((D(fc).cost || 0) > (D(bigFoeCast).cost || 0)) bigFoeCast = fc; });
+        sfx('foeCast'); schoolTint(D(bigFoeCast));
+      }
+    }
+  } catch (e) {}
   try { // M229: arrivals the hand-play sites did not already voice — foe summons and effect-born tokens — take one soft summon cue per pass, tinted by the first such arrival's school. boardFxWatch (above) refreshes pendingArrivals for exactly one watch pass, so the cue fires once
     if (pendingArrivals && pendingArrivals.length) {
+      var arrFirst = null, arrTier = 0; // M240: the pass's biggest arrival tier — 0 plain, 1 heavy (cost 5-7), 2 epic (legendary or cost 8+)
       for (var ari = 0; ari < pendingArrivals.length; ari++) {
         if (String(pendingArrivals[ari]) === String(sndPlayedUid)) continue;
+        if (!arrFirst) arrFirst = pendingArrivals[ari];
+        G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(pendingArrivals[ari])) { var ad240 = D(c); var at240 = (ad240.legendary || ad240.cost >= 8) ? 2 : (ad240.cost >= 5 ? 1 : 0); if (at240 > arrTier) arrTier = at240; } }); });
+      }
+      if (arrFirst) {
         sfx('summon');
-        G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(pendingArrivals[ari])) schoolTint(D(c)); }); });
-        break;
+        if (arrTier === 2) sfx('summonEpic'); else if (arrTier === 1) sfx('summonBloom'); // M240: the tier layer under the cue — a heavy body blooms low, an epic swells
+        G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(arrFirst)) schoolTint(D(c)); }); });
       }
     }
   } catch (e) {}
@@ -8309,9 +8380,9 @@ function m84Watch() {
       }
     });
     window.__dmgSnap = fresh;
+    var lifeSnap = window.__lifeSnap || {}, freshLife = {};
+    G.players.forEach(function (p) { freshLife[p.idx] = p.life; });
     if (!((window.__combatAge || 0) <= 1)) {
-      var lifeSnap = window.__lifeSnap || {}, freshLife = {};
-      G.players.forEach(function (p) { freshLife[p.idx] = p.life; });
       G.players.forEach(function (p) {
         var beforeL = lifeSnap[p.idx];
         if (beforeL != null && freshLife[p.idx] !== beforeL) {
@@ -8321,8 +8392,8 @@ function m84Watch() {
           if (hel) floatNum(hel, (dl > 0 ? '+' : '') + dl, dl > 0 ? 'heal' : (dl <= -4 ? 'big' : '')); // M134: heavy spell/effect damage to a hero reads big too
         }
       });
-      window.__lifeSnap = freshLife;
     }
+    window.__lifeSnap = freshLife; // M240 (loop-3 correction): the snap refreshes on EVERY pass, exactly as __dmgSnap above — it used to refresh only outside the combat window, so a combat hero blow the gate correctly suppressed re-floated as a ghost (-6 again, ~1.4s after the combat, nothing happening) on the next render. The gate still owns the float; the snap now always absorbs
     var foeTraps = G.players[aiIdx].traps.length;
     if (window.__foeTraps != null && foeTraps > window.__foeTraps) { var fds = document.querySelectorAll('.trapslivers i'); var last = fds && fds[fds.length - 1]; if (last) last.classList.add('justarmed'); } // M185: the arm-in flash rides the new sliver, the tiles are gone
     window.__foeTraps = foeTraps;
@@ -9876,7 +9947,7 @@ function clickHand(uid) {
     pendingUid = uid; pendingFirst = null; mode = 'targeting'; if (pspec2) msg = pairStepMsg(d, 1); render(); return;
   }
   sndPlayedUid = uid; // M229: voiced here — the watcher exempts this card's arrival/artifact from a second sound
-  try { G.playCard(humanIdx, uid, null); handOpen = false; sfx(d.type === 'creature' ? 'creature' : d.type === 'artifact' ? 'artifact' : 'spell'); schoolTint(d); say('You play ' + d.name + '.'); } catch (e) { msg = errMsg(e, uid); } // M229: artifact plays take the artifact voice (was the generic 'play'); every play carries its school tint
+  try { G.playCard(humanIdx, uid, null); handOpen = false; sfx(d.type === 'creature' ? 'creature' : d.type === 'artifact' ? 'artifact' : 'spell'); schoolTint(d); if (d.type === 'creature') { if (d.legendary || d.cost >= 8) sfx('summonEpic'); else if (d.cost >= 5) sfx('summonBloom'); } else if (d.type === 'spell') sfxSettle(d.cost); say('You play ' + d.name + '.'); } catch (e) { msg = errMsg(e, uid); } // M229: artifact plays take the artifact voice (was the generic 'play'); every play carries its school tint. M240: a hand-played creature carries its tier layer (the watcher exempts this uid, so it sounds once); a played spell settles by its cost class
   if (G.pendingDraft && G.pendingDraft.player === humanIdx) mode = 'draftPick';
   if (G.pendingUpgradeDraft && G.pendingUpgradeDraft.player === humanIdx) mode = 'upgradePick'; // M234: a cast can open an upgrade draft (Animal Arrow's creature is internal, but the Arkbow class of effect answers here too)
   if (G.pendingScry && G.pendingScry.player === humanIdx) mode = 'scryPick';
@@ -9986,7 +10057,7 @@ function resolveTarget(target) {
   clearTargetLine();
   var d = D(G.players[humanIdx].hand.find(function (c) { return c.uid === pendingUid; }));
   sndPlayedUid = pendingUid; // M229: as at the untargeted site — voiced here, exempt in the watcher
-  try { G.playCard(humanIdx, pendingUid, target); sfx(d && d.type === 'creature' ? 'creature' : d && d.type === 'artifact' ? 'artifact' : 'spell'); schoolTint(d); say('You play ' + (d ? d.name : 'a card') + '.'); } catch (e) { msg = errMsg(e, pendingUid); } // M229: a targeted cast wore 'spell' whatever it was — a targeted creature now lands as a creature, an artifact as an artifact
+  try { G.playCard(humanIdx, pendingUid, target); sfx(d && d.type === 'creature' ? 'creature' : d && d.type === 'artifact' ? 'artifact' : 'spell'); schoolTint(d); if (d && d.type === 'creature') { if (d.legendary || d.cost >= 8) sfx('summonEpic'); else if (d.cost >= 5) sfx('summonBloom'); } else if (d && d.type === 'spell') sfxSettle(d.cost); say('You play ' + (d ? d.name : 'a card') + '.'); } catch (e) { msg = errMsg(e, pendingUid); } // M229: a targeted cast wore 'spell' whatever it was — a targeted creature now lands as a creature, an artifact as an artifact
   pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; mode = (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : (G.pendingUpgradeDraft && G.pendingUpgradeDraft.player === humanIdx) ? 'upgradePick' : (G.pendingScry && G.pendingScry.player === humanIdx) ? 'scryPick' : (G.pendingChoice && G.pendingChoice.player === humanIdx) ? 'choicePick' : 'main'; flushEngineLog(); if (!finishCheck()) render(); // M174: choicePick joins the post-play landings // M234: upgradePick joins them
 }
 function cancelTarget() { clearTargetLine(); pendingUid = null; pendingTargets = []; pendingFirst = null; sacrificePick = false; panPick = null; panDef = null; mode = 'main'; render(); }
@@ -10267,14 +10338,23 @@ async function animateCombat(list) {
         var foeHero = heroHit ? G.players[item.dir < 0 ? aiIdx : humanIdx] : null;
         var lethal = !!(foeHero && foeHero.life - item.power <= 0);
         floatNum(tgt, '-' + item.power, heroHit ? ('big' + (lethal ? ' lethal' : '')) : floatClsFor(item.power));
+        var contactBack = 0;
         if (!heroHit && item.target) {
           var blkInst = null;
           G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(item.target)) blkInst = c; }); });
           if (blkInst) {
             var backPow = D(blkInst).power + blkInst.permPower;
-            if (backPow > 0) { floatNum(el, '-' + backPow, floatClsFor(backPow)); el.classList.add('hitflash'); setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(el), 400); }
+            if (backPow > 0) { contactBack = backPow; floatNum(el, '-' + backPow, floatClsFor(backPow)); el.classList.add('hitflash'); setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(el), 400); }
           }
         }
+        /* M240: the contact SOUNDS, at the contact frame, inside the
+           hit-stop — the blow lands in its own class (impactClsFor
+           mirrors the float's), a blocker's answer clangs back in the
+           'block' voice, and a hero blow stamps its seat so the
+           watcher's heroHurt yields to this one sound. */
+        sfxImpact(item.power, heroHit);
+        if (contactBack > 0) sfx('block');
+        if (heroHit && foeHero) sndHeroImpactAt[foeHero.idx] = Date.now();
         if (lethal && tgt.appendChild) { var mb = document.createElement('span'); mb.className = 'miniburst'; mb.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>'; tgt.appendChild(mb); setTimeout(function () { if (mb.parentNode) mb.parentNode.removeChild(mb); }, 1100); }
         setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(tgt), 400);
         stopMs = lethal ? 130 : (item.power >= 5 ? 95 : (heroHit ? 70 : (item.power >= 4 ? 50 : 0)));
@@ -10295,13 +10375,14 @@ async function declareAttack() {
   var foeBlockUids = Object.keys(blockers).map(function (k) { return blockers[k]; });
   lastBlockSize = G.players[aiIdx].board.reduce(function (m, c) { return foeBlockUids.indexOf(c.uid) >= 0 ? Math.max(m, D(c).health + c.permHealth) : m; }, 0);
   if (names) sfx('guard'); // M201: the foe's blockers step in as the lunge begins
+  sfx('attack'); // M240: the declaration breath sounds AT the declaration, as the foe's path always did — it post-dated the whole combat here
   var canAnimate = attackers.some(function (c) { var el = emblemEl(c.uid); return el && typeof el.animate === 'function'; });
   if (canAnimate) {
     busyAnim = true;
     await animateCombat(attackers.map(function (c) { return { uid: c.uid, power: D(c).power + c.permPower, target: blockers[c.uid] || 'hero', dir: -1 }; }));
     busyAnim = false;
   }
-  try { G.declareCombat(humanIdx, attackers.map(function (c) { return c.uid; }), blockers); sfx('attack'); say('You attack with ' + attackers.length + '. The enemy blocks ' + names + ' of them.', 'bad'); } // M219: the uid list is the attackers array itself now \u2014 it carries Guenhwyvar when the Aid answered
+  try { G.declareCombat(humanIdx, attackers.map(function (c) { return c.uid; }), blockers); say('You attack with ' + attackers.length + '. The enemy blocks ' + names + ' of them.', 'bad'); } // M219: the uid list is the attackers array itself now \u2014 it carries Guenhwyvar when the Aid answered
   catch (e) { msg = errMsg(e); }
   attackSet = new Set(); mode = 'main'; figFx.lunge = 'me'; flushEngineLog(); if (!finishCheck()) render();
 }
@@ -10382,7 +10463,8 @@ async function runAiTurn() {
     say('Enemy attacks with ' + attackers.map(function (a) { return D(a).name; }).join(', ') + '!', 'bad');
     render();
     await new Promise(function (res) { blockResolver = res; });
-    if (Object.keys(blockMap).length) sfx('block');
+    // M240: no pre-animation 'block' clang here any more — the block
+    // voice moved INTO animateCombat, where it lands on the contact.
     await animateCombat(attackers.map(function (a) { return { uid: a.uid, power: D(a).power + a.permPower, target: blockMap[a.uid] || 'hero', dir: 1 }; }));
     try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), blockMap); }
     catch (e) { say('Blocking fumbled (' + e.message + ') — attacks go through unblocked.', 'bad'); try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), {}); } catch (e2) {} }
@@ -10603,7 +10685,7 @@ render();
       ghostTilt = 0; ghostLastX = e.clientX; // M239
       document.body.appendChild(ghost);
       document.body.classList.add('yira-dragging');
-      sfx('whoosh');
+      sfx('tick'); sfx('whoosh'); // M240: a faint lift tick leads the whoosh — the grab itself answers now
     }
     if (dragging && ghost) {
       ghost.style.left = e.clientX + 'px'; ghost.style.top = (e.clientY - 58) + 'px';

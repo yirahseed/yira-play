@@ -1553,13 +1553,15 @@
   .jumpmeta::-webkit-scrollbar { display:none; }
   .jumpmeta button { padding:8px 10px; font-size:12px; white-space:nowrap; flex:none; }
   .jumpcap { font-size:11.5px; color:#a793d6; flex:none; }
+  @media (orientation: landscape) and (max-height: 540px) { .collbar .jumpmeta { display:none; } } /* M241: landscape — the sticky bar measured 101px of the 402px viewport (25%); the jump row folds away there (groups stay one scroll down, the Filters sheet is untouched) */
   .filtersheet .box { max-width:430px; max-height:88vh; overflow-y:auto; text-align:left; }
   .filtersheet h2 { text-align:center; }
   .colllegend.oneline { flex-wrap:nowrap; overflow:hidden; }
   .colllegend.oneline span { white-space:nowrap; }
   .loadoutbtn { width:100%; text-align:left; padding:9px 12px; font-size:13.5px; margin:2px 0 4px; min-height:44px; } /* M237: the builder's loadout fold is a real 44 tall (M225 measured 36 in landscape; it scrolls with the page, so the height is affordable) */
   /* M211: the first-run steps — hero rows and deck rows */
-  .frhero { display:flex; gap:10px; align-items:center; width:100%; text-align:left; padding:8px 10px; margin-top:8px; }
+  .frhero { display:flex; gap:10px; align-items:center; width:100%; text-align:left; padding:8px 10px; margin-top:8px; animation:tileIn .32s ease backwards; } /* M241: the first-run roster deals in (per-row delay is stamped inline, capped 252ms) */
+  @media (prefers-reduced-motion: reduce) { .frhero { animation:none; } }
   .frava { width:52px; height:52px; flex:none; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; background:rgba(124,80,220,.18); font-size:26px; }
   .frmain { font-size:13px; line-height:1.45; color:#cfc4f2; }
   .frmain b { color:#fff; font-size:14.5px; }
@@ -8179,7 +8181,9 @@ function showVsSplash() {
     sfx('legendary');
     var vsGone = false;
     function vsDismiss() { if (vsGone) return; vsGone = true; node.classList.add('out'); setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 380); }
-    var vsTimer = setTimeout(vsDismiss, 5000);
+    // M241: a returning player (>=5 games on this device) has seen the face-off — their splash yields sooner; a new player’s first reads keep the full 5s. Tap dismisses either way.
+    var vsMs = 5000; try { var vrec = record(); if (vrec.w + vrec.l >= 5) vsMs = 2600; } catch (e) {}
+    var vsTimer = setTimeout(vsDismiss, vsMs);
     node.addEventListener('click', function () { clearTimeout(vsTimer); vsDismiss(); });
   } catch (e) {}
 }
@@ -8207,24 +8211,24 @@ function firstRunOpenBuilder() { openBuilder(); } // the deck step waits behind 
 function firstRunSkip() { firstRunStage = null; render(); }
 function firstRunHtml() {
   if (firstRunStage === 'hero') {
-    return '<div class="overlay"><div class="box" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\u2694\uFE0F Choose your hero</h2>' +
+    return '<div class="overlay"><div class="box flowin" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\u2694\uFE0F Choose your hero</h2>' +
       '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">Every duel starts before the first card. Your hero\u2019s passive is always on \u2014 pick the one whose plan fits you. You can change heroes any time from the hub.</p>' +
-      Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id) {
+      '<button class="ghost big" style="margin:0 0 6px" onclick="firstRunSkip()">Look around the hub first \u2192</button>' +
+      Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id, hi) {
         /* M220 (2026-11-11): the row thumb now reads the hero's PORTRAIT_POS focal like every other consumer — the bare centered crop showed Volric's and Zareth's torsos, their faces sitting above the middle band. */
         var p = (typeof PORTRAITS !== 'undefined' && PORTRAITS[id]) ? '<img src="' + PORTRAITS[id] + '" alt="" style="width:100%;height:100%;object-fit:cover;object-position:' + ((typeof PORTRAIT_POS !== 'undefined' && PORTRAIT_POS[id] || ['50% 15%'])[0]) + '">' : heroMedallion(id);
-        return '<button class="ghost frhero" onclick="firstRunPickHero(\'' + id + '\')"><span class="frava">' + p + '</span><span class="frmain"><b>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</b> \u00B7 ' + HEROES[id].life + ' life<br><span>' + (HERO_SCHOOLS[id] || []).map(function (sc) { return SCHOOL_META[sc].icon + ' ' + SCHOOL_META[sc].name; }).join(' + ') + ' \u2014 ' + esc(HEROES[id].blurb) + '</span></span></button>';
-      }).join('') +
-      '<button class="ghost big" style="margin-top:10px" onclick="firstRunSkip()">Look around the hub first \u2192</button></div></div>';
+        return '<button class="ghost frhero" style="animation-delay:' + Math.min(hi * 28, 252) + 'ms" onclick="firstRunPickHero(\'' + id + '\')"><span class="frava">' + p + '</span><span class="frmain"><b>' + (SIGILS[id] || '') + ' ' + esc(HEROES[id].name) + '</b> \u00B7 ' + HEROES[id].life + ' life<br><span>' + (HERO_SCHOOLS[id] || []).map(function (sc) { return SCHOOL_META[sc].icon + ' ' + SCHOOL_META[sc].name; }).join(' + ') + ' \u2014 ' + esc(HEROES[id].blurb) + '</span></span></button>';
+      }).join('') + '</div></div>';
   }
   if (firstRunStage === 'deck') {
     var v = loadVault(); var decks = vaultDecksFor(v, setup.me); var actId = v.active[setup.me] || null;
     var houseName = (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[setup.me]) || 'Default deck';
-    function deckRow(id, name, sub) { return '<button class="ghost frdeck" onclick="firstRunUseDeck(' + (id ? '\'' + id + '\'' : 'null') + ')"><b>\u2694\uFE0F Fight with: ' + esc(name) + '</b><br><span>' + sub + '</span></button>'; }
-    return '<div class="overlay"><div class="box" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\uD83C\uDCCF Choose your deck</h2>' +
-      '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">' + (SIGILS[setup.me] || '') + ' <b>' + esc(HEROES[setup.me].name) + '</b> fights with the deck you pick \u2014 the tuned default, or one of your own from the vault. Build or change a deck any time in the deck builder.</p>' +
+    function deckRow(id, name, sub) { return '<button class="big frdeck" onclick="firstRunUseDeck(' + (id ? '\'' + id + '\'' : 'null') + ')"><b>\u2694\uFE0F Fight with: ' + esc(name) + '</b><br><span style="font-size:12.5px;font-weight:400;color:#e6dcff">' + sub + '</span></button>'; }
+    return '<div class="overlay"><div class="box flowin" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\uD83C\uDCCF Choose your deck</h2>' +
+      '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">' + (SIGILS[setup.me] || '') + ' <b>' + esc(HEROES[setup.me].name) + '</b> fights with the deck you pick \u2014 the tuned default, or one of your own from the vault.</p>' +
       deckRow(null, houseName + ' (default)', actId ? 'The house build.' : 'The house build \u2014 in use now.') +
       decks.map(function (d) { return deckRow(d.id, d.name, d.cards.length + ' cards' + (actId === d.id ? ' \u00B7 in use now' : ' \u00B7 from your vault')); }).join('') +
-      '<button class="big" style="margin-top:10px" onclick="firstRunOpenBuilder()">\u270F\uFE0F Build or edit a deck first</button>' +
+      '<button class="ghost big" style="margin-top:10px" onclick="firstRunOpenBuilder()">\u270F\uFE0F Build or edit a deck first</button>' +
       '<button class="ghost big" onclick="firstRunStage=\'hero\';render()">\u2190 Choose a different hero</button>' +
       '<button class="ghost big" onclick="firstRunSkip()">Look around the hub first \u2192</button></div></div>';
   }
@@ -8240,7 +8244,7 @@ function introHtml() {
     ['🗿', 'Artifacts hold their ground', 'Some cards are <b>artifacts</b> — they do not fight. They take a dock along the field\'s right edge and stay there. Tap yours on your turn to fire its effect: most hold a few <b>charges</b>, work <b>once per turn</b>, and break when the charges run dry.']
   ];
   var st = steps[introStep];
-  return '<div class="overlay"><div class="box introsheet" style="text-align:center;max-width:430px">' +
+  return '<div class="overlay"><div class="box introsheet flowin" style="text-align:center;max-width:430px">' +
     '<div class="intromedal"><span>' + st[0] + '</span></div><h2>' + st[1] + '</h2>' +
     '<p style="color:#d9ccff;font-size:14.5px;line-height:1.55">' + st[2] + '</p>' +
     '<div style="margin:10px 0;font-size:12px;color:#a793d6">' + steps.map(function (_, i) { return i === introStep ? '●' : '○'; }).join(' ') + '</div>' +
@@ -8752,10 +8756,10 @@ function gameOverHtml() {
   var lgNow = leagueOf(record().w);
   var leagueLine = '<span style="color:#c4b6e8;font-size:13px">' + lgNow.icon + ' ' + lgNow.name + ' League · ' + record().w + ' wins' + (lgNow.next ? ' · ' + lgNow.next[1] + ' ' + lgNow.next[2] + ' at ' + lgNow.next[0] : '') + '</span>';
   return box(won ? '🏆 Victory' : '💀 Defeat', (won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.') + '<br>' + leagueLine,
+    '<button class="big" onclick="rematch()">Rematch</button>' +
     '<div class="endrow"><button class="ghost big" onclick="showLog()">📜 Battle recap</button>' +
     '<button class="ghost big" onclick="reviewField=true;render()">👁 Review the field</button></div>' +
-    '<button class="big" onclick="rematch()">Rematch</button>' +
-    '<div class="endrow"><button class="ghost big" onclick="rematchSwapped()">' + (humanIdx === 0 ? 'Rematch — enemy leads' : 'Rematch — you lead') + '</button>' +
+        '<div class="endrow"><button class="ghost big" onclick="rematchSwapped()">' + (humanIdx === 0 ? 'Rematch — enemy leads' : 'Rematch — you lead') + '</button>' +
     '<button class="ghost big" onclick="rematchAsFoe()">🎭 Play as ' + esc(HEROES[setup.foe].name) + '</button></div>' +
     '<button class="ghost big" onclick="backToMenu()">Change matchup</button>');
 }
@@ -9146,7 +9150,11 @@ function hubTile(ico, t, sub, onclick, locked) {
 }
 /* M115 (Jesse): the account FRAME — a local profile shell with the real
    on-device record inside it. No server, no sign-in, nothing collected;
-   when accounts arrive, this frame reads from there instead. */
+   when accounts arrive, this frame reads from there instead.
+   M241: the PvP tile no longer stands in the hub grid — it held the
+   prime first slot as a locked promise a v1 player cannot use; the
+   gates sheet (pvpHtml) and its state stay in the code, dormant, and
+   the tile returns when friend codes do. */
 function hubHtml(rec) {
   var lg = leagueOf(rec.w); var stk = 0; try { stk = (JSON.parse(localStorage.getItem('yira_streak') || '{"c":0}').c) || 0; } catch (e) {}
   var ava = (typeof PORTRAITS !== 'undefined' && PORTRAITS[setup.me]) ? '<img src="' + PORTRAITS[setup.me] + '" alt="">' : (SIGILS[setup.me] || '\u2726');
@@ -9159,7 +9167,6 @@ function hubHtml(rec) {
     '<div class="hubtiles">' +
     hubTile('\u2694\uFE0F', 'Quick Match', 'Face the AI \u2014 your heroes, your decks', 'hubShow(\'play\')', false) +
     hubTile('\uD83E\uDDD7', 'The Climb', climbParked() ? ('Paused at rung ' + climbParked() + ' of ' + CLIMB_RUNGS.length + ' — resume anytime') : (climbBest() > 0 ? ('Best: rung ' + climbBest() + ' of ' + CLIMB_RUNGS.length + ' \u00B7 Umbra waits at the summit') : (CLIMB_RUNGS.length + ' rungs. Umbra waits at the summit')), 'hubShow(\'play\')', false) +
-    hubTile('\uD83D\uDC65', 'PvP', 'Friend codes first, then matchmaking', 'pvpOpen=true;render()', true) +
     hubTile('\uD83C\uDCCF', 'Deck Builder', 'Your 30, your way', 'hubShow(\'decks\')', false) +
     hubTile('\uD83D\uDCDA', 'Card Library', Object.keys(CARDS).filter(function (id) { return !CARDS[id].generatedOnly; }).length + ' cards \u2014 search & filter them all', 'hubShow(\'collection\')', false) +
     hubTile('\uD83C\uDF93', 'How to Play', 'Thirty seconds to your first duel', 'openIntro()', false) +
@@ -9281,7 +9288,7 @@ function renderMenu() {
     (function () { var nb = climbBest(); if (nb >= CLIMB_RUNGS.length) return ''; var nx = CLIMB_RUNGS[nb]; return '<p style="color:#c4b6e8;font-size:12.5px;text-align:center;margin:6px 0 0">Next guardian: ' + esc(HEROES[nx.hero].name) + ' — ' + esc(HEROES[nx.hero].blurb || '') + (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[nx.hero] ? ' Running \u201C' + esc(DECK_NAMES[nx.hero]) + '.\u201D' : '') + '</p>'; })() +
     (climbBest() ? '<div class="record">Best height on this device: ' + climbBest() + ' of ' + CLIMB_RUNGS.length + ' rungs cleared' + (climbBest() >= CLIMB_RUNGS.length ? ' — SUMMITED 🏔️' : '') + '</div>' : '') +
     (function () { var pk = climbParked(); if (!pk) return ''; var rr = CLIMB_RUNGS[pk - 1]; return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0"><button class="big" onclick="resumeClimb()">▶ Resume at rung ' + pk + ' — ' + esc(HEROES[rr.hero].name) + '</button><span style="font-size:12px;color:#a793d6">Your place is saved on this device.</span></div>'; })() +
-    '<button class="big" onclick="startClimb()">' + (climbParked() ? '↺ Start fresh at rung 1' : 'Start The Climb') + '</button>' +
+    '<button class="' + (climbParked() ? 'ghost big' : 'big') + '" onclick="startClimb()">' + (climbParked() ? '↺ Start fresh at rung 1' : 'Start The Climb') + '</button>' +
     (climbBest() > 1 ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center"><span style="font-size:12px;color:#a793d6">Practice a cleared rung:</span>' + CLIMB_RUNGS.slice(0, climbBest()).map(function (r, i) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="startClimbAt(' + (i + 1) + ')">↺ Rung ' + (i + 1) + '</button>'; }).join('') + '</div>' : '') + '</div>' : '') +
     (hubTab === 'decks' ? '<div class="panel"><h2>🃏 Deck builder</h2>' +
     '<p style="color:#c4b6e8;font-size:13.5px;margin:4px 0 10px">Build and name decks in your vault \u2014 the active one fights in matches and The Climb. The AI keeps its tuned default decks.</p>' +

@@ -291,6 +291,8 @@
               text-shadow:0 1px 4px rgba(0,0,0,.9); animation:floatUp .95s ease-out forwards; z-index:6; pointer-events:none; }
   /* M135: hero-bound damage reads BIG; the killing blow reads biggest, in gold */
   .floatnum.big { font-size:27px; animation:floatUpBig 1.15s ease-out forwards; }
+  .floatnum.mid { font-size:22px; animation:floatUpBig 1.05s ease-out forwards; }
+  .floatnum.fx-boardfloat { position:fixed; z-index:63; transform:translate(-50%,-50%); }
   .floatnum.big.lethal { font-size:35px; color:#ffd76a; text-shadow:0 0 14px rgba(255,180,60,.75), 0 2px 5px rgba(0,0,0,.9); }
   @keyframes floatUpBig { 0% { transform:translate(-50%,0) scale(.55); opacity:0; } 28% { transform:translate(-50%,-10px) scale(1.18); opacity:1; } 100% { transform:translate(-50%,-44px) scale(1); opacity:0; } }
   .miniburst { position:absolute; left:50%; top:30%; pointer-events:none; z-index:7; }
@@ -585,6 +587,7 @@
   .fx-herofloat { position:fixed; z-index:66; transform:translate(-50%,-50%); font-size:24px; font-weight:900; color:#ff8fa3;
     text-shadow:0 2px 6px rgba(0,0,0,.9); pointer-events:none; animation:floatUp 1.05s ease-out forwards; }
   .fx-herofloat.good { color:#9df0b6; }
+  .fx-herofloat.big { font-size:32px; animation:floatUpBig 1.3s ease-out forwards; }
   .herobar.hero-hit { animation:heroHit .45s ease-out; }
   .herobar.hero-hit .portrait { animation:heroShake .4s ease-in-out; }
   @keyframes heroHit { 0%{ filter:brightness(1.7) } 100%{ filter:brightness(1) } }
@@ -639,11 +642,11 @@
   .box.flowin .stattile:nth-child(4) { animation-delay:.15s } .box.flowin .stattile:nth-child(5) { animation-delay:.2s }
   .box.flowin .stattile:nth-child(6) { animation-delay:.25s }
   #collGroups .mcard { transition:transform .12s ease-out; } /* the scrub tilt's smoothing (JS below) */
-  .gems-col i:not(.off) { animation:gemIn .35s ease both; }
-  .gems-col i:nth-of-type(2){ animation-delay:.04s } .gems-col i:nth-of-type(3){ animation-delay:.08s }
-  .gems-col i:nth-of-type(4){ animation-delay:.12s } .gems-col i:nth-of-type(5){ animation-delay:.16s }
-  .gems-col i:nth-of-type(6){ animation-delay:.20s } .gems-col i:nth-of-type(7){ animation-delay:.24s }
-  .gems-col i:nth-of-type(8){ animation-delay:.28s } .gems-col i:nth-of-type(9){ animation-delay:.32s }
+  /* M239: the cascade belongs to the turn, not to every render — the
+     blanket replay (measured: 128 gemIn starts in one audit window)
+     diluted the turn-start moment into noise. Only newly-lit gems
+     animate now, stamped post-render by applyGemFills. */
+  .gems-col i.gemfill { animation:gemIn .38s ease both; }
   @keyframes gemIn { 0%{ transform:scale(.4); filter:brightness(2.2) } 100%{ transform:scale(1); filter:brightness(1) } }
   .actions button.pass-ready { animation:passPulse 1.15s ease-in-out infinite; }
   .passive-emblem { position:absolute; right:12px; top:calc(50% - 114px); z-index:6; width:44px; height:44px; border-radius:50%;
@@ -660,7 +663,6 @@
      100% frame is the .off resting state the gem then keeps. */
   .gems-col i.gemspent { animation:gemSpent .55s ease-out; }
   @keyframes gemSpent { 0% { background:#efe6ff; box-shadow:0 0 10px rgba(205,175,255,1); transform:scale(1.55); filter:brightness(2.3); } 100% { background:rgba(255,255,255,.14); box-shadow:none; transform:scale(1); filter:brightness(1); } }
-  .gems-col i:not(.off):not(.held) { animation:gemIn .35s ease both; }
   .fx-death { position:fixed; z-index:65; transform:translate(-50%,-50%); font-size:27px; pointer-events:none; animation:deathPuff .72s ease-out forwards; }
   @keyframes deathPuff { 0%{ opacity:.95; transform:translate(-50%,-50%) scale(.7) } 100%{ opacity:0; transform:translate(-50%,-74%) scale(1.7) } }
   .summon-in { animation:summonIn .45s ease-out; }
@@ -801,6 +803,24 @@
   .emblem.ready-glow .emblem-head { box-shadow:0 0 0 2px rgba(255,205,90,.85), 0 0 14px rgba(255,180,60,.45); }
   .emblem.summon-in .emblem-head::after { content:''; position:absolute; inset:-4px; border-radius:50%; border:2px solid rgba(200,170,255,.8); animation:summonRing .55s ease-out both; pointer-events:none; }
   @keyframes summonRing { from { transform:scale(.6); opacity:.9; } to { transform:scale(1.45); opacity:0; } }
+  /* M239: summon weight tiers — mid-cost bodies land heavy (a slower
+     settle from below), epic arrivals bloom in; the landing ring sells
+     the weight at the floor. Transform/opacity/filter only. */
+  .emblem.summon-heavy { animation:summonInHeavy .58s cubic-bezier(.2,1.4,.4,1) both; }
+  @keyframes summonInHeavy { 0% { transform:translateY(10px) scale(.5); filter:brightness(2.4) } 62% { transform:translateY(0) scale(1.07); filter:brightness(1.25) } 100% { transform:translateY(0) scale(1); filter:brightness(1) } }
+  .emblem.summon-epic { animation:summonInEpic .7s cubic-bezier(.2,1.3,.4,1) both; }
+  @keyframes summonInEpic { 0% { transform:translateY(16px) scale(.42); filter:brightness(3) blur(3px) } 55% { transform:translateY(0) scale(1.1); filter:brightness(1.5) blur(0) } 100% { transform:translateY(0) scale(1); filter:brightness(1) } }
+  .fx-landring { position:fixed; z-index:41; width:118px; height:34px; margin:-17px 0 0 -59px; border-radius:50%; border:3px solid rgba(255,225,168,.85); pointer-events:none; animation:landRing .55s ease-out forwards; }
+  @keyframes landRing { 0% { transform:scale(.35); opacity:.95 } 100% { transform:scale(1.25); opacity:0 } }
+  .fx-landring.tint-ember { border-color:rgba(255,150,90,.9) } .fx-landring.tint-grave { border-color:rgba(170,130,255,.9) }
+  .fx-landring.tint-dawn { border-color:rgba(255,225,150,.9) } .fx-landring.tint-tides { border-color:rgba(120,200,255,.9) }
+  .fx-landring.tint-worldroot { border-color:rgba(140,230,160,.9) }
+  /* M239: the death wisp — a soul-light that flies to the graveyard
+     pile instead of a plain vanish (WAAPI-driven; calm skips it). */
+  .fx-wispdot { position:fixed; z-index:64; width:12px; height:12px; margin:-6px 0 0 -6px; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle, #fff 0%, #c9a6ff 45%, rgba(160,110,255,0) 75%); box-shadow:0 0 14px 4px rgba(170,120,255,.55); }
+  /* M239: your-turn beat — your hero figure flares as the turn lands. */
+  .bfig.me.turnflare img { animation:figFlare .95s ease-out; }
   .pile.deck-low { border-color:rgba(255,120,90,.85) !important; color:#ffb59d; }
   .gems-col.mana-pop span { animation:gemPop .32s both; }
   .gems-col.mana-pop span:nth-child(2) { animation-delay:.05s; } .gems-col.mana-pop span:nth-child(3) { animation-delay:.1s; }
@@ -1187,7 +1207,6 @@
   .card.canblock-hint { box-shadow: 0 0 0 2px rgba(87,182,255,.45), 0 4px 10px rgba(0,0,0,.4); }
   .shell.stage.peril-life::before { content:''; position:absolute; inset:0; z-index:13; pointer-events:none; box-shadow: inset 0 0 64px 18px rgba(200,30,45,.4); animation: perilPulse 1.15s ease-in-out infinite; }
   @keyframes perilPulse { 0%,100% { opacity:.35; } 50% { opacity:.85; } }
-  .gems-col.spentpop i:not(.off) { animation: gemIn .35s ease both; }
   .respip { color:#b18cff; font-size:10px; margin-left:2px; text-shadow:0 0 4px rgba(150,90,255,.8); }
   .speech { position: relative; }
   .speech::after { content:''; position:absolute; left:-5px; top:55%; border:5px solid transparent; border-right-color: rgba(24,16,44,.92); border-left:0; }
@@ -6685,18 +6704,38 @@ function graveHtml() {
   return '<div class="overlay" onclick="closeGrave()"><div class="box" style="text-align:left;max-height:82vh;overflow-y:auto" onclick="event.stopPropagation()"><h2 style="text-align:center">🪦 ' + esc(p.hero.name) + "'s graveyard</h2>" + gsub + '<div style="text-align:center;margin:-2px 0 6px"><button style="font-size:11.5px;padding:3px 10px" onclick="toggleGraveSort()">⇅ ' + (graveSort === 'recent' ? 'Most recent first' : 'By cost') + '</button></div>' + rows + (graveIdx === humanIdx ? '<button class="ghost big" onclick="closeGrave();showDeck(' + humanIdx + ')">🂠 See my deck</button>' : '') + '<button class="big" onclick="closeGrave()">Close</button></div></div>';
 }
 var prevBoardUids = null, prevBoardGame = null, pendingArrivals = [];
+var prevBoardDmg = {}, prevBoardOwner = {}, pendingDmgFlash = []; // M239
 function boardFxWatch() {
   try {
     if (!G) return;
-    var cur = {};
-    G.players.forEach(function (p) { p.board.forEach(function (c) { cur[c.uid] = true; }); });
-    if (prevBoardGame !== G || !prevBoardUids) { prevBoardGame = G; prevBoardUids = cur; pendingArrivals = []; return; }
+    var cur = {}, curDmg = {}, curOwner = {};
+    G.players.forEach(function (p) { p.board.forEach(function (c) { cur[c.uid] = true; curDmg[c.uid] = c.damage; curOwner[c.uid] = p.idx; }); });
+    if (prevBoardGame !== G || !prevBoardUids) { prevBoardGame = G; prevBoardUids = cur; prevBoardDmg = curDmg; prevBoardOwner = curOwner; pendingArrivals = []; return; }
     Object.keys(prevBoardUids).forEach(function (uid) {
       if (cur[uid]) return;
       var el = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
       if (el && el.getBoundingClientRect) {
         var r = el.getBoundingClientRect();
-        spawnDeathPuff(r.left + r.width / 2, r.top + r.height / 2);
+        spawnDeathPuff(r.left + r.width / 2, r.top + r.height / 2, prevBoardOwner[uid]);
+      }
+    });
+    /* M239: damage outside the combat choreography used to be silent —
+       a burned creature just showed a smaller number on the next
+       render. The watcher now floats the delta at the emblem's last
+       rect and queues a hitflash for the fresh emblem. Deaths are
+       excluded (the puff and wisp own them); heals float only when
+       they matter (2 or more). */
+    Object.keys(curDmg).forEach(function (uid) {
+      if (!(uid in prevBoardDmg)) return;
+      var dd = curDmg[uid] - prevBoardDmg[uid];
+      if (!dd || (dd < 0 && dd > -2)) return;
+      var el2 = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
+      if (el2 && el2.getBoundingClientRect) {
+        var r2 = el2.getBoundingClientRect();
+        if (r2.width || r2.height) {
+          spawnBoardFloat(r2.left + r2.width / 2, r2.top + r2.height / 2, (dd > 0 ? '-' : '+') + Math.abs(dd), dd > 0 ? floatClsFor(dd) : 'heal');
+          if (dd > 0) pendingDmgFlash.push(uid);
+        }
       }
     });
     pendingArrivals = Object.keys(cur).filter(function (uid) { return !prevBoardUids[uid]; });
@@ -6706,10 +6745,10 @@ function boardFxWatch() {
         if (c.uid === uid) { var dd = D(c); if (dd.legendary || dd.cost >= 8) pendingMarquee.push((dd.icon || '') + ' ' + dd.name); }
       }); });
     });
-    prevBoardUids = cur;
+    prevBoardUids = cur; prevBoardDmg = curDmg; prevBoardOwner = curOwner;
   } catch (e) {}
 }
-function spawnDeathPuff(x, y) {
+function spawnDeathPuff(x, y, ownerIdx) {
   try {
     if (!document.body || !document.createElement) return;
     var node = document.createElement('div');
@@ -6717,14 +6756,69 @@ function spawnDeathPuff(x, y) {
     node.style.left = x + 'px'; node.style.top = y + 'px';
     document.body.appendChild(node);
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 780);
+    /* M239: the wisp — the dead creature's light travels home to its
+       owner's graveyard pile instead of the death being a plain
+       vanish. WAAPI, transform/opacity only; Calm keeps the puff
+       alone (its static equivalent). */
+    if (!calm && ownerIdx !== undefined && ownerIdx !== null && document.createElement) {
+      var dot = document.createElement('div');
+      dot.className = 'fx-wispdot';
+      dot.style.left = x + 'px'; dot.style.top = y + 'px';
+      document.body.appendChild(dot);
+      var pt = anchorPoint('pile-' + ownerIdx, null);
+      if (pt && dot.animate) {
+        var wdx = pt.x - x, wdy = pt.y - y;
+        var wanim = dot.animate([
+          { transform: 'translate(0px, 0px) scale(1)', opacity: 1 },
+          { transform: 'translate(' + (wdx * 0.5) + 'px, ' + (wdy * 0.5 - 46) + 'px) scale(.85)', opacity: .95, offset: .55 },
+          { transform: 'translate(' + wdx + 'px, ' + wdy + 'px) scale(.4)', opacity: 0 }
+        ], { duration: 540, easing: 'cubic-bezier(.3,.6,.4,1)' });
+        var wdone = function () { if (dot.parentNode) dot.parentNode.removeChild(dot); };
+        if (wanim && wanim.finished && wanim.finished.then) wanim.finished.then(wdone).catch(wdone); else setTimeout(wdone, 600);
+      } else if (dot.parentNode) { dot.parentNode.removeChild(dot); }
+    }
   } catch (e) {}
 }
+var arrivalStamps = {}; // M239 loop 2: uid -> { cls, until }
 function applyArrivals() {
   try {
+    /* M239 loop 2: arrival classes live on ONE render — a back-to-back
+       render (a play produces several) could wipe a summon tier
+       mid-flight. Young stamps (<200ms) re-apply to the fresh emblem;
+       older ones are left alone so the animation never visibly
+       restarts late. */
+    var nowS = Date.now();
+    Object.keys(arrivalStamps).forEach(function (uid) {
+      var st = arrivalStamps[uid];
+      if (nowS > st.until) { delete arrivalStamps[uid]; return; }
+      var elS = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
+      if (elS && elS.classList && !elS.classList.contains(st.cls)) elS.classList.add(st.cls);
+    });
     if (!pendingArrivals || !pendingArrivals.length) return;
     pendingArrivals.forEach(function (uid) {
       var el = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
-      if (el && el.classList) el.classList.add('summon-in');
+      if (el && el.classList) {
+        /* M239: arrival weight tiers — cost 5-7 land heavy, legendary
+           and 8+ bloom epic (the marquee still crowns them after);
+           heavy and epic arrivals stamp a school-tinted ring on the
+           floor where they land. */
+        var tierCls = 'summon-in';
+        try {
+          var inst2 = null;
+          G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(uid)) inst2 = c; }); });
+          if (inst2) {
+            var dd2 = D(inst2);
+            if (dd2.legendary || (dd2.cost || 0) >= 8) tierCls = 'summon-epic';
+            else if ((dd2.cost || 0) >= 5) tierCls = 'summon-heavy';
+            if (tierCls !== 'summon-in' && !calm && el.getBoundingClientRect) {
+              var rr = el.getBoundingClientRect();
+              if (rr.width || rr.height) spawnLandRing(rr.left + rr.width / 2, rr.top + rr.height - 4, (dd2.cardSchools && dd2.cardSchools[0]) || dd2.cardSchool);
+            }
+          }
+        } catch (e) {}
+        el.classList.add(tierCls);
+        arrivalStamps[uid] = { cls: tierCls, until: Date.now() + 200 };
+      }
       if (el && !calm) spawnSummonVapor(uid, el); // M198: the summon breathes its school colour
     });
     pendingArrivals = [];
@@ -6823,13 +6917,13 @@ function emblemIcons(inst, ownerIdx, forBoard) {
   if (d.afterFlip) out += '<span class="eicon" title="the flipped face">🌙</span>';
   return out;
 }
-function spawnHeroFloat(idx, text, cls) {
+function spawnHeroFloat(idx, text, cls, amt) {
   try {
     if (!document.body || !document.createElement) return;
     var H = window.innerHeight || 700, W = window.innerWidth || 400;
     var pt = anchorPoint('herobar-' + idx, { x: idx === aiIdx ? W * 0.7 : W * 0.3, y: idx === aiIdx ? H * 0.12 : H * 0.8 });
     var node = document.createElement('div');
-    node.className = 'fx-herofloat ' + (cls || '');
+    node.className = 'fx-herofloat ' + (cls || '') + ((amt || 0) >= 5 ? ' big' : ''); // M239: hero damage reads by weight
     node.textContent = text;
     node.style.left = (pt.x + (Math.random() * 30 - 15)) + 'px';
     node.style.top = pt.y + 'px';
@@ -6903,6 +6997,7 @@ function checkPhaseSweep() {
     node.className = 'turn-sweep ' + phase;
     node.textContent = phase === 'me' ? 'Your Turn' : "Opponent's Turn";
     document.body.appendChild(node);
+    if (phase === 'me' && !calm) { var bf239 = document.querySelector ? document.querySelector('.bfig.me') : null; if (bf239) { bf239.classList.add('turnflare'); setTimeout(function () { bf239.classList.remove('turnflare'); }, 1000); } } // M239: your hero flares as your turn lands
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, phase === 'foe' ? 1750 : 1300); // M198: the foe sweep is slower — it gets a longer stage
   } catch (e) {}
 }
@@ -7069,21 +7164,24 @@ function soundWatch() {
   } catch (e) {}
   var s = G.stats;
   if (sndSnap.life) {
+    var maxHeroDrop = 0, heroFell = false; // M239
     G.players.forEach(function (p) {
       if (p.life < sndSnap.life[p.idx]) {
         if (sndSnap.life[p.idx] > 0 && p.life <= 0) { try { sfx('heroFall'); } catch (e) {} } // M195: the fall itself gets its sting, before any fanfare
         figFx.hurt[p.idx] = true;
-        spawnHeroFloat(p.idx, '-' + (sndSnap.life[p.idx] - p.life), 'bad');
+        spawnHeroFloat(p.idx, '-' + (sndSnap.life[p.idx] - p.life), 'bad', sndSnap.life[p.idx] - p.life);
         lastHurtAmt = sndSnap.life[p.idx] - p.life; try { sfx('heroHurt'); } catch (e) {} // M191: damage has a sound now, scaled by the blow
+        if (lastHurtAmt > maxHeroDrop) maxHeroDrop = lastHurtAmt; if (p.life <= 0) heroFell = true; // M239
         if (!speechFlags['hurt' + p.idx] && p.life > 0 && p.life <= Math.ceil(p.hero.life / 4)) {
           speechFlags['hurt' + p.idx] = true;
           heroSay(p.idx, heroLine(p.idx, 'hurt'));
         }
       } else if (p.life > sndSnap.life[p.idx]) {
-        spawnHeroFloat(p.idx, '+' + (p.life - sndSnap.life[p.idx]), 'good');
+        spawnHeroFloat(p.idx, '+' + (p.life - sndSnap.life[p.idx]), 'good', p.life - sndSnap.life[p.idx]);
       }
     });
   }
+  if (maxHeroDrop >= 5) feelFreeze(heroFell || maxHeroDrop >= 9 ? 120 : 70); // M239: a heavy hero hit stops the world for a breath
   var dPlant = s.nightmaresPlanted - sndSnap.planted;
   if (dPlant > 0) {
     var wvPl = G.players.find(function (p) { return p.hero.passive === 'weave'; });
@@ -8497,6 +8595,7 @@ function renderBody() {
   checkPhaseSweep();
   applyArrivals();
   applyManaSweeps(); // M198
+  applyGemFills(); applyDamageFlashes(); // M239
   checkDeckWarn();
   checkMarquee();
   fanfareWatch();
@@ -9680,6 +9779,7 @@ function startMatch() {
   uiLog = []; uiLogTurn = []; lastEngineLog = 0; msg = ''; recordCounted = false;
   speech = {}; speechFlags = {};
   introUntil = Date.now() + 2100; // M128: the heroes take the field
+  prevLitGems = null; pendingDmgFlash = []; // M239: fresh feel state per match
   setTimeout(function () { try { if (G && G.winner === null && mode !== 'menu' && mode !== 'collection' && mode !== 'builder') render(); } catch (e) {} }, 2180);
   lastLurking = {}; nmPopIdx = -1;
   redrawSet = new Set(); blockMap = {}; attackSet = new Set();
@@ -10030,6 +10130,92 @@ var busyAnim = false;
 function emblemEl(uid) {
   try { return (typeof document !== 'undefined' && document.querySelector) ? document.querySelector('.emblem[data-uid="' + uid + '"]') : null; } catch (e) { return null; }
 }
+/* ================= M239 — THE FEEL PASS =================
+   Jesse (2026-11-13): the cards and mechanics are in place; the game
+   EXPERIENCE is the work — benchmarked against Hearthstone's weight,
+   Legends of Runeterra's butter, and Spellslingers' own snap, and
+   judged by the cold player. Everything here is presentation only:
+   no engine state changes; every motion is transform/opacity; Calm
+   (yira_calm) reduces each beat to its static equivalent. */
+/* Hit-stop: a brief world-freeze on a heavy impact — every running
+   animation pauses for ms, then resumes. The genre's highest-value
+   feel trick. Bounds: callers pass 50-130ms; overlapping freezes
+   never stack; Calm and animation-less DOMs skip it entirely. */
+var feelFrozenUntil = 0;
+function feelFreeze(ms) {
+  if (calm || !ms) return;
+  if (typeof document === 'undefined' || typeof document.getAnimations !== 'function') return;
+  var now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+  if (now < feelFrozenUntil) return;
+  feelFrozenUntil = now + ms;
+  try {
+    var anims = document.getAnimations();
+    anims.forEach(function (a) { try { a.pause(); } catch (e) {} });
+    setTimeout(function () { anims.forEach(function (a) { try { if (a.playState === 'paused') a.play(); } catch (e) {} }); }, ms);
+  } catch (e) {}
+}
+/* Damage weight classes, shared by combat floats, watcher floats and
+   (via the amt argument) hero floats: 1-2 plain, 3-4 mid, 5+ big. */
+function floatClsFor(amt) { return amt >= 5 ? 'big' : (amt >= 3 ? 'mid' : ''); }
+/* A float that lives on the body at fixed coordinates — for emblems
+   whose DOM node is about to be rebuilt by render(). */
+function spawnBoardFloat(x, y, text, cls) {
+  try {
+    if (calm || !document.body || !document.createElement) return;
+    var n = document.createElement('span');
+    n.className = 'floatnum fx-boardfloat' + (cls ? ' ' + cls : '');
+    n.textContent = text;
+    n.style.left = x + 'px'; n.style.top = y + 'px';
+    document.body.appendChild(n);
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, cls && cls.indexOf('big') >= 0 ? 1200 : 950);
+  } catch (e) {}
+}
+/* The landing ring heavy/epic summons stamp on the arena floor. */
+function spawnLandRing(x, y, school) {
+  try {
+    if (calm || !document.body || !document.createElement) return;
+    var n = document.createElement('div');
+    n.className = 'fx-landring' + (school ? ' tint-' + school : '');
+    n.style.left = x + 'px'; n.style.top = y + 'px';
+    document.body.appendChild(n);
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, 620);
+  } catch (e) {}
+}
+/* Post-render: stamp the damage flashes the board watcher queued. */
+function applyDamageFlashes() {
+  try {
+    if (!pendingDmgFlash || !pendingDmgFlash.length) return;
+    var list = pendingDmgFlash; pendingDmgFlash = [];
+    list.forEach(function (uid) {
+      var el = document.querySelector ? document.querySelector('.board .emblem[data-uid="' + uid + '"], .board .card[data-uid="' + uid + '"]') : null;
+      if (el && el.classList) el.classList.add('hitflash');
+    });
+  } catch (e) {}
+}
+/* Post-render: mana gems cascade ONLY when the lit count grows (turn
+   refills, ramp) — before M239 a blanket CSS rule replayed the fill
+   animation on every render (128 starts in one audit window), which
+   read as constant visual noise and stole the turn-start moment. */
+var prevLitGems = null;
+function applyGemFills() {
+  try {
+    if (!G || !document.querySelectorAll) return;
+    var cur = {}, any = false;
+    [0, 1].forEach(function (idx) {
+      var bar = document.getElementById ? document.getElementById('herobar-' + idx) : null;
+      if (!bar || !bar.querySelectorAll) return;
+      var gems = Array.prototype.slice.call(bar.querySelectorAll('.gems-col i'));
+      var lit = gems.filter(function (g) { return !g.classList.contains('off'); });
+      cur[idx] = lit.length; any = true;
+      var prev = prevLitGems ? (prevLitGems[idx] || 0) : 0;
+      if (!calm && lit.length > prev) {
+        var fresh = lit.slice(Math.max(0, lit.length - (lit.length - prev)));
+        fresh.forEach(function (g, k) { g.classList.add('gemfill'); g.style.animationDelay = (k * 45) + 'ms'; });
+      }
+    });
+    if (any) prevLitGems = cur;
+  } catch (e) {}
+}
 function floatNum(el, txt, cls) {
   try {
     if (!el || !el.appendChild || typeof document === 'undefined' || !document.createElement) return;
@@ -10050,12 +10236,29 @@ async function animateCombat(list) {
       ? document.querySelector(item.dir < 0 ? '.herobar.foe' : '.herobar.me')
       : emblemEl(item.target);
     try {
+      /* M239: the lunge travels TOWARD the target — a vector from the
+         two rects, ~55% of the gap, capped at 110px — with a small
+         recoil past home; the impact lands with hit-stop scaled by
+         the blow. Creature targets float with weight classes, and the
+         blocker's answering damage floats back onto the attacker
+         (combat used to read one-way). */
+      var lungeX = 0, lungeY = 46 * item.dir;
+      try {
+        if (tgt && el.getBoundingClientRect && tgt.getBoundingClientRect) {
+          var ra = el.getBoundingClientRect(), rb = tgt.getBoundingClientRect();
+          var vx = (rb.left + rb.width / 2) - (ra.left + ra.width / 2), vy = (rb.top + rb.height / 2) - (ra.top + ra.height / 2);
+          var vlen = Math.sqrt(vx * vx + vy * vy);
+          if (vlen > 8) { var reach = Math.min(vlen * 0.55, 110); lungeX = vx / vlen * reach; lungeY = vy / vlen * reach; }
+        }
+      } catch (e) {}
       var anim = el.animate([
-        { transform: 'translateY(0)' },
-        { transform: 'translateY(' + (46 * item.dir) + 'px) scale(1.07)', offset: 0.45 },
-        { transform: 'translateY(0)' }
-      ], { duration: list.length > 4 ? 240 : 320, easing: 'ease-in-out' });
+        { transform: 'translate(0px, 0px) scale(1)' },
+        { transform: 'translate(' + lungeX + 'px, ' + lungeY + 'px) scale(1.07)', offset: 0.45 },
+        { transform: 'translate(' + (-lungeX * 0.12) + 'px, ' + (-lungeY * 0.12) + 'px) scale(1.01)', offset: 0.68 },
+        { transform: 'translate(0px, 0px) scale(1)' }
+      ], { duration: list.length > 4 ? 240 : 320, easing: 'cubic-bezier(.2,.7,.3,1)' });
       await sleep(150);
+      var stopMs = 0;
       if (tgt) {
         tgt.classList.add('hitflash');
         /* M135: a strike at a hero reads big; the killing blow reads biggest
@@ -10063,10 +10266,20 @@ async function animateCombat(list) {
         var heroHit = item.target === 'hero';
         var foeHero = heroHit ? G.players[item.dir < 0 ? aiIdx : humanIdx] : null;
         var lethal = !!(foeHero && foeHero.life - item.power <= 0);
-        floatNum(tgt, '-' + item.power, heroHit ? ('big' + (lethal ? ' lethal' : '')) : '');
+        floatNum(tgt, '-' + item.power, heroHit ? ('big' + (lethal ? ' lethal' : '')) : floatClsFor(item.power));
+        if (!heroHit && item.target) {
+          var blkInst = null;
+          G.players.forEach(function (p) { p.board.forEach(function (c) { if (String(c.uid) === String(item.target)) blkInst = c; }); });
+          if (blkInst) {
+            var backPow = D(blkInst).power + blkInst.permPower;
+            if (backPow > 0) { floatNum(el, '-' + backPow, floatClsFor(backPow)); el.classList.add('hitflash'); setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(el), 400); }
+          }
+        }
         if (lethal && tgt.appendChild) { var mb = document.createElement('span'); mb.className = 'miniburst'; mb.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>'; tgt.appendChild(mb); setTimeout(function () { if (mb.parentNode) mb.parentNode.removeChild(mb); }, 1100); }
         setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(tgt), 400);
+        stopMs = lethal ? 130 : (item.power >= 5 ? 95 : (heroHit ? 70 : (item.power >= 4 ? 50 : 0)));
       }
+      if (stopMs && !calm) { feelFreeze(stopMs); await sleep(stopMs); }
       if (anim && anim.finished) await anim.finished;
     } catch (e) { /* animation is garnish; combat proceeds regardless */ }
   }
@@ -10197,6 +10410,7 @@ render();
   if (typeof document === 'undefined' || !document.addEventListener) return;
   var pressEl = null, pressUid = null, startX = 0, startY = 0;
   var dragging = false, ghost = null, srcEl = null, dragUid = null, dropEl = null;
+  var ghostTilt = 0, ghostLastX = 0; // M239
   var lastDragEnd = 0, suppressClickUntil = 0;
   var hoverTimer = null, hoverBox = null, hovering = false;
   function hideHover() {
@@ -10386,12 +10600,17 @@ render();
       ghost.classList.remove('drag-src'); ghost.classList.add('drag-ghost');
       ghost.style.width = srcEl.offsetWidth + 'px';
       ghost.style.left = e.clientX + 'px'; ghost.style.top = (e.clientY - 58) + 'px';
+      ghostTilt = 0; ghostLastX = e.clientX; // M239
       document.body.appendChild(ghost);
       document.body.classList.add('yira-dragging');
       sfx('whoosh');
     }
     if (dragging && ghost) {
       ghost.style.left = e.clientX + 'px'; ghost.style.top = (e.clientY - 58) + 'px';
+      /* M239: the carried card leans into its travel — tilt from
+         horizontal pointer velocity, smoothed and clamped; the
+         position itself stays a strict 1:1 track. */
+      if (!calm) { var gvx = e.clientX - ghostLastX; ghostLastX = e.clientX; ghostTilt = Math.max(-16, Math.min(16, ghostTilt * 0.55 + gvx * 0.6)); ghost.style.transform = 'translate(-50%,-62%) scale(1.15) rotate(' + ghostTilt.toFixed(1) + 'deg)'; }
       var under = document.elementFromPoint(e.clientX, e.clientY);
       var t = (under && under.closest) ? (under.closest('.board .card, .board .emblem') || under.closest('.herobar')) : null;
       if (t !== dropEl) { clearDrop(); if (t) { t.classList.add('drop-hover'); dropEl = t; } }

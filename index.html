@@ -1539,6 +1539,7 @@
   /* M244: a passive PAYOFF pops the emblem once (Volric's third spell, Veyla's completed mission) — body.calm's global crush makes it a still badge under Calm. */
   .shell.stage .passive-emblem.pe-pop { animation:pePop .65s ease-out; }
   @keyframes pePop { 0%{transform:scale(1)} 35%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  .herobar.foe.foepop .hcluster { animation:pePop .7s ease; } /* M246: foe payoff pop, mirrors the human pe-pop */
   /* M244: Volric's NEXT spell is the payoff — his spells wear a gold edge while the count sits at 2/3. */
   .hand.fan .card.storm-next { outline:2px solid rgba(255,217,77,.95); outline-offset:-2px; }
   .card .cname { padding:2px 17px 2px 8px; }
@@ -6816,32 +6817,128 @@ function pairStepMsg(d, step) {
    and its CSS are removed, not bypassed. */
 /* ---------- M32: enemy play reveal (engine playEvents) + spacebar. --- */
 var playEvGame = null, playEvSeen = 0;
+/* M246: the reveal is a QUEUE, not a single pick. The M32 watcher kept
+   only the LAST qualifying play of each render batch, and the foe's whole
+   main phase resolves inside one synchronous engine call — so on any turn
+   where the foe cast two spells, played an artifact, or dropped a
+   legendary, all but one play reached the player as silent board deltas
+   and log lines (the M246 watch logged a five-play Volric turn surfacing
+   exactly one card). Every qualifying play now takes its beat in order,
+   legendary creatures included. Dwell is familiarity-aware: a card the
+   player has not met yet keeps the full 1280 ms reading beat; a known
+   card passes in 620 ms; a queue of 3+ waiting compresses a further 30%
+   so a five-play turn stays near ~4 s of ceremony. Familiarity is honest
+   on-device state: the seen-set (localStorage yira_seen_cards, capped at
+   600) is marked when a reveal shows a card and when the human plays one.
+   Hidden-information law: the queue is fed ONLY by G.playEvents, the
+   engine's public record of resolved plays; a card enters the queue only
+   once it has actually been played, never before. */
+var revealQ = [], revealTimer = null, revealBusyUntil = 0, revealSeenSet = null;
+function seenCardSet() {
+  if (!revealSeenSet) {
+    revealSeenSet = {};
+    try { (JSON.parse(localStorage.getItem('yira_seen_cards') || '[]') || []).forEach(function (id) { revealSeenSet[id] = true; }); } catch (e) {}
+  }
+  return revealSeenSet;
+}
+function markCardSeen(id) {
+  try {
+    if (!id) return;
+    var s = seenCardSet(); if (s[id]) return;
+    s[id] = true;
+    var keys = Object.keys(s); if (keys.length > 600) keys = keys.slice(keys.length - 600);
+    localStorage.setItem('yira_seen_cards', JSON.stringify(keys));
+  } catch (e) {}
+}
 function playRevealWatch() {
   try {
     if (!G || !G.playEvents) return;
-    if (playEvGame !== G) { playEvGame = G; playEvSeen = G.playEvents.length; return; }
-    if (G.playEvents.length <= playEvSeen) return;
+    if (playEvGame !== G) { playEvGame = G; playEvSeen = G.playEvents.length; revealQ = []; revealBusyUntil = 0; if (revealTimer) { clearTimeout(revealTimer); revealTimer = null; } return; }
+    if (G.playEvents.length <= playEvSeen) { pumpReveal(); return; }
     var fresh = G.playEvents.slice(playEvSeen);
     playEvSeen = G.playEvents.length;
-    var pick = null;
     fresh.forEach(function (ev) {
+      var d = CARDS[ev.cardId]; if (!d) return;
+      if (ev.player === humanIdx) { markCardSeen(ev.cardId); return; }
       if (ev.player !== aiIdx) return;
-      var d = D({ cardId: ev.cardId });
-      if (d && (d.type !== 'creature' || d.signatureFor)) pick = ev;
+      if (d.type === 'creature' && !d.signatureFor && !d.legendary) return;
+      revealQ.push(ev.cardId);
     });
-    if (pick) spawnPlayReveal(pick.cardId);
+    pumpReveal();
   } catch (e) {}
 }
-function spawnPlayReveal(cardId) {
+function pumpReveal() {
+  try {
+    if (revealTimer || !revealQ.length) return;
+    var wait = revealBusyUntil - Date.now();
+    if (wait > 0) { revealTimer = setTimeout(function () { revealTimer = null; pumpReveal(); }, wait + 30); return; }
+    var id = revealQ.shift();
+    var dwell = seenCardSet()[id] ? 620 : 1280;
+    if (revealQ.length >= 3) dwell = Math.round(dwell * 0.7);
+    spawnPlayReveal(id, dwell);
+    markCardSeen(id);
+    revealBusyUntil = Date.now() + dwell + 90;
+    revealTimer = setTimeout(function () { revealTimer = null; pumpReveal(); }, dwell + 90);
+  } catch (e) { revealTimer = null; }
+}
+function spawnPlayReveal(cardId, dwellMs) {
   try {
     if (!document.body || !document.createElement) return;
+    var dwell = dwellMs || 1280;
     var fake = { cardId: cardId, uid: -7, permPower: 0, permHealth: 0, damage: 0, starterOwner: aiIdx, doom: 0 };
     var node = document.createElement('div');
     node.className = 'play-reveal' + (CARDS[cardId] && CARDS[cardId].legendary ? ' legendary' : '');
+    node.style.animationDuration = (dwell / 1000) + 's';
     node.innerHTML = '<div class="pr-label">ENEMY PLAYS</div>' + cardHtml(fake, aiIdx, {});
     document.body.appendChild(node);
-    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1280);
+    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, dwell);
   } catch (e) {}
+}
+/* M246: foe payoff parity. M244 gave the HUMAN seat a pop and a voice
+   when a passive paid off; the foe seat got neither, because the pe-pop
+   and soundWatch read the human seat only — the M246 watch logged four
+   Storm Conduit crackles and two Free Spirit completions against the foe
+   with no on-screen beat at all. This watcher mirrors the same crossings
+   on the foe seat, read from public state alone: the per-turn spell
+   count, the mission and spirit thresholds, the summon count, the
+   traps-armed total — every one of them already shown or countable from
+   the board. Voices mirror the human side exactly (stormpop for the
+   third spell, mission bells for a completed mission); the remaining
+   crossings pop silently, as they do for the human. The pop lands on
+   the foe hero cluster (.herobar.foe.foepop). */
+var foePaySnap = null;
+function foePayoffWatch() {
+  try {
+    if (!G || G.winner !== null || !G.players || !G.players[aiIdx]) return;
+    var foe = G.players[aiIdx];
+    var snap = {
+      turn: G.turnCount,
+      storm: foe.spellsCastThisTurn || 0,
+      mission: foe.missionThreshold || 0,
+      spirit: foe.spiritThreshold || 0,
+      summons: foe.summonCount || 0,
+      traps: foe.trapsArmedTotal || 0
+    };
+    if (!foePaySnap || G.turnCount < foePaySnap.turn) { foePaySnap = snap; return; }
+    var prevStorm = snap.storm < foePaySnap.storm ? 0 : foePaySnap.storm;
+    var pop = false;
+    if (Math.floor(snap.storm / 3) > Math.floor(prevStorm / 3)) { pop = true; try { sfx('stormpop'); } catch (e) {} }
+    if (snap.mission > foePaySnap.mission) { pop = true; try { sfx('mission'); } catch (e) {} }
+    if (snap.spirit > foePaySnap.spirit) pop = true;
+    if (Math.floor(snap.summons / 5) > Math.floor(foePaySnap.summons / 5)) pop = true;
+    if (Math.floor(snap.traps / 3) > Math.floor(foePaySnap.traps / 3)) pop = true;
+    foePaySnap = snap;
+    if (pop) foePayoffPop();
+  } catch (e) {}
+}
+var foePopPending = false;
+function foePayoffPop() {
+  /* The pop is a pending flag, not a live-DOM edit: renderBody's watchers
+     run before the battle shell is rebuilt, so a class added to the old
+     bar would be wiped by the very render that detected the crossing.
+     heroBarHtml consumes the flag and bakes .foepop into the fresh foe
+     bar — the same pattern as the human seat's pe-pop. */
+  foePopPending = true;
 }
 if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', function (e) {
   if (typeof titleDismissed !== 'undefined' && !titleDismissed && typeof mode !== 'undefined' && mode === 'menu') { enterTitle(); return; }
@@ -8180,7 +8277,9 @@ function heroBarHtml(p, isMe) {
   var ringCol = lifeFrac > 0.5 ? '#7dc95e' : (lifeFrac > 0.25 ? '#e8b93e' : '#e5534b');
   var ringStyle = 'background:conic-gradient(' + ringCol + ' ' + Math.round(lifeFrac * 100) + '%, rgba(255,255,255,.10) 0)';
   var lifeBand = lifeFrac > 0.5 ? '' : (lifeFrac > 0.25 ? ' warn' : ' crit');
-  return '<div class="herobar' + (isMe ? ' me' : ' foe') + (G && G.current === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
+  var foePopCls = '';
+  if (!isMe && foePopPending) { foePopCls = ' foepop'; foePopPending = false; } // M246: consume the payoff pop
+  return '<div class="herobar' + (isMe ? ' me' : ' foe') + foePopCls + (G && G.current === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
     '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (((isMe && p.life <= 8) || (!isMe && p.life <= 6)) && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="lifering" style="' + ringStyle + '"><div class="portrait">' + heroPortrait(p.heroId) +
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + lifeBand + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div></div>' +
     '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
@@ -8715,6 +8814,7 @@ function renderBody() {
   if (G.winner !== null) crowdStop(); else crowdStart();
   var me = G.players[humanIdx], foe = G.players[aiIdx];
   soundWatch(); turnWatch(); m81Watch(); m83Watch(); m84Watch();
+  foePayoffWatch(); // M246: foe-seat passive payoff parity (pop + mirrored voices)
   computeNmPops();
   var foeTint = 'rgba(0,0,0,0)';
   if (typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[foe.heroId]) {
@@ -10703,21 +10803,37 @@ function confirmBlocks() {
 
 /* ---------- AI turn ---------- */
 function aiSummary(before) {
-  var foe = G.players[aiIdx];
-  var newCreatures = foe.board.filter(function (c) { return !before.boardUids.has(c.uid); }).map(function (c) { return D(c).name; });
-  var newGrave = foe.graveyard.slice(before.graveCount).map(function (c) { return D(c).name; });
-  var trapsArmed = foe.traps.length - before.trapCount;
-  var parts = [];
-  if (newCreatures.length) parts.push('plays ' + newCreatures.join(', '));
-  if (newGrave.length) parts.push('casts ' + newGrave.join(', '));
-  if (trapsArmed > 0) parts.push('arms ' + trapsArmed + ' trap' + (trapsArmed > 1 ? 's' : ''));
-  if (parts.length) say('Enemy ' + parts.join('; ') + '.', 'bad');
+  /* M246: derived from the engine's public play record (playEvents)
+     instead of board/grave diffs. The diff version mislabelled the very
+     turns it described: creatures that died to the foe's own board wipe
+     were reported as "casts" (they reached the graveyard slice), token
+     summons were reported as "plays", countered spells vanished, and
+     post-combat plays were never summarised at all. playEvents is exact:
+     every resolved play, typed, in order — and it is public information
+     only, so the summary can never leak an unplayed card. */
+  try {
+    var foe = G.players[aiIdx];
+    var evs = (G.playEvents || []).slice(before.playEv || 0);
+    var plays = [], casts = [], seenP = {}, seenC = {};
+    evs.forEach(function (ev) {
+      if (ev.player !== aiIdx) return;
+      var d = CARDS[ev.cardId]; if (!d) return;
+      if (d.type === 'spell') { if (!seenC[d.name]) { seenC[d.name] = 1; casts.push(d.name); } }
+      else if (!seenP[d.name]) { seenP[d.name] = 1; plays.push(d.name); }
+    });
+    var trapsArmed = foe.traps.length - before.trapCount;
+    var parts = [];
+    if (plays.length) parts.push('plays ' + plays.join(', '));
+    if (casts.length) parts.push('casts ' + casts.join(', '));
+    if (trapsArmed > 0) parts.push('arms ' + trapsArmed + ' trap' + (trapsArmed > 1 ? 's' : ''));
+    if (parts.length) say('Enemy ' + parts.join('; ') + '.', 'bad');
+  } catch (e) {}
 }
 async function runAiTurn() {
   await sleep(650);
   if (G.winner !== null) return finishCheck();
   var foe = G.players[aiIdx];
-  var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length };
+  var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0) };
   aiStartAndMain(G, aiIdx); flushEngineLog(); aiSummary(before);
   render(); await sleep(1000);
   if (finishCheck()) return;
@@ -10739,7 +10855,8 @@ async function runAiTurn() {
     render(); await sleep(900);
     if (finishCheck()) return;
   }
-  aiPostCombat(G, aiIdx); flushEngineLog();
+  var beforePost = { trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0) };
+  aiPostCombat(G, aiIdx); flushEngineLog(); aiSummary(beforePost); // M246: post-combat plays get their summary too
   if (finishCheck()) return;
   startHumanTurn();
 }

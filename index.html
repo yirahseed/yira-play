@@ -1658,6 +1658,41 @@
   .intromedal { width:76px; height:76px; margin:2px auto 8px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:38px; background:radial-gradient(circle at 35% 30%, #3a2a63, #1d1332 72%); border:2px solid #c9a86a; box-shadow:inset 0 0 0 3px rgba(16,8,36,.75), inset 0 0 0 5px rgba(233,201,138,.30), 0 4px 14px rgba(0,0,0,.5); }
   /* The victory flourish is gold vapor (spawnVictoryFlourish). */
   .wisp.gold { filter:sepia(.55) saturate(2.4) hue-rotate(-16deg) brightness(1.18) blur(1.6px); }
+
+  /* ===== M252: TEXT THAT FITS + THE MESSAGE LINE'S GEOMETRY =====
+     (1) The message line yields the dock column. The .msg pill is a
+     centred flex item whose width grows with its text; the artifact
+     docks are absolutely positioned on the field's right border and,
+     in portrait, their column lands exactly in the pill's band — a
+     long message's tail slid UNDER a medallion and was lost (M251
+     ledger (c): '...found no sp[ace]'). The M123 doctrine reserved
+     the column for the open fan; the message line now reserves it
+     too, whenever either dock stands: the pill caps 76px short of
+     the stage's width and shifts half the reserve left, so its right
+     edge always stops at least ~72px clear of the screen edge —
+     beyond the medallion (right:4px, 50px wide) and its eye badge. */
+  .shell.stage.hasdock .msg { max-width:calc(100% - 76px); transform:translateX(-34px); }
+  /* (2) Long rules text trades art height for text room on the small
+     face. cardHtml tiers the card by composed-text length (txtl1 at
+     150+ chars, txtl2 at 215+); the text box is flex-grown, so every
+     pixel the art window gives up lands in the text. Draft offers
+     (120px art by design) and signature minis (40px) keep their
+     intentional art sizes. */
+  .card.txtl1 .cart { height:40px; }
+  .card.txtl2 .cart { height:26px; }
+  .card.txtl3 .cart { height:18px; }
+  .hand.fan .card.txtl1 .cart { height:38px; }
+  .hand.fan .card.txtl2 .cart { height:24px; }
+  .hand.fan .card.txtl3 .cart { height:16px; }
+  .draftrow .card.txtl1 .cart, .draftrow .card.txtl2 .cart, .draftrow .card.txtl3 .cart { height:120px; }
+  .sigminis .card.txtl1 .cart, .sigminis .card.txtl2 .cart, .sigminis .card.txtl3 .cart { height:40px; }
+  /* The extreme tail (230+ chars) cannot fit a 112px column at any
+     readable size — in the collection, where cards are read to build
+     decks, those few take a wide tile instead: same height, the text
+     laid out across a browsing column. The hand keeps the narrow face
+     (the fan is an identifier surface; the lift and the inspect carry
+     the full read, per the M185 doctrine). */
+  #collGroups .card.txtl3 { width:min(330px, 88vw); }
 </style>
 </head>
 <body>
@@ -7596,6 +7631,23 @@ function turnWatch() {
   if (lastTurnRendered !== -1 && G.turnNumber !== lastTurnRendered && G.winner === null) sweepPending = true;
   lastTurnRendered = G.turnNumber;
 }
+/* M252: the mill test, factored out so the harness can pin it. A grave
+   arrival is a MILL when the card sat in its owner's DECK at the last
+   watcher pass and in no held zone (hand / board / traps / artifacts) —
+   it travelled deck -> graveyard without entering play, so it never
+   lived and must not take the death rattle. Everything unproven
+   defaults to death: a token born and killed inside one combat (never
+   in any snapshot's deck) still rattles, as does a creature played and
+   killed between passes (it was in the held set). The foe's deck set is
+   read for CLASSIFICATION ONLY — no card is named, no count is shown;
+   a mill is already public through the deck and grave piles. */
+function m252MillArrival(inst, ownerIdx, snap) {
+  if (!snap || !snap.deckIds || !snap.heldAll) return false;
+  if (snap.graveIds && snap.graveIds[inst.uid]) return false; // not a fresh arrival
+  if (!snap.deckIds[ownerIdx] || !snap.deckIds[ownerIdx][inst.uid]) return false;
+  if (snap.heldAll[ownerIdx] && snap.heldAll[ownerIdx][inst.uid]) return false;
+  return true;
+}
 function soundWatch() {
   if (!G) return;
   graveFxWatch(); // M198: hand->grave transitions, caught against the pre-render DOM
@@ -7719,13 +7771,39 @@ function soundWatch() {
     say('🪦 Hand full — ' + burnNames + ' went straight to the graveyard.');
     try { sfx('whoosh'); } catch (e) {}
   }
+  /* M252: THE MILL joins the burn in the census's honesty ledger. The
+     watcher now snapshots every player's deck and held uid sets each
+     pass (below), so a fresh grave arrival can be TESTED: in the
+     owner's deck last pass, in no held zone -> it was milled (or, for
+     the foe, burned — the same deck-to-grave family, voiced alike and
+     never named). Burns and mills accumulate as UID SETS and the
+     census counts only grave creatures outside both sets, recomputed
+     from the graves' current membership each pass — so a card that
+     leaves the grave (raised, stolen back) stops suppressing the
+     rattle it never earned (the M251 cumulative-net arithmetic could
+     mute a later honest death after a grave exit; the set form
+     cannot). Mills take the burn's whoosh, one per pass, on either
+     seat; deaths keep the rattle. */
+  var burnUids = Object.assign({}, sndSnap.burnUids || {});
+  burnNow.forEach(function (c) { burnUids[c.uid] = 1; });
+  var millUids = Object.assign({}, sndSnap.millUids || {});
+  var millNow = [], millCreatures = 0;
+  if (sndSnap.deckIds && sndSnap.heldAll && sndSnap.graveIds) {
+    G.players.forEach(function (p) {
+      p.graveyard.forEach(function (c) {
+        if (burnUids[c.uid] || millUids[c.uid]) return;
+        if (m252MillArrival(c, p.idx, sndSnap)) { millUids[c.uid] = 1; millNow.push(c); if (D(c).type === 'creature') millCreatures++; }
+      });
+    });
+  }
+  if (millCreatures && !burnNow.length) { try { sfx('whoosh'); } catch (e) {} } // the burn's own whoosh already sounded when both land in one pass
   var heldHumanNow = {}; var huS251 = G.players[humanIdx]; huS251.hand.forEach(function (c) { heldHumanNow[c.uid] = 1; }); huS251.board.forEach(function (c) { heldHumanNow[c.uid] = 1; }); huS251.traps.forEach(function (c) { heldHumanNow[c.uid] = 1; });
   var graveHumanNow = {}; huS251.graveyard.forEach(function (c) { graveHumanNow[c.uid] = 1; });
-  var burnNet = (sndSnap.burnNet || 0) + burnCreatures;
-  var graveCNet = graveC - burnNet;
+  var graveCNet = 0;
+  G.players.forEach(function (p) { p.graveyard.forEach(function (c) { if (D(c).type === 'creature' && !burnUids[c.uid] && !millUids[c.uid]) graveCNet++; }); }); // M252: net of burns AND mills, by current grave membership
   if (sndSnap.graveCNet != null && graveCNet > sndSnap.graveCNet) { // M201: name the dead before the rattle — the biggest new corpse sets the size class. M251: the census is NET of burns — a burned card never lived and must not rattle
     var biggestCorpse = null;
-    Object.keys(graveIds).forEach(function (u) { if (sndSnap.graveIds && sndSnap.graveIds[u]) return; if (burnNow.some(function (bc) { return String(bc.uid) === String(u); })) return; var inst = graveIds[u]; if (D(inst).type !== 'creature') return; if (!biggestCorpse || D(inst).cost > D(biggestCorpse).cost) biggestCorpse = inst; });
+    Object.keys(graveIds).forEach(function (u) { if (sndSnap.graveIds && sndSnap.graveIds[u]) return; if (burnUids[u] || millUids[u]) return; var inst = graveIds[u]; if (D(inst).type !== 'creature') return; if (!biggestCorpse || D(inst).cost > D(biggestCorpse).cost) biggestCorpse = inst; });
     if (biggestCorpse) { var bcd = D(biggestCorpse); lastDeathClass = (bcd.cost >= 6 || (bcd.power || 0) + (bcd.health || 0) >= 10) ? 'big' : (bcd.cost <= 2 ? 'small' : 'mid'); }
     sfx('death');
   }
@@ -7739,7 +7817,7 @@ function soundWatch() {
   if (sndSnap.missionThr != null && missionThrW > sndSnap.missionThr) sfx('mission'); // M244: the threshold only ever rises when a mission completes
   if (sndSnap.stuns != null && stunN > sndSnap.stuns) sfx('stun');
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW, graveCNet: graveCNet, burnNet: burnNet, heldHuman: heldHumanNow, graveHuman: graveHumanNow, deckHuman: G.players[humanIdx].deck.length };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW, graveCNet: graveCNet, heldHuman: heldHumanNow, graveHuman: graveHumanNow, deckHuman: G.players[humanIdx].deck.length, deckIds: G.players.map(function (p) { var ds = {}; p.deck.forEach(function (c) { ds[c.uid] = 1; }); return ds; }), heldAll: G.players.map(function (p) { var hs = {}; p.hand.forEach(function (c) { hs[c.uid] = 1; }); p.board.forEach(function (c) { hs[c.uid] = 1; }); p.traps.forEach(function (c) { hs[c.uid] = 1; }); p.artifacts.forEach(function (c) { hs[c.uid] = 1; }); return hs; }), burnUids: burnUids, millUids: millUids };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
   sndPlayedUid = null; // M229: the play-site exemption lasts exactly one watch pass — the first render that shows the arrival
 }
@@ -8015,7 +8093,7 @@ function effectText(d) {
       case 'scryTop': return 'Look at the top card of your deck. You may place it on the bottom of your deck.';
       case 'nextDrawArmor': return 'The next creature you draw gains Armor.';
       case 'healLock': return 'Your opponent cannot heal until your next turn.';
-      case 'rays': return 'Attacks with one of four rays at random: add a random Ember or Tides card to your hand and deal 3 to the enemy hero; bounce the strongest enemy creature to its hand; cheapen a card in your hand and tax one in theirs; or steal 1 power from every enemy creature with power.';
+      case 'rays': return 'On attack, a random ray: gain a random Ember or Tides card and deal 3 to the enemy hero; bounce their strongest creature; cheapen a card in your hand and tax one in theirs; or steal 1 power from each enemy creature with power.'; // M252: tightened wording, same four rays — the Gaze Tyrant carried the library's longest composed text
       case 'smiteByBoard': return 'Deal damage to an enemy creature equal to the number of creatures you control.';
       case 'rageStrongest': return 'Deal damage to a random enemy creature equal to your strongest creature\'s power.';
       case 'wither': return e.amount ? ('Give an enemy creature -' + e.amount + '/-' + e.amount + '.') : 'Give an enemy creature -3/-3 (-5/-5 instead if one of your creatures died this turn).';
@@ -8177,6 +8255,15 @@ function chargePipsHtml(d, inst) {
 function typeTabHtml(d) {
   return '<span class="typetab tt-' + d.type + '"></span>' + (d.signatureFor ? '<span class="sigloz"></span>' : '');
 }
+/* M252: the power figure the game actually fights with. The engine's
+   powerOf is an unfloored sum, but every damage funnel floors at zero
+   (hurtCreature no-ops on amt <= 0; every combat rider gates on
+   amount > 0), so a debuffed creature's honest display figure is
+   max(0, printed + perm + temp) — never a negative number on an emblem.
+   (The one unfloored path — an unblocked negative-power attacker
+   HEALING the defending hero through hurtHero's unconditional
+   subtraction — is an engine item, ledgered in M252 for Jesse.) */
+function effPow(inst) { var d = D(inst); return Math.max(0, (d.power || 0) + (inst.permPower || 0) + (inst.tempPower || 0)); }
 function cardHtml(inst, ownerIdx, opts) {
   opts = opts || {};
   var d = D(inst);
@@ -8184,13 +8271,15 @@ function cardHtml(inst, ownerIdx, opts) {
   if (inst.stunned) cls += ' stunned';
   if (inst.miracleDiscount && typeof G !== 'undefined' && G && inst.miracleTurn === G.turnNumber) cls += ' miracle-live';
   if (inst.temporary) cls += ' temporary';
+  var etext = effectText(d);
+  if (etext.length >= 230) cls += ' txtl3'; else if (etext.length >= 160) cls += ' txtl2'; else if (etext.length >= 95) cls += ' txtl1'; // M252: long rules text trades art height for text room (CSS tiers) — a general fit rule, any card, present or future
   var hpLeft = d.type === 'creature' ? (d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) : null;
   /* M43 (Jesse): the stats row is ALWAYS rendered (empty on non-creatures)
      so the text panel above it is the same fixed size on every card and the
      orbs never overlap it. Art-less cards get a proper art window too. */
-  var foot = '<div class="ctext">' + esc(effectText(d)) + '</div>';
+  var foot = '<div class="ctext">' + esc(etext) + '</div>';
   if (inst.createdBy) foot += '<div class="createdby">\u2726 Created by ' + esc(inst.createdBy) + '</div>';
-  foot += '<div class="cstats">' + (d.type === 'creature' ? '<span class="orb pow">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span>' : '') + rarityGemHtml(d) + (d.type === 'creature' ? '<span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span>' : '') + '</div>';
+  foot += '<div class="cstats">' + (d.type === 'creature' ? '<span class="orb pow">' + effPow(inst) + '⚔</span>' : '') + rarityGemHtml(d) + (d.type === 'creature' ? '<span class="orb hp' + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span>' : '') + '</div>';
   if (inst.temporary) foot += '<div class="tempflag">⏳ temporary</div>';
   var art = (typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '<div class="cart glyphbox">' + (d.icon || '') + '</div>';
   /* M27.1: a card in hand shows its EFFECTIVE cost — green when discounted,
@@ -8239,7 +8328,7 @@ function emblemHtml(inst, ownerIdx, opts) {
   if (allKw.indexOf('sneak') >= 0 && (!inst.sneakUsed || d.sneakInfinite)) kwBig += '<span class="kw-sneak" title="Sneak"></span>'; // M209 (Jesse B9): the veil marks LIVE sneak only — once spent, the creature wears its normal face again; sneakInfinite never spends, so its veil never lifts
   return '<div class="emblem' + (opts.cls || '') + openHit + wounded + '" data-uid="' + inst.uid + '"' + (opts.onclick ? ' onclick="' + opts.onclick + '"' : '') + '>' +
     '<div class="emblem-head' + (d.signatureFor ? ' sighead' : '') + '"><div class="emblem-rim"' + rimStyle + '></div><div class="emblem-face">' + face + '</div>' + kwBig +
-    '<span class="emblem-pow' + (inst.permPower > 0 ? ' buffed' : inst.permPower < 0 ? ' debuffed' : '') + '">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span>' +
+    '<span class="emblem-pow' + ((inst.permPower + (inst.tempPower || 0)) > 0 ? ' buffed' : (inst.permPower + (inst.tempPower || 0)) < 0 ? ' debuffed' : '') + '">' + effPow(inst) + '⚔</span>' +
     '<span class="emblem-hp' + (inst.permHealth > 0 ? ' buffed' : inst.permHealth < 0 ? ' debuffed' : '') + (inst.damage > 0 ? ' hurt' : '') + '">' + hpLeft + '♥</span><span class="emblem-pip"></span>' + (opts.zz ? '<span class="emblem-zz">Zz</span>' : '') + (inst.doom > 0 ? '<span class="emblem-doom" title="Doomed — dies when the counter runs out">💀' + inst.doom + '</span>' : '') + '</div>' +
     (opts.chev ? '<div class="chev">⌄⌄⌄</div>' : '') + (opts.sick ? '<div class="sickchip" title="Summoned this turn — it can attack next turn">⏳</div>' : '') + (opts.blocking ? '<div class="blockchip" title="Blocking">🛡️</div>' : '') +
     '<div class="emblem-name" style="font-size:' + Math.max(9, Math.min(9.5, Math.round(258 / Math.max(8, d.name.length)) / 2)) + 'px">' + esc(d.name) + '</div>' +
@@ -8726,7 +8815,7 @@ function inspectHtml() {
   var owner = inspectCardId ? humanIdx : (G.players[0].board.includes(inst) || G.players[0].hand.includes(inst) ? 0 : 1);
   var stats = '';
   var inGrave = false; try { inGrave = G && G.players.some(function (pp) { return pp.graveyard.indexOf(inst) >= 0; }); } catch (e) {}
-  if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span class="pow">' + d.power + '⚔</span><span class="hp">' + d.health + '♥</span></div>' : '<div class="stats"><span class="pow">' + (d.power + inst.permPower + (inst.tempPower || 0)) + '⚔</span><span class="hp">' + (d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
+  if (d.type === 'creature') stats = inGrave ? '<div class="stats"><span class="pow">' + d.power + '⚔</span><span class="hp">' + d.health + '♥</span></div>' : '<div class="stats"><span class="pow">' + effPow(inst) + '⚔</span><span class="hp">' + (d.health + inst.permHealth + (inst.tempHealth || 0) - inst.damage) + '♥' + (inst.damage ? ' (' + inst.damage + ' damage taken)' : '') + '</span></div>';
   return '<div class="overlay inspect-veil' + (Date.now() - inspectAnimAt < 450 ? ' inspect-in' : '') + '" style="background:radial-gradient(ellipse at 50% 36%, ' + schoolHex(d) + '2e, rgba(6,4,12,.84) 62%)" onclick="closeInspect()"><div class="bigcard ' + d.type + (d.signatureFor ? ' sigcard' : '') + (d.legendary ? ' legendary' : '') + (inspectPolished ? ' polished' : '') + '"' + cardStyle(d) + '>' +
     '<div class="cost">' + d.cost + '</div>' + typeTabHtml(d) + crownHtml(d) + (d.icon ? '<div class="glyph">' + d.icon + '</div>' : '') + '<div class="cname' + (d.legendary && d.signatureFor ? ' foil' : '') + '">' + esc(d.name) + '</div>' +
     ((typeof CARD_ART !== 'undefined' && CARD_ART[inst.cardId]) ? '<div class="cart"><img src="' + CARD_ART[inst.cardId] + '" alt=""></div>' : '<div class="cart glyphbox">' + (d.icon || '') + '</div>') +
@@ -8794,10 +8883,23 @@ function fitTextEl(el, minPx) {
   }
   while (guard++ < 44 && fs > minPx && over()) { fs -= 0.5; el.style.fontSize = fs + 'px'; }
 }
+/* M252: card rules text gets a deeper fit than names do — the shrink
+   floor drops to 6px, and a text still spilling at the floor trades
+   leading (1.14) before it may clip. The M64 law is the FULL
+   description, shrunk until visible — never truncated. */
+function fitCardText(el) {
+  try {
+    if (fitTextEl(el, 6.0)) return;
+    el.style.lineHeight = '1.14';
+    if (fitTextEl(el, 6.0)) return;
+    el.style.lineHeight = '1.08';
+    fitTextEl(el, 6.0);
+  } catch (e) {}
+}
 function fitAllText() {
   try {
     document.querySelectorAll('.card .cname, .bigcard .cname').forEach(function (el) { fitTextEl(el, 6); });
-    document.querySelectorAll('.card .ctext').forEach(function (el) { fitTextEl(el, 7.5); });
+    document.querySelectorAll('.card .ctext').forEach(function (el) { fitCardText(el); });
     document.querySelectorAll('.bigcard .ctext').forEach(function (el) { fitTextEl(el, 10.5); });
     /* M71: board emblem names and hero names join the fit pass — no more
        ellipsis-clipped names ('Thornwood Ar…', 'Karg the Unbroke'). */
@@ -8806,7 +8908,7 @@ function fitAllText() {
     /* M77: draft-offer cards fit deeper — a long signature name or text
        shrinks until it truly fits instead of clipping (Jesse screenshot). */
     document.querySelectorAll('.draftrow .cname').forEach(function (el) { fitTextEl(el, 7); });
-    document.querySelectorAll('.draftrow .ctext').forEach(function (el) { fitTextEl(el, 6.5); });
+    document.querySelectorAll('.draftrow .ctext').forEach(function (el) { fitCardText(el); });
   } catch (e) {}
 }
 var __m81Game = null, __m81Decks = [99, 99], __m81LogLen = 0;
@@ -8971,7 +9073,7 @@ function renderBody() {
      the field; there are no separate sections anymore. */
   var shellStyle = (typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.20), rgba(15,9,27,.38)), url(' + PORTRAITS.arena + ')"' : '';
   if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
-  var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep' + (G.active === aiIdx ? ' foe' : '') + '"></div>' : '');
+  var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + ((me.artifacts.length || foe.artifacts.length) ? ' hasdock' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep' + (G.active === aiIdx ? ' foe' : '') + '"></div>' : '');
   html += '<button class="pause-btn" aria-label="Pause menu" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
   sweepPending = false;
   html += heroBarHtml(foe, false);
@@ -8992,13 +9094,13 @@ function renderBody() {
       if (coach) html += '<div class="coachline">' + coach + '</div>';
     }
     if (mode === 'blocking') {
-      var through = aiAttackers.filter(function (a) { return !blockMap[a.uid]; }).reduce(function (s, a) { var c = G.players[aiIdx].board.find(function (x) { return x.uid === a.uid; }); return s + (c ? D(c).power + c.permPower : 0); }, 0);
+      var through = aiAttackers.filter(function (a) { return !blockMap[a.uid]; }).reduce(function (s, a) { var c = G.players[aiIdx].board.find(function (x) { return x.uid === a.uid; }); return s + (c ? effPow(c) : 0); }, 0); // M252: the forecast counts the power that will actually land (temp mods in, floored at 0)
       html += '<div class="blockchip' + (through ? '' : ' allblocked') + '">' + (through ? '⚠ ' + through + ' damage still gets through' : '🛡️ Everything is blocked') + '</div>';
       var pairBits = Object.keys(blockMap).map(function (auid) {
         var a = G.players[aiIdx].board.find(function (x) { return x.uid === +auid; });
         var b = me.board.find(function (x) { return x.uid === blockMap[auid]; });
         if (!a || !b) return '';
-        var aPow = D(a).power + a.permPower, bPow = D(b).power + b.permPower;
+        var aPow = effPow(a), bPow = effPow(b); // M252: the pair forecast reads effective power both ways — a -3/-0'd attacker is forecast to deal 0, as the engine will
         var aLeft = D(a).health + a.permHealth - a.damage, bLeft = D(b).health + b.permHealth - b.damage;
         var out = (aPow >= bLeft && bPow >= aLeft) ? 'both fall' : (aPow >= bLeft ? 'blocker falls' : (bPow >= aLeft ? 'attacker falls' : 'both stand'));
         return '<span class="pairbit">' + (D(a).icon || '⚔') + ' ' + aPow + ' vs ' + (D(b).icon || '🛡') + ' ' + bPow + ' → ' + out + '</span>';
@@ -9024,7 +9126,7 @@ function renderBody() {
   else if (mode === 'targeting') { html += '<button class="danger" onclick="cancelTarget()">✕ Cancel cast</button>'; if (pendingTargets.length) html += '<button class="pass-ready" onclick="confirmMultiTarget()">⚡ Cast (' + pendingTargets.length + ')</button>'; if (pendingFirst) html += '<button onclick="restartTargets()">↩ Restart targets</button>'; }
   else if (mode === 'attackSelect') {
     if (mode === 'attackSelect') { var readyN = me.board.filter(function (c) { return G.canAttack(c, me); }); var allIn = readyN.length && readyN.every(function (c) { return attackSet.has(c.uid); }); html += '<button class="ghost" onclick="attackAllToggle()">' + (allIn ? '✕ Clear attackers' : '⚔️ All attackers') + '</button>'; }
-    if (attackSet.size) { var totPow = 0; attackSet.forEach(function (u) { var c = me.board.find(function (x) { return x.uid === u; }); if (c) totPow += D(c).power + c.permPower; }); html += '<button class="pass-ready" onclick="declareAttack()">⚔️ Declare (' + attackSet.size + ') · ' + totPow + ' power</button>';
+    if (attackSet.size) { var totPow = 0; attackSet.forEach(function (u) { var c = me.board.find(function (x) { return x.uid === u; }); if (c) totPow += effPow(c); }); html += '<button class="pass-ready" onclick="declareAttack()">⚔️ Declare (' + attackSet.size + ') · ' + totPow + ' power</button>';
     html += '<button class="ghost" onclick="endTurn()" title="Pass without attacking — your creatures hold their ground">⏭ End Turn</button>'; }
     else html += '<button class="danger" onclick="endTurn()">⏭ End Turn</button>';
   }
@@ -9032,13 +9134,13 @@ function renderBody() {
       html += '<button class="danger" onclick="cancelArtifactPick()">\u2715 Cancel</button>'; // M187: a pending artifact pick stands down here \u2014 the guidance rides the message line and the tiles light in boardHtml. (The branch this replaces referenced per-creature locals that do not exist in renderBody, so any targeted pick threw on render \u2014 a latent break on the M116 surface, repaired in this wave.)
     } else if (mode === 'blocking') {
     var unblocked = aiAttackers.filter(function (a) { return !blockMap[a.uid]; });
-    var faceDmg = unblocked.reduce(function (s, a) { var c = foe.board.find(function (x) { return x.uid === a.uid; }); return s + (c ? D(c).power + c.permPower : 0); }, 0);
+    var faceDmg = unblocked.reduce(function (s, a) { var c = foe.board.find(function (x) { return x.uid === a.uid; }); return s + (c ? effPow(c) : 0); }, 0); // M252: effective power, as P4a
     var anyBlock = aiAttackers.some(function (a) { var ac = foe.board.find(function (x) { return x.uid === a.uid; }); return ac && me.board.some(function (b) { return canBlockCreature(ac, b); }); });
     html += '<button' + (aiAttackers.length && !unblocked.length ? ' class="pass-ready"' : '') + ' onclick="confirmBlocks()">' + (!anyBlock && aiAttackers.length ? 'Take ' + faceDmg : '✓ Done' + (faceDmg > 0 ? ' · −' + faceDmg : '')) + '</button>'; /* M102 (Jesse): the button carries a verb and a number — the prose lives in the battle log */
   }
   else if (mode === 'main') {
     var readyN = me.board.filter(function (c) { return G.canAttack(c, me); }).length;
-    var readyPow = me.board.filter(function (c) { return G.canAttack(c, me); }).reduce(function (s, c) { return s + D(c).power + c.permPower; }, 0);
+    var readyPow = me.board.filter(function (c) { return G.canAttack(c, me); }).reduce(function (s, c) { return s + effPow(c); }, 0); // M252: effective power — a fully debuffed line no longer advertises power it cannot deal (and can no longer fake a 'lethal!' read)
     if (!me.combatDone && readyN) html += '<button' + (readyPow >= foe.life ? ' class="lethal"' : '') + ' onclick="startAttackSelect()">⚔️ Attack' + (readyN > 1 ? ' · ' + readyN + ' ready' : '') + (readyPow ? ' · ' + readyPow + ' power' : '') + (readyPow >= foe.life ? ' · lethal!' : '') + '</button>';
     /* M66 (Jesse playtest): passing must ALWAYS be one tap — End Turn stands
        beside Attack even when creatures are ready, so holding a creature

@@ -124,11 +124,15 @@
   .draftrow { display:flex; gap:10px; justify-content:center; flex-wrap:nowrap; }
   /* M234: the upgrade draft \u2014 Essence shields, and Wrenna's Nurture furniture */
   .essencepick { display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
-  .essence-shield { display:flex; flex-direction:column; align-items:center; gap:4px; min-width:118px; padding:14px 10px; border-radius:14px; border:2px solid #7a5c2e; background:linear-gradient(180deg,#2c3a2a,#1d2619); color:#e8e3d3; cursor:pointer; }
-  .essence-shield:hover { border-color:#c9a227; }
-  .ess-glyph { font-size:26px; }
-  .ess-name { font-weight:700; font-size:13px; }
-  .ess-grant { font-size:12px; opacity:.85; }
+  /* M245: the Essence tiles join the card-frame family — the M244 ledger
+     flagged the flat green shields beside the framed cards they upgrade.
+     Bronze-gold rim, the deep warm-brown body of the signature frames,
+     the glyph seated in a medallion, the name in banner gold. */
+  .essence-shield { display:flex; flex-direction:column; align-items:center; gap:5px; min-width:118px; padding:14px 10px 12px; border-radius:14px; border:2px solid #a8842f; background:linear-gradient(180deg,#3d2c12,#241a0c 55%,#1a1208); box-shadow:inset 0 0 0 2px rgba(255,217,102,.22), 0 6px 14px rgba(0,0,0,.45); color:#f2e7c8; cursor:pointer; transition:transform .15s ease, border-color .15s ease; }
+  .essence-shield:hover { border-color:#ffd166; transform:translateY(-3px); }
+  .ess-glyph { font-size:25px; width:52px; height:52px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:radial-gradient(circle at 38% 32%, #6b5320, #2e2110 72%); border:2px solid #c9a227; box-shadow:inset 0 0 10px rgba(0,0,0,.55); }
+  .ess-name { font-weight:800; font-size:13.5px; color:#ffe9b0; letter-spacing:.02em; }
+  .ess-grant { font-size:12px; color:#e6dcff; opacity:.92; }
   .stored-upgrade { display:inline-block; margin-left:8px; padding:4px 10px; border-radius:999px; background:#22331f; border:1px solid #7a5c2e; color:#cfe3b8; font-size:12px; vertical-align:middle; }
   .nurture-btn { margin-left:8px; }
   .draftrow .card { width:100%; min-width:0; height:308px; } /* M125: the picks share ONE row — the old 31%-of-an-auto-parent sizing wrapped them into a vertical stack taller than the phone, and the third pick was cut off (Jesse, live) */
@@ -455,6 +459,11 @@
   .brow button:disabled { opacity:.35; }
   .berr { color:#ff9d9d; font-size:13px; margin:3px 0; }
   .bok { color:#9df0b6; font-size:13.5px; font-weight:700; }
+  /* M245: the vault commit, felt — the saved line pops once when a save
+     lands (the builderSavedAt stamp arms it, mount-once). body.calm's
+     global crush stills it like every other beat. */
+  .bok.savepop { animation:savePop 1.1s ease-out; transform-origin:left center; }
+  @keyframes savePop { 0% { transform:scale(1); } 25% { transform:scale(1.13); color:#d8ffe9; text-shadow:0 0 14px rgba(123,224,163,.85); } 100% { transform:scale(1); } }
   @media (max-width:560px){ .portrait{width:38px;height:38px} }
   .card .glyph { position:absolute; right:5px; top:16px; font-size:21px; opacity:.5; pointer-events:none; }
   .bigcard .glyph { position:absolute; right:12px; top:34px; font-size:34px; opacity:.55; pointer-events:none; }
@@ -9624,7 +9633,7 @@ var collectionType = 'all', collectionCost = 'all', collShown = 0;
 function costIn(bucket, cost) { if (bucket === '01') return cost <= 1; if (bucket === '23') return cost >= 2 && cost <= 3; if (bucket === '45') return cost >= 4 && cost <= 5; if (bucket === '6p') return cost >= 6; return true; }
 function setCollectionType(v) { collectionType = v; render(); }
 function setCollectionCost(v) { collectionCost = v; render(); }
-function clearCollectionFilters() { collectionQuery = ''; collectionSchool = 'all'; collectionType = 'all'; collectionCost = 'all'; collectionOnlySig = false; collectionOnlyLeg = false; collectionArt = 'all'; collectionShowTokens = true; collectionKeyword = 'all'; render(); }
+function clearCollectionFilters() { collectionQuery = ''; collectionSchool = 'all'; collectionType = 'all'; collectionCost = 'all'; collectionSigHero = 'all'; collectionOnlySig = false; collectionOnlyLeg = false; collectionArt = 'all'; collectionShowTokens = true; collectionKeyword = 'all'; render(); }
 function setCollectionSchool(s) { collectionSchool = s; render(); }
 var collectionQuery = '';
 var NEW_CARDS = { horncharge_lantern: 1, rod_of_ruin: 1, bag_of_tricks: 1, ghoulcallers_grimoire: 1, battlefield_merchant: 1, armored_angel: 1, knight_of_the_tusk: 1, daughter_of_runes: 1 }; // M116: the ribbon marks the recovery wave
@@ -9636,9 +9645,20 @@ var collectionShowTokens = true;
 var collectionArt = 'all';
 function setCollectionArt(v) { collectionArt = v; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
 var collectionOnlySig = false, collectionOnlyLeg = false;
+var collectionSigHero = 'all'; // M245: the one-hero signature finder — the audit's A5 hunt scrolled 2,631px past eleven other heroes' groups to reach Volric's; this filter (filter sheet + chip) lands on one hero's set directly
+function setCollectionSigHero(v) { collectionSigHero = v; render(); }
 function setCollectionOnly(kind) { if (kind === 'sig') collectionOnlySig = !collectionOnlySig; else collectionOnlyLeg = !collectionOnlyLeg; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
 function setCollectionTokens(v) { collectionShowTokens = v; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
 function setCollectionSort(s) { collectionSort = s; if (collFiltersOpen) { render(); return; } var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); else render(); }
+/* M245: one forgiving haystack for both searches — the card's name,
+   rules text, keywords, subtype and type, its school's name AND the
+   plain words a player actually types for that school (fire for Ember,
+   water for Tides, nature for the Wilds), plus its hero's name for
+   signatures ("veyla" finds her three). Multi-word queries match
+   word-by-word, so "dawn creature" and "fire spell" behave. */
+var SCHOOL_ALIASES = { tides: 'water blue ocean sea', ember: 'fire red flame', grave: 'death dark undead shadow', dawn: 'light holy sun white', worldroot: 'nature green wilds forest', none: 'neutral' };
+function searchHay(d) { return (d.name + ' ' + effectText(d) + ' ' + (d.keywords || []).join(' ') + ' ' + (d.subtype || '') + ' ' + d.type + ' ' + (d.cardSchool ? SCHOOL_META[d.cardSchool].name + ' ' + (SCHOOL_ALIASES[d.cardSchool] || '') : 'neutral') + ' ' + (d.signatureFor && HEROES[d.signatureFor] ? HEROES[d.signatureFor].name : '')).toLowerCase(); }
+function searchMatch(d, q) { var hay = searchHay(d); return q.toLowerCase().split(/\s+/).every(function (w) { return !w || hay.indexOf(w) >= 0; }); }
 function setCollectionQuery(v) { collectionQuery = v; var n = document.getElementById('collGroups'); if (n) n.innerHTML = collectionGroupsHtml(); var c = document.getElementById('collCount'); if (c) c.textContent = collShown; var ch = document.getElementById('collChips'); if (ch && ch.id === 'collChips') ch.innerHTML = collChipsInner(); }
 /* ---------- M211: SLIM FILTER BAR + FILTER SHEET (Jesse's overnight
    directive, 2026-11-10: "the card library and deck builder are
@@ -9663,6 +9683,7 @@ function collActiveFilters() {
   if (collectionSort !== 'cost') out.push(['Sort: ' + (collectionSort === 'name' ? 'Name' : 'Newest'), 'sort']);
   if (collectionKeyword !== 'all') out.push([KW_LABELS[collectionKeyword] || collectionKeyword, 'keyword']);
   if (collectionArt !== 'all') out.push(['Art: ' + (collectionArt === 'painted' ? 'painted' : 'glyphs'), 'art']);
+  if (collectionSigHero !== 'all') out.push(['\u25C6 ' + heroShortName(collectionSigHero) + ' signatures', 'sigh']);
   if (collectionOnlySig) out.push(['\u25C6 Signatures', 'sig']);
   if (collectionOnlyLeg) out.push(['\uD83D\uDC51 Legendaries', 'leg']);
   if (!collectionShowTokens) out.push(['Tokens hidden', 'tokens']);
@@ -9678,7 +9699,7 @@ function clearCollDim(dim) {
   if (dim === 'query') collectionQuery = ''; else if (dim === 'school') collectionSchool = 'all';
   else if (dim === 'type') collectionType = 'all'; else if (dim === 'cost') collectionCost = 'all';
   else if (dim === 'sort') collectionSort = 'cost'; else if (dim === 'keyword') collectionKeyword = 'all';
-  else if (dim === 'art') collectionArt = 'all'; else if (dim === 'sig') collectionOnlySig = false;
+  else if (dim === 'art') collectionArt = 'all'; else if (dim === 'sigh') collectionSigHero = 'all'; else if (dim === 'sig') collectionOnlySig = false;
   else if (dim === 'leg') collectionOnlyLeg = false; else if (dim === 'tokens') collectionShowTokens = true;
   render();
 }
@@ -9688,6 +9709,7 @@ function collFilterSheetHtml() {
 '<div style="margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px">' + [['all', '🌐 All'], ['tides', '🌊 Tides'], ['ember', '🔥 Ember'], ['grave', '🪦 Grave'], ['dawn', '☀️ Dawn'], ['worldroot', '🌿 Wilds'], ['none', '⚪ Neutral']].map(function (sc) {
       return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionSchool === sc[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionSchool(\'' + sc[0] + '\')">' + sc[1] + '</button>';
     }).join('') + '</div>' +
+    '<div style="margin:8px 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#a793d6">\u25C6 Signatures of:</span><select onchange="setCollectionSigHero(this.value)" style="flex:1;min-width:170px;box-sizing:border-box;padding:8px 10px;border-radius:8px;background:rgba(20,12,38,.8);border:1px solid rgba(177,140,255,.4);color:#efe9ff;font-size:14px"><option value="all"' + (collectionSigHero === 'all' ? ' selected' : '') + '>Every hero</option>' + Object.keys(HEROES).filter(function (h) { return Object.keys(CARDS).some(function (id) { return CARDS[id].signatureFor === h; }); }).map(function (h) { return '<option value="' + h + '"' + (collectionSigHero === h ? ' selected' : '') + '>' + (SIGILS[h] || '\u25C6') + ' ' + esc(HEROES[h].name) + '</option>'; }).join('') + '</select></div>' +
     '<div style="margin:8px 0 2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#a793d6">Sort:</span>' + [['cost', '💧 Cost'], ['name', '🔤 Name'], ['new', '✨ Newest']].map(function (s) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionSort === s[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionSort(\'' + s[0] + '\')">' + s[1] + '</button>'; }).join('') + '<span style="font-size:12px;color:#a793d6">' + ['tides', 'ember', 'grave', 'dawn', 'worldroot'].map(function (s) { return SCHOOL_META[s].icon + ' ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].cardSchool === s && !CARDS[id].generatedOnly; }).length; }).join(' · ') + ' playable</span><button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="setCollectionTokens(!collectionShowTokens)">' + (collectionShowTokens ? '🫥 Hide tokens' : '👀 Show tokens') + '</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionOnlySig ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'sig\')">◆ Signatures</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionOnlyLeg ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionOnly(\'leg\')">👑 Legendaries</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="cycleCollectionKeyword()">' + (collectionKeyword === 'all' ? '🔑 Keyword: any' : '🔑 ' + KW_LABELS[collectionKeyword]) + '</button><button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionArt !== 'all' ? ';border-color:#7be0a3;color:#d8ffe9' : '') + '" onclick="setCollectionArt(collectionArt === \'all\' ? \'painted\' : collectionArt === \'painted\' ? \'glyph\' : \'all\')">' + (collectionArt === 'all' ? '🎨 Art: all' : collectionArt === 'painted' ? '🎨 Art: painted' : '✦ Art: glyphs') + '</button></div>' +
     '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Type:</span>' + [['all', '🌐 All'], ['creature', '🐾 Creatures'], ['spell', '✨ Spells'], ['trap', '🪤 Traps'], ['artifact', '🏺 Artifacts'], ['sig', '◆ Signatures'], ['gen', '🔮 Generated']].map(function (t) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionType === t[0] ? ';border-color:#b18cff;color:#fff;background:rgba(124,80,220,.25)' : '') + '" onclick="setCollectionType(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('') + '</div>' +
     '<div style="margin:8px 0 2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;color:#a793d6">Cost:</span>' + [['all', 'Any'], ['01', '0–1'], ['23', '2–3'], ['45', '4–5'], ['6p', '6+']].map(function (t) { return '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px' + (collectionCost === t[0] ? ';border-color:#ffd166;color:#ffe9b0' : '') + '" onclick="setCollectionCost(\'' + t[0] + '\')">' + t[1] + ' 💧</button>'; }).join('') + '<button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></div>' +
@@ -9699,7 +9721,7 @@ function collectionGroupsHtml() {
     if (collectionType !== 'all' && tag !== collectionType) return '';
     ids = ids.filter(function (id) { return collectionSchool === 'all' || (CARDS[id].cardSchool || 'none') === collectionSchool; });
     if (collectionCost !== 'all') ids = ids.filter(function (id) { return costIn(collectionCost, CARDS[id].cost); });
-    if (collectionQuery) { var q = collectionQuery.toLowerCase(); ids = ids.filter(function (id) { var d = CARDS[id]; var hay = d.name + ' ' + effectText(d) + ' ' + (d.keywords || []).join(' ') + ' ' + (d.cardSchool ? SCHOOL_META[d.cardSchool].name : ''); return hay.toLowerCase().indexOf(q) >= 0; }); }
+    if (collectionQuery) { ids = ids.filter(function (id) { return searchMatch(CARDS[id], collectionQuery); }); } // M245: the forgiving haystack
     if (collectionSort === 'name') ids.sort(function (a, b) { return CARDS[a].name.localeCompare(CARDS[b].name); });
     else if (collectionSort === 'new') ids.sort(function (a, b) { return (NEW_CARDS[b] ? 1 : 0) - (NEW_CARDS[a] ? 1 : 0) || (CARDS[a].cost - CARDS[b].cost); });
     if (!collectionShowTokens) ids = ids.filter(function (id) { return !CARDS[id].generatedOnly; });
@@ -9723,15 +9745,17 @@ function collectionGroupsHtml() {
      hero who holds signatures gets a section, in roster order, forever. */
   var SIG_TITLES = { weaver: '🌑 SIGNATURES — UMBRA', controller: '👁️ SIGNATURES — THE WARDEN', keeper: '🌿 SIGNATURES — THE VERDANT KEEPER', graven: '🪦 SIGNATURES — MORVANE', unchained: '👻 SIGNATURES — SISTER VESPER', unbridled: '🐗 SIGNATURES — BRAM', torchbearer: '☄️ SIGNATURES — KAEL', bruiser: '🔥 SIGNATURES — KARG THE UNBROKEN', banneret: '⚔️ SIGNATURES — SER ALDRIC', sibilance: '🐍 SIGNATURES — MOTHER SIBILANCE', tidemother: '🐙 SIGNATURES — SURA', skydancer: '🕊️ SIGNATURES — SUYIN', palelord: '🦇 SIGNATURES — CASSIAN', stormconduit: '⚡ SIGNATURES — VOLRIC', hallchampion: '🐆 SIGNATURES — ZARETH' };
   var sigGroups = '', sigAnchored = false;
-  Object.keys(HEROES).forEach(function (h) { var hs = byHero(h); if (!hs.length) return; sigGroups += group(SIG_TITLES[h] || ((SIGILS[h] || '◆') + ' SIGNATURES — ' + HEROES[h].name.toUpperCase()), hs, 'sig', sigAnchored ? undefined : 'grp-sig'); sigAnchored = true; });
-  return sigGroups +
+  /* M245: with the signature finder set, only that hero's group renders. */
+  Object.keys(HEROES).forEach(function (h) { var hs = byHero(h); if (!hs.length) return; if (collectionSigHero !== 'all' && h !== collectionSigHero) return; sigGroups += group(SIG_TITLES[h] || ((SIGILS[h] || '◆') + ' SIGNATURES — ' + HEROES[h].name.toUpperCase()), hs, 'sig', sigAnchored ? undefined : 'grp-sig'); sigAnchored = true; });
+  var noSigHeroes = Object.keys(HEROES).filter(function (h) { return !HEROES[h].held && !byHero(h).length; }).map(function (h) { return heroShortName(h); }); // M245: data-driven — the M225 footer still named Veyla signature-less a full wave after M234 gave her three
+  return sigGroups + (collectionSigHero === 'all' ?
     group('CREATURES', plain('creature'), 'creature', 'grp-creature') +
     group('SPELLS', plain('spell'), 'spell', 'grp-spell') +
     group('TRAPS', plain('trap'), 'trap', 'grp-trap') +
     group('ARTIFACTS', plain('artifact'), 'artifact', 'grp-artifact') +
-    group('✨ GENERATED ONLY — NEVER START IN A DECK', ids.filter(function (id) { return CARDS[id].generatedOnly; }), 'gen', 'grp-gen') +
+    group('✨ GENERATED ONLY — NEVER START IN A DECK', ids.filter(function (id) { return CARDS[id].generatedOnly; }), 'gen', 'grp-gen') : '') +
     (collShown === 0 ? '<p style="color:#c4b6e8;font-size:14px;text-align:center;margin:26px 10px">No cards match those filters. <button class="ghost hit" style="padding:5px 11px;font-size:12.5px" onclick="clearCollectionFilters()">↺ Clear all filters</button></p>' : '') +
-    '<p style="color:#a793d6;font-size:12.5px;margin-top:14px">Korvash and Veyla have no signature cards in the recovered library.</p>'; // M225: the old footer joked that KARG had none — he holds two (Searing Chains, Ember Deathraider); the empty hooks are Korvash's and Veyla's
+    (noSigHeroes.length ? '<p style="color:#a793d6;font-size:12.5px;margin-top:14px">' + esc(noSigHeroes.join(' and ')) + (noSigHeroes.length > 1 ? ' have' : ' has') + ' no signature cards in the recovered library.</p>' : ''); // M245: computed from the data, so it can never go stale the way the hand-written M225 line did (it named Veyla a wave after she gained three)
 }
 /* M176: the collection's completeness, made visible — a slim gold bar under
    the header count, in the collection's own idiom. Progress only; the count
@@ -9772,6 +9796,7 @@ function renderCollection() {
 /* ---------- M5: deck builder (custom 30-card decks per hero, saved on device) ---------- */
 var builderHero = null, builderDeck = null, builderQuery = '';
 var builderDeckId = null, builderDeckName = '', deckDeleteArmed = false, deckPickOpen = false; // M210: the deck in the builder is a VAULT deck (builderDeckId) or an unsaved new one (null); deckDeleteArmed is the two-tap delete confirm
+var builderSavedAt = 0; // M245: the vault-commit stamp — set by a successful builderSave, consumed by the render that lands within 1.6s of it (mount-once, the M199 discipline), so the saved line pops exactly once
 var builderPulseId = null, builderPulseAt = 0; // M199 (gap 12): the add/remove acknowledgement stamp — set by builderAdd/builderRemove, consumed by the renderBuilder pass that prints it, so the flash can never replay on a later re-render (mount-once, the M198 discipline)
 // M188 (Jesse's class-card law, 2026-11-09): the five class cards are the
 // SCHOOLS stage-1s — the SAME set the engine's seeding reads (SCHOOLS[key]
@@ -9948,7 +9973,7 @@ function builderAuto() {
   var guard = 0;
   while (builderDeck.length < 30 && guard++ < 400) {
     var added = false;
-    for (var i = 0; i < pool.length; i++) { var id = pool[i]; var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.filter(function (x) { return x === id; }).length < cap && !(isClassCard(id) && deckClassCount(builderDeck) >= 1) && !(builderHero === 'hallchampion' && CARDS[id].legendary && CARDS[id].type === 'creature' && legendaryCreatureCount(builderDeck) >= 6)) { builderDeck.push(id); added = true; break; } } // M188: auto-fill respects the class-card slot too // M219: auto-fill respects the Companions cap too
+    for (var i = 0; i < pool.length; i++) { var id = pool[i]; var cap = CARDS[id].legendary ? 1 : 2; if (builderDeck.filter(function (x) { return x === id; }).length < cap && !(isClassCard(id) && deckClassCount(builderDeck) >= 1) && !(builderHero === 'hallchampion' && CARDS[id].legendary && CARDS[id].type === 'creature' && legendaryCreatureCount(builderDeck) >= 6) && !(builderHero === 'wildhuntress' && CARDS[id].type === 'creature' && offColourCreatureCount(builderDeck.concat([id])) > 8)) { builderDeck.push(id); added = true; break; } } // M188: auto-fill respects the class-card slot too // M219: auto-fill respects the Companions cap too // M245: and the Nature cap — auto-fill could push Wrenna past 8 off-colour creatures into a deck the save path then refused
     if (!added) break;
   }
   render();
@@ -9981,7 +10006,7 @@ function copyDeckCode() {
   try { var f = document.getElementById('deckCodeField'); if (f) { f.select(); } if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(deckCodeString()); else if (f) document.execCommand('copy'); } catch (e) {}
   deckCodeMsg = ''; render();
 }
-function builderSave() { if (deckErrors(builderHero, builderDeck).length) return; var v = loadVault(); var name = uniqueDeckName(v, builderHero, builderDeckName, builderDeckId); var d = builderDeckId ? vaultDeckById(v, builderDeckId) : null; if (d && d.heroId === builderHero) { d.name = name; d.cards = builderDeck.slice(); d.updatedAt = Date.now(); } else { d = { id: newDeckId(), heroId: builderHero, name: name, cards: builderDeck.slice(), updatedAt: Date.now() }; v.decks.push(d); builderDeckId = d.id; } builderDeckName = name; v.active[builderHero] = d.id; saveVault(v); mirrorLegacyDeck(builderHero, d.cards); deckDeleteArmed = false; render(); } // M210: Save writes the vault deck being edited (creating it if new) and makes it the active deck — never lossy, never a second hidden copy
+function builderSave() { if (deckErrors(builderHero, builderDeck).length) return; var v = loadVault(); var name = uniqueDeckName(v, builderHero, builderDeckName, builderDeckId); var d = builderDeckId ? vaultDeckById(v, builderDeckId) : null; if (d && d.heroId === builderHero) { d.name = name; d.cards = builderDeck.slice(); d.updatedAt = Date.now(); } else { d = { id: newDeckId(), heroId: builderHero, name: name, cards: builderDeck.slice(), updatedAt: Date.now() }; v.decks.push(d); builderDeckId = d.id; } builderDeckName = name; v.active[builderHero] = d.id; saveVault(v); mirrorLegacyDeck(builderHero, d.cards); deckDeleteArmed = false; builderSavedAt = Date.now(); try { sfx('levelup'); } catch (e) {} render(); } // M245: the commit SOUNDS and shows — a save used to be a silent re-render, indistinguishable from any other tap // M210: Save writes the vault deck being edited (creating it if new) and makes it the active deck — never lossy, never a second hidden copy
 function builderUseDefault() { var v = loadVault(); delete v.active[builderHero]; saveVault(v); builderDeckId = null; builderDeck = (DECKS[builderHero] || []).slice(); builderDeckName = uniqueDeckName(v, builderHero, (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[builderHero]) || ('My ' + heroShortName(builderHero) + ' Deck'), null); deckDeleteArmed = false; render(); } // M210: Default becomes the fighting deck; vault decks are NOT deleted (the pre-vault build removed the saved deck here — the vault keeps it)
 function renderBuilder() {
   var heroId = builderHero, d = builderDeck;
@@ -10004,6 +10029,7 @@ function renderBuilder() {
       if (isClassCard(id) && deckClassCount(d) >= 1) whyNot = 'A deck may start with only one class card — yours is already in.';
       else if (n >= cap) whyNot = c.legendary ? 'Legendary — only one copy may start in a deck.' : 'Already at the most copies allowed (2).';
       else if (heroId === 'hallchampion' && c.legendary && c.type === 'creature' && legendaryCreatureCount(d) >= 6) whyNot = 'Companions of the Hall: Zareth\'s deck may hold up to 6 legendary creatures \u2014 the hall is full.'; // M219: the cap says why, in plain words (the M191 pattern)
+      else if (heroId === 'wildhuntress' && c.type === 'creature' && offColourCreatureCount(d.concat([id])) > 8) whyNot = 'Nature: Wrenna\'s deck may hold up to 8 creatures of any colours — the wilds are full.'; // M245: builderAdd refused this case in silence — the 9th off-colour creature's Add sat enabled with no note and the tap simply died (audit B2-Wrenna); the cap now says why, in the M191 pattern
       else if (d.length >= 30) whyNot = 'Your deck is full — remove a card to make room.';
     }
     var btn = inPool
@@ -10018,7 +10044,7 @@ function renderBuilder() {
     return '<h3 style="color:#a793d6;margin:14px 0 4px;font-size:12px;letter-spacing:.15em">' + title + '</h3>' + sorted.map(function (id) { return row(id, true); }).join('');
   }
   var pool = heroPool(heroId);
-  if (builderQuery) { var bq = builderQuery.toLowerCase(); pool = pool.filter(function (id) { var c = CARDS[id]; var hay = c.name + ' ' + effectText(c) + ' ' + (c.keywords || []).join(' ') + ' ' + (c.cardSchool ? SCHOOL_META[c.cardSchool].name : ''); return hay.toLowerCase().indexOf(bq) >= 0; }); }
+  if (builderQuery) { pool = pool.filter(function (id) { return searchMatch(CARDS[id], builderQuery); }); } // M245: the same forgiving haystack as the collection
   if (builderSchoolF !== 'all') pool = pool.filter(function (id) { return (CARDS[id].cardSchool || 'none') === builderSchoolF; });
   if (builderType !== 'all') pool = pool.filter(function (id) { return CARDS[id].type === builderType; });
   if (builderCost !== 'all') pool = pool.filter(function (id) { return costIn(builderCost, CARDS[id].cost); });
@@ -10039,7 +10065,7 @@ function renderBuilder() {
     '<div style="margin:10px 0 4px;font-size:15px">Deck: <b>' + esc(builderDeckName || (curDeck ? curDeck.name : 'New deck')) + '</b> · <b>' + d.length + ' / 30</b> cards' + (curDeck ? (activeId === curDeck.id ? ' · \u2605 active \u2014 this deck fights' : ' · saved in your vault') + (isSaved ? '' : ' · unsaved changes') : ' · new deck \u2014 Save puts it in your vault') + (!activeId ? ' · the default deck fights for this hero' : '') + '</div>' +
     '<div class="curve">' + (function () { var byCost = {}, types = {}, sum = 0; d.forEach(function (id) { var c = CARDS[id]; if (!c) return; var b = Math.min(c.cost, 8); byCost[b] = (byCost[b] || 0) + 1; types[c.type] = (types[c.type] || 0) + 1; sum += c.cost; }); var max = 1; Object.keys(byCost).forEach(function (k) { if (byCost[k] > max) max = byCost[k]; }); var bars = ''; for (var b2 = 0; b2 <= 8; b2++) { var n2 = byCost[b2] || 0; bars += '<span class="cbar"><i style="height:' + Math.max(2, Math.round(n2 / max * 30)) + 'px"></i><em>' + (b2 === 8 ? '8+' : b2) + '</em></span>'; } return bars + '<span class="cmeta">' + (d.length ? 'avg ' + (sum / d.length).toFixed(1) + ' mana · ' : '') + Object.keys(types).map(function (t) { return types[t] + ' ' + t + (types[t] === 1 ? '' : 's'); }).join(' · ') + (function () { var pk = 0, pkn = 0; Object.keys(byCost).forEach(function (k) { if (byCost[k] > pkn) { pkn = byCost[k]; pk = k; } }); return d.length ? ' · curve peak 💧' + pk + ' (' + pkn + ')' : ''; })() + (function () { var sc = {}; d.forEach(function (id) { var s2 = CARDS[id] && CARDS[id].cardSchool; if (s2 && s2 !== 'none') sc[s2] = (sc[s2] || 0) + 1; }); var ks = Object.keys(sc); return ks.length ? ' · ' + ks.map(function (k) { return SCHOOL_META[k].icon + ' ' + sc[k]; }).join(' ') : ''; })() + '</span>'; })() + '</div>' +
     (d.length >= 20 && !cheapN ? '<div class="berr" style="border-color:rgba(255,209,102,.5);color:#ffe9b0">⚠ No plays before turn 3 — this deck has nothing costing 2 or less.</div>' : '') +
-    (errs.length ? errs.map(function (e) { return '<div class="berr">⚠ ' + esc(e) + '</div>'; }).join('') : '<div class="bok">✓ Legal deck' + (isSaved ? ' — saved' + (curDeck && activeId === curDeck.id ? ' and in use' : '') : '') + '</div>') +
+    (errs.length ? errs.map(function (e) { return '<div class="berr">⚠ ' + esc(e) + '</div>'; }).join('') : '<div class="bok' + (isSaved && builderSavedAt && Date.now() - builderSavedAt < 1600 ? ' savepop' : '') + '">✓ Legal deck' + (isSaved ? ' — saved' + (curDeck && activeId === curDeck.id ? ' and in use' : '') : '') + '</div>') +
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">' +
     '<button class="big" style="flex:1" onclick="builderSave()"' + (errs.length ? ' disabled' : '') + '>' + (curDeck ? '💾 Save & use this deck' : '💾 Save to vault & use') + '</button>' +
     '<button class="ghost hit" onclick="builderJumpDeck()">\uD83C\uDCCF View deck \u2193</button>' +

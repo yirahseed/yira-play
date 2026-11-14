@@ -7014,7 +7014,7 @@ function foePayoffWatch() {
       mission: foe.missionThreshold || 0,
       spirit: foe.spiritThreshold || 0,
       summons: foe.summonCount || 0,
-      traps: foe.trapsArmedTotal || 0
+      traps: foe.trapsArmedCount || 0 // M268: was trapsArmedTotal — a field the engine never had, so the foe Warden's Outwit crossing could never pop (the M264 dead-field family)
     };
     if (!foePaySnap || G.turnCount < foePaySnap.turn) { foePaySnap = snap; return; }
     var prevStorm = snap.storm < foePaySnap.storm ? 0 : foePaySnap.storm;
@@ -7171,7 +7171,7 @@ function heroProfileHtml() {
     '<h2>' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</h2>' +
     '<div class="profile-life">❤️ ' + p.life + ' / ' + p.hero.life + ' life · 💎 ' + Math.max(0, G.availableMana(p)) + '/' + p.maxMana + ' mana</div>' +
     (function () { var sigs = Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }); return sigs.length ? '<div class="sigminis">' + sigs.map(function (id) { return cardHtml(fakeInst(id), p.idx, {}); }).join('') + '</div>' : ''; })() +
-    '<div style="font-size:12.5px;color:#c4b6e8;margin-top:2px">◆ Signatures: ' + Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }).map(function (id) { return esc(CARDS[id].name); }).join(' · ') + '</div>' +
+    (function () { var sigs = Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }); return '<div style="font-size:12.5px;color:#c4b6e8;margin-top:2px">◆ Signatures: ' + (sigs.length ? sigs.map(function (id) { return esc(CARDS[id].name); }).join(' · ') : 'none \u2014 no signature cards in the recovered library') + '</div>'; })() + // M268: a hero with no signatures (Korvash) names the zero instead of wearing a dangling empty label
     '<p class="profile-blurb">' + esc(p.hero.blurb) + '</p>' +
     '<div class="profile-rows">' + (mineP ? '<div>🏫 ' + schools + '</div>' + '<div>' + st.icon + ' ' + esc(st.name) + '</div>' : '') +
     '<div>🂠 ' + p.deck.length + ' in deck · ✋ ' + p.hand.length + ' in hand · 🪦 ' + p.graveyard.length + ' in graveyard · ⚔️ ' + p.board.length + ' on the field</div>' +
@@ -9347,6 +9347,9 @@ function renderBody() {
   var pePopCls = ''; // M244: the payoff pop — a crossing arms a 700ms window; renders inside it wear the class once through
   if (me.hero.passive === 'stormConduit') { var srP = me.spellsCastThisTurn || 0; if (peTrack.stormRaw != null && srP > peTrack.stormRaw && srP % 3 === 0) peTrack.popUntil = Date.now() + 700; peTrack.stormRaw = srP; }
   if (me.hero.passive === 'freeSpiritMissions') { if (peTrack.missionThr != null && me.missionThreshold > peTrack.missionThr) peTrack.popUntil = Date.now() + 700; peTrack.missionThr = me.missionThreshold; }
+  if (me.hero.passive === 'trapDraw') { var trP = me.trapsArmedCount || 0; if (peTrack.trapRaw != null && trP > peTrack.trapRaw && trP % 3 === 0) peTrack.popUntil = Date.now() + 700; peTrack.trapRaw = trP; } // M268: the Outwit crossing pops, as the foe watcher's trap branch does
+  if (me.hero.passive === 'unbridled') { var smP = me.summonCount || 0; if (peTrack.sumRaw != null && smP > peTrack.sumRaw && smP % 5 === 0) peTrack.popUntil = Date.now() + 700; peTrack.sumRaw = smP; } // M268: the War Boar crossing pops
+  if (me.hero.passive === 'freeSpirit') { if (peTrack.spiritThr != null && me.spiritThreshold > peTrack.spiritThr) peTrack.popUntil = Date.now() + 700; peTrack.spiritThr = me.spiritThreshold; } // M268: the spirit-threshold rise pops, mirroring the mission branch
   if (peTrack.popUntil && Date.now() < peTrack.popUntil) pePopCls = ' pe-pop';
   html += '<div class="passive-emblem' + (me.hero.passive === 'weave' ? ' pe-weave' : '') + pePopCls + '" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + (me.hero.passive === 'trapDraw' ? '<span class="pe-count">' + (me.trapsArmedCount % 3) + '/3</span>' : '') + (me.hero.passive === 'unbridled' ? '<span class="pe-count">' + (me.summonCount % 5) + '/5</span>' : '') + (me.hero.passive === 'freeSpiritMissions' ? '<span class="pe-count">' + me.missionProgress + '/' + me.missionThreshold + '</span>' : '') + (me.hero.passive === 'freeSpirit' ? '<span class="pe-count">' + me.damageDealtThisTurn + '/' + me.spiritThreshold + '</span>' : '') + (me.hero.passive === 'stormConduit' ? '<span class="pe-count">' + ((me.spellsCastThisTurn || 0) % 3) + '/3</span>' : '') + '</div>';
   // M234 (Nurture): the roster's first ACTIVATED hero power gets a

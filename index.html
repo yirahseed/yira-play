@@ -9893,6 +9893,22 @@ function versusHtml() {
 
 var LEAGUE_TIERS = [[0, '🌱', 'Seedling'], [3, '🛡️', 'Bronze'], [6, '⚔️', 'Silver'], [10, '🏅', 'Gold'], [15, '💠', 'Platinum'], [25, '👑', 'Mythic']];
 function leagueOf(wins) { var cur = LEAGUE_TIERS[0], next = null; for (var i = 0; i < LEAGUE_TIERS.length; i++) { if (wins >= LEAGUE_TIERS[i][0]) { cur = LEAGUE_TIERS[i]; next = LEAGUE_TIERS[i + 1] || null; } } return { icon: cur[1], name: cur[2], next: next }; }
+/* M267: THE CELEBRATION LEDGER. The old finishCheck compare looked only
+   at the last two win counts, so a tier crossed by a CLIMB win (which
+   never celebrates, by the M132 rule) stayed crossed-but-uncelebrated
+   forever: the next standard win compared same-tier to same-tier and
+   the moment was silently eaten — proven on a driven veteran profile
+   (5 standard wins, a climb win to 6 = Silver, then a standard win at
+   7: no banner, though the end box honestly read Silver). The ledger
+   (yira_league_base) remembers the win count celebrations are settled
+   through; it advances on STANDARD wins only, so a climb-carried cross
+   is celebrated once — naming the league the player now stands in — on
+   the next standard win. No ledger yet (every profile written before
+   M267) falls back to the old last-win compare, so standard-only
+   histories behave exactly as they always did. */
+function leagueBase() { try { var n = parseInt(localStorage.getItem('yira_league_base'), 10); return isNaN(n) ? null : n; } catch (e) { return null; } }
+function leagueTierIdx(wins) { var t = 0; for (var i = 0; i < LEAGUE_TIERS.length; i++) { if (wins >= LEAGUE_TIERS[i][0]) t = i; } return t; }
+function leagueCelebration(base, wins) { if (base === null || base < 0 || base > wins - 1) base = wins - 1; return leagueTierIdx(wins) > leagueTierIdx(base) ? leagueOf(wins) : null; }
 function renderTitle() {
   /* M94 (Jesse): a landing page, the old way — the game's name up front,
      press start, THEN the menu opens and you pick everything. Kept
@@ -10735,7 +10751,7 @@ function finishCheck() {
     if (!recordCounted) {
       recordCounted = true;
       var rec = record(); if (G.winner === humanIdx) rec.w++; else rec.l++;
-      if (G.winner === humanIdx && !climb) { var lgB = leagueOf(rec.w - 1), lgA = leagueOf(rec.w); if (lgB.name !== lgA.name) leagueCrossed = { name: lgA.name, icon: lgA.icon }; } // M132: a tier crossed upward earns its own screen
+      if (G.winner === humanIdx && !climb) { var cel = leagueCelebration(leagueBase(), rec.w); if (cel) leagueCrossed = { name: cel.name, icon: cel.icon }; try { localStorage.setItem('yira_league_base', String(rec.w)); } catch (e) {} } // M132: a tier crossed upward earns its own screen // M267: settled through the celebration ledger, so a climb-carried cross is celebrated on the next standard win instead of being eaten
       try { localStorage.setItem('yira_record', JSON.stringify(rec)); } catch (e) {}
       try { var st = JSON.parse(localStorage.getItem('yira_streak') || '{"c":0,"b":0}'); if (G.winner === humanIdx) { st.c++; if (st.c > st.b) st.b = st.c; } else st.c = 0; localStorage.setItem('yira_streak', JSON.stringify(st)); } catch (e) {}
       if (climb) {

@@ -1133,6 +1133,10 @@
 /* M70: turn banner (the original's grammar), moonlight-ready pulse, flip shimmer */
 #turnbanner { position: fixed; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 90; pointer-events: none; font-size: 44px; font-weight: 900; letter-spacing: 3px; color: #f3e9ff; text-shadow: 0 2px 18px rgba(124,80,220,.85), 0 0 2px #000; opacity: 0; animation: turnBanner 1.15s ease-out forwards; }
 #turnbanner.foe { font-size: 30px; color: #ffb3ab; text-shadow: 0 2px 14px rgba(190,60,40,.8), 0 0 2px #000; }
+#turnbanner.foe { animation-duration: 1.7s; } /* M247: the foe banner keeps the M198 slower stage, now inside the single lifecycle */
+/* M247: the deck warning's own lane (top 12.5%) — it used to ride the
+   turn-sweep class at top 38%, the banner's exact seat. */
+#deckwarn { position: fixed; left: 50%; top: 12.5%; transform: translate(-50%, -50%); z-index: 78; pointer-events: none; font-size: 19px; font-weight: 900; letter-spacing: .14em; color: #ffb84d; text-shadow: 0 3px 14px rgba(0,0,0,.85); animation: sweepIn 1.35s ease-out forwards; white-space: nowrap; font-family: Georgia, 'Times New Roman', serif; }
 @keyframes turnBanner { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.82); } 18% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.02); } }
 .eicon.moonready { animation: moonPulse 1s ease-in-out infinite; filter: drop-shadow(0 0 5px #cfe4ff); }
 @keyframes moonPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
@@ -6870,12 +6874,14 @@ function playRevealWatch() {
 function pumpReveal() {
   try {
     if (revealTimer || !revealQ.length) return;
+    if (stageBusyFor('reveal')) { revealTimer = setTimeout(function () { revealTimer = null; pumpReveal(); }, Math.max(40, stageLockUntil - Date.now() + 40)); return; } // M247: a reveal never starts under the turn banner or a marquee — the queue holds it, in order
     var wait = revealBusyUntil - Date.now();
     if (wait > 0) { revealTimer = setTimeout(function () { revealTimer = null; pumpReveal(); }, wait + 30); return; }
     var id = revealQ.shift();
     var dwell = seenCardSet()[id] ? 620 : 1280;
     if (revealQ.length >= 3) dwell = Math.round(dwell * 0.7);
     spawnPlayReveal(id, dwell);
+    stageClaim('reveal', dwell + 90); // M247: the reveal owns the center stage for its dwell
     markCardSeen(id);
     revealBusyUntil = Date.now() + dwell + 90;
     revealTimer = setTimeout(function () { revealTimer = null; pumpReveal(); }, dwell + 90);
@@ -6964,15 +6970,27 @@ if (typeof document !== 'undefined' && document.addEventListener) document.addEv
 /* ---------- M30 batch: marquee moments, combat previews, open-hit
    pulse, hurt vignette, foe thinking pulse, fanfare, trap-arm click. --- */
 var pendingMarquee = [];
+var marqueeTimer = null;
 function checkMarquee() {
   try {
     if (!pendingMarquee.length || !document.body || !document.createElement) return;
+    /* M247: one marquee at a time, and never under another center-stage
+       ceremony. Before, each render shifted one label onto its own node
+       with a private timer — two legendary arrivals a render apart (a
+       common double-summon) stacked two different names in the same
+       pixels at top 34%, and a marquee could land on the turn banner. */
+    if (stageBusyFor('marquee') || (document.querySelector && document.querySelector('.marquee'))) {
+      if (!marqueeTimer) marqueeTimer = setTimeout(function () { marqueeTimer = null; checkMarquee(); }, Math.max(60, stageLockUntil - Date.now() + 60));
+      return;
+    }
     var label = pendingMarquee.shift();
     var node = document.createElement('div');
     node.className = 'marquee'; node.textContent = '✦ ' + label + ' ✦';
     document.body.appendChild(node);
+    stageClaim('marquee', 1600);
     sfx('legendary');
     setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1550);
+    if (pendingMarquee.length && !marqueeTimer) marqueeTimer = setTimeout(function () { marqueeTimer = null; checkMarquee(); }, 1650);
   } catch (e) {}
 }
 /* M191: the victory flourish — gold vapor rising off the winner's bar,
@@ -7277,16 +7295,31 @@ function checkDeckWarn() {
   try {
     if (!G || G.winner !== null || !document.body || !document.createElement) return;
     if (deckWarnGame !== G) { deckWarnGame = G; deckWarned = {}; }
+    /* M247: both players can cross on the same render (a draw at the
+       turn swap is the classic case — the exact render the turn banner
+       fires on). Before, each crossing made its own .turn-sweep node in
+       the banner's seat: two warnings stacked on each other AND on the
+       banner. Now one combined message in the warning's own lane. */
+    var freshWarns = [];
     G.players.forEach(function (p) {
       if (p.deck.length <= 5 && p.deck.length > 0 && !deckWarned[p.idx]) {
         deckWarned[p.idx] = true;
-        var node = document.createElement('div');
-        node.className = 'turn-sweep warn';
-        node.textContent = '⚠️ ' + (p.idx === humanIdx ? 'YOUR DECK: ' : 'ENEMY DECK: ') + p.deck.length + ' LEFT';
-        document.body.appendChild(node);
-        setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1350);
+        freshWarns.push('⚠️ ' + (p.idx === humanIdx ? 'YOUR DECK: ' : 'ENEMY DECK: ') + p.deck.length + ' LEFT');
       }
     });
+    if (freshWarns.length) showDeckWarn(freshWarns.join('   ·   '));
+  } catch (e) {}
+}
+var deckWarnGen = 0;
+function showDeckWarn(txt) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var gen = ++deckWarnGen;
+    var node = document.getElementById('deckwarn');
+    if (!node) { node = document.createElement('div'); node.id = 'deckwarn'; document.body.appendChild(node); }
+    node.textContent = txt;
+    node.style.animation = 'none'; void node.offsetWidth; node.style.animation = '';
+    setTimeout(function () { if (gen === deckWarnGen) { try { node.remove(); } catch (e) {} } }, 1400);
   } catch (e) {}
 }
 /* ---------- M28 Spellslingers-feel batch: blocker lines, hero hit
@@ -7312,7 +7345,8 @@ function spawnHeroFloat(idx, text, cls, amt) {
     node.className = 'fx-herofloat ' + (cls || '') + ((amt || 0) >= 5 ? ' big' : ''); // M239: hero damage reads by weight
     node.textContent = text;
     node.style.left = (pt.x + (Math.random() * 30 - 15)) + 'px';
-    node.style.top = pt.y + 'px';
+    var hfLive = 0; try { hfLive = document.querySelectorAll ? document.querySelectorAll('.fx-herofloat').length : 0; } catch (e) {}
+    node.style.top = (pt.y - (hfLive % 3) * 26) + 'px'; // M247: simultaneous hero floats stack a line apart instead of superimposing
     document.body.appendChild(node);
     var bar = document.querySelector ? document.querySelector('#herobar-' + idx) : null;
     if (bar && bar.classList) { bar.classList.add('hero-hit'); setTimeout(function () { bar.classList.remove('hero-hit'); }, 480); }
@@ -7337,15 +7371,29 @@ function trapReveal() {
       var line = String(uiLog[i]).replace(/<[^>]*>/g, '');
       var hit = Object.keys(TRAP_BY_NAME).find(function (nm) { return line.indexOf(nm) === 0 || line.indexOf(nm + ' ') >= 0; });
       if (hit) {
-        var fake = { cardId: TRAP_BY_NAME[hit], uid: -7, permPower: 0, permHealth: 0, damage: 0, starterOwner: humanIdx };
-        var node = document.createElement('div');
-        node.className = 'trap-reveal';
-        node.innerHTML = '<div class="tr-label">🪤 TRAP SPRUNG</div>' + cardHtml(fake, humanIdx, {});
-        document.body.appendChild(node);
-        setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1300);
+        /* M247: the trap reveal is a single gen-managed node (two traps
+           springing a beat apart used to stack two cards in the same
+           pixels at top 42%), and it defers to the center-stage lock —
+           the latest trap waits out the banner, never paints over it. */
+        if (stageBusyFor('trap')) { pendingTrapReveal = TRAP_BY_NAME[hit]; if (!trapRevealTimer) trapRevealTimer = setTimeout(function () { trapRevealTimer = null; var id2 = pendingTrapReveal; pendingTrapReveal = null; if (id2) showTrapReveal(id2); }, Math.max(40, stageLockUntil - Date.now() + 40)); return; }
+        showTrapReveal(TRAP_BY_NAME[hit]);
         return;
       }
     }
+  } catch (e) {}
+}
+var trapRevealGen = 0, pendingTrapReveal = null, trapRevealTimer = null;
+function showTrapReveal(cardId) {
+  try {
+    if (!document.body || !document.createElement) return;
+    var gen = ++trapRevealGen;
+    var node = document.querySelector ? document.querySelector('.trap-reveal') : null;
+    if (!node) { node = document.createElement('div'); node.className = 'trap-reveal'; document.body.appendChild(node); }
+    var fake = { cardId: cardId, uid: -7, permPower: 0, permHealth: 0, damage: 0, starterOwner: humanIdx };
+    node.innerHTML = '<div class="tr-label">🪤 TRAP SPRUNG</div>' + cardHtml(fake, humanIdx, {});
+    node.style.animation = 'none'; void node.offsetWidth; node.style.animation = '';
+    stageClaim('trap', 1350);
+    setTimeout(function () { if (gen === trapRevealGen && node.parentNode) node.parentNode.removeChild(node); }, 1300);
   } catch (e) {}
 }
 function drawBlockLines() {
@@ -7379,13 +7427,17 @@ function checkPhaseSweep() {
     var first = sweepPhase === null;
     sweepPhase = phase;
     if (first) return;
-    var node = document.createElement('div');
-    node.className = 'turn-sweep ' + phase;
-    node.textContent = phase === 'me' ? 'Your Turn' : "Opponent's Turn";
-    document.body.appendChild(node);
+    /* M247: NO text node is created here any more. This watcher used to
+       paint a second turn announcer (.turn-sweep) at the banner's exact
+       seat (left 50% / top 38%) on a private 1300/1750ms timer, while
+       render()'s tracker painted #turnbanner on the same swap — the two
+       texts coexisted for most of a second on every swap, and on the
+       return swap the stale foe sweep was still fading when the new
+       'Your Turn' banner landed (Jesse's phone, 2026-11-14). The single
+       announcer is #turnbanner (showTurnBanner); this watcher keeps only
+       its side beats — the M239 hero flare and the M240 flare chime. */
     if (phase === 'me' && !calm) { var bf239 = document.querySelector ? document.querySelector('.bfig.me') : null; if (bf239) { bf239.classList.add('turnflare'); setTimeout(function () { bf239.classList.remove('turnflare'); }, 1000); } } // M239: your hero flares as your turn lands
     if (phase === 'me' && G.turnNumber !== lastFlareTurn) { lastFlareTurn = G.turnNumber; try { sfx('flare'); } catch (e) {} } // M240: the flare's chime-sweep — the sweep's own transition guard makes it once per phase change; the turn number belts it against replays. Sound is not Calm-gated (draw and mana sing under Calm too); only the flare's light is
-    setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, phase === 'foe' ? 1750 : 1300); // M198: the foe sweep is slower — it gets a longer stage
   } catch (e) {}
 }
 /* M195: the draw flight joins the stream idiom — the card back rides a
@@ -8764,7 +8816,7 @@ function m81Watch() {
   try {
     if (!G || !document.body || !document.createElement) return;
     if (__m81Game !== G) { __m81Game = G; __m81Decks = [G.players[0].deck.length, G.players[1].deck.length]; __m81LogLen = G.log.length;
-      var b0 = document.createElement('div'); b0.id = 'turnbanner'; b0.className = 'turnbanner splash'; b0.textContent = 'Battle!'; document.body.appendChild(b0); setTimeout(function () { try { b0.remove(); } catch (e) {} }, 1250);
+      showTurnBanner('Battle!', false, 'splash'); // M247: the splash rides the single banner lifecycle — it used to be a second owner of the #turnbanner node with a private removal timer that could cut a live turn banner short
       return; }
     // spell-cast dim: the newest play event is a spell -> the arena dims so the moment owns the screen
     var evs = G.playEvents || [];
@@ -8780,23 +8832,63 @@ function m81Watch() {
 function m81Pill(txt) {
   try { var old = document.getElementById('perilpill'); if (old) old.remove(); var el = document.createElement('div'); el.id = 'perilpill'; el.textContent = txt; document.body.appendChild(el); setTimeout(function () { try { el.remove(); } catch (e) {} }, 2100); } catch (e) {}
 }
-function showTurnBanner(txt, foe) {
+/* M247: THE CENTER-STAGE LOCK. The turn banner, the marquee, the foe
+   play-reveal and the trap reveal all perform at the same center seat.
+   Exactly one owns it at a time: a ceremony defers while the lock is
+   held (its queue keeps the message), and the turn banner — the turn's
+   own signal — preempts: it cuts whatever ceremony is up rather than
+   painting over it. */
+var stageLockUntil = 0, stageLockOwner = null;
+function stageBusyFor(owner) { try { return typeof stageLockUntil === 'number' && Date.now() < stageLockUntil && stageLockOwner !== owner; } catch (e) { return false; } }
+function stageClaim(owner, durMs) { stageLockOwner = owner; stageLockUntil = Date.now() + durMs; }
+function stagePreempt() {
+  try { ['.marquee', '.play-reveal', '.trap-reveal'].forEach(function (sel) { var n = document.querySelector ? document.querySelector(sel) : null; if (n && n.parentNode) n.parentNode.removeChild(n); }); } catch (e) {}
+}
+/* M247: the turn banner's single lifecycle. One node (created once,
+   reused), one generation counter, one removal timer that only the
+   current generation may fire — a rapid swap replaces the text in the
+   same node and retires the old timer, so two messages can never be
+   painted at once, and no stale node outlives its message. */
+var turnBannerGen = 0, turnBannerTimer = null, turnBannerUntil = 0;
+function clearTurnBanner() {
+  turnBannerGen++;
+  if (turnBannerTimer) { clearTimeout(turnBannerTimer); turnBannerTimer = null; }
+  turnBannerUntil = 0;
+  if (stageLockOwner === 'banner') { stageLockOwner = null; stageLockUntil = 0; }
+  try { var b = document.getElementById('turnbanner'); if (b && b.parentNode) b.parentNode.removeChild(b); } catch (e) {}
+}
+function modalOpenNow() {
+  try { return !!(sheetOpen || logOpen || glossaryOpen || inspectUid !== null || inspectCardId !== null || profileIdx !== null || graveIdx !== null || deckIdx !== null || mode === 'draftPick' || mode === 'scryPick' || mode === 'choicePick' || mode === 'upgradePick'); } catch (e) { return false; }
+}
+function showTurnBanner(txt, foe, kind) {
   try {
     if (!document.body || !document.createElement) return;
+    var dur = kind === 'splash' ? 1300 : (foe ? 1750 : 1200);
+    stagePreempt(); // M247: the banner takes the stage — it never paints over another ceremony
+    var gen = ++turnBannerGen;
+    if (turnBannerTimer) { clearTimeout(turnBannerTimer); turnBannerTimer = null; }
     var b = document.getElementById('turnbanner');
     if (!b) { b = document.createElement('div'); b.id = 'turnbanner'; document.body.appendChild(b); }
     b.textContent = txt;
-    b.className = foe ? 'turnbanner foe' : 'turnbanner';
+    b.className = 'turnbanner' + (kind === 'splash' ? ' splash' : (foe ? ' foe' : ''));
     b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
+    turnBannerUntil = Date.now() + dur;
+    stageClaim('banner', dur);
+    turnBannerTimer = setTimeout(function () { if (gen === turnBannerGen) { turnBannerTimer = null; turnBannerUntil = 0; if (stageLockOwner === 'banner') { stageLockOwner = null; stageLockUntil = 0; } try { b.remove(); } catch (e) {} } }, dur);
   } catch (e) {}
 }
 function render() {
   try { ambientStart(); } catch (e) {}
   renderBody(); fitAllText();
   // M70: the original's banner grammar — quiet between actions, loud at the turn change.
+  // M247: the banner YIELDS the moment the match ends (concede-during-
+  // banner included) or a modal sheet owns the screen (pause-during-
+  // banner included), and the trackers re-sync in the same breath so it
+  // can never re-fire stale once the modal closes.
   try {
-    if (typeof G !== 'undefined' && G && typeof mode !== 'undefined' && mode !== 'menu' && mode !== 'collection' && G.winner === null) {
-      if (window.__bannerGame !== G) { window.__bannerGame = G; window.__bannerActive = G.active; }
+    if (typeof G !== 'undefined' && G && typeof mode !== 'undefined') {
+      if (G.winner !== null || mode === 'menu' || mode === 'collection' || modalOpenNow()) { clearTurnBanner(); window.__bannerGame = G; window.__bannerActive = G.active; }
+      else if (window.__bannerGame !== G) { window.__bannerGame = G; window.__bannerActive = G.active; }
       else if (window.__bannerActive !== G.active) { window.__bannerActive = G.active; showTurnBanner(G.active === humanIdx ? 'Your Turn' : "Opponent's Turn", G.active !== humanIdx); }
     }
   } catch (e) {}
@@ -10597,15 +10689,21 @@ function feelFreeze(ms) {
 function floatClsFor(amt) { return amt >= 5 ? 'big' : (amt >= 3 ? 'mid' : ''); }
 /* A float that lives on the body at fixed coordinates — for emblems
    whose DOM node is about to be rebuilt by render(). */
+var boardFloatStack = {};
 function spawnBoardFloat(x, y, text, cls) {
   try {
     if (calm || !document.body || !document.createElement) return;
+    /* M247: floats at the same anchor STACK (each live float lifts the
+       next one a line) — two blows on one creature a beat apart used to
+       print their numbers in the exact same pixels, superimposed. */
+    var key = Math.round(x / 12) + ':' + Math.round(y / 12);
+    var stack = boardFloatStack[key] || 0; boardFloatStack[key] = stack + 1;
     var n = document.createElement('span');
     n.className = 'floatnum fx-boardfloat' + (cls ? ' ' + cls : '');
     n.textContent = text;
-    n.style.left = x + 'px'; n.style.top = y + 'px';
+    n.style.left = x + 'px'; n.style.top = (y - stack * 24) + 'px';
     document.body.appendChild(n);
-    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, cls && cls.indexOf('big') >= 0 ? 1200 : 950);
+    setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); boardFloatStack[key] = Math.max(0, (boardFloatStack[key] || 1) - 1); }, cls && cls.indexOf('big') >= 0 ? 1200 : 950);
   } catch (e) {}
 }
 /* The landing ring heavy/epic summons stamp on the arena floor. */
@@ -10657,7 +10755,10 @@ function applyGemFills() {
 function floatNum(el, txt, cls) {
   try {
     if (!el || !el.appendChild || typeof document === 'undefined' || !document.createElement) return;
-    var s = document.createElement('span'); s.className = 'floatnum' + (cls ? ' ' + cls : ''); s.textContent = txt; el.appendChild(s);
+    var s = document.createElement('span'); s.className = 'floatnum' + (cls ? ' ' + cls : ''); s.textContent = txt;
+    var sibN = 0; try { sibN = el.querySelectorAll ? el.querySelectorAll('.floatnum').length : 0; } catch (e) {}
+    if (sibN) s.style.top = (4 - sibN * 20) + 'px'; // M247: a second float on the same emblem rides a line above, never on top of the first
+    el.appendChild(s);
     setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, cls && cls.indexOf('big') >= 0 ? 1200 : 950);
   } catch (e) {}
 }

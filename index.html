@@ -1527,6 +1527,11 @@
      emblems keep the violet seal; theirs are not Nightmare counts. */
   .shell.stage .field > .passive-emblem.pe-weave { border-color:#3a3644; background:radial-gradient(circle at 35% 30%, #4a4552, #100e14 78%); box-shadow:0 4px 14px rgba(0,0,0,.6), 0 0 10px rgba(0,0,0,.5); }
   .shell.stage .passive-emblem.pe-weave .pe-count { background:#17141d; border-color:#8f8a9c; }
+  /* M244: a passive PAYOFF pops the emblem once (Volric's third spell, Veyla's completed mission) — body.calm's global crush makes it a still badge under Calm. */
+  .shell.stage .passive-emblem.pe-pop { animation:pePop .65s ease-out; }
+  @keyframes pePop { 0%{transform:scale(1)} 35%{transform:scale(1.3)} 100%{transform:scale(1)} }
+  /* M244: Volric's NEXT spell is the payoff — his spells wear a gold edge while the count sits at 2/3. */
+  .hand.fan .card.storm-next { outline:2px solid rgba(255,217,77,.95); outline-offset:-2px; }
   .card .cname { padding:2px 17px 2px 8px; }
   .bigcard .cname { padding:4px 20px 4px 12px; }
   /* M154: sectioned hub — the featured Play banner + bottom nav */
@@ -5830,7 +5835,9 @@ function sfx(name) {
     case 'heal': tone(523, 523, 0.12, 'sine', 0.20); tone(784, 784, 0.16, 'sine', 0.18, 0.07); break;
     case 'artifact': noiseBurst(0.04, 0.16, 2600); tone(180, 120, 0.10, 'square', 0.20); tone(96, 68, 0.13, 'sine', 0.20, 0.01); tone(1244, 1244, 0.16, 'sine', 0.055, 0.03); break; // M229: an artifact SEATS — a metal clasp, a low body, one ring partial. Artifact plays were the generic 'play' plus an unmatched square blip from the watcher: two sounds, neither of them an artifact
     case 'activate': tone(660, 660, 0.03, 'square', 0.10); tone(740, 740, 0.03, 'square', 0.10, 0.045); tone(830, 830, 0.03, 'square', 0.10, 0.09); noiseBurst(0.03, 0.08, 3000); tone(990, 1320, 0.09, 'sine', 0.10, 0.10); break; // M229: a wound mechanism — three ratchet clicks and the release. An activation is a machine working, not a spell being cast (it wore 'spell' at all three sites)
-    case 'levelup': tone(196, 196, 0.24, 'sine', 0.13); tone(587, 587, 0.12, 'sine', 0.16, 0.02); tone(880, 880, 0.20, 'sine', 0.15, 0.09); noiseBurst(0.10, 0.045, 3400, 0.06); break; // M229: a chain LEVELS — root, fifth, octave, a breath of shimmer. Deliberately smaller than 'legendary': chains climb mid-match, legends arrive
+    case 'levelup': tone(196, 196, 0.24, 'sine', 0.13); tone(587, 587, 0.12, 'sine', 0.16, 0.02); tone(880, 880, 0.20, 'sine', 0.15, 0.09); noiseBurst(0.10, 0.045, 3400, 0.06); break;
+    case 'stormpop': tone(220, 440, 0.10, 'sawtooth', 0.05); tone(660, 990, 0.12, 'sine', 0.10, 0.03); noiseBurst(0.05, 0.03, 4000, 0.05); break; // M244: Volric's third spell PAYS — a quick rising zap, smaller than a chain level
+    case 'mission': tone(523, 523, 0.12, 'sine', 0.11); tone(784, 784, 0.16, 'sine', 0.11, 0.07); tone(1046, 1046, 0.20, 'sine', 0.08, 0.15); break; // M244: a Free Spirit mission COMPLETES — three soft bells, the spirit is already flying to her hand // M229: a chain LEVELS — root, fifth, octave, a breath of shimmer. Deliberately smaller than 'legendary': chains climb mid-match, legends arrive
     case 'summon': tone(170, 105, 0.11, 'sine', 0.34); noiseBurst(0.05, 0.10, 650); break; // M229: an arrival the hand-play sites did not voice — a foe summon, an effect-born token — the creature family at half weight; the watcher layers the school tint
     // M240: THE IMPACT FAMILY — the contact sound, classed EXACTLY like
     // the floats (impactClsFor mirrors floatClsFor): a 1-2 blow ticks, a
@@ -6006,7 +6013,8 @@ function toggleMute() {
 }
 /* Watch engine stats each render: nightmare plants/drains and trap fires
    get their sounds AND visual effects without threading hooks through the engine. */
-var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null };
+var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null, stormRaw: null, missionThr: null };
+var peTrack = { stormRaw: null, missionThr: null, popUntil: 0 }; // M244: passive-payoff pop tracking (Volric's 3rd spell, Veyla's mission) — the emblem pops once per payoff
 var lastHurtAmt = 1; // M191: the size of the most recent hero blow — the hurt sound scales with it
 var lastCombatBlow = 2; // M201: the biggest body in the current combat declaration — the attack impact layers by it
 var lastBlockSize = 0; // M201: the biggest blocker body in the current combat — the guard-up knock scales with it
@@ -7520,9 +7528,13 @@ function soundWatch() {
   if (sndSnap.mirN != null && mirN > sndSnap.mirN) sfx('miracle');
   var lvlN = 0; G.log.forEach(function (l) { var lt = String(l); if ((lt.indexOf('levels ') >= 0 && lt.indexOf(' to stage ') >= 0) || (lt.indexOf('takes up ') >= 0 && lt.indexOf(' slips into their deck') >= 0) || lt.indexOf('attains Mastery') >= 0) lvlN++; }); // M229: chain level-ups, school adoptions and mastery attainments were the census's silent majors — the engine log is the only surface that names them, read the way the miracle scan reads it
   if (sndSnap.lvlN != null && lvlN > sndSnap.lvlN) sfx('levelup');
+  var huW = G.players[humanIdx]; var stormRawW = (huW.hero.passive === 'stormConduit') ? (huW.spellsCastThisTurn || 0) : 0;
+  if (sndSnap.stormRaw != null && stormRawW > sndSnap.stormRaw && stormRawW % 3 === 0) sfx('stormpop'); // M244: the third spell resolved — name the payoff out loud
+  var missionThrW = (huW.hero.passive === 'freeSpiritMissions') ? huW.missionThreshold : 0;
+  if (sndSnap.missionThr != null && missionThrW > sndSnap.missionThr) sfx('mission'); // M244: the threshold only ever rises when a mission completes
   if (sndSnap.stuns != null && stunN > sndSnap.stuns) sfx('stun');
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
   sndPlayedUid = null; // M229: the play-site exemption lasts exactly one watch pass — the first render that shows the arrival
 }
@@ -8793,7 +8805,11 @@ function renderBody() {
      threshold likewise escalates, and damage past it shows raw — the mirror
      does not editorialise). Volric: spellsCastThisTurn % 3, the Warden's
      cyclic shape — banked casts toward the next discounted third spell. */
-  html += '<div class="passive-emblem' + (me.hero.passive === 'weave' ? ' pe-weave' : '') + '" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + (me.hero.passive === 'trapDraw' ? '<span class="pe-count">' + (me.trapsArmedCount % 3) + '/3</span>' : '') + (me.hero.passive === 'unbridled' ? '<span class="pe-count">' + (me.summonCount % 5) + '/5</span>' : '') + (me.hero.passive === 'freeSpiritMissions' ? '<span class="pe-count">' + me.missionProgress + '/' + me.missionThreshold + '</span>' : '') + (me.hero.passive === 'freeSpirit' ? '<span class="pe-count">' + me.damageDealtThisTurn + '/' + me.spiritThreshold + '</span>' : '') + (me.hero.passive === 'stormConduit' ? '<span class="pe-count">' + ((me.spellsCastThisTurn || 0) % 3) + '/3</span>' : '') + '</div>';
+  var pePopCls = ''; // M244: the payoff pop — a crossing arms a 700ms window; renders inside it wear the class once through
+  if (me.hero.passive === 'stormConduit') { var srP = me.spellsCastThisTurn || 0; if (peTrack.stormRaw != null && srP > peTrack.stormRaw && srP % 3 === 0) peTrack.popUntil = Date.now() + 700; peTrack.stormRaw = srP; }
+  if (me.hero.passive === 'freeSpiritMissions') { if (peTrack.missionThr != null && me.missionThreshold > peTrack.missionThr) peTrack.popUntil = Date.now() + 700; peTrack.missionThr = me.missionThreshold; }
+  if (peTrack.popUntil && Date.now() < peTrack.popUntil) pePopCls = ' pe-pop';
+  html += '<div class="passive-emblem' + (me.hero.passive === 'weave' ? ' pe-weave' : '') + pePopCls + '" onclick="showPassive(' + humanIdx + ')" title="' + esc(me.hero.name) + ' — hero power (tap to read)">' + (SIGILS[me.heroId] || '✦') + (me.hero.passive === 'weave' ? '<span class="pe-count">' + nightmaresIn(foe.deck) + '</span>' : '') + (me.hero.passive === 'trapDraw' ? '<span class="pe-count">' + (me.trapsArmedCount % 3) + '/3</span>' : '') + (me.hero.passive === 'unbridled' ? '<span class="pe-count">' + (me.summonCount % 5) + '/5</span>' : '') + (me.hero.passive === 'freeSpiritMissions' ? '<span class="pe-count">' + me.missionProgress + '/' + me.missionThreshold + '</span>' : '') + (me.hero.passive === 'freeSpirit' ? '<span class="pe-count">' + me.damageDealtThisTurn + '/' + me.spiritThreshold + '</span>' : '') + (me.hero.passive === 'stormConduit' ? '<span class="pe-count">' + ((me.spellsCastThisTurn || 0) % 3) + '/3</span>' : '') + '</div>';
   // M234 (Nurture): the roster's first ACTIVATED hero power gets a
   // first-class door \u2014 a stored-Essence chip while one waits, and the
   // activation button while she can pay for it on her own turn.
@@ -8861,6 +8877,7 @@ function renderBody() {
     var off = hi - hMid;
     var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 0.6 : 0.85)).toFixed(1) + 'px)';
     var opts = { cls: ' clickable' + (isArmed ? ' armed-glow' : (afford && mode === 'main' ? '' : ' unaffordable') + (!handOpen && afford && mode === 'main' ? ' mini-playable' : '') + (typeof fanPrevUids !== 'undefined' && fanPrevUids && !fanPrevUids[inst.uid] ? ' newdraw' : '')), fan: fanT, fz: hi + 1, ml: hi === 0 ? 0 : Math.round(stepPx - cardW), };
+    if (me.hero.passive === 'stormConduit' && ((me.spellsCastThisTurn || 0) % 3) === 2 && D(inst).type === 'spell' && mode === 'main') opts.cls += ' storm-next'; // M244: the NEXT spell is Volric's payoff — it says so before you commit
     // No onclick on hand cards since M10: the pointer controller owns the
     // hand — tap magnifies to read, drag onto the field plays.
     return cardHtml(inst, humanIdx, opts);

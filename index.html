@@ -5801,6 +5801,11 @@ var inspectPolished = false; /* M176: the inspect's polished-form toggle — pre
 var inspectAnimAt = 0; /* M195: when the current inspect was opened — the entrance theatre rides only the opening render */
 var inspectClosing = false; /* M195: an outro is already running */
 var matchStartedAt = 0;
+/* M269: matchGen increments on every match replace (startMatch / backToMenu) so an
+   async loop still awaiting in a dead match can tell it is orphaned and bail;
+   clickGuardUntil is the click-swallow deadline armed when a splash is dismissed
+   or a cinematic is tap-skipped (the drag controller's capture handler honours it). */
+var matchGen = 0, clickGuardUntil = 0;
 var handOpen = false;
 var lastManaPop = -1, logOpen = false, sheetOpen = false;
 var setup = { me: 'weaver', foe: 'bruiser', seat: 'first' };
@@ -8819,7 +8824,7 @@ function showVsSplash() {
     // M241: a returning player (>=5 games on this device) has seen the face-off — their splash yields sooner; a new player’s first reads keep the full 5s. Tap dismisses either way.
     var vsMs = 5000; try { var vrec = record(); if (vrec.w + vrec.l >= 5) vsMs = 2600; } catch (e) {}
     var vsTimer = setTimeout(vsDismiss, vsMs);
-    node.addEventListener('click', function () { clearTimeout(vsTimer); vsDismiss(); });
+    node.addEventListener('click', function () { clearTimeout(vsTimer); clickGuardUntil = Date.now() + 250; vsDismiss(); }); // M269: the dismissing tap's twin must not land on the mulligan panel beneath — 250ms covers a double-tap's twin click (~175ms) while leaving the player's very next deliberate tap (the mulligan confirm itself) untouched
   } catch (e) {}
 }
 /* M56: the first-launch welcome — three panels, thirty seconds, stored
@@ -9858,6 +9863,7 @@ function cineDroneStop(st, fast) {
 function cineFinish(skipped) {
   var st = cineState;
   if (st && st.done) return;
+  if (skipped) clickGuardUntil = Date.now() + 450; // M269: the skip lands on pointerdown — the same tap's click (and a double-tap's twin) must not fall through onto the end screen's Rematch
   if (st) {
     st.done = true;
     st.timers.forEach(function (t) { clearTimeout(t); });
@@ -10684,6 +10690,7 @@ function renderBuilder() {
 
 /* ---------- match flow ---------- */
 function startMatch() {
+  matchGen++; // M269: orphan every async loop still running the previous match
   try { fxBakeStart(); } catch (e) {} // M243: and again at match start (idempotent) — the versus splash covers the cook
   matchStartedAt = Date.now();
   soundInit();
@@ -10720,8 +10727,9 @@ function startMatch() {
 function rematch() { startMatch(); }
 function rematchSwapped() { setup.seat = setup.seat === 'second' ? 'first' : 'second'; startMatch(); }
 function rematchAsFoe() { var t = setup.me; setup.me = setup.foe; setup.foe = t; startMatch(); }
-function backToMenu() { climb = null; mode = 'menu'; if (hubTab === 'collection') hubTab = 'play'; render(); } // M190: 'collection' is a screen you visit, not a hub tab you land on — leaving the library must not strand the hub on the panel-less void
+function backToMenu() { matchGen++; /* M269: leaving to the menu orphans the match's loops too */ climb = null; mode = 'menu'; if (hubTab === 'collection') hubTab = 'play'; render(); } // M190: 'collection' is a screen you visit, not a hub tab you land on — leaving the library must not strand the hub on the panel-less void
 function confirmMulligan() {
+  if (mode !== 'mulligan') return; // M269: a doubled confirm (a held node re-dispatched, a WebView quirk) must not start the turn twice — the engine's startTurn has no double-start guard, so this door is the guard
   try { sfx('shuffle'); } catch (e) {}
   heroSay(aiIdx, heroLine(aiIdx, 'start'));
   heroSay(humanIdx, heroLine(humanIdx, 'start'));
@@ -11067,6 +11075,7 @@ function attackAllToggle() {
 /* M31: drag-to-block assignment — same semantics as assignBlocker, with
    the pair given explicitly instead of via blockPick. */
 function dragAssignBlock(blockerUid, attackerUid) {
+  if (mode !== 'blocking' || !blockResolver) return; // M269: frozen at confirm, like the tap doors
   var attacker = aiAttackers.find(function (x) { return x.uid === attackerUid; });
   var blocker = G.players[humanIdx].board.find(function (c) { return c.uid === blockerUid; });
   if (!attacker || !blocker) return;
@@ -11268,6 +11277,7 @@ async function animateCombat(list) {
 }
 async function declareAttack() {
   if (busyAnim) return;
+  var gen = matchGen; // M269
   if (!attackSet.size) { mode = 'main'; render(); return; }
   var attackers = G.players[humanIdx].board.filter(function (c) { return attackSet.has(c.uid); });
   var gwAid = (typeof G.guenhwyvarAid === 'function') ? G.guenhwyvarAid(humanIdx, attackers) : null; if (gwAid) attackers.push(gwAid); // M219: Guenhwyvar's Aid \u2014 she joins THIS declaration, before blockers are chosen, and can be blocked
@@ -11285,6 +11295,7 @@ async function declareAttack() {
     await animateCombat(attackers.map(function (c) { return { uid: c.uid, power: combatPow(c, G.players[aiIdx]), target: blockers[c.uid] || 'hero', dir: -1 }; })); // M261: floats forecast the grown blow
     busyAnim = false;
   }
+  if (gen !== matchGen) return; // M269: the match was replaced mid-animation — the new match owns G now; resolving the old combat into it would corrupt it
   try { G.declareCombat(humanIdx, attackers.map(function (c) { return c.uid; }), blockers); say('You attack with ' + attackers.length + '. The enemy blocks ' + names + ' of them.', 'bad'); } // M219: the uid list is the attackers array itself now \u2014 it carries Guenhwyvar when the Aid answered
   catch (e) { msg = errMsg(e); }
   attackSet = new Set(); mode = 'main'; figFx.lunge = 'me'; flushEngineLog(); if (!finishCheck()) render();
@@ -11299,6 +11310,7 @@ function canBlockCreature(attacker, blocker) {
   return !ak.includes('flying') || bk.includes('flying') || bk.includes('reach');
 }
 function pickAttacker(uid) {
+  if (mode !== 'blocking' || !blockResolver) return; // M269: once blocks are confirmed the pairing is frozen
   blockPick = (blockPick === uid ? null : uid);
   if (blockPick !== null) {
     var a = aiAttackers.find(function (x) { return x.uid === blockPick; });
@@ -11309,6 +11321,7 @@ function pickAttacker(uid) {
   render();
 }
 function assignBlocker(uid) {
+  if (mode !== 'blocking' || !blockResolver) return; // M269: frozen at confirm, like pickAttacker
   if (blockPick === null) {
     var mine = Object.keys(blockMap).find(function (k) { return blockMap[k] === uid; });
     if (mine) { delete blockMap[mine]; blockPick = +mine; var an = aiAttackers.find(function (x) { return x.uid === +mine; }); msg = 'Unpaired — tap a blocker for ' + (an ? D(an).name : 'that attacker') + ', or tap it again to leave it open.'; }
@@ -11366,12 +11379,18 @@ function aiSummary(before) {
   } catch (e) {}
 }
 async function runAiTurn() {
-  await sleep(650);
+  var gen = matchGen; // M269: this loop belongs to ONE match — a restart or abandon replaces matchGen and every checkpoint below bails, so an orphaned loop can never act inside another match or drag the player back into one
+  /* M269: the foe's sleeps are sheet-aware — the pause sheet promises "The foe
+     waits. Nothing moves while you are here.", so while the sheet is open the
+     foe's clock simply does not run (the sheet's own doors still work: concede
+     resolves through the winner checks, restart/abandon through the gen gate). */
+  async function aiSleep(ms) { var t = 0; while (t < ms) { if (gen !== matchGen) return false; if (sheetOpen) { await sleep(120); continue; } var step = Math.min(120, ms - t); await sleep(step); t += step; } return gen === matchGen; }
+  if (!(await aiSleep(650))) return;
   if (G.winner !== null) return finishCheck();
   var foe = G.players[aiIdx];
   var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0) };
   aiStartAndMain(G, aiIdx); flushEngineLog(); aiSummary(before);
-  render(); await sleep(1000);
+  render(); if (!(await aiSleep(1000))) return;
   if (finishCheck()) return;
   var attackers = aiPickAttackers(G, aiIdx);
   if (attackers.length) {
@@ -11381,19 +11400,21 @@ async function runAiTurn() {
     sfx('attack');
     say('Enemy attacks with ' + attackers.map(function (a) { return D(a).name; }).join(', ') + '!', 'bad');
     render();
-    await new Promise(function (res) { blockResolver = res; });
+    var resolvedMap = await new Promise(function (res) { blockResolver = function () { var snap = {}; Object.keys(blockMap).forEach(function (k) { snap[k] = blockMap[k]; }); res(snap); }; }); // M269: the confirmed pairing is SNAPSHOT at confirm time — what the combat animation shows is exactly what resolves, whatever is tapped during the animation
+    if (gen !== matchGen) return;
     // M240: no pre-animation 'block' clang here any more — the block
     // voice moved INTO animateCombat, where it lands on the contact.
-    await animateCombat(attackers.map(function (a) { return { uid: a.uid, power: combatPow(a, G.players[humanIdx]), target: blockMap[a.uid] || 'hero', dir: 1 }; })); // M261: floats forecast the grown blow
-    try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), blockMap); }
+    await animateCombat(attackers.map(function (a) { return { uid: a.uid, power: combatPow(a, G.players[humanIdx]), target: resolvedMap[a.uid] || 'hero', dir: 1 }; })); // M261: floats forecast the grown blow
+    try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), resolvedMap); }
     catch (e) { say('Blocking fumbled (' + e.message + ') — attacks go through unblocked.', 'bad'); try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), {}); } catch (e2) {} }
     flushEngineLog(); mode = 'aiTurn'; aiAttackers = [];
-    render(); await sleep(900);
+    render(); if (!(await aiSleep(900))) return;
     if (finishCheck()) return;
   }
   var beforePost = { trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0) };
   aiPostCombat(G, aiIdx); flushEngineLog(); aiSummary(beforePost); // M246: post-combat plays get their summary too
   if (finishCheck()) return;
+  if (gen !== matchGen) return; // M269
   startHumanTurn();
 }
 render();
@@ -11414,6 +11435,7 @@ render();
   var dragging = false, ghost = null, srcEl = null, dragUid = null, dropEl = null;
   var ghostTilt = 0, ghostLastX = 0; // M239
   var lastDragEnd = 0, suppressClickUntil = 0;
+  var activePid = null; // M269: the pointer that owns the current gesture — every other finger is a bystander whose input is ignored until the owner lifts
   var hoverTimer = null, hoverBox = null, hovering = false;
   function hideHover() {
     if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
@@ -11525,6 +11547,9 @@ render();
   }
   document.addEventListener('pointerdown', function (e) {
     if (!e.target.closest) return;
+    if (activePid !== null && e.pointerId !== activePid) return; // M269: a second finger never starts a gesture mid-gesture
+    if (dragging) { endDrag(); pressEl = null; handTouch = false; liftClear(); return; } // M269: the OWNING pointer pressing again while its drag is still armed means the drag's release was lost (a mouse released outside the window) — cancel the stale drag and spend this press on the cancellation, never on completing the drop somewhere unintended
+    activePid = e.pointerId;
     /* M43 (Jesse): the resting hand would not engage from taps on his
        phone — the card-level hit test alone was too easy to miss among
        scaled, overlapping minis. ANY touch on the resting fan opens it. */
@@ -11577,6 +11602,7 @@ render();
   var dirLock = null, scrolled = false, lastX = 0, dragSrcX = 0, dragSrcY = 0;
   var scrubbing = false, scrubEl = null, handTouch = false, fanTopY = 0, scrubCenters = null, scrubFrozen = false;
   document.addEventListener('pointermove', function (e) {
+    if (activePid !== null && e.pointerId !== activePid) return; // M269: bystander fingers don't steer the owner's drag
     if (!pressEl && !handTouch) return;
     /* M71 hand v3 (the LoR model): any slide inside the hand band scrubs —
        the nearest card lifts in place under your finger; pushing up out
@@ -11627,6 +11653,7 @@ render();
     }
   }, true);
   document.addEventListener('pointerup', function (e) {
+    if (activePid !== null && e.pointerId !== activePid) return; // M269: a bystander finger's lift must not drop the owner's drag at the bystander's coordinates
     document.querySelectorAll('.hand.fan.engaged').forEach(function (n) { n.classList.remove('engaged'); });
     if (scrubbing) { scrubbing = false; scrubFrozen = false; scrubCenters = null; handTouch = false; liftClear(); hideHover(); suppressClickUntil = Date.now() + 300; pressEl = null; return; }
     handTouch = false; dirLock = null;
@@ -11645,6 +11672,10 @@ render();
       var under = document.elementFromPoint(e.clientX, e.clientY);
       var boardCard = (under && under.closest) ? under.closest('.board .card, .board .emblem') : null;
       var heroBar = (under && under.closest) ? under.closest('.herobar') : null;
+      if (!heroBar) { // M269: the hero bars and figures are pointer-transparent by design (their buttons stay live, the boxes pass taps through), so elementFromPoint can never name them — a targeted spell dropped squarely on the foe's hero just armed targeting and waited for a second tap. Hit-test the foe hero's boxes geometrically, so the drop takes the target it was aimed at.
+        var fhEls = document.querySelectorAll('.herobar.foe, .bfig.foe');
+        for (var fi = 0; fi < fhEls.length; fi++) { var fr2 = fhEls[fi].getBoundingClientRect(); if (fr2.width && e.clientX >= fr2.left && e.clientX <= fr2.right && e.clientY >= fr2.top && e.clientY <= fr2.bottom) { heroBar = fhEls[fi]; break; } }
+      }
       var onBoard = (under && under.closest) ? under.closest('.board') : null;
       endDrag(); lastDragEnd = Date.now();
       if (boardCard || heroBar || onBoard) dropPlay(uid, boardCard, heroBar);
@@ -11660,7 +11691,7 @@ render();
     }
     pressEl = null;
   }, true);
-  document.addEventListener('pointercancel', function () { hideHover(); endDrag(); pressEl = null; overlayPress = null; scrolled = false; dirLock = null; scrubbing = false; scrubCenters = null; handTouch = false; liftClear(); document.querySelectorAll('.hand.fan.engaged').forEach(function (n) { n.classList.remove('engaged'); }); }, true);
+  document.addEventListener('pointercancel', function (e) { if (activePid !== null && e.pointerId !== activePid) return; hideHover(); endDrag(); pressEl = null; overlayPress = null; scrolled = false; dirLock = null; scrubbing = false; scrubCenters = null; handTouch = false; liftClear(); document.querySelectorAll('.hand.fan.engaged').forEach(function (n) { n.classList.remove('engaged'); }); }, true);
   /* Desktop: merely hovering the fan engages it, the way a finger does. */
   document.addEventListener('pointerover', function (e) {
     if (e.pointerType !== 'mouse' || !e.target.closest) return;
@@ -11687,6 +11718,7 @@ render();
   /* M38: tapping the field puts the hand away. */
   document.addEventListener('click', function (e) {
     if (!handOpen) return;
+    if (dragging || scrubbing) return; // M269: a bystander's click mid-drag must not rest the hand out from under the owner's gesture
     if (Date.now() < suppressClickUntil) return;
     if (!e.target.closest) return;
     if (e.target.closest('.handzone, .overlay, .herobar, button, .artdock')) return;
@@ -11710,6 +11742,7 @@ render();
   var emblemHold = null, emblemHoldX = 0, emblemHoldY = 0;
   document.addEventListener('pointerdown', function (e) {
     if (typeof mode === 'undefined' || (mode !== 'attackSelect' && mode !== 'blocking' && mode !== 'targeting')) return;
+    if (dragging || scrubbing || (activePid !== null && e.pointerId !== activePid)) return; // M269: no hold-to-read from a bystander finger mid-drag
     if (!e.target.closest) return;
     var el = e.target.closest('.board .emblem');
     if (!el) return;
@@ -11733,15 +11766,16 @@ render();
   var blockDrag = null;
   document.addEventListener('pointerdown', function (e) {
     if (typeof mode === 'undefined' || mode !== 'blocking' || !e.target.closest) return;
+    if (activePid !== null && e.pointerId !== activePid) return; // M269
     var el = e.target.closest('.board .emblem');
     if (!el) return;
     var uid = Number(el.getAttribute('data-uid'));
     if (!G || !G.players[humanIdx].board.some(function (c) { return c.uid === uid; })) return;
     var r = el.getBoundingClientRect();
-    blockDrag = { uid: uid, x0: r.left + r.width / 2, y0: r.top + r.height / 2, sx: e.clientX, sy: e.clientY, moved: false };
+    blockDrag = { uid: uid, x0: r.left + r.width / 2, y0: r.top + r.height / 2, sx: e.clientX, sy: e.clientY, moved: false, pid: e.pointerId }; // M269: the drag belongs to the finger that started it
   }, true);
   document.addEventListener('pointermove', function (e) {
-    if (!blockDrag) return;
+    if (!blockDrag || e.pointerId !== blockDrag.pid) return;
     if (!blockDrag.moved && Math.sqrt(Math.pow(e.clientX - blockDrag.sx, 2) + Math.pow(e.clientY - blockDrag.sy, 2)) < 12) return;
     blockDrag.moved = true;
     var under = document.elementFromPoint ? document.elementFromPoint(e.clientX, e.clientY) : null;
@@ -11750,7 +11784,7 @@ render();
     if (typeof drawTargetLine === 'function') drawTargetLine(blockDrag.x0, blockDrag.y0, e.clientX, e.clientY, ok);
   }, true);
   document.addEventListener('pointerup', function (e) {
-    if (!blockDrag) return;
+    if (!blockDrag || e.pointerId !== blockDrag.pid) return;
     var bd = blockDrag; blockDrag = null;
     if (!bd.moved) return; // a plain tap — the tap-tap flow owns it
     if (typeof clearTargetLine === 'function') clearTargetLine();
@@ -11771,6 +11805,7 @@ render();
        hero bars, the hand, the action bar, piles, chips, the artifact
        medallion) stays excluded. */
     if (typeof mode === 'undefined' || (mode !== 'main' && mode !== 'attackSelect')) return;
+    if (dragging) return; // M269: a bystander finger's lift on the field is not half of a double-tap
     if (!e.target.closest || !e.target.closest('.stage')) return;
     if (e.target.closest('.emblem, .card, button, .herobar, .handzone, .actions, .pile, .chip, .amedal, a')) return;
     var now = Date.now();
@@ -11803,8 +11838,14 @@ render();
   }
   document.addEventListener('click', function (e) {
     var now = Date.now();
+    if (now < clickGuardUntil) { e.stopPropagation(); e.preventDefault(); return; } // M269: a dismissed splash / tap-skipped cinematic guards the screen beneath it for a beat — clicks in the window fire nothing
+    if (dragging || scrubbing) { e.stopPropagation(); e.preventDefault(); return; } // M269: while a gesture owns the screen, any click belongs to a bystander finger — it fires nothing (no pause, no inspect, no buttons)
     if (now - lastDragEnd < 400 || now < suppressClickUntil) { e.stopPropagation(); e.preventDefault(); lastDragEnd = 0; suppressClickUntil = 0; }
   }, true);
+  /* M269: the owning pointer releases its claim only after every other
+     pointerup/pointercancel listener has had its say (registration order). */
+  document.addEventListener('pointerup', function (e) { if (e.pointerId === activePid) activePid = null; }, true);
+  document.addEventListener('pointercancel', function (e) { if (e.pointerId === activePid) activePid = null; }, true);
 })();
 
 /* M68: the original's badge grammar — power reads green, health reads red */

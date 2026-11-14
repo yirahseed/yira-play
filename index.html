@@ -548,13 +548,13 @@
      leading edge, the same brighter-head read the violet build had.
      Everything outside .fx-nightmare (draw tails, grave flights, summon
      breath, school tints) keeps the violet system untouched. */
-  .fx-nightmare .wisp { mix-blend-mode:normal; filter:blur(1.2px) grayscale(.86) brightness(.55) contrast(1.24); /* M212 (P3): blur 1.6->1.2 so the sprite's fibre survives the crush */
+  .fx-nightmare .wisp { mix-blend-mode:normal; filter:blur(1.2px) grayscale(1) brightness(.55) contrast(1.24); /* M266: grayscale 1 — the .86 partial crush left the violet source tinted (measured in the M266 census); BLACK, not purple */ /* M212 (P3): blur 1.6->1.2 so the sprite's fibre survives the crush */
     background:radial-gradient(circle, rgba(6,5,9,.52) 0%, rgba(14,12,18,.26) 55%, rgba(0,0,0,0) 80%), var(--smoke-img, none) center / 160% no-repeat; }
-  .fx-nightmare .wisp-streak { filter:blur(1.8px) grayscale(.86) brightness(.58) contrast(1.22); } /* M216 (Q2): eased back from M212's 1.4 — at round-7 lengths and contrast the grain drew rope fibre; flow segments also carry a size-keyed inline blur */
-  .fx-nightmare .wisp-head { filter:blur(1.1px) grayscale(.78) brightness(.92) contrast(1.18); } /* M216 (Q5): the ash-lit leading edge lifts again (.8->.92) — the M216 pixel readout showed the head no brighter than its own body en route */
-  .fx-nightmare .wisp-headglow { filter:blur(6px) grayscale(.35) brightness(1.5) contrast(1.02); } /* M216 (Q5): the ash-glow riding the head — a soft pale bloom so the leader reads by light against the dark arena and its own darker body */
-  .fx-nightmare .wisp-halo { filter:blur(7px) grayscale(.88) brightness(.48) contrast(1.12); }
-  .fx-nightmare .wisp-under { filter:blur(10px) grayscale(.88) brightness(.50); }
+  .fx-nightmare .wisp-streak { filter:blur(1.8px) grayscale(1) brightness(.58) contrast(1.22); } /* M266: full crush, as .wisp */ /* M216 (Q2): eased back from M212's 1.4 — at round-7 lengths and contrast the grain drew rope fibre; flow segments also carry a size-keyed inline blur */
+  .fx-nightmare .wisp-head { filter:blur(1.1px) grayscale(1) brightness(.92) contrast(1.18); } /* M266: full crush, as .wisp */ /* M216 (Q5): the ash-lit leading edge lifts again (.8->.92) — the M216 pixel readout showed the head no brighter than its own body en route */
+  .fx-nightmare .wisp-headglow { filter:blur(6px) grayscale(1) brightness(1.5) contrast(1.02); } /* M266: was grayscale(.35) — the single most violet surface in the game at 1.5x brightness; the ash-glow keeps its light, loses the violet */ /* M216 (Q5): the ash-glow riding the head — a soft pale bloom so the leader reads by light against the dark arena and its own darker body */
+  .fx-nightmare .wisp-halo { filter:blur(7px) grayscale(1) brightness(.48) contrast(1.12); } /* M266: full crush, as .wisp */
+  .fx-nightmare .wisp-under { filter:blur(10px) grayscale(1) brightness(.50); } /* M266: full crush, as .wisp */
   .fx-nightmare .wisp-pulse { mix-blend-mode:normal;
     background:radial-gradient(circle, rgba(10,8,14,.60) 0%, rgba(24,20,32,.28) 45%, rgba(0,0,0,0) 70%); }
   /* M198: school tints for one-off vapor (the summon breath). The smoke
@@ -6244,7 +6244,7 @@ function sfxPlant(n) {
   var flightS = (fxFlightMs > 0 ? fxFlightMs : 1300) / 1000;
   volleyBed(0, flightS * 1.02, calm ? 0.034 : 0.058, 250, 540, false); // M212: the one continuous current under the volley
   for (var k = 0; k < c; k++) {
-    var dl = k * 0.05 + Math.random() * 0.02;
+    var dl = k * 0.012 + Math.random() * 0.01; // M266: tracks the compressed visual ignition (was k*0.05, mirroring the old 470ms stagger)
     var durS = flightS * (0.88 + Math.random() * 0.3);
     var base = 470 + Math.random() * 260 - k * 22;
     plantNoise(dl, durS, base, base * (2.1 + Math.random() * 0.5), 0.13);
@@ -6292,7 +6292,7 @@ function sfxDrain(n) {
   volleyBed(0, 0.95, calm ? 0.028 : 0.048, 760, 300, true); // M212: the drain's mirrored bed — torn in fast, sighing out, band falling
   var c = Math.min(Math.max(n, 1), 4);
   for (var k = 0; k < c; k++) {
-    var dl = k * 0.07;
+    var dl = k * 0.02; // M266: tracks the drain's compressed ignition
     var base = 900 + Math.random() * 300;
     plantNoise(dl, 0.7, base, base * 0.42, 0.13);
     flowNoise(dl, 0.66, calm ? 0.026 : 0.04, 700, 320, 0.7); // M212: variation over the bed
@@ -6438,16 +6438,16 @@ function fxBakeVariant(img, crop, filterChain, blurPx, streakMask) {
 function fxBakeFinish(imgs) {
   try {
     var SM = imgs.smoke, ST = imgs.streak || imgs.smoke;
-    var bodyF = 'grayscale(.86) brightness(.55) contrast(1.24)';
-    var streakF = 'grayscale(.86) brightness(.58) contrast(1.22)';
+    var bodyF = 'grayscale(1) brightness(.55) contrast(1.24)'; // M266: full crush — the .86 partial left the violet source's chroma alive in the bake (measured: 43-51% of body pixels still strongly violet); Jesse's law is BLACK, not purple
+    var streakF = 'grayscale(1) brightness(.58) contrast(1.22)'; // M266: full crush, as bodyF
     fxBake = {
       bodyCore: [fxBakeVariant(SM, { s: 148, px: 50, py: 50 }, bodyF, 13, false), fxBakeVariant(SM, { s: 132, px: 44, py: 56 }, bodyF, 13, false), fxBakeVariant(SM, { s: 140, px: 56, py: 44 }, bodyF, 13, false)],
       bodyRim: [fxBakeVariant(SM, { s: 135, px: 16, py: 16 }, bodyF, 13, false), fxBakeVariant(SM, { s: 135, px: 84, py: 16 }, bodyF, 13, false), fxBakeVariant(SM, { s: 135, px: 16, py: 84 }, bodyF, 13, false), fxBakeVariant(SM, { s: 135, px: 84, py: 84 }, bodyF, 13, false)],
       streak: [fxBakeVariant(ST, { s: 200, px: 30, py: 50 }, streakF, 13, true), fxBakeVariant(ST, { s: 225, px: 50, py: 50 }, streakF, 13, true), fxBakeVariant(ST, { s: 185, px: 68, py: 50 }, streakF, 13, true)],
-      head: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.78) brightness(.92) contrast(1.18)', 5, false),
-      headglow: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.35) brightness(1.5) contrast(1.02)', 15, false),
-      halo: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.88) brightness(.48) contrast(1.12)', 29, false),
-      under: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.88) brightness(.50)', 27, false)
+      head: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(1) brightness(.92) contrast(1.18)', 5, false), // M266: full crush
+      headglow: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(1) brightness(1.5) contrast(1.02)', 15, false), // M266: the glow was the worst violet offender (grayscale .35 at 1.5x brightness measured 100% strongly-violet pixels) — the ash stays bright, the colour goes
+      halo: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(1) brightness(.48) contrast(1.12)', 29, false), // M266: full crush
+      under: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(1) brightness(.50)', 27, false) // M266: full crush
     };
     fxBakeState = (fxBake.head && fxBake.bodyCore[0] && fxBake.bodyRim[0] && fxBake.streak[0]) ? 2 : 3;
     try { window.__fxBake = fxBake; } catch (e) {} // probe surface: the M243 drive inspects the baked sprites
@@ -6717,7 +6717,7 @@ function spawnRibbon(layer, P, o) {
     layer.appendChild(el);
     if (o.flow && dc.cls !== 'wisp wisp-head' && dc.cls !== 'wisp wisp-halo' && dc.cls.indexOf('wisp-under') < 0 && dc.cls.indexOf('headglow') < 0) { // M216 (Q3): feather scales with calibre — the nightmare class blur was a flat 1.2px whatever the segment's size, drawing a tube edge on the fat ones; this inline chain restates the nightmare class filter with a size-keyed blur (flow ribbons fly only in the nightmare layers; head/halo/underlay/glow keep their class filters)
       var bp = (1.1 + size * 0.03).toFixed(2);
-      el.style.filter = dc.sprite === 'streak' ? 'blur(' + bp + 'px) grayscale(.86) brightness(.58) contrast(1.22)' : 'blur(' + bp + 'px) grayscale(.86) brightness(.55) contrast(1.24)';
+      el.style.filter = dc.sprite === 'streak' ? 'blur(' + bp + 'px) grayscale(1) brightness(.58) contrast(1.22)' : 'blur(' + bp + 'px) grayscale(1) brightness(.55) contrast(1.24)'; // M266: full crush — DOM twin of the bake change, so both renderers fly the identical stream
     }
     var frames = [];
     for (var s2 = 0; s2 <= SAMPLES; s2++) {
@@ -6769,7 +6769,7 @@ function spawnStreams(fromIdx, toIdx, n) {
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
       var dur = flight * (0.88 + Math.random() * 0.3);
-      var delay = calm ? Math.min(k * 40, 240) : Math.min(k * (42 + Math.random() * 30), 470);
+      var delay = calm ? Math.min(k * 16, 80) : Math.min(k * (10 + Math.random() * 8), 110); // M266: SIMULTANEITY — Jesse's spec (2026-10-31) is one stream per Nightmare, ALL SIMULTANEOUS; the shipped stagger spread starts to ~470ms at cap, so the last stream launched a quarter into the volley's life (measured M266). The fan now ignites together: <=110ms of micro-offset so siblings don't share a birth frame, paths and durations still fully individual
       var sideK = count > 1 ? (k % 2 === 0 ? 1 : -1) : 0; // M195: fan the volley — siblings take opposite corridors
       if (sideK && Math.random() < 0.3) sideK = -sideK;
       var wScale = (0.8 + 0.5 * (count > 1 ? k / (count - 1) : 0.5)) * (0.85 + Math.random() * 0.3) * Math.min(1.28, Math.max(0.92, dist / 640));
@@ -6824,7 +6824,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     spawnPilePulse(layer, src, 40);
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
-      var dur = (640 + Math.random() * 180) * Math.min(1.25, Math.max(0.85, distD / 620)), delay = k * 55;
+      var dur = (640 + Math.random() * 180) * Math.min(1.25, Math.max(0.85, distD / 620)), delay = k * 14; // M266: simultaneity, as the plant (was k*55)
       var sideD = count > 1 ? (k % 2 === 0 ? 1 : -1) : 0;
       if (sideD && Math.random() < 0.3) sideD = -sideD;
       var laneD = count > 1 ? (k - (count - 1) / 2) * 20 * laneScaleD : 0;

@@ -8571,7 +8571,7 @@ function heroBarHtml(p, isMe) {
   var lifeBand = lifeFrac > 0.5 ? '' : (lifeFrac > 0.25 ? ' warn' : ' crit');
   var foePopCls = '';
   if (!isMe && foePopPending) { foePopCls = ' foepop'; foePopPending = false; } // M246: consume the payoff pop
-  return '<div class="herobar' + (isMe ? ' me' : ' foe') + foePopCls + (G && G.current === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
+  return '<div class="herobar' + (isMe ? ' me' : ' foe') + foePopCls + (G && G.active === p.idx && G.winner === null ? ' active-turn' : '') + '" id="herobar-' + p.idx + '"' + click + '>' +
     '<div class="hcluster clickable' + (mode === 'aiTurn' && !isMe ? ' thinking' : '') + (((isMe && p.life <= 8) || (!isMe && p.life <= 6)) && G.winner === null ? ' lowlife' : '') + '" onclick="showHero(' + p.idx + ')" title="Hero profile"><div class="lifering" style="' + ringStyle + '"><div class="portrait">' + heroPortrait(p.heroId) +
     '<span class="life' + (p.life > p.hero.life ? ' good' : '') + lifeBand + '">' + p.life + '</span>' + (function () { var dl = noteLife(p); return dl ? '<span class="lifedelta ' + (dl > 0 ? 'up' : 'down') + '">' + (dl > 0 ? '▲' : '▼') + Math.abs(dl) + '</span>' : ''; })() + '</div></div>' +
     '<div class="hname" style="font-size:' + Math.max(8, Math.min(11, Math.floor(920 / Math.max(10, p.hero.name.length + 2)) / 10)) + 'px;white-space:nowrap">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + (!isMe && typeof mode !== 'undefined' && mode === 'aiTurn' ? ' <span class="thinkdots"><i>.</i><i>.</i><i>.</i></span>' : '') + ghost + '</div></div>' + speechHtml(p) +
@@ -8651,6 +8651,7 @@ function boardHtml(p, isMe) {
         if (pendingFirst && pendingFirst.inst === inst) opts.cls = (opts.cls || '') + ' selected-attacker';
       } else if ((!isMe && (k === 'damageAny' || ((k === 'wither' || k === 'debuffPerZombieGrave' || k === 'smiteByBoard' || k === 'doom' || k === 'stunCreature' || k === 'destroyCreature' || k === 'debuffCreature' || k === 'debuffAndAdd' || k === 'destroyAndSelfDamage' || k === 'drainCreatureOrDamage' || k === 'markCreature' || k === 'pathExile' || k === 'pacify' || k === 'stealCreature' || k === 'setHealth' || k === 'halveStats' || k === 'destroyIfPower' || k === 'damagePerGem' || k === 'fightOnce' || k === 'stealPower' || k === 'drainCreature' || k === 'stunPermanent' || k === 'stunCreatures' || k === 'stunOrDestroyArtifact' || k === 'damageOrStripCharges' || k === 'damageCreatureHeal' || k === 'transformCreature') && !warded) || (k === 'grantKeyword' && (d.effect || d.debut).foeTarget && !warded) || (k === 'destroyFlyer' && flying && !warded) || (k === 'debuffCreature' && !warded))) || (isMe && (k === 'buffCreature' || (k === 'grantKeyword' && !(d.effect || d.debut).foeTarget) || k === 'healCreatureFull' || k === 'bounceOwnSetCost' || k === 'grimEchoes' || k === 'buffAndDoom' || (k === 'pacify' && d.debut) || k === 'becomeLegendary')) || k === 'bounce' || k === 'swapStats' || (isMe && sacrificePick)) { opts.onclick = 'targetCreature(' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' targetable clickable'; } // M185: damageCreatureHeal (Lightning Helix) rides the enemy-creature list in the big condition above
     }
+    if (mode === 'main' && isMe && !opts.onclick && d2type(inst) === 'creature' && G.canAttack(inst, p) && !p.combatDone) { opts.onclick = 'tapReadyAttacker(' + inst.uid + ')'; } // M264: a ready creature's tap selects it (the coach's promise); the fallthrough below keeps tap-to-inspect for everything else
     if (mode === 'main' && !opts.onclick) { opts.onclick = 'openInspect(event,' + inst.uid + ')'; opts.cls = (opts.cls || '') + ' clickable'; }
     window.__faces = window.__faces || {};
     if (window.__faces[inst.uid] && window.__faces[inst.uid] !== inst.cardId && CARDS[inst.cardId] && CARDS[inst.cardId].afterFlip) opts.cls = (opts.cls || '') + ' justflipped';
@@ -11003,6 +11004,26 @@ function finishPan(dt) { // M187: the woken Debut's target has landed \u2014 the
   flushEngineLog(); if (!finishCheck()) render();
 }
 var hintsShown = {}; function hintOnce(key, text) { if (hintsShown[key]) return ''; hintsShown[key] = 1; return text; } /* M102 (Jesse): a hint earns its place once, not every phase of every match */
+/* M264 (Cold Loop 18 — FIRST CONTACT): the attack coach has always
+   promised "select attackers (tap them...)", but in main mode a board
+   tap fell through to the inspect — the coach's own gesture opened the
+   read instead of selecting, and the cold drive's first combat never
+   happened through the tap door (the Attack BUTTON worked; the tap did
+   not). A tap on a READY creature now does what the coach says: it
+   enters attack selection with that creature queued. The read is not
+   lost — the M32 hold reads any creature in attackSelect (the attack
+   hint teaches exactly that), and every non-ready or foe creature keeps
+   tap-to-inspect. Presentation only: selection rules are untouched. */
+function tapReadyAttacker(uid) {
+  if (!G || mode !== 'main' || G.players[humanIdx].combatDone) return;
+  var me = G.players[humanIdx];
+  var c = me.board.find(function (x) { return x.uid === uid; });
+  if (!c || !G.canAttack(c, me)) return;
+  attackSet = new Set([uid]); mode = 'attackSelect';
+  msg = hintOnce('atk', 'Tap your attackers \u2014 hold any creature to read it.');
+  try { sfx('click'); } catch (e) {}
+  render();
+}
 function startAttackSelect() {
   if (!G || G.players[humanIdx].combatDone) return; // M193: the combat step is spent — this door stays shut for the rest of the turn
   attackSet = new Set(); mode = 'attackSelect'; msg = hintOnce('atk', 'Tap your attackers — hold any creature to read it.'); render();

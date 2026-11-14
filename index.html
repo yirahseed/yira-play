@@ -138,7 +138,7 @@
   .draftrow .card { width:100%; min-width:0; height:308px; } /* M125: the picks share ONE row — the old 31%-of-an-auto-parent sizing wrapped them into a vertical stack taller than the phone, and the third pick was cut off (Jesse, live) */
   .draftrow .card .cart { height:120px; } /* M77: draft offers get full-size cards — the pick deserves the art and the whole text (Jesse screenshot: titles wrapped/clipped, text cut mid-sentence, orbs spilling out of 170px cards) */
   .card .ctyperow { display:flex; justify-content:space-between; align-items:center; min-height:16px; flex:none; margin-top:1px; gap:4px; flex-wrap:wrap; }
-  .card .ctyperow .cbadges { height:15px; overflow:hidden; text-align:right; }
+  .card .ctyperow .cbadges { height:15px; overflow:hidden; text-align:right; line-height:1.05; font-size:8px; } /* M253: the line box was 18px in a 15px window — every badge sliced 3px at the bottom; the strip's own small font (its pills set their own sizes) drops the strut under the 13px pill, and fitBadges (ui.js) grows a wrapped strip to show its second line */
   .card .ctext { font-size:10px; color:#33261a; line-height:1.28; flex:1 1 auto; min-height:0; overflow:hidden; margin-top:3px; padding-bottom:12px;
                  background:linear-gradient(180deg, rgba(240,229,199,.95), rgba(224,208,170,.95)); border-radius:6px; padding:3px 5px;
                  box-shadow:inset 0 1px 3px rgba(90,60,20,.35), inset 0 0 0 1px rgba(120,84,30,.35), inset 0 -1px 0 rgba(255,252,240,.5);
@@ -1672,6 +1672,28 @@
      edge always stops at least ~72px clear of the screen edge —
      beyond the medallion (right:4px, 50px wide) and its eye badge. */
   .shell.stage.hasdock .msg { max-width:calc(100% - 76px); transform:translateX(-34px); }
+  /* M253: in landscape the message line's flow slot lands on the foe
+     board's top edge (measured at 874x402: the pill at y101-122, the
+     board at y100-201 — the emblems paint through the hint's middle).
+     The pill parks in the foe bar's empty centre band instead: one
+     seat in both dock states, clear of the pause button (far left),
+     the foe cluster (far right) and every board. The action stack
+     also drops 38px in landscape, so a two-button stack's text
+     clears the foe nameplate band it used to cross (its translucent
+     backdrop still floats over the arena, as everywhere). */
+  @media (orientation:landscape) and (max-height:500px) {
+    .shell.stage .msg { position:absolute; top:22px; left:50%; transform:translateX(-50%); max-width:56%; margin:0; z-index:9; }
+    .shell.stage.hasdock .msg { transform:translateX(-50%); max-width:56%; }
+    .field .actions { top:calc(50% + 38px); }
+    /* M253 corrective (found by the dock probe): in landscape the two
+       artifact docks land on the SAME seat (foe medal y64-124, my
+       medal y70-130 — one artifact hides the other), and the dropped
+       stack's text runs under my own dock medal. With a dock standing,
+       the stack steps left of the dock column, and my dock takes the
+       free band above the rested hand. */
+    .shell.stage.hasdock .field .actions { right:64px; }
+    .shell.stage .artdock.me { top:auto; bottom:calc(150px + env(safe-area-inset-bottom)); }
+  }
   /* (2) Long rules text trades art height for text room on the small
      face. cardHtml tiers the card by composed-text length (txtl1 at
      150+ chars, txtl2 at 215+); the text box is flex-grown, so every
@@ -8896,19 +8918,80 @@ function fitCardText(el) {
     fitTextEl(el, 6.0);
   } catch (e) {}
 }
+/* M253: names get the staged honesty M252 gave rules text. fitTextEl
+   alone stops at its floor (6px card faces, 5.5px emblems) with the
+   longest names still over — measured on the M252 build: 10 card
+   faces (worst Champion of the Perished, +8.2px) and 3 emblems
+   (+4.2px). fitCardName keeps working honestly: the floor first, then
+   TRACKING (letter-spacing steps — the fit probe measures spacing
+   like any other metric), then a final half-pixel of size. The
+   emblem's geometry is untouched; the name's own type does the work. */
+function nameStillOver(el) {
+  try {
+    var cs = getComputedStyle(el);
+    if (cs.whiteSpace === 'nowrap' && el.childNodes.length === 1 && el.firstChild.nodeType === 3) {
+      var probe = fitTextEl._p;
+      if (!probe) {
+        probe = fitTextEl._p = document.createElement('span');
+        probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;top:-9999px;left:-9999px;';
+        document.body.appendChild(probe);
+      }
+      probe.style.fontStyle = cs.fontStyle; probe.style.fontWeight = cs.fontWeight;
+      probe.style.fontFamily = cs.fontFamily; probe.style.letterSpacing = cs.letterSpacing;
+      probe.style.fontSize = (parseFloat(el.style.fontSize) || parseFloat(cs.fontSize) || 12) + 'px';
+      probe.textContent = el.firstChild.nodeValue;
+      var avail = el.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0) - 5;
+      return probe.getBoundingClientRect().width > avail || el.scrollHeight > el.clientHeight + 1;
+    }
+    return el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+  } catch (e) { return false; }
+}
+function fitCardName(el, floorPx) {
+  try {
+    fitTextEl(el, floorPx);
+    if (!nameStillOver(el)) return;
+    var steps = ['-0.25px', '-0.5px'];
+    for (var i = 0; i < steps.length; i++) {
+      el.style.letterSpacing = steps[i];
+      fitTextEl(el, floorPx);
+      if (!nameStillOver(el)) return;
+    }
+    fitTextEl(el, Math.max(4.5, floorPx - 0.5));
+  } catch (e) {}
+}
+/* M253: the keyword badge strip clipped by design — a 15px window
+   over an 18px line box sliced 3px off every badge's bottom (109
+   keyword cards), and a wrapped second line was hidden whole
+   (Daggerclaw Imp's cantBlock; Ball Lightning showed NO keyword at
+   all). The strip's line-height now fits its window (template.html),
+   and a strip that still wraps grows — itself and its typerow — to
+   show the second line; the flex text column absorbs the growth on
+   those few cards only (their rules texts are short; the Chromium
+   fit sweep owns the proof). */
+function fitBadges(el) {
+  try {
+    if (el.scrollHeight > el.clientHeight + 1) {
+      el.style.height = Math.min(el.scrollHeight, 31) + 'px';
+      var row = el.closest ? el.closest('.ctyperow') : null;
+      if (row) row.style.height = 'auto';
+    }
+  } catch (e) {}
+}
 function fitAllText() {
   try {
-    document.querySelectorAll('.card .cname, .bigcard .cname').forEach(function (el) { fitTextEl(el, 6); });
+    document.querySelectorAll('.card .cname').forEach(function (el) { fitCardName(el, 6); });
+    document.querySelectorAll('.bigcard .cname').forEach(function (el) { fitTextEl(el, 6); });
     document.querySelectorAll('.card .ctext').forEach(function (el) { fitCardText(el); });
     document.querySelectorAll('.bigcard .ctext').forEach(function (el) { fitTextEl(el, 10.5); });
     /* M71: board emblem names and hero names join the fit pass — no more
        ellipsis-clipped names ('Thornwood Ar…', 'Karg the Unbroke'). */
-    document.querySelectorAll('.emblem-name').forEach(function (el) { fitTextEl(el, 5.5); }); // M232: the floor drops to 5.5 — at SIX creatures on a board (Guenhwyvar's exception) long names (Frontline Paladin, Knight Militant) still hit the old 7px floor and ellipsised; the M71 no-clipped-names law holds at six-up too
+    document.querySelectorAll('.emblem-name').forEach(function (el) { fitCardName(el, 5.5); }); // M253: fitCardName wraps the fit below — tracking, then a deeper floor, for the three names that still clipped at 5.5. M232: the floor drops to 5.5 — at SIX creatures on a board (Guenhwyvar's exception) long names (Frontline Paladin, Knight Militant) still hit the old 7px floor and ellipsised; the M71 no-clipped-names law holds at six-up too
     document.querySelectorAll('.hcluster .hname').forEach(function (el) { fitTextEl(el, 6); });
     /* M77: draft-offer cards fit deeper — a long signature name or text
        shrinks until it truly fits instead of clipping (Jesse screenshot). */
     document.querySelectorAll('.draftrow .cname').forEach(function (el) { fitTextEl(el, 7); });
     document.querySelectorAll('.draftrow .ctext').forEach(function (el) { fitCardText(el); });
+    document.querySelectorAll('.card .cbadges').forEach(function (el) { fitBadges(el); }); // M253: a wrapped badge strip grows to show its second line
   } catch (e) {}
 }
 var __m81Game = null, __m81Decks = [99, 99], __m81LogLen = 0;
@@ -9295,8 +9378,20 @@ var introUntil = 0;
 function matchIntroHtml() {
   if (typeof PORTRAITS === 'undefined') return '';
   var me = G.players[humanIdx], foe = G.players[aiIdx];
-  function side(p, idx, cls) { var line = heroLine(idx, 'start'); return '<div class="intro-side ' + cls + '">' + (PORTRAITS[p.heroId] ? '<img src="' + PORTRAITS[p.heroId] + '" alt="">' : '<div class="introfigmedal">' + heroMedallion(p.heroId) + '</div>') + '<div class="intro-tag"><div class="intro-name">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div>' + (line ? '<div class="intro-line">\u201c' + esc(line) + '\u201d</div>' : '') + '</div></div>'; }
-  return '<div class="matchintro">' + side(foe, aiIdx, 'foe') + '<div class="intro-vs">⚔️</div>' + side(me, humanIdx, 'me') + '</div>';
+  /* M253: the splash is re-appended by EVERY render while introUntil is
+     live (the pause sheet, the log, any watcher render) — a rebuilt node
+     used to restart the entrance from zero, so the figures replayed
+     their slide mid-splash (the M252/M253 scanners kept catching the
+     .me plate mid-flight, oy 5-8) and a late rebuild could postpone the
+     fade past the JS removal and pop out. The rebuild now resumes the
+     ONE shared timeline: negative delays place each animation at the
+     position the match start already reached. */
+  var introEl = Math.max(0, Date.now() - (introUntil - 2100));
+  var imgD = ' style="animation-delay:' + (-Math.min(introEl, 649)) + 'ms"';
+  var vsD = ' style="animation-delay:' + Math.max(450 - introEl, -450) + 'ms"';
+  var boxD = ' style="animation-delay:' + (1600 - introEl) + 'ms"';
+  function side(p, idx, cls) { var line = heroLine(idx, 'start'); return '<div class="intro-side ' + cls + '">' + (PORTRAITS[p.heroId] ? '<img src="' + PORTRAITS[p.heroId] + '" alt=""' + imgD + '>' : '<div class="introfigmedal">' + heroMedallion(p.heroId) + '</div>') + '<div class="intro-tag"><div class="intro-name">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div>' + (line ? '<div class="intro-line">\u201c' + esc(line) + '\u201d</div>' : '') + '</div></div>'; }
+  return '<div class="matchintro"' + boxD + '>' + side(foe, aiIdx, 'foe') + '<div class="intro-vs"' + vsD + '>⚔️</div>' + side(me, humanIdx, 'me') + '</div>';
 }
 function gameOverHtml() {
   if (endStep === 'league' && leagueCrossed) return leagueHtml(); // M132: the celebration interrupts the result, once

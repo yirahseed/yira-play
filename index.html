@@ -1032,6 +1032,15 @@
   .hand.fan .card.unaffordable { filter:saturate(.5) brightness(.74); }
   @keyframes cardShake { 0%,100% { margin-top:0 } 25% { margin-top:-5px } 55% { margin-top:2px } 80% { margin-top:-2px } }
   .hand.fan .card.shake { animation:cardShake .4s ease; }
+  /* M251: the full-board tell — when a play is refused for room, the
+     row itself answers: a short bump and its emblems flare their rims
+     in ember. Calm-safe by construction (body.calm's global crush
+     stills both animations; the msg line and the denied knock carry
+     the refusal there). */
+  .board-full-tell { animation:fullBump .45s ease; }
+  .board-full-tell .emblem:not(.ghost) { animation:fullFlare .6s ease; }
+  @keyframes fullBump { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-3px); } 55% { transform:translateX(3px); } 80% { transform:translateX(-1px); } }
+  @keyframes fullFlare { 0% { box-shadow:0 0 0 0 rgba(255,122,77,0); } 30% { box-shadow:0 0 0 2px rgba(255,150,90,.95), 0 0 16px rgba(255,122,77,.55); } 100% { box-shadow:0 0 0 0 rgba(255,122,77,0); } }
   .shell.stage .pile.gravepop { animation:chipPulse .65s ease; }
   .herobar.drop-hover { outline:none; }
   .herobar.drop-hover .portrait { box-shadow:0 0 0 3px #ffd94d, 0 0 22px rgba(255,217,77,.85); border-radius:50%; }
@@ -5826,6 +5835,7 @@ function sfx(name) {
     case 'creature': tone(200, 120, 0.14, 'sine', 0.62); noiseBurst(0.06, 0.25, 700); break; // M229: trimmed 0.7→0.62 — the census's loudest single sound
     case 'spell': tone(700, 980, 0.12, 'sine', 0.4); noiseBurst(0.07, 0.12, 2400); tone(1320, 1760, 0.10, 'sine', 0.07, 0.02); break;
     case 'tick': tone(1500, 1300, 0.03, 'sine', 0.10); tone(2250, 1950, 0.025, 'sine', 0.04); break;
+    case 'denied': tone(150, 95, 0.10, 'sine', 0.32); noiseBurst(0.05, 0.13, 480); tone(128, 84, 0.09, 'sine', 0.20, 0.095); break; // M251: a refusal knocks twice, low and dull — the impact family's recipe at refusal weight; the field saying no, not an alarm
     case 'whoosh': noiseBurst(0.16, 0.20, 800); tone(300, 90, 0.16, 'sine', 0.10); break;
     case 'mana': tone(784, 784, 0.10, 'sine', 0.20); tone(1175, 1175, 0.14, 'sine', 0.16, 0.06); break;
     case 'legendary': tone(196, 196, 0.5, 'sine', 0.34); tone(392, 392, 0.42, 'sine', 0.16, 0.01); tone(587, 587, 0.34, 'sine', 0.09, 0.02); [659, 784, 988, 1318].forEach(function (f, i) { tone(f, f, 0.26, 'triangle', 0.15, 0.05 + i * 0.06); }); plantNoise(0, 0.4, 500, 2100, 0.07); noiseBurst(0.2, 0.06, 3200); break; // M195: a bell-body under the arpeggio — a legend arrives with weight, not a level-up jingle
@@ -6048,10 +6058,21 @@ var lastFlareTurn = -1; // M240: the turn number the flare chime last sang for �
 function impactClsFor(amt) { return amt >= 5 ? 'big' : (amt >= 3 ? 'mid' : ''); }
 function sfxImpact(amt, hero) { lastImpactAmt = amt || 0; lastImpactHero = !!hero; sfx('impact'); }
 function sfxSettle(cost) { lastSettleCost = cost || 0; sfx('settle'); }
-var shakeUid = null;
+var shakeUid = null; var shakeUidAt = 0; // M251: the mana shake's freshness stamp — the class is consumed at hand-build time (fan builder), never painted onto the outgoing DOM
+var boardFullTellAt = 0; // M251: stamp of the last board-full refusal — boardHtml consumes a fresh one into the human board's tell class
 /* M60 (Jesse): mana-shortage errors never become text — the faded card IS
    the message. The failed card just shakes. Other errors still speak. */
-function errMsg(e, uid) { if (/mana/.test(e.message)) { if (uid != null) shakeUid = uid; return ''; } return e.message; }
+function errMsg(e, uid) { if (/mana/.test(e.message)) { if (uid != null) { shakeUid = uid; shakeUidAt = Date.now(); } return ''; }
+  /* M251: the refusal desk. A board-full refusal used to surface as the
+     engine's raw 'board full (5)' in the small msg line and nothing else —
+     no board-side tell, no sound (the M244 ledger). Now every no-room
+     refusal stamps the tell for boardHtml to consume, knocks the denied
+     voice, and speaks in player prose. The artifact-capacity string was
+     already prose and keeps its words; it gains the same tell. */
+  if (/board full/.test(e.message)) { boardFullTellAt = Date.now(); try { sfx('denied'); } catch (e2) {} return 'Your field is full — five creatures stand already.'; }
+  if (/field is full/.test(e.message)) { boardFullTellAt = Date.now(); try { sfx('denied'); } catch (e2) {} return e.message; }
+  if (/artifact not usable/.test(e.message)) return 'That artifact can\'t fire right now.';
+  return e.message; }
 /* M190: each Nightmare breathes its own whoosh — a bandpass noise sweep
    that rises as the wisp travels, a low sine swell underneath, and a faint
    detuned minor-second shimmer (the Ashiok eeriness), with per-wisp pitch
@@ -7668,7 +7689,7 @@ function soundWatch() {
       var grew = p.hand.length - (sndSnap.hands[p.idx] || 0);
       for (var di = 0; di < Math.min(grew, 3); di++) spawnDrawFlight(p.idx, di * 90);
       if (p.idx === humanIdx && grew > 0) sfx('draw');
-      if (shakeUid !== null) { var se = document.querySelector ? document.querySelector('.hand.fan .card[data-uid="' + shakeUid + '"]') : null; if (se && se.classList) { se.classList.add('shake'); setTimeout(function () { se.classList.remove('shake'); }, 430); } shakeUid = null; }
+      // M251: the mana shake is no longer applied here — this node belongs to the OUTGOING DOM and the rebuild discards it before it can paint. The fan builder consumes shakeUid at build time onto the fresh card instead.
     });
   }
   if (sndSnap.life && G.players[humanIdx].life > sndSnap.life[humanIdx]) sfx('heal');
@@ -7676,9 +7697,35 @@ function soundWatch() {
   G.players.forEach(function (p) { p.board.forEach(function (c) { var dc = D(c); if (dc.afterFlip) flipN++; if (c.stunned) stunN++; }); });
   if (sndSnap.flips != null && flipN > sndSnap.flips) sfx('flip');
   var graveC = 0, graveIds = {}; G.players.forEach(function (p) { p.graveyard.forEach(function (c) { graveIds[c.uid] = c; if (D(c).type === 'creature') graveC++; }); });
-  if (sndSnap.graveC != null && graveC > sndSnap.graveC) { // M201: name the dead before the rattle — the biggest new corpse sets the size class
+  /* M251: THE BURN. A card that arrives in the human's graveyard from
+     NOWHERE held (last pass it was in no hand, on no board, in no armed
+     trap) while the hand sits at its cap and the deck shrank is a draw
+     the hand had no room for — it burned, silently, and the census below
+     then played the DEATH rattle for a card that never lived. Name the
+     card on the msg line and in the log, whoosh it toward the pile (the
+     M33 mill shake on the pile chip fires for this same signature and
+     stays), and hold the burned out of the death census entirely. The
+     foe's burns are never named — hidden information. */
+  var burnNow = [], burnCreatures = 0;
+  if (sndSnap.heldHuman && sndSnap.graveHuman && sndSnap.deckHuman != null) {
+    var huG251 = G.players[humanIdx];
+    if (huG251.hand.length >= 10 && huG251.deck.length < sndSnap.deckHuman) {
+      huG251.graveyard.forEach(function (c) { if (!sndSnap.graveHuman[c.uid] && !sndSnap.heldHuman[c.uid]) { burnNow.push(c); if (D(c).type === 'creature') burnCreatures++; } });
+    }
+  }
+  if (burnNow.length) {
+    var burnNames = burnNow.map(function (c) { return D(c).name; }).join(', ');
+    msg = '🪦 Hand full — ' + burnNames + ' went straight to the graveyard.';
+    say('🪦 Hand full — ' + burnNames + ' went straight to the graveyard.');
+    try { sfx('whoosh'); } catch (e) {}
+  }
+  var heldHumanNow = {}; var huS251 = G.players[humanIdx]; huS251.hand.forEach(function (c) { heldHumanNow[c.uid] = 1; }); huS251.board.forEach(function (c) { heldHumanNow[c.uid] = 1; }); huS251.traps.forEach(function (c) { heldHumanNow[c.uid] = 1; });
+  var graveHumanNow = {}; huS251.graveyard.forEach(function (c) { graveHumanNow[c.uid] = 1; });
+  var burnNet = (sndSnap.burnNet || 0) + burnCreatures;
+  var graveCNet = graveC - burnNet;
+  if (sndSnap.graveCNet != null && graveCNet > sndSnap.graveCNet) { // M201: name the dead before the rattle — the biggest new corpse sets the size class. M251: the census is NET of burns — a burned card never lived and must not rattle
     var biggestCorpse = null;
-    Object.keys(graveIds).forEach(function (u) { if (sndSnap.graveIds && sndSnap.graveIds[u]) return; var inst = graveIds[u]; if (D(inst).type !== 'creature') return; if (!biggestCorpse || D(inst).cost > D(biggestCorpse).cost) biggestCorpse = inst; });
+    Object.keys(graveIds).forEach(function (u) { if (sndSnap.graveIds && sndSnap.graveIds[u]) return; if (burnNow.some(function (bc) { return String(bc.uid) === String(u); })) return; var inst = graveIds[u]; if (D(inst).type !== 'creature') return; if (!biggestCorpse || D(inst).cost > D(biggestCorpse).cost) biggestCorpse = inst; });
     if (biggestCorpse) { var bcd = D(biggestCorpse); lastDeathClass = (bcd.cost >= 6 || (bcd.power || 0) + (bcd.health || 0) >= 10) ? 'big' : (bcd.cost <= 2 ? 'small' : 'mid'); }
     sfx('death');
   }
@@ -7692,7 +7739,7 @@ function soundWatch() {
   if (sndSnap.missionThr != null && missionThrW > sndSnap.missionThr) sfx('mission'); // M244: the threshold only ever rises when a mission completes
   if (sndSnap.stuns != null && stunN > sndSnap.stuns) sfx('stun');
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW, graveCNet: graveCNet, burnNet: burnNet, heldHuman: heldHumanNow, graveHuman: graveHumanNow, deckHuman: G.players[humanIdx].deck.length };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
   sndPlayedUid = null; // M229: the play-site exemption lasts exactly one watch pass — the first render that shows the arrival
 }
@@ -8365,7 +8412,13 @@ function showStance(idx) {
   render();
 }
 function boardHtml(p, isMe) {
-  var out = '<div class="board">';
+  /* M251: a fresh board-full stamp dresses the HUMAN's board for exactly
+     this render — the row bumps and its five emblems flare their rims.
+     The stamp is consumed only here and only when fresh (<1.5s), so a
+     refusal can never flare a later, unrelated board. */
+  var tellCls251 = '';
+  if (isMe && boardFullTellAt && Date.now() - boardFullTellAt < 1500) { tellCls251 = ' board-full-tell'; boardFullTellAt = 0; }
+  var out = '<div class="board' + tellCls251 + '">';
 
   p.board.forEach(function (inst, bi) {
     var opts = {};
@@ -9079,6 +9132,7 @@ function renderBody() {
     var fanT = 'rotate(' + (off * hStep).toFixed(1) + 'deg) translateY(' + (Math.pow(Math.abs(off), 1.6) * (hn > 7 ? 0.6 : 0.85)).toFixed(1) + 'px)';
     var opts = { cls: ' clickable' + (isArmed ? ' armed-glow' : (afford && mode === 'main' ? '' : ' unaffordable') + (!handOpen && afford && mode === 'main' ? ' mini-playable' : '') + (typeof fanPrevUids !== 'undefined' && fanPrevUids && !fanPrevUids[inst.uid] ? ' newdraw' : '')), fan: fanT, fz: hi + 1, ml: hi === 0 ? 0 : Math.round(stepPx - cardW), };
     if (me.hero.passive === 'stormConduit' && ((me.spellsCastThisTurn || 0) % 3) === 2 && D(inst).type === 'spell' && mode === 'main') opts.cls += ' storm-next'; // M244: the NEXT spell is Volric's payoff — it says so before you commit
+    if (shakeUid !== null && inst.uid === shakeUid) { if (shakeUidAt && Date.now() - shakeUidAt < 1500) opts.cls += ' shake'; shakeUid = null; } // M251: the mana shake rides the FRESH card — the soundWatch application painted the outgoing node and the rebuild discarded it, so the refusal's one tell never showed (M251 Chromium verify: 14 samples over ~630 ms, never present)
     // No onclick on hand cards since M10: the pointer controller owns the
     // hand — tap magnifies to read, drag onto the field plays.
     return cardHtml(inst, humanIdx, opts);
@@ -10406,11 +10460,29 @@ function clickHand(uid) {
     pendingUid = uid; pendingFirst = null; mode = 'targeting'; if (pspec2) msg = pairStepMsg(d, 1); render(); return;
   }
   sndPlayedUid = uid; // M229: voiced here — the watcher exempts this card's arrival/artifact from a second sound
-  try { G.playCard(humanIdx, uid, null); handOpen = false; sfx(d.type === 'creature' ? 'creature' : d.type === 'artifact' ? 'artifact' : 'spell'); schoolTint(d); if (d.type === 'creature') { if (d.legendary || d.cost >= 8) sfx('summonEpic'); else if (d.cost >= 5) sfx('summonBloom'); } else if (d.type === 'spell') sfxSettle(d.cost); say('You play ' + d.name + '.'); } catch (e) { msg = errMsg(e, uid); } // M229: artifact plays take the artifact voice (was the generic 'play'); every play carries its school tint. M240: a hand-played creature carries its tier layer (the watcher exempts this uid, so it sounds once); a played spell settles by its cost class
+  var boardBefore251 = me.board.length, playRes251 = null;
+  try { playRes251 = G.playCard(humanIdx, uid, null); handOpen = false; sfx(d.type === 'creature' ? 'creature' : d.type === 'artifact' ? 'artifact' : 'spell'); schoolTint(d); if (d.type === 'creature') { if (d.legendary || d.cost >= 8) sfx('summonEpic'); else if (d.cost >= 5) sfx('summonBloom'); } else if (d.type === 'spell') sfxSettle(d.cost); say('You play ' + d.name + '.'); } catch (e) { msg = errMsg(e, uid); } // M229: artifact plays take the artifact voice (was the generic 'play'); every play carries its school tint. M240: a hand-played creature carries its tier layer (the watcher exempts this uid, so it sounds once); a played spell settles by its cost class
   if (G.pendingDraft && G.pendingDraft.player === humanIdx) mode = 'draftPick';
   if (G.pendingUpgradeDraft && G.pendingUpgradeDraft.player === humanIdx) mode = 'upgradePick'; // M234: a cast can open an upgrade draft (Animal Arrow's creature is internal, but the Arkbow class of effect answers here too)
   if (G.pendingScry && G.pendingScry.player === humanIdx) mode = 'scryPick';
   if (G.pendingChoice && G.pendingChoice.player === humanIdx) mode = 'choicePick'; // M174: a modal Debut (Ragerunner) asks its question
+  /* M251: a token summon that meets a full field used to fizzle in total
+     silence — mana spent, success sounds played, no tokens, no text
+     (Forest Patrol at five). When the played card's own effect or Debut
+     summons tokens and fewer arrived than promised because the field is
+     full, the refusal gets the same tell as a refused creature. A
+     countered cast is exempt — the counter already told that story. */
+  if (mode === 'main' && playRes251 && !playRes251.countered) {
+    var eff251 = d.effect || d.debut;
+    if (eff251 && (eff251.kind === 'summonToken' || eff251.kind === 'summonTokens')) {
+      var want251 = eff251.kind === 'summonTokens' ? (eff251.count || 1) : 1;
+      var got251 = (me.board.length - boardBefore251) - (d.type === 'creature' ? 1 : 0);
+      if (got251 < want251 && me.board.length >= 5) {
+        boardFullTellAt = Date.now(); try { sfx('denied'); } catch (e) {}
+        msg = got251 <= 0 ? 'No room — the field is full; the summon found no space.' : 'The field filled mid-summon — ' + (want251 - got251) + ' turned away.';
+      }
+    }
+  }
   flushEngineLog(); if (!finishCheck()) render();
 }
 function pickDraft(uid) {

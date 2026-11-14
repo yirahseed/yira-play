@@ -6120,6 +6120,7 @@ var sndPlayedUid = null; // M229: the card the hand-play sites just voiced — t
 var lastImpactAmt = 0, lastImpactHero = false;
 var lastSettleCost = 0;
 var sndHeroImpactAt = [0, 0]; // M240: when each seat's hero last took a CONTACT impact — the watcher's heroHurt yields to it (one blow, one sound)
+var sndHeroImpactAmt = [0, 0]; // M262: how much CONTACT hero damage the stamp above currently covers, accumulated per combat — the watcher yields only for a delta the impacts already voiced, and consumes what it yields to (see the soundWatch hero branch)
 var pendingFoeCasts = []; // M240: foe spell instances graveFxWatch caught leaving the foe's hand for the grave — the foe-cast cue's evidence
 var pendingImpactAmt = 0; // M240: the biggest watcher-floated creature blow this pass — boardFxWatch collects, soundWatch voices it once
 var lastWispSfxAt = 0; // M240: wisp-breath throttle for multi-death passes
@@ -7764,7 +7765,7 @@ function soundWatch() {
         if (sndSnap.life[p.idx] > 0 && p.life <= 0) { try { sfx('heroFall'); } catch (e) {} } // M195: the fall itself gets its sting, before any fanfare
         figFx.hurt[p.idx] = true;
         spawnHeroFloat(p.idx, '-' + (sndSnap.life[p.idx] - p.life), 'bad', sndSnap.life[p.idx] - p.life);
-        lastHurtAmt = sndSnap.life[p.idx] - p.life; try { if (Date.now() - (sndHeroImpactAt[p.idx] || 0) > 1500) sfx('heroHurt'); } catch (e) {} // M191: damage has a sound now, scaled by the blow. M240: a blow the contact impact already voiced does not sound twice — the float and freeze still fire; only the duplicate voice yields
+        lastHurtAmt = sndSnap.life[p.idx] - p.life; try { var covered262 = (Date.now() - (sndHeroImpactAt[p.idx] || 0) <= 1500) && (sndHeroImpactAmt[p.idx] || 0) >= lastHurtAmt; if (covered262) sndHeroImpactAmt[p.idx] -= lastHurtAmt; else sfx('heroHurt'); } catch (e) {} // M191: damage has a sound now, scaled by the blow. M240: a blow the contact impact already voiced does not sound twice — the float and freeze still fire; only the duplicate voice yields. M262: the yield is now AMOUNT-AWARE — the M262 B4 beat measured a separate, larger burn landing 54ms after a contact and getting no voice at all under the blanket window; the watcher now yields only when the accumulated contact stamp covers this delta, and consumes the cover it used, so a distinct blow inside the window speaks
         if (lastHurtAmt > maxHeroDrop) maxHeroDrop = lastHurtAmt; if (p.life <= 0) heroFell = true; // M239
         if (!speechFlags['hurt' + p.idx] && p.life > 0 && p.life <= Math.ceil(p.hero.life / 4)) {
           speechFlags['hurt' + p.idx] = true;
@@ -11199,7 +11200,7 @@ async function animateCombat(list) {
            watcher's heroHurt yields to this one sound. */
         sfxImpact(item.power, heroHit);
         if (contactBack > 0) sfx('block');
-        if (heroHit && foeHero) sndHeroImpactAt[foeHero.idx] = Date.now();
+        if (heroHit && foeHero) { var stNow262 = Date.now(); if (stNow262 - (sndHeroImpactAt[foeHero.idx] || 0) > 1500) sndHeroImpactAmt[foeHero.idx] = 0; sndHeroImpactAt[foeHero.idx] = stNow262; sndHeroImpactAmt[foeHero.idx] = (sndHeroImpactAmt[foeHero.idx] || 0) + (item.power || 0); } // M262: accumulate the combat's hero damage on the stamp, so the watcher can tell the combat's own aggregate (yield) from a separate blow landing inside the window (speak)
         if (lethal && tgt.appendChild) { var mb = document.createElement('span'); mb.className = 'miniburst'; mb.innerHTML = '<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>'; tgt.appendChild(mb); setTimeout(function () { if (mb.parentNode) mb.parentNode.removeChild(mb); }, 1100); }
         setTimeout((function (t) { return function () { t.classList.remove('hitflash'); }; })(tgt), 400);
         stopMs = lethal ? 130 : (item.power >= 5 ? 95 : (heroHit ? 70 : (item.power >= 4 ? 50 : 0)));

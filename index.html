@@ -2988,6 +2988,12 @@ class Game {
   }
   // Damage to a hero, redirected to a guardian creature when one stands guard.
   hurtHero(targetIdx, amount, sourceIdx) {
+    // M254 (Jesse's ruling, 2026-11-14): damage floors at zero in this funnel,
+    // the hurtCreature/gainLife entry-guard idiom. The life subtraction below
+    // ran unconditionally, so an attacker debuffed to NEGATIVE power healed
+    // the hero it struck (measured 24 -> 25 at M252). A floored blow is now
+    // indistinguishable from a natural 0-power blow: no life delta, no tally.
+    if (!(amount > 0)) return;
     const t = this.players[targetIdx];
     const guardian = t.board.find((c) => def(c).guardian);
     if (guardian && amount > 0) {

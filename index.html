@@ -7451,39 +7451,86 @@ function spawnHeroFloat(idx, text, cls, amt) {
   } catch (e) {}
 }
 var TRAP_BY_NAME = null;
+/* M261: THE TRAP REVEAL IS A QUEUE — the M246 play-reveal pattern,
+   learned twice in one audit. The pre-M261 scan showed ONE trap per
+   watcher pass (the last spring named in uiLog's last six lines), so
+   when two traps sprang in one resolution — two afterAttackDeclared
+   answers to a single attack; Vindictive Shot + Raise the Guard in
+   the foe's end-of-turn dispatch — the earlier trap's effect landed
+   with no ceremony naming it (M261 traps drive: trapsTriggered +2,
+   showTrapReveal called once). The queue is fed from the ENGINE log
+   by cursor (G.log only grows within a match, so the cursor is
+   exact): every spring line leads with its trap's name — verified
+   across the foeSummon, combat-window, fight-window, end-of-turn and
+   counter dispatches — except the countered trap's own consumption
+   line ("X is countered as it activates"), which is not a spring:
+   there the COUNTER's line is the ceremony, and it enqueues
+   normally. Hidden information is untouched: only springs (public
+   resolutions) ever reach the engine log; armed traps stay hidden
+   exactly as they are today. The old pending-single-slot machinery
+   is retired — the queue subsumes it. */
+var trapQueue = [], trapLogGame = null, trapLogCursor = 0, trapPumpTimer = null, trapShownId = null, trapShownAt = 0, trapShownPainted = false;
 function trapReveal() {
   try {
-    if (!TRAP_BY_NAME) {
-      TRAP_BY_NAME = {};
-      Object.keys(CARDS).forEach(function (id) { if (CARDS[id].type === 'trap') TRAP_BY_NAME[CARDS[id].name] = id; });
-    }
-    for (var i = uiLog.length - 1; i >= 0 && i > uiLog.length - 6; i--) {
-      var line = String(uiLog[i]).replace(/<[^>]*>/g, '');
-      var hit = Object.keys(TRAP_BY_NAME).find(function (nm) { return line.indexOf(nm) === 0 || line.indexOf(nm + ' ') >= 0; });
-      if (hit) {
-        /* M247: the trap reveal is a single gen-managed node (two traps
-           springing a beat apart used to stack two cards in the same
-           pixels at top 42%), and it defers to the center-stage lock —
-           the latest trap waits out the banner, never paints over it. */
-        if (stageBusyFor('trap')) { pendingTrapReveal = TRAP_BY_NAME[hit]; if (!trapRevealTimer) trapRevealTimer = setTimeout(function () { trapRevealTimer = null; var id2 = pendingTrapReveal; pendingTrapReveal = null; if (id2) showTrapReveal(id2); }, Math.max(40, stageLockUntil - Date.now() + 40)); return; }
-        showTrapReveal(TRAP_BY_NAME[hit]);
-        return;
+    if (!TRAP_BY_NAME) { TRAP_BY_NAME = {}; Object.keys(CARDS).forEach(function (id) { if (CARDS[id].type === 'trap') TRAP_BY_NAME[CARDS[id].name] = id; }); }
+    var fresh = [], gi, gl, gHit, seen = {};
+    if (typeof G !== 'undefined' && G && G.log) {
+      if (trapLogGame !== G) { trapLogGame = G; trapLogCursor = Math.max(0, G.log.length - 12); trapQueue = []; }
+      for (gi = trapLogCursor; gi < G.log.length; gi++) {
+        gl = String(G.log[gi]);
+        if (gl.indexOf(' is countered as it activates') >= 0) continue;
+        gHit = Object.keys(TRAP_BY_NAME).find(function (nm) { return gl.indexOf(nm) === 0; });
+        /* One spring, one reveal: a trap whose effect narrates itself
+           in a second name-leading line (Raise the Guard logs both
+           "answers: the guard is raised" and ": 3 tokens answer the
+           call"; Guard the Flock's retarget line is the same shape)
+           still enqueues once. A trap is consumed when it springs, so
+           within one scan an id can only be the same spring twice. */
+        if (gHit && !seen[TRAP_BY_NAME[gHit]]) { seen[TRAP_BY_NAME[gHit]] = 1; fresh.push(TRAP_BY_NAME[gHit]); }
+      }
+      trapLogCursor = G.log.length;
+    } else {
+      for (gi = uiLog.length - 1; gi >= 0 && gi > uiLog.length - 6; gi--) {
+        gl = String(uiLog[gi]).replace(/<[^>]*>/g, '');
+        gHit = Object.keys(TRAP_BY_NAME).find(function (nm) { return gl.indexOf(nm) === 0 || gl.indexOf(nm + ' ') >= 0; });
+        if (gHit) { fresh.push(TRAP_BY_NAME[gHit]); break; }
       }
     }
+    fresh.forEach(function (id) { trapQueue.push(id); });
+    if (fresh.length) pumpTrapReveal();
   } catch (e) {}
 }
-var trapRevealGen = 0, pendingTrapReveal = null, trapRevealTimer = null;
+function pumpTrapReveal() {
+  try {
+    if (!trapQueue.length || !document.body || !document.createElement) return;
+    if (typeof G !== 'undefined' && G && trapLogGame && trapLogGame !== G) { trapQueue = []; return; }
+    var up = document.querySelector ? document.querySelector('.trap-reveal') : null;
+    if (up || stageBusyFor('trap')) {
+      if (!trapPumpTimer) trapPumpTimer = setTimeout(function () { trapPumpTimer = null; pumpTrapReveal(); }, Math.max(80, (stageLockUntil || 0) - Date.now() + 80));
+      return;
+    }
+    showTrapReveal(trapQueue.shift());
+  } catch (e) {}
+}
+var trapRevealGen = 0;
 function showTrapReveal(cardId) {
   try {
-    if (!document.body || !document.createElement) return;
+    if (!CARDS[cardId] || !document.body || !document.createElement) return;
     var gen = ++trapRevealGen;
     var node = document.querySelector ? document.querySelector('.trap-reveal') : null;
     if (!node) { node = document.createElement('div'); node.className = 'trap-reveal'; document.body.appendChild(node); }
     var fake = { cardId: cardId, uid: -7, permPower: 0, permHealth: 0, damage: 0, starterOwner: humanIdx };
     node.innerHTML = '<div class="tr-label">🪤 TRAP SPRUNG</div>' + cardHtml(fake, humanIdx, {});
     node.style.animation = 'none'; void node.offsetWidth; node.style.animation = '';
+    trapShownId = cardId; trapShownAt = Date.now(); trapShownPainted = false;
+    if (typeof requestAnimationFrame === 'function') { var genP = gen; requestAnimationFrame(function () { requestAnimationFrame(function () { if (trapShownId === cardId && trapRevealGen === genP) trapShownPainted = true; }); }); }
     stageClaim('trap', 1350);
-    setTimeout(function () { if (gen === trapRevealGen && node.parentNode) node.parentNode.removeChild(node); }, 1300);
+    setTimeout(function () {
+      if (gen !== trapRevealGen) return;
+      if (node.parentNode) node.parentNode.removeChild(node);
+      if (trapShownId === cardId) trapShownId = null;
+      pumpTrapReveal();
+    }, 1300);
   } catch (e) {}
 }
 function drawBlockLines() {
@@ -8298,6 +8345,28 @@ function typeTabHtml(d) {
    HEALING the defending hero through hurtHero's unconditional
    subtraction — is an engine item, ledgered in M252 for Jesse.) */
 function effPow(inst) { var d = D(inst); return Math.max(0, (d.power || 0) + (inst.permPower || 0) + (inst.tempPower || 0)); }
+/* M261: THE COMBAT FORECAST — what an attacker's blow will actually weigh
+   when the damage step lands. effPow reads the body as it stands, but the
+   engine also resolves attack triggers BEFORE the damage step
+   (declareCombat's attackEffect dispatch), and two of those kinds are
+   deterministic self-buffs: selfGrowth (Guenhwyvar +1/+0 on the attack
+   she joins; also Predator Ooze, Sun Empire Brawler, Furnace Whelp —
+   power ae.power, engine default +1) and attackSelfBuffPerFoeGems
+   (Zogat: +the defending hero's gem count). A forecast that ignores
+   them lies where the player reads hardest: the M261 foe-combat audit
+   watched the foe's Guenhwyvar float "-0" on her blocker and chime at
+   weight 0 while her grown blow dealt exactly 1. foeP is the DEFENDING
+   player (the gem count is theirs, and it cannot change mid-combat). */
+function combatPow(inst, foeP) {
+  var d = D(inst);
+  var p = (d.power || 0) + (inst.permPower || 0) + (inst.tempPower || 0);
+  var ae = d.attackEffect || inst.grantedAttackEffect;
+  if (ae) {
+    if (ae.kind === 'selfGrowth') p += (ae.power !== undefined ? ae.power : 1);
+    else if (ae.kind === 'attackSelfBuffPerFoeGems' && foeP) p += (foeP.maxMana || 0);
+  }
+  return Math.max(0, p);
+}
 function cardHtml(inst, ownerIdx, opts) {
   opts = opts || {};
   var d = D(inst);
@@ -8473,12 +8542,12 @@ function heroBarHtml(p, isMe) {
     // and silently never rendered.
     if (mode === 'attackSelect' && !isMe && attackSet.size) {
       var gp = 0;
-      G.players[humanIdx].board.forEach(function (c) { if (attackSet.has(c.uid)) gp += D(c).power + c.permPower; });
+      G.players[humanIdx].board.forEach(function (c) { if (attackSet.has(c.uid)) gp += combatPow(c, G.players[aiIdx]); }); // M261: the hero-bar ghost forecasts the blow that will land
       if (gp > 0) ghost = ' <span class="ghost-dmg">−' + gp + '</span>';
     }
     if (mode === 'blocking' && isMe && aiAttackers.length) {
       var up = 0;
-      aiAttackers.forEach(function (a) { if (!blockMap[a.uid]) up += D(a).power + a.permPower; });
+      aiAttackers.forEach(function (a) { if (!blockMap[a.uid]) up += combatPow(a, G.players[humanIdx]); }); // M261: same forecast on the blocking ghost
       if (up > 0) ghost = ' <span class="ghost-dmg">−' + up + '</span>';
     }
   } catch (e) {}
@@ -9092,7 +9161,24 @@ var stageLockUntil = 0, stageLockOwner = null;
 function stageBusyFor(owner) { try { return typeof stageLockUntil === 'number' && Date.now() < stageLockUntil && stageLockOwner !== owner; } catch (e) { return false; } }
 function stageClaim(owner, durMs) { stageLockOwner = owner; stageLockUntil = Date.now() + durMs; }
 function stagePreempt() {
-  try { ['.marquee', '.play-reveal', '.trap-reveal'].forEach(function (sel) { var n = document.querySelector ? document.querySelector(sel) : null; if (n && n.parentNode) n.parentNode.removeChild(n); }); } catch (e) {}
+  try { ['.marquee', '.play-reveal', '.trap-reveal'].forEach(function (sel) { var n = document.querySelector ? document.querySelector(sel) : null; if (n && n.parentNode) {
+    if (sel === '.trap-reveal') {
+      /* M261: a trap reveal the banner catches before its first
+         PAINTED frame was never SEEN, so cutting it deletes the
+         ceremony outright (M261 traps drive T3: both traps sprang,
+         the one reveal attempted showed for zero sampled frames —
+         end-of-turn traps are born inside the banner's own render
+         cascade). "Painted" is a double-rAF stamp, not a wall-clock
+         age: a heavy cascade can burn any number of milliseconds
+         without painting once, and the instrumented probe watched
+         the age test pass at 67ms and fail under sampler load. An
+         unpainted reveal goes back to the head of the queue and
+         takes the stage when the lock frees; a painted one is cut
+         as before — the M247 law stands: the banner preempts. */
+      if (trapShownId && !trapShownPainted) { trapQueue.unshift(trapShownId); if (!trapPumpTimer) trapPumpTimer = setTimeout(function () { trapPumpTimer = null; pumpTrapReveal(); }, 1200); }
+      trapShownId = null;
+    }
+    n.parentNode.removeChild(n); } }); } catch (e) {}
 }
 /* M247: the turn banner's single lifecycle. One node (created once,
    reused), one generation counter, one removal timer that only the
@@ -9189,13 +9275,13 @@ function renderBody() {
       if (coach) html += '<div class="coachline">' + coach + '</div>';
     }
     if (mode === 'blocking') {
-      var through = aiAttackers.filter(function (a) { return !blockMap[a.uid]; }).reduce(function (s, a) { var c = G.players[aiIdx].board.find(function (x) { return x.uid === a.uid; }); return s + (c ? effPow(c) : 0); }, 0); // M252: the forecast counts the power that will actually land (temp mods in, floored at 0)
+      var through = aiAttackers.filter(function (a) { return !blockMap[a.uid]; }).reduce(function (s, a) { var c = G.players[aiIdx].board.find(function (x) { return x.uid === a.uid; }); return s + (c ? combatPow(c, G.players[humanIdx]) : 0); }, 0); // M252+M261: the forecast counts the power that will actually land (temp mods in, floored at 0, attack-trigger growth in)
       html += '<div class="blockchip' + (through ? '' : ' allblocked') + '">' + (through ? '⚠ ' + through + ' damage still gets through' : '🛡️ Everything is blocked') + '</div>';
       var pairBits = Object.keys(blockMap).map(function (auid) {
         var a = G.players[aiIdx].board.find(function (x) { return x.uid === +auid; });
         var b = me.board.find(function (x) { return x.uid === blockMap[auid]; });
         if (!a || !b) return '';
-        var aPow = effPow(a), bPow = effPow(b); // M252: the pair forecast reads effective power both ways — a -3/-0'd attacker is forecast to deal 0, as the engine will
+        var aPow = combatPow(a, G.players[humanIdx]), bPow = effPow(b); // M261: the attacker's side of the pair forecast includes its attack-trigger growth; the blocker does not attack, so it keeps the standing read // M252: the pair forecast reads effective power both ways — a -3/-0'd attacker is forecast to deal 0, as the engine will
         var aLeft = D(a).health + a.permHealth - a.damage, bLeft = D(b).health + b.permHealth - b.damage;
         var out = (aPow >= bLeft && bPow >= aLeft) ? 'both fall' : (aPow >= bLeft ? 'blocker falls' : (bPow >= aLeft ? 'attacker falls' : 'both stand'));
         return '<span class="pairbit">' + (D(a).icon || '⚔') + ' ' + aPow + ' vs ' + (D(b).icon || '🛡') + ' ' + bPow + ' → ' + out + '</span>';
@@ -11131,7 +11217,7 @@ async function declareAttack() {
   if (gwAid) render(); // M260: she was summoned into this declaration but never rendered before the engine resolved the combat and she retreated — the human's own Guenhwyvar attacked invisibly (no emblem for the lunge; animateCombat skips emblem-less attackers), while the foe's Aid renders through the blocking phase. One render as she joins gives her emblem its frame: she leaps in, as her painting shows her.
   var blockers = chooseBlockers(G, aiIdx, attackers);
   var names = Object.keys(blockers).length;
-  lastCombatBlow = attackers.reduce(function (m, c) { return Math.max(m, D(c).power + c.permPower); }, 0); // M201: combat weight reads
+  lastCombatBlow = attackers.reduce(function (m, c) { return Math.max(m, combatPow(c, G.players[aiIdx])); }, 0); // M201+M261: combat weight reads the grown blow
   var foeBlockUids = Object.keys(blockers).map(function (k) { return blockers[k]; });
   lastBlockSize = G.players[aiIdx].board.reduce(function (m, c) { return foeBlockUids.indexOf(c.uid) >= 0 ? Math.max(m, D(c).health + c.permHealth) : m; }, 0);
   if (names) sfx('guard'); // M201: the foe's blockers step in as the lunge begins
@@ -11139,7 +11225,7 @@ async function declareAttack() {
   var canAnimate = attackers.some(function (c) { var el = emblemEl(c.uid); return el && typeof el.animate === 'function'; });
   if (canAnimate) {
     busyAnim = true;
-    await animateCombat(attackers.map(function (c) { return { uid: c.uid, power: D(c).power + c.permPower, target: blockers[c.uid] || 'hero', dir: -1 }; }));
+    await animateCombat(attackers.map(function (c) { return { uid: c.uid, power: combatPow(c, G.players[aiIdx]), target: blockers[c.uid] || 'hero', dir: -1 }; })); // M261: floats forecast the grown blow
     busyAnim = false;
   }
   try { G.declareCombat(humanIdx, attackers.map(function (c) { return c.uid; }), blockers); say('You attack with ' + attackers.length + '. The enemy blocks ' + names + ' of them.', 'bad'); } // M219: the uid list is the attackers array itself now \u2014 it carries Guenhwyvar when the Aid answered
@@ -11233,7 +11319,7 @@ async function runAiTurn() {
   var attackers = aiPickAttackers(G, aiIdx);
   if (attackers.length) {
     var gwAidAi = (typeof G.guenhwyvarAid === 'function') ? G.guenhwyvarAid(aiIdx, attackers) : null; if (gwAidAi) attackers.push(gwAidAi); // M219: Guenhwyvar's Aid \u2014 she joins this same declaration, so the blocking phase renders her and she can be blocked
-    lastCombatBlow = attackers.reduce(function (m, a) { return Math.max(m, D(a).power + a.permPower); }, 0); // M201: combat weight read
+    lastCombatBlow = attackers.reduce(function (m, a) { return Math.max(m, combatPow(a, G.players[humanIdx])); }, 0); // M201+M261: combat weight read
     aiAttackers = attackers; blockMap = {}; blockPick = null; mode = 'blocking'; msg = hintOnce('block', 'Hold any creature to read it.');
     sfx('attack');
     say('Enemy attacks with ' + attackers.map(function (a) { return D(a).name; }).join(', ') + '!', 'bad');
@@ -11241,7 +11327,7 @@ async function runAiTurn() {
     await new Promise(function (res) { blockResolver = res; });
     // M240: no pre-animation 'block' clang here any more — the block
     // voice moved INTO animateCombat, where it lands on the contact.
-    await animateCombat(attackers.map(function (a) { return { uid: a.uid, power: D(a).power + a.permPower, target: blockMap[a.uid] || 'hero', dir: 1 }; }));
+    await animateCombat(attackers.map(function (a) { return { uid: a.uid, power: combatPow(a, G.players[humanIdx]), target: blockMap[a.uid] || 'hero', dir: 1 }; })); // M261: floats forecast the grown blow
     try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), blockMap); }
     catch (e) { say('Blocking fumbled (' + e.message + ') — attacks go through unblocked.', 'bad'); try { G.declareCombat(aiIdx, attackers.map(function (a) { return a.uid; }), {}); } catch (e2) {} }
     flushEngineLog(); mode = 'aiTurn'; aiAttackers = [];

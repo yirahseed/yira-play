@@ -505,6 +505,7 @@
      .stream-path, .stream-under, .fx-puff and their keyframes — is
      removed entirely; ui.js spawnStreams flies .wisp nodes now.) */
   .fx-vapor { position:fixed; inset:0; z-index:61; pointer-events:none; overflow:hidden; }
+  .fx-streamcanvas { position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; } /* M243: the canvas the flow ribbons fly on — one per nightmare layer, viewport-sized in JS */
   .wisp { position:absolute; left:0; top:0; mix-blend-mode:screen; will-change:transform,opacity; filter:blur(1.6px) saturate(1.12);
     background:
       radial-gradient(circle, rgba(38,15,84,.30) 0%, rgba(62,27,128,.12) 55%, rgba(0,0,0,0) 80%),
@@ -6252,6 +6253,176 @@ function streamTe(u, e) {
    at te*(1+lag) - lag*frac, so the tail trails behind, then chases and
    pours in as every segment's own path-time runs to 1. Writhe is a
    perpendicular sine laid over the path, anchored to zero at both ends. */
+/* ================= M243 — STREAM ROUND 10: THE RENDERING-COST PASS ====
+   The M242 frame drive named the plant burst the stack's one real frame
+   cost (a 237-404ms task at burst start, p50 50-183ms in flight); the
+   M243 profile (m243-work) found where it lives: a 10-stream volley is
+   350 DOM nodes, each carrying a sprite background, a radial mask and a
+   CSS filter chain (blur up to 10px), each running a 21-keyframe WAAPI
+   animation whose transform changes SCALE every frame — so the browser
+   re-rasters every filtered surface on every frame (the burst window's
+   CPU profile is ~310ms of native style/layout/paint against ~18ms of
+   stream JS). The rebuild moves the FLOW ribbons (plant + drain) onto
+   ONE canvas per layer: the entire paint stack — sprite crop, the
+   black crush, the dark heart, the mask falloff, the size-keyed blur —
+   is baked ONCE into sprite canvases at runtime (no new asset files),
+   and each frame is a set of drawImage transforms driven by the SAME
+   pose math the DOM path always used (poseAt, inside spawnRibbon).
+   The look's source of truth does not move; only the paint does.
+   Safety: the canvas path arms only when the bake COMPLETES and a
+   pixel probe proves ctx.filter really applies on this engine (some
+   engines accept the property and ignore it — a violet stream would
+   be worse than a slow one). Every other case — no canvas 2d, filter
+   ignored, sprites failed, the stub DOM — flies the DOM renderer,
+   which is byte-for-byte the pre-M243 one. */
+var fxBakeState = 0; // 0 idle, 1 baking, 2 ready, 3 unavailable (DOM forever)
+var fxBake = null;
+var fxBatchSeq = 0;
+var fxVolleyMode = 'dom'; // the renderer the current volley flies on — set per volley by spawnStreams / spawnDrainWisps
+var fxReg = { renderer: 'dom', volleys: [] }; // M243: the volley registry — probes and harness pins read it; spawnStreams/spawnDrainWisps append one entry per volley
+try { window.__fxReg = fxReg; } catch (e) {}
+function fxStreamRenderer() {
+  var pref = 'auto';
+  try { pref = window.__fxRendererPref || 'auto'; } catch (e) {}
+  if (pref === 'dom') return 'dom';
+  return fxBakeState === 2 ? 'canvas' : 'dom';
+}
+function fxBakeVariant(img, crop, filterChain, blurPx, streakMask) {
+  var B = 256;
+  var c1 = document.createElement('canvas'); c1.width = B; c1.height = B;
+  var x = c1.getContext('2d'); if (!x) return null;
+  var iw = img.naturalWidth || img.width || 256, ih = img.naturalHeight || img.height || 256;
+  var dw = B * crop.s / 100, dh = dw * ih / iw;
+  var dx = (B - dw) * crop.px / 100, dy = (B - dh) * crop.py / 100;
+  try { x.filter = filterChain; } catch (e) {}
+  x.drawImage(img, dx, dy, dw, dh);
+  try { x.filter = 'none'; } catch (e) {}
+  var g = x.createRadialGradient(B / 2, B / 2, 0, B / 2, B / 2, B * 0.7071); // the dark heart the nightmare CSS lays over the sprite
+  g.addColorStop(0, 'rgba(6,5,9,.52)'); g.addColorStop(0.55, 'rgba(14,12,18,.26)'); g.addColorStop(0.8, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, B, B);
+  x.globalCompositeOperation = 'destination-in'; // the CSS mask, baked as alpha
+  var mg;
+  if (streakMask) {
+    x.save(); x.translate(B / 2, B / 2); x.scale(1, 0.6957);
+    mg = x.createRadialGradient(0, 0, 0, 0, 0, B * 0.92);
+    mg.addColorStop(0, 'rgba(0,0,0,1)'); mg.addColorStop(0.52, 'rgba(0,0,0,1)'); mg.addColorStop(0.86, 'rgba(0,0,0,0)');
+    x.fillStyle = mg; x.fillRect(-B, -B * 1.44, B * 2, B * 2.88);
+    x.restore();
+  } else {
+    mg = x.createRadialGradient(B / 2, B / 2, 0, B / 2, B / 2, B * 0.7071);
+    mg.addColorStop(0, 'rgba(0,0,0,1)'); mg.addColorStop(0.6, 'rgba(0,0,0,1)'); mg.addColorStop(0.86, 'rgba(0,0,0,0)');
+    x.fillStyle = mg; x.fillRect(0, 0, B, B);
+  }
+  x.globalCompositeOperation = 'source-over';
+  if (!blurPx) return c1;
+  var c2 = document.createElement('canvas'); c2.width = B; c2.height = B;
+  var x2 = c2.getContext('2d'); if (!x2) return c1;
+  try { x2.filter = 'blur(' + blurPx + 'px)'; } catch (e) {}
+  x2.drawImage(c1, 0, 0);
+  try { x2.filter = 'none'; } catch (e) {}
+  return c2;
+}
+function fxBakeFinish(imgs) {
+  try {
+    var SM = imgs.smoke, ST = imgs.streak || imgs.smoke;
+    var bodyF = 'grayscale(.86) brightness(.55) contrast(1.24)';
+    var streakF = 'grayscale(.86) brightness(.58) contrast(1.22)';
+    fxBake = {
+      bodyCore: [fxBakeVariant(SM, { s: 148, px: 50, py: 50 }, bodyF, 13, false), fxBakeVariant(SM, { s: 132, px: 44, py: 56 }, bodyF, 13, false), fxBakeVariant(SM, { s: 140, px: 56, py: 44 }, bodyF, 13, false)],
+      bodyRim: [fxBakeVariant(SM, { s: 135, px: 16, py: 16 }, bodyF, 13, false), fxBakeVariant(SM, { s: 135, px: 84, py: 16 }, bodyF, 13, false), fxBakeVariant(SM, { s: 135, px: 16, py: 84 }, bodyF, 13, false), fxBakeVariant(SM, { s: 135, px: 84, py: 84 }, bodyF, 13, false)],
+      streak: [fxBakeVariant(ST, { s: 200, px: 30, py: 50 }, streakF, 13, true), fxBakeVariant(ST, { s: 225, px: 50, py: 50 }, streakF, 13, true), fxBakeVariant(ST, { s: 185, px: 68, py: 50 }, streakF, 13, true)],
+      head: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.78) brightness(.92) contrast(1.18)', 5, false),
+      headglow: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.35) brightness(1.5) contrast(1.02)', 15, false),
+      halo: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.88) brightness(.48) contrast(1.12)', 29, false),
+      under: fxBakeVariant(SM, { s: 138, px: 50, py: 50 }, 'grayscale(.88) brightness(.50)', 27, false)
+    };
+    fxBakeState = (fxBake.head && fxBake.bodyCore[0] && fxBake.bodyRim[0] && fxBake.streak[0]) ? 2 : 3;
+    try { window.__fxBake = fxBake; } catch (e) {} // probe surface: the M243 drive inspects the baked sprites
+  } catch (e) { fxBakeState = 3; }
+}
+function fxBakeStart() {
+  if (fxBakeState !== 0) return;
+  fxBakeState = 1;
+  try {
+    if (typeof Image === 'undefined' || !document.createElement) { fxBakeState = 3; return; }
+    var probe = document.createElement('canvas');
+    if (!probe || typeof probe.getContext !== 'function') { fxBakeState = 3; return; }
+    probe.width = 4; probe.height = 4;
+    var px = probe.getContext('2d'); if (!px) { fxBakeState = 3; return; }
+    px.fillStyle = '#ff0000'; px.fillRect(0, 0, 4, 4);
+    try { px.filter = 'grayscale(1) brightness(0)'; } catch (e) {}
+    px.fillRect(0, 0, 4, 4);
+    var dat = px.getImageData(1, 1, 1, 1).data;
+    if (dat[0] > 40) { fxBakeState = 3; return; } // still red: the filter was ignored — the DOM keeps the look honest
+    var imgs = {}, pending = 2, failed = false;
+    function one(key, uri) {
+      if (!uri) { failed = true; fxBakeState = 3; return; }
+      pending++;
+      var im = new Image();
+      im.onload = function () { imgs[key] = im; pending--; if (pending === 0 && !failed) fxBakeFinish(imgs); };
+      im.onerror = function () { failed = true; fxBakeState = 3; };
+      im.src = uri;
+    }
+    pending = 0;
+    var streakUri = null; try { streakUri = FX_ART.streak; } catch (e) {}
+    one('smoke', FX_ART.smoke); one('streak', streakUri || FX_ART.smoke);
+    setTimeout(function () { if (fxBakeState === 1) fxBakeState = 3; }, 4000);
+  } catch (e) { fxBakeState = 3; }
+}
+var fxCanvasLayers = [];
+var fxStreamNow = 0, fxStreamLastReal = 0, fxStreamRaf = 0; // the stream clock: virtual ms, paused by hit-stop like every WAAPI animation (M239 parity)
+function fxCanvasFor(layer) {
+  for (var i = 0; i < fxCanvasLayers.length; i++) if (fxCanvasLayers[i].layer === layer) return fxCanvasLayers[i];
+  var cv = document.createElement('canvas');
+  cv.className = 'fx-streamcanvas';
+  var scale = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) || 1, 2);
+  var vw = window.innerWidth || 400, vh = window.innerHeight || 700;
+  cv.width = Math.max(2, Math.round(vw * scale)); cv.height = Math.max(2, Math.round(vh * scale));
+  layer.appendChild(cv);
+  var rec = { layer: layer, canvas: cv, ctx: cv.getContext('2d'), scale: scale, ribbons: [] };
+  fxCanvasLayers.push(rec);
+  fxCanvasWake();
+  return rec;
+}
+function fxCanvasWake() { if (!fxStreamRaf && typeof requestAnimationFrame === 'function') { fxStreamLastReal = 0; fxStreamRaf = requestAnimationFrame(fxCanvasTick); } }
+function fxCanvasTick(nowReal) {
+  fxStreamRaf = 0;
+  if (fxStreamLastReal) { var dt = nowReal - fxStreamLastReal; if (nowReal < feelFrozenUntil) dt = 0; fxStreamNow += dt; }
+  fxStreamLastReal = nowReal;
+  for (var i = fxCanvasLayers.length - 1; i >= 0; i--) {
+    var rec = fxCanvasLayers[i];
+    if (!rec.layer.parentNode) { fxCanvasLayers.splice(i, 1); continue; }
+    fxDrawLayer(rec);
+  }
+  if (fxCanvasLayers.length) fxStreamRaf = requestAnimationFrame(fxCanvasTick);
+}
+function fxDrawLayer(rec) {
+  var ctx = rec.ctx; if (!ctx) return;
+  var vw = window.innerWidth || 400, vh = window.innerHeight || 700;
+  ctx.setTransform(rec.scale, 0, 0, rec.scale, 0, 0);
+  ctx.clearRect(0, 0, vw, vh);
+  var poseMs = null; try { poseMs = window.__fxPoseMs; } catch (e) {}
+  for (var r = 0; r < rec.ribbons.length; r++) {
+    var R = rec.ribbons[r];
+    var nowR = (typeof poseMs === 'number') ? R.t0 + poseMs : fxStreamNow;
+    var raw = nowR - R.t0 - R.o.delay;
+    if (raw < -60 || raw > R.o.dur + 90) continue;
+    var u = raw <= 0 ? 0 : (raw >= R.o.dur ? 1 : raw / R.o.dur);
+    for (var j = 0; j < R.descs.length; j++) { // descs order = paint order, exactly as DOM siblings painted
+      var dc = R.descs[j];
+      var pose = R.poseAt(dc, u);
+      if (!pose || !dc.img || pose.op <= 0.004) continue;
+      var sz = dc._c.size;
+      ctx.globalAlpha = pose.op > 1 ? 1 : pose.op;
+      ctx.setTransform(rec.scale, 0, 0, rec.scale, 0, 0);
+      ctx.translate(pose.x, pose.y);
+      ctx.rotate(pose.ang * 0.0174533);
+      ctx.scale(pose.scx, pose.scy);
+      ctx.drawImage(dc.img, -sz / 2, -sz / 2, sz, sz);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
 function spawnRibbon(layer, P, o) {
   var N = o.segs, maxLag = o.lag;
   var phase = Math.random() * 6.28;
@@ -6339,9 +6510,81 @@ function spawnRibbon(layer, P, o) {
   }
   var landA = Math.random() * 6.283, landR = o.flow ? 5 + Math.random() * 8 : 0;
   var landX = Math.cos(landA) * landR, landY = Math.sin(landA) * landR * 0.7;
+  /* M243: the per-segment constants are drawn ONCE into dc._c, and the
+     pose math lives in poseAt — shared verbatim by the DOM keyframe
+     sampler below and by the canvas painter (fxDrawLayer), so both
+     renderers fly the identical stream; only the paint differs.
+     M228 (the seep): seepK is how completely a piece dissolves across
+     the last stretch of arc — the head family goes first and furthest
+     (no knot docks at the arrival and the leader's glow is spent
+     before it lands; that light belongs to the launch end), the body
+     seeps gentler, the underlay washes were already faint. bloomK is
+     the calibre bloom paired with it — smoke spreading as it thins;
+     the body blooms most, the dissolving head least. */
   descs.forEach(function (dc, di) {
-    var lagj = maxLag * dc.frac;
-    var size = o.size * dc.sizeMul;
+    var seepK = !o.flow ? 0 : (dc.cls === 'wisp wisp-head' || dc.cls === 'wisp wisp-headglow' || dc.cls === 'wisp wisp-halo' ? 1 : (dc.cls.indexOf('wisp-under') >= 0 ? 0.35 : 0.6));
+    dc._c = {
+      lagj: maxLag * dc.frac,
+      size: o.size * dc.sizeMul,
+      peak: o.opacity * dc.opMul,
+      seepK: seepK,
+      bloomK: !o.flow ? 0 : (seepK === 1 ? 0.6 : (seepK === 0.35 ? 0.5 : 1)),
+      rotJit: Math.random() * 14 - 7,
+      flipX: Math.random() < 0.5 ? -1 : 1,
+      flipY: Math.random() < 0.5 ? -1 : 1,
+      segPhase: phase + di * 0.62
+    };
+  });
+  function poseAt(dc, u) {
+    var C = dc._c;
+    var te = o.flow ? streamTe(u, o.ease) : 1 - Math.pow(1 - u, o.ease);
+    var sj = te * (1 + maxLag) - C.lagj; if (sj < 0) sj = 0; if (sj > 1) sj = 1;
+    var pt, pt2, sjA = sj;
+    if (o.flow) { // M212 (P6): this segment rides maxLag*frac of ARC behind the head; sjA (its arc fraction, >1 in the pour) drives the envelopes
+      var segLen = arcAtX(te * (1 + maxLag)) - dc.frac * maxLag * arcTot; if (segLen < 0) segLen = 0;
+      sjA = arcTot > 0 ? segLen / arcTot : 0;
+      var pa = paramAt(segLen);
+      pt = pathPoint(P, pa);
+      pt2 = pathPoint(P, segLen + 2.5 < arcTot ? paramAt(segLen + 2.5) : Math.min(1, pa + 0.012));
+    } else {
+      pt = pathPoint(P, sj);
+      pt2 = pathPoint(P, Math.min(1, sj + 0.012));
+    }
+    var tx = pt2.x - pt.x, ty = pt2.y - pt.y, tl = Math.sqrt(tx * tx + ty * ty) || 1;
+    var sjW = o.flow ? Math.min(1, sjA) : sj; // the position envelopes read the clamped arc fraction on flow ribbons
+    var env = Math.sin(Math.PI * Math.min(1, sjW * 1.1));
+    var wob = o.flow
+      ? Math.sin(sjW * 13 - u * 7 + phase) * o.writhe * env * (0.72 + 0.5 * Math.sin(u * 3.4 + phase * 1.7)) // M212 (P5): a wave TRAVELLING along the body — phase is a function of arc position on the ribbon's ONE shared clock, so the undulation itself flows downstream; the M201 breathing swell rides it
+      : Math.sin(u * o.wfreq + C.segPhase + sj * o.waveK) * o.writhe * env;
+    var x = pt.x + (-ty / tl) * (wob + dc.jit * env), y = pt.y + (tx / tl) * (wob + dc.jit * env);
+    if (o.flow && sjW > 0.78) { var lw = (sjW - 0.78) / 0.22; lw = lw * lw * (3 - 2 * lw); var ov = Math.sin(Math.PI * Math.min(1, Math.max(0, (sjW - 0.86) / 0.14))) * 6; x += landX * lw + (tx / tl) * ov; y += landY * lw + (ty / tl) * ov; } // M202: the approach bends toward the landing spot, and momentum carries the smoke a few px PAST it near sj .93 before the pile drinks it back — a pour, not a parking
+    var seep = 0; if (o.flow && sjA > 0.78) { var swq = Math.min(1, (sjA - 0.78) / 0.22); seep = swq * swq * (3 - 2 * swq); } // M228: the seep envelope — a smoothstep across the last stretch of arc, read per segment off its own arc fraction, so each piece of the stream seeps as IT arrives
+    var girth = o.flow ? 0.92 + 0.18 * Math.pow(Math.sin(Math.PI * sjW), 1.2) : 0.8 + 0.45 * Math.pow(Math.sin(Math.PI * Math.min(1, sj)), 1.2); // M212 (P2): the flow body breathes (0.92-1.10) instead of billowing to 1.25 — width is the cloud
+    var impl = o.flow ? (sjA > 0.90 ? 1 - ((sjA - 0.90) / 0.10) * 0.55 : 1) : (sj > 0.86 ? 1 - ((sj - 0.86) / 0.14) * 0.6 : 1); // M212 (P7): the funnel starts later on flow ribbons, so the tail's last act stays visible
+    var sc = girth * impl * (sj <= 0 ? 0.35 : 1) * (1 + 0.30 * seep * C.bloomK); // M228: the seep's calibre bloom rides the scale — the last stretch widens slightly as it thins, diffusion instead of a funnel docking
+    var fi = sj <= 0 ? 0 : Math.min(1, (o.flow ? sjA : sj) / 0.05);
+    var fo = o.flow ? (sjA > 0.90 ? Math.max(0, (1 - sjA) / 0.10) : 1) : (sj > 0.85 ? Math.max(0, (1 - sj) / 0.15) : 1); // M212 (P7): fade lives in the last tenth now
+    var op = C.peak * fi * fo * (1 - 0.78 * seep * C.seepK); // M228: the seep's alpha ease — the stream thins INTO the deck across its last stretch; the M212 (P7) last-tenth fade still closes what remains
+    var ang = Math.atan2(ty, tx) * 57.2958 + C.rotJit + (o.flow ? 0 : Math.sin(u * o.wfreq + C.segPhase) * 5); // M195: the segment's long axis rides the tangent; M212: flow ribbons drop the per-segment wobble (boiling cue)
+    var landFlat = o.flow ? (sjA > 0.90 ? 1 - ((sjA - 0.90) / 0.10) * 0.3 : 1) : 1; // M202: landing smoke flattens against the pile instead of shrinking as a ball
+    return { x: x, y: y, ang: ang, scx: C.flipX * sc * dc.stretch, scy: C.flipY * sc * dc.squash * landFlat, op: op };
+  }
+  if (o.flow && fxVolleyMode === 'canvas' && fxBake) { // M243: fly the ribbon on the layer's canvas — no nodes, no filters, no per-segment animations
+    var recC = fxCanvasFor(layer);
+    descs.forEach(function (dc, di) {
+      if (dc.cls === 'wisp wisp-halo') dc.img = fxBake.halo;
+      else if (dc.cls === 'wisp wisp-headglow') dc.img = fxBake.headglow;
+      else if (dc.cls.indexOf('wisp-under') >= 0) dc.img = fxBake.under;
+      else if (dc.cls === 'wisp wisp-head') dc.img = fxBake.head;
+      else if (dc.sprite === 'streak') dc.img = fxBake.streak[di % fxBake.streak.length];
+      else if (dc.crop === 'rim') dc.img = fxBake.bodyRim[di % fxBake.bodyRim.length];
+      else dc.img = fxBake.bodyCore[di % fxBake.bodyCore.length];
+    });
+    recC.ribbons.push({ o: o, descs: descs, poseAt: poseAt, t0: fxStreamNow });
+    return;
+  }
+  descs.forEach(function (dc, di) {
+    var size = dc._c.size;
     var el = document.createElement('div');
     el.className = dc.cls;
     el.style.width = size + 'px'; el.style.height = size + 'px';
@@ -6359,50 +6602,15 @@ function spawnRibbon(layer, P, o) {
       el.style.backgroundPosition = (44 + Math.random() * 12).toFixed(0) + '% ' + (44 + Math.random() * 12).toFixed(0) + '%';
     }
     layer.appendChild(el);
-    if (o.flow && dc.cls !== 'wisp wisp-head' && dc.cls !== 'wisp wisp-halo' && dc.cls.indexOf('wisp-under') < 0 && dc.cls.indexOf('headglow') < 0) { // M216 (Q3): feather scales with calibre — the nightmare class blur was a flat 1.2px whatever the segment's size, drawing a tube edge on the fat ones; this inline chain restates the .fx-nightmare class filter with a size-keyed blur (flow ribbons fly only in .fx-nightmare layers; head/halo/underlay/glow keep their class filters)
+    if (o.flow && dc.cls !== 'wisp wisp-head' && dc.cls !== 'wisp wisp-halo' && dc.cls.indexOf('wisp-under') < 0 && dc.cls.indexOf('headglow') < 0) { // M216 (Q3): feather scales with calibre — the nightmare class blur was a flat 1.2px whatever the segment's size, drawing a tube edge on the fat ones; this inline chain restates the nightmare class filter with a size-keyed blur (flow ribbons fly only in the nightmare layers; head/halo/underlay/glow keep their class filters)
       var bp = (1.1 + size * 0.03).toFixed(2);
       el.style.filter = dc.sprite === 'streak' ? 'blur(' + bp + 'px) grayscale(.86) brightness(.58) contrast(1.22)' : 'blur(' + bp + 'px) grayscale(.86) brightness(.55) contrast(1.24)';
     }
-    var peak = o.opacity * dc.opMul;
-    var seepK = !o.flow ? 0 : (dc.cls === 'wisp wisp-head' || dc.cls === 'wisp wisp-headglow' || dc.cls === 'wisp wisp-halo' ? 1 : (dc.cls.indexOf('wisp-under') >= 0 ? 0.35 : 0.6)); // M228 (the seep): how completely this piece dissolves across the last stretch of arc — the head family goes first and furthest (no knot docks at the arrival and the leader's glow is spent before it lands; that light belongs to the launch end), the body seeps gentler, the underlay washes were already faint
-    var bloomK = !o.flow ? 0 : (seepK === 1 ? 0.6 : (seepK === 0.35 ? 0.5 : 1)); // M228: the calibre bloom paired with the seep — smoke spreading as it thins; the body blooms most, the dissolving head least
-    var rotJit = Math.random() * 14 - 7;
-    var flipX = Math.random() < 0.5 ? -1 : 1, flipY = Math.random() < 0.5 ? -1 : 1;
-    var segPhase = phase + di * 0.62;
     var frames = [];
     for (var s2 = 0; s2 <= SAMPLES; s2++) {
       var u = s2 / SAMPLES;
-      var te = o.flow ? streamTe(u, o.ease) : 1 - Math.pow(1 - u, o.ease);
-      var sj = te * (1 + maxLag) - lagj; if (sj < 0) sj = 0; if (sj > 1) sj = 1;
-      var pt, pt2, sjA = sj;
-      if (o.flow) { // M212 (P6): this segment rides maxLag*frac of ARC behind the head; sjA (its arc fraction, >1 in the pour) drives the envelopes
-        var segLen = arcAtX(te * (1 + maxLag)) - dc.frac * maxLag * arcTot; if (segLen < 0) segLen = 0;
-        sjA = arcTot > 0 ? segLen / arcTot : 0;
-        var pa = paramAt(segLen);
-        pt = pathPoint(P, pa);
-        pt2 = pathPoint(P, segLen + 2.5 < arcTot ? paramAt(segLen + 2.5) : Math.min(1, pa + 0.012));
-      } else {
-        pt = pathPoint(P, sj);
-        pt2 = pathPoint(P, Math.min(1, sj + 0.012));
-      }
-      var tx = pt2.x - pt.x, ty = pt2.y - pt.y, tl = Math.sqrt(tx * tx + ty * ty) || 1;
-      var sjW = o.flow ? Math.min(1, sjA) : sj; // the position envelopes read the clamped arc fraction on flow ribbons
-      var env = Math.sin(Math.PI * Math.min(1, sjW * 1.1));
-      var wob = o.flow
-        ? Math.sin(sjW * 13 - u * 7 + phase) * o.writhe * env * (0.72 + 0.5 * Math.sin(u * 3.4 + phase * 1.7)) // M212 (P5): a wave TRAVELLING along the body — phase is a function of arc position on the ribbon's ONE shared clock, so the undulation itself flows downstream; the M201 breathing swell rides it
-        : Math.sin(u * o.wfreq + segPhase + sj * o.waveK) * o.writhe * env;
-      var x = pt.x + (-ty / tl) * (wob + dc.jit * env), y = pt.y + (tx / tl) * (wob + dc.jit * env);
-      if (o.flow && sjW > 0.78) { var lw = (sjW - 0.78) / 0.22; lw = lw * lw * (3 - 2 * lw); var ov = Math.sin(Math.PI * Math.min(1, Math.max(0, (sjW - 0.86) / 0.14))) * 6; x += landX * lw + (tx / tl) * ov; y += landY * lw + (ty / tl) * ov; } // M202: the approach bends toward the landing spot, and momentum carries the smoke a few px PAST it near sj .93 before the pile drinks it back — a pour, not a parking
-      var seep = 0; if (o.flow && sjA > 0.78) { var swq = Math.min(1, (sjA - 0.78) / 0.22); seep = swq * swq * (3 - 2 * swq); } // M228: the seep envelope — a smoothstep across the last stretch of arc, read per segment off its own arc fraction, so each piece of the stream seeps as IT arrives
-      var girth = o.flow ? 0.92 + 0.18 * Math.pow(Math.sin(Math.PI * sjW), 1.2) : 0.8 + 0.45 * Math.pow(Math.sin(Math.PI * Math.min(1, sj)), 1.2); // M212 (P2): the flow body breathes (0.92-1.10) instead of billowing to 1.25 — width is the cloud
-      var impl = o.flow ? (sjA > 0.90 ? 1 - ((sjA - 0.90) / 0.10) * 0.55 : 1) : (sj > 0.86 ? 1 - ((sj - 0.86) / 0.14) * 0.6 : 1); // M212 (P7): the funnel starts later on flow ribbons, so the tail's last act stays visible
-      var sc = girth * impl * (sj <= 0 ? 0.35 : 1) * (1 + 0.30 * seep * bloomK); // M228: the seep's calibre bloom rides the scale — the last stretch widens slightly as it thins, diffusion instead of a funnel docking
-      var fi = sj <= 0 ? 0 : Math.min(1, (o.flow ? sjA : sj) / 0.05);
-      var fo = o.flow ? (sjA > 0.90 ? Math.max(0, (1 - sjA) / 0.10) : 1) : (sj > 0.85 ? Math.max(0, (1 - sj) / 0.15) : 1); // M212 (P7): fade lives in the last tenth now
-      var op = peak * fi * fo * (1 - 0.78 * seep * seepK); // M228: the seep's alpha ease — the stream thins INTO the deck across its last stretch; the M212 (P7) last-tenth fade still closes what remains
-      var ang = Math.atan2(ty, tx) * 57.2958 + rotJit + (o.flow ? 0 : Math.sin(u * o.wfreq + segPhase) * 5); // M195: the segment's long axis rides the tangent; M212: flow ribbons drop the per-segment wobble (boiling cue)
-      var landFlat = o.flow ? (sjA > 0.90 ? 1 - ((sjA - 0.90) / 0.10) * 0.3 : 1) : 1; // M202: landing smoke flattens against the pile instead of shrinking as a ball
-      frames.push({ transform: 'translate(' + (x - size / 2).toFixed(1) + 'px,' + (y - size / 2).toFixed(1) + 'px) rotate(' + ang.toFixed(1) + 'deg) scale(' + (flipX * sc * dc.stretch).toFixed(3) + ',' + (flipY * sc * dc.squash * landFlat).toFixed(3) + ')', opacity: +op.toFixed(3), offset: u });
+      var pose = poseAt(dc, u);
+      frames.push({ transform: 'translate(' + (pose.x - size / 2).toFixed(1) + 'px,' + (pose.y - size / 2).toFixed(1) + 'px) rotate(' + pose.ang.toFixed(1) + 'deg) scale(' + pose.scx.toFixed(3) + ',' + pose.scy.toFixed(3) + ')', opacity: +pose.op.toFixed(3), offset: u });
     }
     flyNode(el, frames, o.dur, o.delay, 'linear'); // easing is baked into the samples; M212 (P5) SUPERSEDES the M201 R2 per-segment duration stretch on flow ribbons: ONE clock per ribbon — the tail still pours in after the head (arc-lag keeps sjA_tail < sjA_head at every instant before the settle), but neighbours no longer shear against each other on private clocks
   });
@@ -6440,6 +6648,10 @@ function spawnStreams(fromIdx, toIdx, n) {
     var durScale = Math.min(1.3, Math.max(0.85, dist / 620));
     var flight = calm ? 750 : (1250 + Math.random() * 300) * durScale;
     fxFlightMs = flight;
+    fxBakeStart(); // M243: warm the sprite bake (no-op once running or done — the first volleys fly DOM while it cooks)
+    fxVolleyMode = fxStreamRenderer();
+    fxReg.renderer = fxVolleyMode;
+    fxReg.volleys.push({ kind: 'plant', n: planted, ribbons: count, segs: Math.round((calm ? 12 : 22) * segScale), calm: !!calm, renderer: fxVolleyMode, batch: ++fxBatchSeq });
     var fanPh = Math.random() * 6.283; // M228: this volley's arrival-fan rotation — the pattern is deterministic per stream, the volley never lands the same way twice
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
@@ -6492,6 +6704,10 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     var layer = document.createElement('div');
     layer.className = 'fx-vapor fx-nightmare';
     document.body.appendChild(layer);
+    fxBakeStart(); // M243: same bake, same decision as the plant
+    fxVolleyMode = fxStreamRenderer();
+    fxReg.renderer = fxVolleyMode;
+    fxReg.volleys.push({ kind: 'drain', n: count, ribbons: count, segs: Math.round((calm ? 10 : 16) * segScaleD), calm: !!calm, renderer: fxVolleyMode, batch: ++fxBatchSeq });
     spawnPilePulse(layer, src, 40);
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
@@ -9112,7 +9328,7 @@ function renderTitle() {
     '<div class="pressstart">✦ PRESS START ✦</div></div>' +
     '<div class="titlever">all names and art original</div><div class="titlechips"><span class="tchip">\u2694\uFE0F 1v1 duels</span><span class="tchip">\uD83C\uDFDB\uFE0F 18 heroes</span><span class="tchip">\uD83C\uDCCF 435 cards</span><span class="tchip">\uD83E\uDDD7 The Climb</span></div></div>'; // M156: store-grade title — the internal build stamp leaves the player-facing surface (it still lives in SPRINT.md and the commit history) // M194 revision (2026-11-10): the chip count is hardcoded here — 410 -> 423 for the completion wave (the profile screen counts live) // M219 revision (2026-11-11): 423 -> 425 collectible (Hungry Goat + Grave Disturbance join) and 15 -> 17 heroes (Volric + Zareth take the field on the M218 hunt's data) // M227 revision (2026-11-12): 425 -> 429 collectible (the hunt-2 wave: Swordsmith, Drum Up Support, Frontline Paladin, Elixir of Vitality) // M234 revision (2026-11-12): 429 -> 435 collectible (the full-roster wave: Oswald, Cut Down, Ghost Blades, Veyla's Enforcer, Defend with Twinkle, the Arkbow) and 17 -> 18 heroes (Wrenna takes the field — the roster is complete)
 }
-function enterTitle() { titleDismissed = true; try { soundInit(); sfx('play'); } catch (e) {} render(); try { var mp = document.querySelector('.menupage'); if (mp && mp.classList) mp.classList.add('hub-in'); } catch (e) {} } // M191: the hub settles in once, on entry only — the class rides this DOM, so later re-renders never replay it
+function enterTitle() { titleDismissed = true; try { fxBakeStart(); } catch (e) {} try { soundInit(); sfx('play'); } catch (e) {} render(); try { var mp = document.querySelector('.menupage'); if (mp && mp.classList) mp.classList.add('hub-in'); } catch (e) {} } // M243: fxBakeStart warms the stream sprite bake on title entry, so a session's first plant already flies canvas // M191: the hub settles in once, on entry only — the class rides this DOM, so later re-renders never replay it // M191: the hub settles in once, on entry only — the class rides this DOM, so later re-renders never replay it
 var profileOpen = false, pvpOpen = false, glossaryOpen = false;
 var hubTab = 'play', settingsOpen = false; // M154: the hub is sectioned screens, not one long scroll
 function hubShow(tab) {
@@ -9837,6 +10053,7 @@ function renderBuilder() {
 
 /* ---------- match flow ---------- */
 function startMatch() {
+  try { fxBakeStart(); } catch (e) {} // M243: and again at match start (idempotent) — the versus splash covers the cook
   matchStartedAt = Date.now();
   soundInit();
   sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null }; prevLife = {}; lifeSeries = []; lastSeriesTurn = -1; prevHandUids = {}; prevHandCount = -1; concedeArmed = false; window.__conceded = false; reviewField = false; leagueCrossed = null; leagueSeen = false; endStep = 'result'; // M237: the yield flag's home is the match, not the render

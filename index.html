@@ -11128,6 +11128,7 @@ async function declareAttack() {
   if (!attackSet.size) { mode = 'main'; render(); return; }
   var attackers = G.players[humanIdx].board.filter(function (c) { return attackSet.has(c.uid); });
   var gwAid = (typeof G.guenhwyvarAid === 'function') ? G.guenhwyvarAid(humanIdx, attackers) : null; if (gwAid) attackers.push(gwAid); // M219: Guenhwyvar's Aid \u2014 she joins THIS declaration, before blockers are chosen, and can be blocked
+  if (gwAid) render(); // M260: she was summoned into this declaration but never rendered before the engine resolved the combat and she retreated — the human's own Guenhwyvar attacked invisibly (no emblem for the lunge; animateCombat skips emblem-less attackers), while the foe's Aid renders through the blocking phase. One render as she joins gives her emblem its frame: she leaps in, as her painting shows her.
   var blockers = chooseBlockers(G, aiIdx, attackers);
   var names = Object.keys(blockers).length;
   lastCombatBlow = attackers.reduce(function (m, c) { return Math.max(m, D(c).power + c.permPower); }, 0); // M201: combat weight reads

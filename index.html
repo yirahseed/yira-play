@@ -6449,6 +6449,7 @@ var fxBake = null;
 var fxBatchSeq = 0;
 var fxVolleyMode = 'dom'; // the renderer the current volley flies on — set per volley by spawnStreams / spawnDrainWisps
 var fxReg = { renderer: 'dom', volleys: [] }; // M243: the volley registry — probes and harness pins read it; spawnStreams/spawnDrainWisps append one entry per volley
+function fxRegTrim() { if (fxReg.volleys.length > 120) fxReg.volleys.splice(0, fxReg.volleys.length - 120); } // M287: the registry was append-only for the whole session — every volley ever flown left an entry behind (the M287 long session counted it growing match over match, never plateauing). Readers (probes, pins) only ever read the recent tail, so the tail is capped at 120 and the array stops growing; the two push sites stay literally intact for the M243 pin
 try { window.__fxReg = fxReg; } catch (e) {}
 function fxStreamRenderer() {
   var pref = 'auto';
@@ -6821,7 +6822,7 @@ function spawnStreams(fromIdx, toIdx, n) {
     fxBakeStart(); // M243: warm the sprite bake (no-op once running or done — the first volleys fly DOM while it cooks)
     fxVolleyMode = fxStreamRenderer();
     fxReg.renderer = fxVolleyMode;
-    fxReg.volleys.push({ kind: 'plant', n: planted, ribbons: count, segs: Math.round((calm ? 12 : 22) * segScale), calm: !!calm, renderer: fxVolleyMode, batch: ++fxBatchSeq });
+    fxReg.volleys.push({ kind: 'plant', n: planted, ribbons: count, segs: Math.round((calm ? 12 : 22) * segScale), calm: !!calm, renderer: fxVolleyMode, batch: ++fxBatchSeq }); fxRegTrim();
     var fanPh = Math.random() * 6.283; // M228: this volley's arrival-fan rotation — the pattern is deterministic per stream, the volley never lands the same way twice
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {
@@ -6877,7 +6878,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     fxBakeStart(); // M243: same bake, same decision as the plant
     fxVolleyMode = fxStreamRenderer();
     fxReg.renderer = fxVolleyMode;
-    fxReg.volleys.push({ kind: 'drain', n: count, ribbons: count, segs: Math.round((calm ? 10 : 16) * segScaleD), calm: !!calm, renderer: fxVolleyMode, batch: ++fxBatchSeq });
+    fxReg.volleys.push({ kind: 'drain', n: count, ribbons: count, segs: Math.round((calm ? 10 : 16) * segScaleD), calm: !!calm, renderer: fxVolleyMode, batch: ++fxBatchSeq }); fxRegTrim();
     spawnPilePulse(layer, src, 40);
     var maxEnd = 0;
     for (var k = 0; k < count; k++) {

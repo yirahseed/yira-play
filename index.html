@@ -998,6 +998,24 @@
   .pairbit { font-size:10.5px; color:#d9ccff; border:1px solid rgba(200,170,255,.25); border-radius:999px; padding:1px 8px; background:rgba(14,9,26,.5); }
   .vs-side small { display:block; max-width:120px; margin:3px auto 0; font-size:10px; line-height:1.3; color:#a793d6; }
   body.calm *, body.calm *::before, body.calm *::after { animation-duration:.01s !important; transition-duration:.01s !important; }
+  /* M279: CALM COMPLETION — the crush above runs fade-OUT ceremonies
+     (turn banner, trap/play reveals, marquee, damage floats) to their
+     opacity-0 end state in ~10ms, so a Calm player never saw them at
+     all; and the infinite pulses collapse into per-frame phase jitter
+     instead of stillness. Under Calm the ceremonies hold STATIC at
+     full opacity for their normal JS-timed dwell, and the pulses rest
+     at a mid-state shadow. Standard mode is untouched: every rule
+     below is scoped to body.calm. */
+  body.calm #turnbanner, body.calm .marquee, body.calm .play-reveal { animation:none !important; opacity:1 !important; }
+  body.calm .trap-reveal { animation:none !important; opacity:1 !important; transform:translate(-50%,-50%); }
+  body.calm .floatnum, body.calm .fx-herofloat { animation:none !important; opacity:1 !important; }
+  body.calm .hcluster.thinking .portrait { animation:none !important; box-shadow:0 0 0 3px rgba(177,140,255,.55), 0 0 10px rgba(177,140,255,.4); }
+  body.calm .hcluster.lowlife .portrait { animation:none !important; box-shadow:0 0 0 3px rgba(255,70,70,.55), 0 0 12px rgba(255,40,40,.4); }
+  body.calm .emblem.open-hit { animation:none !important; }
+  body.calm .emblem.wounded .emblem-head::before { animation:none !important; }
+  body.calm .polished .rgem { animation:none !important; }
+  body.calm .shell.stage.peril { animation:none !important; box-shadow:inset 0 0 42px rgba(255,40,60,.14); }
+  body.calm .shell.stage.peril-life::before { animation:none !important; }
   .shell.stage.peril { animation:perilPulse 1.6s ease-in-out infinite; }
   @keyframes perilPulse { 0%, 100% { box-shadow:inset 0 0 42px rgba(255,40,60,.14); } 50% { box-shadow:inset 0 0 64px rgba(255,40,60,.34); } }
 
@@ -9997,7 +10015,7 @@ function cineFinish(skipped) {
   cineQueuedFor = null;
   if (el && el.parentNode) {
     var drop = function () { try { if (el.parentNode) el.parentNode.removeChild(el); } catch (e) {} };
-    if (!skipped && el.animate) {
+    if (!skipped && !calm && el.animate) { // M279: under Calm the cinematic exits at once — no 450ms fade
       try {
         var a = el.animate([{ opacity: '1' }, { opacity: '0' }], { duration: 450, easing: 'ease-in', fill: 'forwards' });
         if (a) a.onfinish = drop;
@@ -11359,13 +11377,16 @@ async function animateCombat(list) {
           if (vlen > 8) { var reach = Math.min(vlen * 0.55, 110); lungeX = vx / vlen * reach; lungeY = vy / vlen * reach; }
         }
       } catch (e) {}
-      var anim = el.animate([
+      // M279: the lunge is WAAPI — the CSS calm crush cannot see it, so
+      // Calm gates it here. The contact still lands (floats, impact
+      // sounds, and the hit-stop's own calm gate below).
+      var anim = calm ? null : el.animate([
         { transform: 'translate(0px, 0px) scale(1)' },
         { transform: 'translate(' + lungeX + 'px, ' + lungeY + 'px) scale(1.07)', offset: 0.45 },
         { transform: 'translate(' + (-lungeX * 0.12) + 'px, ' + (-lungeY * 0.12) + 'px) scale(1.01)', offset: 0.68 },
         { transform: 'translate(0px, 0px) scale(1)' }
       ], { duration: list.length > 4 ? 240 : 320, easing: 'cubic-bezier(.2,.7,.3,1)' });
-      await sleep(150);
+      await sleep(calm ? 0 : 150);
       var stopMs = 0;
       if (tgt) {
         tgt.classList.add('hitflash');
@@ -11502,6 +11523,7 @@ function aiSummary(before) {
     if (casts.length) parts.push('casts ' + casts.join(', '));
     if (trapsArmed > 0) parts.push('arms ' + trapsArmed + ' trap' + (trapsArmed > 1 ? 's' : ''));
     if (parts.length) say('Enemy ' + parts.join('; ') + '.', 'bad');
+    if (trapsArmed > 0) { try { sfx('trapArm'); } catch (e) {} } // M279: sound parity — the human hears their own trap arm (clickHand's sfx('trapArm')); the foe's arm was text-only. No leak: this fires at the same seam that already announces the arm in text, and the armed count is public (◆ pips)
   } catch (e) {}
 }
 function aiActivations(before) {
@@ -11527,7 +11549,8 @@ function aiActivations(before) {
     if (!tinkered) (before.arts || []).forEach(function (rec) {
       if (rec[2] === 1 && !seen[rec[1]] && !foe.artifacts.some(function (a) { return a.uid === rec[0]; })) { seen[rec[1]] = 1; var d2 = CARDS[rec[1]]; if (d2) names.push(d2.name); }
     });
-    if (names.length) say('Enemy activates ' + names.join(', ') + '.', 'bad');
+    if (names.length) { say('Enemy activates ' + names.join(', ') + '.', 'bad'); try { sfx('activate'); } catch (e) {} } // M279: sound parity — the human's own activations sound sfx('activate') at three sites; the foe's were text-only
+    if (typeof before.hpTurn !== 'undefined' && foe.heroPowerTurn !== before.hpTurn) { try { sfx('activate'); } catch (e) {} } // M279: the foe's Nurture gets the human's tell too — the engine sets heroPowerTurn only in its Nurture branch, so the stamp is exact
   } catch (e) {}
 }
 async function runAiTurn() {
@@ -11540,7 +11563,7 @@ async function runAiTurn() {
   if (!(await aiSleep(650))) return;
   if (G.winner !== null) return finishCheck();
   var foe = G.players[aiIdx];
-  var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0), arts: foe.artifacts.map(function (a) { return [a.uid, a.cardId, a.charges]; }) };
+  var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length, hpTurn: foe.heroPowerTurn, playEv: (G.playEvents ? G.playEvents.length : 0), arts: foe.artifacts.map(function (a) { return [a.uid, a.cardId, a.charges]; }) }; // M279: hpTurn rides the snapshot for aiActivations' Nurture tell
   aiStartAndMain(G, aiIdx); flushEngineLog(); aiSummary(before); aiActivations(before); // M274: activations ride the main-phase seam (aiPostCombat never activates)
   render(); if (!(await aiSleep(1000))) return;
   if (finishCheck()) return;

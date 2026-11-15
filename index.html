@@ -10043,10 +10043,10 @@ var GLOSS_KEYWORDS = [
   ['flying', 'Flying', 'Can only be blocked by a creature with Flying or Reach.'],
   ['reach', 'Reach', 'Can block creatures with Flying.'],
   ['haste', 'Haste', 'Can attack the turn it arrives — no summoning sickness.'],
-  ['trample', 'Trample', "Damage beyond the blocker\u2019s health spills onto the enemy hero."],
+  ['trample', 'Trample', "Damage beyond the blocker\u2019s remaining health spills onto the enemy hero."],
   ['ward', 'Ward', "Can't be targeted by your opponent until your next turn."],
-  ['armor', 'Armor', "Blocks incoming damage once \u2014 then it breaks. (Destruction ignores it.)"],
-  ['relentless', 'Relentless', "Resummon this with can't block the first time it dies."],
+  ['armor', 'Armor', "Turns aside one blow completely \u2014 any amount of damage \u2014 then it breaks. (Destruction ignores it.)"],
+  ['relentless', 'Relentless', "The first time it dies, it rises again with can't block \u2014 if your field has room for it."],
   ['sneak', 'Sneak', "Can't be blocked the first time it attacks."],
   ['cantBlock', "Can't Block", 'This creature can never be assigned as a blocker.'],
   ['cantAttack', "Can't Attack", 'This creature can never attack.'],
@@ -10056,14 +10056,14 @@ var GLOSS_KEYWORDS = [
 var GLOSS_SYSTEMS = [
   ['🌟', 'Debut', 'Fires the moment the card enters play.'],
   ['🪦', 'Finale', 'Fires when the card dies.'],
-  ['🪤', 'Traps', 'Armed face-down on your turn; their mana stays reserved (purple ◆) and they fire themselves when their moment comes. An unfired trap stands down at the start of your next turn and frees its mana.'],
+  ['🪤', 'Traps', 'Armed face-down on your turn; their mana stays reserved (purple ◆) and they fire themselves when their moment comes. An unfired trap stands down at the start of your next turn: it returns to your hand and frees its mana \u2014 unless your hand is full, when it stays armed.'],
   ['✨', 'Miracle', 'When a card with Miracle is truly drawn (never from your opening hand), the Miracle resolves free, right then.'],
   ['🌙', 'Moonlight', 'A Moonlight card flips at the end of your turn if you end with exactly 2 mana unspent.'],
   ['🎲', 'Draft', 'Whenever you draft, you choose: 1 of 3 cards.'],
   ['🌀', 'School chains', "The class card never starts in your opening hand: it slips into the top 3 of your deck once your hand is drawn and your mulligan settles. Play a stage and the next stage slips into the top 3 in turn. Stage 3 grants a rest-of-game boon — and EVERY stage 3 STACKS: each cast adds a stack and the boon grows with it (the Wizard's Mastery summons one 5/5 Tide Elemental per stack on a 6+ spell-mana turn; Whispers drain per stack, the Aura grows attackers per stack, Might burns per stack). Pilfer or draft your way into another school's class card and its chain is yours to climb."],
   ['🔖', 'The Spellmark', "Spellmark Adept holds a mark on a RANDOM spell in your graveyard — rolled when it reaches your hand, re-rolled each turn. Its debut adds a temporary copy of the marked spell; look at the Adept in hand to see its mark."],
   ['🌑', 'Nightmares', "Umbra plants Nightmares inside cards in the foe's deck. When a haunted card leaves the deck — drawn or milled — each Nightmare on it drains 1 life from its holder to Umbra."],
-  ['\uD83D\uDEAB', 'Counter', "A countered card fizzles \u2014 it does nothing, though its cost stays spent. Arming a trap is not playing it, but a trap ACTIVATING is playing it, so counters answer activations too \u2014 and a counter can itself be countered."],
+  ['\uD83D\uDEAB', 'Counter', "A countered card fizzles \u2014 it does nothing, though its cost stays spent. Arming a trap is not playing it, but a trap ACTIVATING is playing it, so counters answer trap activations too \u2014 and a counter can itself be countered. Casting an artifact can be countered; an artifact's own activation, once it stands on the field, cannot."],
   ['\uD83D\uDCAB', 'Stun', "A stunned creature can\u2019t attack on its controller\u2019s next turn; the stun lifts after that. Some stuns last the rest of the game \u2014 those never lift."],
   ['\uD83E\uDE78', 'Drain', "Damage that pays the dealer back: whatever life drain takes from its target, the draining hero gains."],
   ['\u267B\uFE0F', 'Mill', "The top cards of a deck go straight into their owner\u2019s graveyard \u2014 never drawn, never played. A Nightmare buried in a milled card still wakes and drains its holder."],
@@ -10072,7 +10072,12 @@ var GLOSS_SYSTEMS = [
   ['\uD83C\uDFAF', 'Free Spirit missions', "Veyla\u2019s calling: damage you deal to the enemy hero during your turn fills her current mission \u2014 3 the first time, then 4, then 5, each asking 1 more. The moment one fills, a Spirit joins her hand. Progress left unfinished fades when her next turn begins."],
   ['\uD83C\uDAD9\uFE0F', 'Stances', "Your land slot is a posture that lasts the whole duel, picked per hero in the deck builder: the Open Stance simply grows your mana each turn, while others feed you spells, legends, recruits, or hardier creatures."],
   ['\u23F3', 'Summoning sickness', "A creature can\u2019t attack on the turn it arrives \u2014 Haste is the exception. The \u23F3 chip on a creature marks one still under it."],
-  ['\uD83D\uDC51', 'Legendary', "A one-of-a-kind card: a deck may start with only a single copy of it."]
+  ['\u2694\uFE0F', 'One combat step', "You attack once per turn \u2014 one declaration, every attacker chosen together. A creature that gains Haste after your combat step is spent still waits until next turn to attack."],
+  ['\uD83D\uDC51', 'Legendary', "A one-of-a-kind card: a deck may start with only a single copy of it."],
+  ['\uD83D\uDC80', 'Falling', "A hero falls at 0 life \u2014 or by ending their own turn with an empty deck. While Laboratory Maniac stands for you, an empty deck wins you the duel instead."],
+  ['\uD83D\uDC9A', 'Healing', "Healing has no ceiling: a hero can be healed above the life on their versus card. That number is where a hero starts, not where they stop."],
+  ['\uD83D\uDD37', 'Essences', "Upgrades, drafted 1 of 3 \u2014 by Wrenna's Arkbow and her Nurture, and by cards that draft them. An Essence strengthens one creature while it stands: bonus power and health, or a keyword \u2014 Sneak, Armor, Reach, Trample, Ward, Flying or Relentless. (Reach is never offered to a flyer, nor Armor to a creature already wearing it.)"],
+  ['\uD83D\uDC06', "Guenhwyvar's exception", "At most five creatures stand on a side \u2014 Guenhwyvar alone rides past the limit: when Zareth attacks with a legendary creature, she leaps in as a sixth fighter for that one combat, then slips away at its end."]
 ];
 function openGlossary() { glossaryOpen = true; render(); } // M151: these helpers now render (like showLog/toggleCalm) — the pause-sheet button calls openGlossary() alone and silently did nothing
 function dismissGlossary() { glossaryOpen = false; render(); }

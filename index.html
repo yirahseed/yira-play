@@ -6119,7 +6119,7 @@ function toggleMute() {
 }
 /* Watch engine stats each render: nightmare plants/drains and trap fires
    get their sounds AND visual effects without threading hooks through the engine. */
-var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null, stormRaw: null, missionThr: null };
+var sndSnap = { planted: 0, drained: 0, plantedBy: null, drainedBy: null, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null, stormRaw: null, missionThr: null };
 var pendingPileFx = []; // M272: pile-shake intents queued by soundWatch, applied to the fresh DOM by applyPileFx() at the end of render() — see the mill branch of soundWatch for why the stamp cannot happen in the watcher itself
 var peTrack = { stormRaw: null, missionThr: null, popUntil: 0 }; // M244: passive-payoff pop tracking (Volric's 3rd spell, Veyla's mission) — the emblem pops once per payoff
 var lastHurtAmt = 1; // M191: the size of the most recent hero blow — the hurt sound scales with it
@@ -7791,18 +7791,54 @@ function soundWatch() {
   if (maxHeroDrop >= 5) feelFreeze(heroFell || maxHeroDrop >= 9 ? 120 : 70); // M239: a heavy hero hit stops the world for a breath
   var dPlant = s.nightmaresPlanted - sndSnap.planted;
   if (dPlant > 0) {
-    var wvPl = G.players.find(function (p) { return p.hero.passive === 'weave'; });
-    if (wvPl) {
-      spawnStreams(wvPl.idx, G.opp(wvPl.idx), dPlant);
-      sfxPlant(dPlant); // M192: after the streams, so the sound tracks this volley's flight time
-      if (dPlant >= 3 && !speechFlags.sowAt) speechFlags.sowAt = 0;
-      if (dPlant >= 3 && Date.now() - (speechFlags.sowAt || 0) > 20000) { speechFlags.sowAt = Date.now(); heroSay(wvPl.idx, heroLine(wvPl.idx, 'sow')); }
-    } else { sfxPlant(dPlant); } // no weaver at the table: the sound still carries the moment
-    var total = 0;
-    G.players.forEach(function (p) { if (G.players[G.opp(p.idx)].hero.passive === 'weave') total = Math.max(total, nightmaresIn(p.deck)); });
-    say('🌑 ' + dPlant + ' Nightmare' + (dPlant > 1 ? 's' : '') + ' planted — ' + total + ' now growing in the afflicted deck.', 'drain');
+    /* M277: per-seat attribution. This watcher used to credit EVERY plant
+       to the first weaver in the players array (find(weave)) — invisible
+       with one Umbra at the table, wrong in both directions in the
+       mirror: the foe's volleys streamed out of the human's bar and the
+       human's out of the foe's (proven in the M277 mirror probes, where
+       all ten organic FX calls named seat 0 whatever the true actor).
+       The engine splits the stat by weaver (nightmaresPlantedBy); ride
+       it — one volley per planting seat, from its own bar to its own
+       victim's deck, the sow line spoken by the seat that sowed. The
+       single-weaver case is unchanged: one seat, one volley, and the
+       line's total is that seat's afflicted deck, as before. */
+    var plantedByNow = s.nightmaresPlantedBy || [0, 0];
+    var plantedByPrev = sndSnap.plantedBy || [0, 0];
+    var plantSeen = false;
+    G.players.forEach(function (p) {
+      if (p.hero.passive !== 'weave') return;
+      var dSeat = (plantedByNow[p.idx] || 0) - (plantedByPrev[p.idx] || 0);
+      if (dSeat <= 0) return;
+      plantSeen = true;
+      spawnStreams(p.idx, G.opp(p.idx), dSeat);
+      sfxPlant(dSeat); // M192: after the streams, so the sound tracks this volley's flight time
+      if (dSeat >= 3 && !speechFlags['sowAt' + p.idx]) speechFlags['sowAt' + p.idx] = 0;
+      if (dSeat >= 3 && Date.now() - (speechFlags['sowAt' + p.idx] || 0) > 20000) { speechFlags['sowAt' + p.idx] = Date.now(); heroSay(p.idx, heroLine(p.idx, 'sow')); }
+      say('🌑 ' + dSeat + ' Nightmare' + (dSeat > 1 ? 's' : '') + ' planted — ' + nightmaresIn(G.players[G.opp(p.idx)].deck) + ' now growing in the afflicted deck.', 'drain');
+    });
+    if (!plantSeen) { // no weaver at the table (or a stat the split does not carry): the sound and the combined line still carry the moment
+      sfxPlant(dPlant);
+      var total = 0;
+      G.players.forEach(function (p) { if (G.players[G.opp(p.idx)].hero.passive === 'weave') total = Math.max(total, nightmaresIn(p.deck)); });
+      say('🌑 ' + dPlant + ' Nightmare' + (dPlant > 1 ? 's' : '') + ' planted — ' + total + ' now growing in the afflicted deck.', 'drain');
+    }
   }
-  if (s.nightmareLifeDrained > sndSnap.drained) { var dDrain = s.nightmareLifeDrained - sndSnap.drained; sfxDrain(dDrain); var wv = G.players.find(function (p) { return p.hero.passive === 'weave'; }); if (wv) { figFx.flare = wv.idx; spawnDrainWisps(G.opp(wv.idx), wv.idx, dDrain); } }
+  if (s.nightmareLifeDrained > sndSnap.drained) {
+    var dDrain = s.nightmareLifeDrained - sndSnap.drained; sfxDrain(dDrain);
+    /* M277: drains split by owner too (nightmareLifeDrainedBy) — in the
+       mirror the wisps tore out of the wrong deck toward the wrong bar,
+       the plant defect's twin. One wisp flight per draining owner. */
+    var drainedByNow = s.nightmareLifeDrainedBy || [0, 0];
+    var drainedByPrev = sndSnap.drainedBy || [0, 0];
+    var drainSeen = false;
+    G.players.forEach(function (p) {
+      if (p.hero.passive !== 'weave') return;
+      var dSeatD = (drainedByNow[p.idx] || 0) - (drainedByPrev[p.idx] || 0);
+      if (dSeatD <= 0) return;
+      drainSeen = true; figFx.flare = p.idx; spawnDrainWisps(G.opp(p.idx), p.idx, dSeatD);
+    });
+    if (!drainSeen) { var wv = G.players.find(function (p) { return p.hero.passive === 'weave'; }); if (wv) { figFx.flare = wv.idx; spawnDrainWisps(G.opp(wv.idx), wv.idx, dDrain); } }
+  }
   if (s.cardsCountered > sndSnap.countered) { sfx('counter'); trapReveal(); }
   else if (s.trapsTriggered > sndSnap.traps) { sfx('trapFire'); trapReveal(); }
   try { // M240: the foe's spell casts, voiced once per pass in the biggest cast's school — graveFxWatch's hand->grave evidence (mills never enter the held set; armed traps stay in it until they fire, and a fired trap is the trapFire branch's moment). A countered cast belongs to the counter branch above, not this one
@@ -7911,7 +7947,7 @@ function soundWatch() {
   if (sndSnap.missionThr != null && missionThrW > sndSnap.missionThr) sfx('mission'); // M244: the threshold only ever rises when a mission completes
   if (sndSnap.stuns != null && stunN > sndSnap.stuns) sfx('stun');
   var seen = sndSnap.winnerSeen;
-  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW, graveCNet: graveCNet, heldHuman: heldHumanNow, graveHuman: graveHumanNow, deckHuman: G.players[humanIdx].deck.length, deckIds: G.players.map(function (p) { var ds = {}; p.deck.forEach(function (c) { ds[c.uid] = 1; }); return ds; }), heldAll: G.players.map(function (p) { var hs = {}; p.hand.forEach(function (c) { hs[c.uid] = 1; }); p.board.forEach(function (c) { hs[c.uid] = 1; }); p.traps.forEach(function (c) { hs[c.uid] = 1; }); p.artifacts.forEach(function (c) { hs[c.uid] = 1; }); return hs; }), burnUids: burnUids, millUids: millUids };
+  sndSnap = { planted: s.nightmaresPlanted, drained: s.nightmareLifeDrained, plantedBy: (s.nightmaresPlantedBy || [0, 0]).slice(), drainedBy: (s.nightmareLifeDrainedBy || [0, 0]).slice(), traps: s.trapsTriggered, countered: s.cardsCountered, winnerSeen: seen, life: G.players.map(function (p) { return p.life; }), hands: G.players.map(function (p) { return p.hand.length; }), flips: flipN, stuns: stunN, graveC: graveC, graveIds: graveIds, mirN: mirN, lvlN: lvlN, stormRaw: stormRawW, missionThr: missionThrW, graveCNet: graveCNet, heldHuman: heldHumanNow, graveHuman: graveHumanNow, deckHuman: G.players[humanIdx].deck.length, deckIds: G.players.map(function (p) { var ds = {}; p.deck.forEach(function (c) { ds[c.uid] = 1; }); return ds; }), heldAll: G.players.map(function (p) { var hs = {}; p.hand.forEach(function (c) { hs[c.uid] = 1; }); p.board.forEach(function (c) { hs[c.uid] = 1; }); p.traps.forEach(function (c) { hs[c.uid] = 1; }); p.artifacts.forEach(function (c) { hs[c.uid] = 1; }); return hs; }), burnUids: burnUids, millUids: millUids };
   if (G.winner !== null && !sndSnap.winnerSeen) { sndSnap.winnerSeen = true; sfx(G.winner === humanIdx ? 'victory' : 'defeat'); heroSay(G.winner, heroLine(G.winner, 'win')); heroSay(1 - G.winner, heroLine(1 - G.winner, 'lose')); }
   sndPlayedUid = null; // M229: the play-site exemption lasts exactly one watch pass — the first render that shows the arrival
 }
@@ -10780,7 +10816,7 @@ function startMatch() {
   try { fxBakeStart(); } catch (e) {} // M243: and again at match start (idempotent) — the versus splash covers the cook
   matchStartedAt = Date.now();
   soundInit();
-  sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null }; prevLife = {}; lifeSeries = []; lastSeriesTurn = -1; prevHandUids = {}; prevHandCount = -1; concedeArmed = false; window.__conceded = false; reviewField = false; leagueCrossed = null; leagueSeen = false; endStep = 'result'; // M237: the yield flag's home is the match, not the render
+  sndSnap = { planted: 0, drained: 0, plantedBy: null, drainedBy: null, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null }; prevLife = {}; lifeSeries = []; lastSeriesTurn = -1; prevHandUids = {}; prevHandCount = -1; concedeArmed = false; window.__conceded = false; reviewField = false; leagueCrossed = null; leagueSeen = false; endStep = 'result'; // M237: the yield flag's home is the match, not the render
   var seat = climb ? 'first' : setup.seat;
   var foeHero = climb ? CLIMB_RUNGS[climb.rung - 1].hero : setup.foe;
   var climbBonus = climb ? CLIMB_RUNGS[climb.rung - 1].bonus : 0;

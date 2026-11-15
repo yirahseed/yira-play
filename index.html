@@ -10154,6 +10154,8 @@ function cineStart() {
     // scene joins Umbra's two (his loss stays flat: the loss mood is
     // Umbra's alone, M236, so a graven loss never reaches this call).
     // Same fallback law for both heroes.
+    // M305: the Warden's WIN scene joins the set the same way (a
+    // controller loss likewise never reaches this call).
     if (CINE3D_HEROES[heroId]) { try { st.gl3d = cine3dTryMount(st, ov); } catch (e) { st.gl3d = null; } }
     var q = function (sel) { return ov.querySelector(sel); };
     var far = q('.cine-far'), mid = q('.cine-mid'), hero = q('.cine-hero'), vig = q('.cine-vig'), bart = q('.cine-bar.top'), barb = q('.cine-bar.bot');
@@ -10389,18 +10391,34 @@ function cineFinish(skipped) {
    frame and end-screen handoff are the shipped ones, untouched. Umbra's
    builder is the M298 build extracted verbatim — the M303 regression
    drives re-prove his win + loss before this wave is called done.
+   Bundle cost: zero — three.js was already vendored at M298.
+   M305 (2026-11-15): THE THIRD FIGURE — the Warden joins the stage.
+   The M304 pilot (m304-work/proto3d-warden.html) ports in as
+   buildWarden behind the same dispatch: ivory plate armour, gold
+   engraving, the deep grey hood over a still black face, the great
+   eye shield with its real point light, clockwork orbit motes, and
+   his dawn-dressed coliseum (ritual circle with a tides heart — the
+   BUILDERS heartRing — plus the candle ring, which rides inside his
+   builder with its flames). The gate widens to
+   CINE3D_HEROES = {weaver, graven, controller}. WIN-only, like
+   Morvane — the loss mood stays Umbra's alone (M236); his
+   CINE_VOICE row, subtitle ("Order, restored."), tap-skip, Calm
+   frame and end-screen handoff are the shipped ones, untouched.
+   Umbra's and Morvane's builders are not modified by this wave; the
+   M305 regression drives re-prove all three heroes' scenes.
    Bundle cost: zero — three.js was already vendored at M298. */
 /* M303: the heroes with a true-3D cinematic builder in the module
    below. cineStart attempts the 3D stage for these heroes only; every
-   other hero's cinematic is the flat build, exactly as shipped. */
-var CINE3D_HEROES = { weaver: true, graven: true };
+   other hero's cinematic is the flat build, exactly as shipped.
+   M305: the Warden (controller) joins the set — win scene only. */
+var CINE3D_HEROES = { weaver: true, graven: true, controller: true };
 var Cine3D = (function () {
   function available() {
     try { return typeof THREE !== 'undefined' && !!THREE.WebGLRenderer; } catch (e) { return false; }
   }
 
   /* M303: THE BUILDER DISPATCH. mount() no longer builds Umbra inline:
-     each 3D hero has a builder — buildUmbra / buildMorvane — that takes
+     each 3D hero has a builder — buildUmbra / buildMorvane / buildWarden — that takes
      the shared helpers (H) and returns { group, updaters }. The shared
      environment (floor, pool, inlay rings, colonnade, backdrop) and the
      light rig are parameterised per hero by the BUILDERS table below
@@ -11060,6 +11078,495 @@ var Cine3D = (function () {
     return { group: morvane, updaters: [updateWisps, updateHoodMotes, updateMoths, updateMist, updateMotes, updateCrystalPulse] };
   }
 
+  /* THE WARDEN — the M304 pilot's procedural figure (total height ≈ 3.46;
+     the broadest of the three — ivory plate over a dark under-robe, a deep
+     grey hood over a still black face, and the great eye shield whose lit
+     eye lights the scene), ported faithfully from
+     m304-work/proto3d-warden.html: the armour family (cuirass, faulds,
+     pauldron bells, greaves, gauntlets), the sash goods, the shield with
+     its breathing point light, clockwork orbit motes, the candle ring.
+     Win scene only — the loss mood is Umbra's alone (M236), so
+     bopts.lose never arrives true for this builder; the gate keeps it
+     that way. His scene dressing that the shared environment cannot
+     parameterise — the candle pillars and the tides heart of his ritual
+     circle — rides here and in his BUILDERS row (heartRing). */
+  function buildWarden(THREE, scene, H, bopts) {
+    var TIDES = 0x6ec3ff; // SCHOOL_COLORS.tides bright
+    var DAWN = 0xffe9a8;  // SCHOOL_COLORS.dawn bright
+    var GOLD = 0xc8a95a;  // his engraving gold (the portrait's)
+    var EYE = 0xffc46a;   // the shield-eye's glow
+    function hemWave(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var y = pos.getY(i);
+        if (y < 0.06) {
+          var th = Math.atan2(pos.getZ(i), pos.getX(i));
+          pos.setY(i, y + (0.06 - y) / 0.06 * 0.028 * (0.5 + 0.5 * Math.sin(th * 8 + 0.4)));
+        }
+      }
+      geo.computeVertexNormals();
+    }
+    /* The Warden's palette — ivory plate, dawn gold, grey-blue cloth. */
+    var plateMat   = new THREE.MeshStandardMaterial({ color: 0xb3a888, roughness: 0.55, metalness: 0.25 });
+    var plateDkMat = new THREE.MeshStandardMaterial({ color: 0x9a8f74, roughness: 0.55, metalness: 0.3 });
+    var goldMat    = new THREE.MeshStandardMaterial({ color: 0xa8874a, roughness: 0.34, metalness: 0.8 });
+    var clothMat   = new THREE.MeshStandardMaterial({ color: 0x323a44, roughness: 0.92, metalness: 0.04 });
+    var darkMat    = new THREE.MeshStandardMaterial({ color: 0x22262e, roughness: 0.94, metalness: 0.03 });
+    var hoodMat    = new THREE.MeshStandardMaterial({ color: 0x363f49, roughness: 0.88, metalness: 0.04 });
+    var waxMat     = new THREE.MeshStandardMaterial({ color: 0xd8cfb8, roughness: 0.7,  metalness: 0.0 });
+
+    /* Everything (shield included) rides in one group so the idle sway
+       never breaks the shield grip. */
+    var warden = new THREE.Group();
+
+    // — Under-robe: dark cloth, hem → waist (seen at the hem and in the gaps).
+    var robePts = [
+      [0.72, 0.00], [0.71, 0.05], [0.65, 0.26], [0.55, 0.70], [0.47, 1.15],
+      [0.43, 1.55], [0.44, 1.90]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var robeGeo = H.displaceFolds(new THREE.LatheGeometry(robePts, 96),
+      8, function (y) { return 0.055 - 0.04 * Math.min(1, Math.max(0, (y - 0.1) / 1.8)); }, 0.4);
+    hemWave(robeGeo);
+    var robe = new THREE.Mesh(robeGeo, darkMat);
+    robe.castShadow = true; robe.receiveShadow = true;
+    warden.add(robe);
+
+    // — Legs + greaves: below the faulds the portrait shows wrapped legs
+    // and ivory greaves. Two cloth legs, an ivory half-shell on each
+    // shin, dark plate boots.
+    [-1, 1].forEach(function (side) {
+      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.115, 0.135, 0.62, 12), darkMat);
+      leg.position.set(0.24 * side, 0.31, 0.06);
+      leg.castShadow = true;
+      warden.add(leg);
+      var greave = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.145, 0.125, 0.52, 12, 1, true, -0.9, 1.8), plateMat);
+      greave.position.set(0.24 * side, 0.34, 0.06);
+      greave.castShadow = true;
+      warden.add(greave);
+      var boot = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.10, 0.34), plateDkMat);
+      boot.position.set(0.24 * side, 0.05, 0.13);
+      warden.add(boot);
+    });
+
+    // — Armoured skirt / faulds: an ivory plate lathe over the robe's
+    // waist, gold trim rings riding its bands.
+    var skirtPts = [
+      [0.695, 0.48], [0.675, 0.74], [0.625, 1.04], [0.55, 1.34], [0.475, 1.56]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var skirtGeo = H.displaceFolds(new THREE.LatheGeometry(skirtPts, 96),
+      10, function () { return 0.010; }, 0.2);   // plate segments, barely a ripple
+    var skirt = new THREE.Mesh(skirtGeo, plateMat);
+    skirt.castShadow = true;
+    warden.add(skirt);
+    [[1.335, 0.558], [0.745, 0.682]].forEach(function (b) {
+      var trim = new THREE.Mesh(new THREE.TorusGeometry(b[1], 0.014, 6, 64), goldMat);
+      trim.rotation.x = Math.PI / 2; trim.position.y = b[0];
+      warden.add(trim);
+    });
+
+    // — Breastplate: a broad ivory cuirass, waist → neck, with the
+    // portrait's engraved gold diamond at the chest and diagonal trim runs.
+    var chestPts = [
+      [0.435, 1.50], [0.50, 1.76], [0.545, 2.06], [0.525, 2.36],
+      [0.455, 2.58], [0.30, 2.70], [0.225, 2.75]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var chestGeo = H.displaceFolds(new THREE.LatheGeometry(chestPts, 96),
+      8, function () { return 0.007; }, 0.9);    // armour breathes, it does not fold
+    var chest = new THREE.Mesh(chestGeo, plateMat);
+    chest.castShadow = true;
+    warden.add(chest);
+    var chestGem = new THREE.Mesh(new THREE.OctahedronGeometry(0.075), goldMat);
+    chestGem.scale.set(0.75, 1.35, 0.28);
+    chestGem.position.set(0, 2.08, 0.545);
+    warden.add(chestGem);
+    [-1, 1].forEach(function (side) {
+      var pts = [
+        new THREE.Vector3(0.02 * side, 2.02, 0.552),
+        new THREE.Vector3(0.17 * side, 1.88, 0.528),
+        new THREE.Vector3(0.30 * side, 1.70, 0.478)
+      ];
+      var run = new THREE.Mesh(
+        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, 0.009, 6), goldMat);
+      warden.add(run);
+    });
+
+    // — Pauldrons: ONE bell shell per shoulder (a small lathe cap in its
+    // own group, the arm passing through its centre) with a gold rim
+    // torus glued at its lower edge — one piece of armour, no floating
+    // parts (the pilot's twice-built form).
+    [-1, 1].forEach(function (side) {
+      var grp = new THREE.Group();
+      grp.position.set(0.51 * side, 2.52, 0.02);
+      grp.rotation.z = -0.10 * side;
+      var bellPts = [
+        [0.27, -0.155], [0.285, -0.09], [0.275, 0.0], [0.235, 0.10],
+        [0.16, 0.155], [0.02, 0.17]
+      ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+      var bell = new THREE.Mesh(new THREE.LatheGeometry(bellPts, 28), plateMat);
+      bell.castShadow = true;
+      grp.add(bell);
+      var rimT = new THREE.Mesh(new THREE.TorusGeometry(0.272, 0.012, 6, 32), goldMat);
+      rimT.rotation.x = Math.PI / 2;
+      rimT.position.y = -0.15;
+      grp.add(rimT);
+      warden.add(grp);
+    });
+
+    // — Sash belt: the portrait's wrapped grey-blue sash over the faulds,
+    // a gold buckle, hanging tassels, and his small belt pouch.
+    var sash = new THREE.Mesh(new THREE.TorusGeometry(0.475, 0.055, 10, 56), clothMat);
+    sash.rotation.x = Math.PI / 2; sash.position.y = 1.56; sash.scale.set(1, 1, 0.8);
+    warden.add(sash);
+    var buckle = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.09, 0.03), goldMat);
+    buckle.position.set(0, 1.56, 0.50);
+    warden.add(buckle);
+    [-0.09, 0, 0.09].forEach(function (x) {
+      var cord = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.16, 5), goldMat);
+      cord.position.set(x, 1.44, 0.485);
+      warden.add(cord);
+      var tassel = new THREE.Mesh(new THREE.ConeGeometry(0.026, 0.09, 8), goldMat);
+      tassel.rotation.x = Math.PI;
+      tassel.position.set(x, 1.315, 0.485);
+      warden.add(tassel);
+    });
+    var pouch = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.19, 0.07), clothMat);
+    pouch.position.set(-0.30, 1.44, 0.40);
+    pouch.rotation.y = 0.5;
+    warden.add(pouch);
+
+    // — Scarf / mantle wrap: the portrait's grey wrap wound around the
+    // neck under the hood — the family's mantle band with its chest dip.
+    var wrapPts = [
+      [0.40, 2.44], [0.46, 2.56], [0.42, 2.68], [0.30, 2.76]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var wrapGeo = new THREE.LatheGeometry(wrapPts, 96);
+    (function dipChest(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), z = pos.getZ(i);
+        var r = Math.hypot(x, z); if (r < 1e-4) continue;
+        var facing = z / r;
+        if (facing > 0) pos.setY(i, pos.getY(i) - 0.07 * facing * facing);
+      }
+      geo.computeVertexNormals();
+    })(wrapGeo);
+    H.displaceFolds(wrapGeo, 7, function () { return 0.026; }, 0.4);
+    var wrap = new THREE.Mesh(wrapGeo, clothMat);
+    wrap.castShadow = true;
+    warden.add(wrap);
+
+    // — Hood: the portrait's deep grey hood, raised — its face is ALREADY
+    // pure shadow in the portrait; the cinematic invents nothing. Brow
+    // ledge + crown tip carried from Morvane's cowl, re-proportioned.
+    var HOOD_OPEN = 0.55;
+    var hoodPts = [
+      [0.375, 2.58], [0.44, 2.77], [0.455, 2.98], [0.43, 3.16],
+      [0.35, 3.30], [0.225, 3.40], [0.115, 3.445], [0.02, 3.46]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var hoodGeo = H.displaceFolds(
+      new THREE.LatheGeometry(hoodPts, 72, HOOD_OPEN, Math.PI * 2 - HOOD_OPEN * 2),
+      6, function () { return 0.022; }, 1.1);
+    (function browAndCrown(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var y = pos.getY(i), z = pos.getZ(i);
+        if (y > 2.98 && z > 0) pos.setZ(i, z + (y - 2.98) * 0.30);   // the brow ledge
+        if (y > 3.12) pos.setZ(i, pos.getZ(i) + (y - 3.12) * 0.22); // the crown tip
+      }
+      geo.computeVertexNormals();
+    })(hoodGeo);
+    var hood = new THREE.Mesh(hoodGeo, hoodMat);
+    hood.castShadow = true;
+    warden.add(hood);
+    var hoodLiner = new THREE.Mesh(hoodGeo,
+      new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide }));
+    hoodLiner.scale.set(0.965, 1.0, 0.965);
+    hoodLiner.position.y = 0.004;
+    warden.add(hoodLiner);
+
+    // — The shadowed face: pure black, recessed, STILL. No smoke (that
+    // is Umbra's), no grave motes (Morvane's) — suspended dark.
+    var shadowHead = new THREE.Mesh(
+      new THREE.SphereGeometry(0.178, 24, 18),
+      new THREE.MeshBasicMaterial({ color: 0x000000 }));
+    shadowHead.position.set(0, 3.02, -0.06);
+    shadowHead.scale.set(0.92, 1.18, 0.98);
+    warden.add(shadowHead);
+
+    // — Right arm (−X, his right): armoured, hanging at his side —
+    // plate sleeve and an ivory GAUNTLET: a relaxed metal fist of
+    // capsules (the programme's second visible hand; it only has to hang).
+    (function rightArm() {
+      var grp = new THREE.Group();
+      grp.position.set(-0.50, 2.48, 0.03);
+      grp.rotation.z = 0.07;
+      grp.rotation.x = -0.05;
+      var upper = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.11, 0.62, 14), plateMat);
+      upper.position.y = -0.31;
+      upper.castShadow = true;
+      grp.add(upper);
+      var elbow = new THREE.Mesh(new THREE.SphereGeometry(0.095, 12, 10), plateDkMat);
+      elbow.position.y = -0.64;
+      grp.add(elbow);
+      var fore = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.115, 0.58, 14), plateDkMat);
+      fore.position.y = -0.95;
+      fore.castShadow = true;
+      grp.add(fore);
+      var cuff = new THREE.Mesh(new THREE.TorusGeometry(0.105, 0.02, 8, 20), goldMat);
+      cuff.position.y = -1.24;
+      cuff.rotation.x = Math.PI / 2;
+      grp.add(cuff);
+      var fist = new THREE.Group();
+      fist.position.y = -1.38;
+      var palm = new THREE.Mesh(new THREE.SphereGeometry(0.082, 12, 10), plateMat);
+      palm.scale.set(0.9, 1.25, 0.95);
+      fist.add(palm);
+      for (var i = 0; i < 3; i++) {
+        var f = new THREE.Mesh(new THREE.CapsuleGeometry(0.018, 0.055, 3, 8), plateDkMat);
+        f.position.set(-0.038 + i * 0.038, -0.085, 0.035);
+        f.rotation.x = 0.5;                   // fingers curled under, at rest
+        fist.add(f);
+      }
+      var thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.019, 0.05, 3, 8), plateDkMat);
+      thumb.position.set(0.075, -0.03, 0.03);
+      thumb.rotation.z = -0.7;
+      fist.add(thumb);
+      grp.add(fist);
+      warden.add(grp);
+    })();
+
+    // — Left arm (+X, his left): mostly BEHIND the shield — a plate
+    // sleeve angled down-forward, its gauntlet a grip mass where the
+    // shield's inner edge covers it.
+    (function leftArm() {
+      var grp = new THREE.Group();
+      grp.position.set(0.50, 2.48, 0.03);
+      grp.rotation.z = -0.30;
+      grp.rotation.x = -0.35;
+      var upper = new THREE.Mesh(new THREE.CylinderGeometry(0.135, 0.11, 0.60, 14), plateMat);
+      upper.position.y = -0.30;
+      upper.castShadow = true;
+      grp.add(upper);
+      var fore = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.115, 0.52, 14), plateDkMat);
+      fore.position.y = -0.82;
+      grp.add(fore);
+      var grip = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 10), plateDkMat);
+      grip.scale.set(0.9, 1.3, 0.95);
+      grip.position.y = -1.14;
+      grp.add(grip);
+      warden.add(grp);
+    })();
+
+    /* — THE EYE SHIELD — his signature build. A great tower shield on
+       his left: a gold backing plate a breath larger reading as the
+       engraved border, the ivory face on it, a gold tube following the
+       inner outline, four corner studs — and THE EYE: an almond outline
+       in emissive gold, a glowing iris, and a real point light, so the
+       Ward Lens lights the scene as Morvane's crystal does. */
+    var shield = new THREE.Group();
+    shield.position.set(0.68, 1.52, 0.30);
+    shield.rotation.y = -0.16;
+    shield.rotation.x = 0.03;
+    (function buildShield() {
+      function shieldShape(w, h) {
+        var s = new THREE.Shape();
+        var hw = w / 2, hh = h / 2;
+        s.moveTo(-hw, hh);
+        s.lineTo(hw, hh);
+        s.quadraticCurveTo(hw, -hh * 0.25, 0, -hh);
+        s.quadraticCurveTo(-hw, -hh * 0.25, -hw, hh);
+        return s;
+      }
+      var back = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(shieldShape(1.14, 2.42), { depth: 0.05, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 1 }),
+        goldMat);
+      back.position.z = -0.045;
+      shield.add(back);
+      var face = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(shieldShape(1.04, 2.32), { depth: 0.055, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2 }),
+        plateMat);
+      face.castShadow = true;
+      shield.add(face);
+      var innerPts = [];
+      (function () {
+        var tmp = shieldShape(0.90, 2.16).getPoints(40);
+        for (var i = 0; i < tmp.length; i++) innerPts.push(new THREE.Vector3(tmp[i].x, tmp[i].y, 0.085));
+      })();
+      var innerLine = new THREE.Mesh(
+        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(innerPts, true), 96, 0.008, 6), goldMat);
+      shield.add(innerLine);
+      [[-0.44, 1.06], [0.44, 1.06], [-0.40, -0.55], [0.40, -0.55]].forEach(function (p) {
+        var stud = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 8), goldMat);
+        stud.position.set(p[0], p[1], 0.085);
+        shield.add(stud);
+      });
+    })();
+    var eyeGroup = new THREE.Group();
+    eyeGroup.position.set(0, 0.30, 0.10);
+    shield.add(eyeGroup);
+    var outlineMat = new THREE.MeshStandardMaterial({
+      color: 0x2a1f08, emissive: GOLD, emissiveIntensity: 1.1, roughness: 0.4, metalness: 0.4
+    });
+    (function buildEye() {
+      var pts = [];
+      for (var i = 0; i <= 40; i++) {
+        var u = i / 40, ang = u * Math.PI * 2;
+        var x = Math.cos(ang) * 0.31;
+        var y = Math.sin(ang) * 0.155 * (1 - 0.35 * Math.abs(Math.cos(ang)));
+        pts.push(new THREE.Vector3(x, y, 0));
+      }
+      var outline = new THREE.Mesh(
+        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 72, 0.013, 6), outlineMat);
+      eyeGroup.add(outline);
+    })();
+    var irisMat = new THREE.MeshStandardMaterial({
+      color: 0x3a2808, emissive: EYE, emissiveIntensity: 1.7, roughness: 0.2, metalness: 0.1
+    });
+    var iris = new THREE.Mesh(new THREE.SphereGeometry(0.115, 20, 14), irisMat);
+    iris.scale.set(1, 1, 0.45);
+    eyeGroup.add(iris);
+    var irisCore = new THREE.Mesh(new THREE.SphereGeometry(0.05),
+      new THREE.MeshBasicMaterial({ color: 0xfff3d0 }));
+    irisCore.scale.set(1, 1, 0.5);
+    irisCore.position.z = 0.035;
+    eyeGroup.add(irisCore);
+    var eyeLight = new THREE.PointLight(EYE, 0.8, 9, 1);
+    eyeLight.position.z = 0.30;
+    eyeGroup.add(eyeLight);
+    warden.add(shield);
+    scene.add(warden);
+
+    /* — Candles: seven low ivory pillars on a ring around his ritual
+       circle (the portrait's own ground). The wax rides here with the
+       flames below — one CANDLE_SPOTS table feeds both, as the pilot
+       keeps them. */
+    var CANDLE_SPOTS = [
+      [2.05, 0.30], [1.45, 1.55], [-0.40, 2.10], [-1.75, 1.20],
+      [-2.20, -0.55], [0.85, -2.00], [2.25, -1.15]
+    ];
+    CANDLE_SPOTS.forEach(function (s, i) {
+      var h = 0.14 + (i % 3) * 0.045;
+      var wax = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.038, h, 10), waxMat);
+      wax.position.set(s[0], h / 2, s[1]);
+      scene.add(wax);
+    });
+
+    /* — THE ORBIT MOTES — his signature system, and the anti-Umbra:
+       sixty golden motes in three flat rings, every mote on its ring
+       sharing ONE angular speed, evenly spaced — a clock, not a swarm.
+       Pure f(t): ring angle = base + ω·t. */
+    var ORBIT_N = 60;
+    var orbit = H.pointsSystem(ORBIT_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(orbit);
+    var ORBIT_RINGS = [
+      { r: 1.35, y: 0.55, w: 0.055, n: 18 },
+      { r: 1.95, y: 1.55, w: 0.038, n: 22 },
+      { r: 2.55, y: 2.45, w: 0.026, n: 20 }
+    ];
+    var ORBIT_C = new THREE.Color(0xffd98f), ORBIT_C2 = new THREE.Color(0xfff3d0);
+    function updateOrbit(t) {
+      var i = 0;
+      for (var k = 0; k < ORBIT_RINGS.length; k++) {
+        var ring = ORBIT_RINGS[k];
+        for (var j = 0; j < ring.n; j++, i++) {
+          var ang = (j / ring.n) * Math.PI * 2 + t * ring.w + k * 0.7;
+          var bob = Math.sin(t * 0.24 + j * 1.7 + k * 2.0) * 0.03;
+          var tw = 0.6 + 0.4 * Math.sin(t * 0.5 + j * 2.3 + k);
+          H.setP(orbit, i, Math.cos(ang) * ring.r, ring.y + bob, Math.sin(ang) * ring.r,
+            2.4 + (j % 3) * 0.6, 0.42 * tw, (j % 4 === 0) ? ORBIT_C2 : ORBIT_C);
+        }
+      }
+      H.markDirty(orbit);
+    }
+
+    /* — Hood motes: suspended, not drifting — five tides-blue sparks
+       hanging in his hood's shadow at a pace you have to watch for.
+       Stillness with a pulse. Child of the figure. */
+    var HOODMOTE_N = 5;
+    var hoodMotes = H.pointsSystem(HOODMOTE_N, H.smokeTex, THREE.AdditiveBlending);
+    warden.add(hoodMotes);
+    var hmSeeds = [];
+    (function () { var r = H.rng(97); for (var i = 0; i < HOODMOTE_N; i++) hmSeeds.push([r(), r(), r(), r()]); })();
+    var HM_C = new THREE.Color(TIDES);
+    function updateHoodMotes(t) {
+      for (var i = 0; i < HOODMOTE_N; i++) {
+        var s = hmSeeds[i];
+        var x = (s[0] - 0.5) * 0.16 + Math.sin(t * 0.07 + s[3] * 15.0) * 0.012;
+        var y = 3.02 + (s[1] - 0.5) * 0.22 + Math.sin(t * 0.05 + s[0] * 11.0) * 0.012;
+        var z = 0.16 + (s[2] - 0.5) * 0.06;
+        H.setP(hoodMotes, i, x, y, z, 1.5 + s[3] * 0.9, 0.02 + 0.03 * Math.abs(Math.sin(t * 0.13 + s[1] * 25.0)), HM_C);
+      }
+      H.markDirty(hoodMotes);
+    }
+
+    /* — Ground mist: the pilots' slow swirl, blue-grey. */
+    var MIST_N = 26;
+    var mist = H.pointsSystem(MIST_N, H.smokeTex, THREE.NormalBlending);
+    scene.add(mist);
+    var mistSeeds = [];
+    (function () { var r = H.rng(4242); for (var i = 0; i < MIST_N; i++) mistSeeds.push([r(), r(), r(), r()]); })();
+    var MIST_C = new THREE.Color(0x0a0e14), MIST_V = new THREE.Color(0x1a2432);
+    function updateMist(t) {
+      for (var i = 0; i < MIST_N; i++) {
+        var s = mistSeeds[i];
+        var ang = s[0] * Math.PI * 2 + t * 0.05 * (s[3] > 0.5 ? 1 : -1);
+        var rad = 0.95 + s[1] * 1.5;
+        H.setP(mist, i, Math.cos(ang) * rad, 0.12 + s[2] * 0.4, Math.sin(ang) * rad,
+          190 + s[1] * 150, 0.10 + s[3] * 0.05, s[2] > 0.6 ? MIST_V : MIST_C);
+      }
+      H.markDirty(mist);
+    }
+
+    /* — Ambient motes: the arena's dust rises SLOWLY (time ascending,
+       where Morvane's settles) — ivory, tides-blue, a little dawn gold. */
+    var MOTE_N = 110;
+    var motes = H.pointsSystem(MOTE_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(motes);
+    var moteSeeds = [];
+    (function () { var r = H.rng(99); for (var i = 0; i < MOTE_N; i++) moteSeeds.push([r(), r(), r(), r()]); })();
+    var MOTE_I = new THREE.Color(0xe8e4d2), MOTE_T = new THREE.Color(TIDES), MOTE_G = new THREE.Color(0xc8b98a);
+    function updateMotes(t) {
+      for (var i = 0; i < MOTE_N; i++) {
+        var s = moteSeeds[i];
+        var x = (s[0] - 0.5) * 13 + Math.sin(t * 0.07 + s[3] * 20) * 0.35;
+        var y = 0.25 + ((s[1] + t * 0.006 * (0.5 + s[3])) % 1) * 5.2;
+        var z = (s[2] - 0.5) * 13 + Math.cos(t * 0.06 + s[0] * 20) * 0.35;
+        var tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.4 + s[3] * 31));
+        H.setP(motes, i, x, y, z, 2.0 + s[3] * 2.2, 0.11 * tw, s[1] > 0.8 ? MOTE_T : (s[1] > 0.45 ? MOTE_I : MOTE_G));
+      }
+      H.markDirty(motes);
+    }
+
+    /* — Candle flames: seven flames as ONE points system over the
+       candle ring; the flicker is a pure function of t (two summed
+       sines per candle) — even fire obeys the scene-time law. */
+    var FLAME_N = CANDLE_SPOTS.length;
+    var flames = H.pointsSystem(FLAME_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(flames);
+    var FLAME_C = new THREE.Color(0xffb45e), FLAME_C2 = new THREE.Color(0xffe2ae);
+    function updateFlames(t) {
+      for (var i = 0; i < FLAME_N; i++) {
+        var s = CANDLE_SPOTS[i];
+        var fl = 0.72 + 0.20 * Math.sin(t * 6.7 + i * 2.39) + 0.08 * Math.sin(t * 11.3 + i * 5.1);
+        H.setP(flames, i, s[0], 0.27 + 0.02 * Math.sin(t * 5.1 + i * 3.7), s[1],
+          4.6 * fl, 0.5 * fl + 0.18, (i % 3 === 0) ? FLAME_C2 : FLAME_C);
+      }
+      H.markDirty(flames);
+    }
+
+    /* — The eye pulse: the iris and its light breathe together at HALF
+       Morvane's crystal pace (0.45 rad/s — a watch, not a fire) — a
+       pure function of scene time (the pilot folded this into its
+       render loop; here it rides the updater array like everything else). */
+    function updateEyePulse(t) {
+      var pulse = Math.sin(t * 0.45 + 0.6);
+      irisMat.emissiveIntensity = 1.7 + 0.3 * pulse;
+      eyeLight.intensity = 0.8 + 0.18 * pulse;
+    }
+    return { group: warden, updaters: [updateOrbit, updateHoodMotes, updateMist, updateMotes, updateFlames, updateEyePulse] };
+  }
+
   /* M303: per-hero scene parameters for the shared rig + environment.
      The lose columns are Umbra's alone (keyLose / rimLoseI / foldLoseI);
      a null lose value means the win value stands in both moods. The
@@ -11096,6 +11603,28 @@ var Cine3D = (function () {
       stone: [0x100e16, 0x0c0a10], crush: 0x141a16, tombstones: true,
       sway: [0.04, 0.005],
       grade: { background: 'linear-gradient(160deg, rgba(216,207,184,.85), rgba(62,107,94,.8) 55%, rgba(44,74,65,.9))', opacity: '0.30' }
+    },
+    /* M305: the Warden's dawn dressing (the M304 pilot's rig, read into
+       the shared table): warm dawn key, tides rim, blue-black fog, his
+       HERO_ACCENT grade, and the heartRing — a third inlay ring in
+       tides blue at the heart of his gold ritual circle, drawn by
+       mount() only for rows that carry it. The candle ring rides
+       inside buildWarden (its flames are one of his updaters). */
+    controller: {
+      build: buildWarden,
+      bg: 0x04070c, fog: 0x060a12,
+      hemi: [0x2a3442, 0x0a0c10, 0.09],
+      key: [0xfff1d6, 0.52], keyLose: null,
+      rim: 0x6ec3ff, rimI: 0.95, rimLoseI: null,
+      rim2: [0xc8a95a, 0.5, 20], up: [0xffe9a8, 0.16, 5],
+      fold: [0xafc4de, 0.20], foldLoseI: null,
+      accent: 0xc8a95a, ringOp: [0.20, 0.12],
+      heartRing: [0.62, 0.645, 0x6ec3ff, 0.14],
+      floorStops: ['#12151d', '#0a0d13', '#030408'],
+      floorRing: 'rgba(160,180,205,0.09)', floorSpoke: 'rgba(160,180,205,0.06)',
+      stone: [0x12161f, 0x0d1017], crush: 0x101820, tombstones: false,
+      sway: [0.04, 0.005],
+      grade: { background: 'linear-gradient(160deg, rgba(232,228,210,.85), rgba(143,163,184,.8) 55%, rgba(200,185,138,.9))', opacity: '0.30' }
     }
   };
 
@@ -11268,6 +11797,12 @@ var Cine3D = (function () {
       m.rotation.x = -Math.PI / 2; m.position.y = 0.006;
       scene.add(m);
     });
+    if (B.heartRing) { // M305: the Warden's ritual circle carries a third, inner ring in his second school's colour (the tides heart of the portrait's ground)
+      var heartM = new THREE.Mesh(new THREE.RingGeometry(B.heartRing[0], B.heartRing[1], 72),
+        new THREE.MeshBasicMaterial({ color: B.heartRing[2], transparent: true, opacity: B.heartRing[3], side: THREE.DoubleSide }));
+      heartM.rotation.x = -Math.PI / 2; heartM.position.y = 0.006;
+      scene.add(heartM);
+    }
     if (B.tombstones) { // M303: Morvane's risen ground — four tilted slabs sunk in the mist (the M302 dressing)
       var tStone = new THREE.MeshStandardMaterial({ color: 0x17141f, roughness: 1 });
       [[2.3, -1.2, 0.4, 0.06, 0.0], [-2.6, -0.6, -0.3, -0.09, 0.0],
@@ -11354,7 +11889,7 @@ var Cine3D = (function () {
     function render(t, view) {
       if (disposed) return;
       var tSec = t / 1000;
-      for (var ui2 = 0; ui2 < built.updaters.length; ui2++) built.updaters[ui2](tSec); // M303: the builder's updater array (Umbra: smoke/sparks/mist/motes; Morvane: wisps/hood motes/moths/mist/motes/crystal pulse)
+      for (var ui2 = 0; ui2 < built.updaters.length; ui2++) built.updaters[ui2](tSec); // M303: the builder's updater array (Umbra: smoke/sparks/mist/motes; Morvane: wisps/hood motes/moths/mist/motes/crystal pulse; Warden, M305: orbit motes/hood motes/mist/motes/candle flames/eye pulse)
       var sway = lose ? 0.4 : 1; // M298: the loss stills the idle life down with everything else
       figure.rotation.y = B.sway[0] * sway * Math.sin(t * 0.00021);
       figure.rotation.z = B.sway[1] * sway * Math.sin(t * 0.0005);
@@ -11442,7 +11977,7 @@ function cine3dTryMount(st, ov) {
   var handle = null;
   try {
     handle = Cine3D.mount(box, {
-      hero: st.heroId, // M303: the builder dispatch key (weaver | graven)
+      hero: st.heroId, // M303: the builder dispatch key (weaver | graven | controller since M305)
       mood: st.mood, ms: st.ms,
       backdrop: (typeof PORTRAITS !== 'undefined' ? (PORTRAITS['coliseum-cine'] || PORTRAITS.arena || '') : '')
     });

@@ -6112,6 +6112,7 @@ function toggleMute() {
 /* Watch engine stats each render: nightmare plants/drains and trap fires
    get their sounds AND visual effects without threading hooks through the engine. */
 var sndSnap = { planted: 0, drained: 0, traps: 0, countered: 0, winnerSeen: false, life: null, hands: null, stormRaw: null, missionThr: null };
+var pendingPileFx = []; // M272: pile-shake intents queued by soundWatch, applied to the fresh DOM by applyPileFx() at the end of render() — see the mill branch of soundWatch for why the stamp cannot happen in the watcher itself
 var peTrack = { stormRaw: null, missionThr: null, popUntil: 0 }; // M244: passive-payoff pop tracking (Volric's 3rd spell, Veyla's mission) — the emblem pops once per payoff
 var lastHurtAmt = 1; // M191: the size of the most recent hero blow — the hurt sound scales with it
 var lastCombatBlow = 2; // M201: the biggest body in the current combat declaration — the attack impact layers by it
@@ -7752,12 +7753,10 @@ function soundWatch() {
     G.players.forEach(function (p, i) {
       var prev = G.__millSnap[i];
       if (p.deck.length < prev.deck && p.graveyard.length > prev.grave && p.hand.length <= prev.hand) {
-        var pile = document.querySelector ? document.querySelector('#pile-' + p.idx) : null;
-        if (pile && pile.classList) { pile.classList.add('milled'); setTimeout(function () { pile.classList.remove('milled'); }, 520); }
+        pendingPileFx.push({ idx: p.idx, cls: 'milled' }); /* M272: the shake used to be stamped HERE, on the pre-render node — soundWatch runs at the top of renderBody, whose innerHTML rebuild lands in the same task and destroys that node, so the .45s shake died unborn (the M272 D/D2 census: its noiseBurst twin sounded at every mill, the class was observable in 0 of ~50 samples at 20ms polling). The intent is queued and applied to the FRESH pile node by applyPileFx() at the end of render(). */
         try { noiseBurst(0.13, 0.045, 640); } catch (e) {} // M229: the mill was visual-only — a soft paper slide as cards leave the deck for the grave
       } else if (p.graveyard.length > prev.grave) {
-        var pile2 = document.querySelector ? document.querySelector('#pile-' + p.idx) : null;
-        if (pile2 && pile2.classList) { pile2.classList.add('gravepop'); setTimeout(function () { pile2.classList.remove('gravepop'); }, 650); }
+        pendingPileFx.push({ idx: p.idx, cls: 'gravepop' }); // M272: same stillborn-stamp fix as the mill shake above — queued, applied post-rebuild by applyPileFx()
       }
       G.__millSnap[i] = { deck: p.deck.length, grave: p.graveyard.length, hand: p.hand.length };
     });
@@ -9230,6 +9229,7 @@ function showTurnBanner(txt, foe, kind) {
 function render() {
   try { ambientStart(); } catch (e) {}
   renderBody(); fitAllText();
+  try { applyPileFx(); } catch (e) {} // M272: stamp soundWatch's queued pile FX onto the nodes this render just built
   // M70: the original's banner grammar — quiet between actions, loud at the turn change.
   // M247: the banner YIELDS the moment the match ends (concede-during-
   // banner included) or a modal sheet owns the screen (pause-during-
@@ -9508,8 +9508,42 @@ function matchIntroHtml() {
   function side(p, idx, cls) { var line = heroLine(idx, 'start'); return '<div class="intro-side ' + cls + '">' + (PORTRAITS[p.heroId] ? '<img src="' + PORTRAITS[p.heroId] + '" alt=""' + imgD + '>' : '<div class="introfigmedal">' + heroMedallion(p.heroId) + '</div>') + '<div class="intro-tag"><div class="intro-name">' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</div>' + (line ? '<div class="intro-line">\u201c' + esc(line) + '\u201d</div>' : '') + '</div></div>'; }
   return '<div class="matchintro"' + boxD + '>' + side(foe, aiIdx, 'foe') + '<div class="intro-vs"' + vsD + '>⚔️</div>' + side(me, humanIdx, 'me') + '</div>';
 }
+/* M272: apply the pile FX intents soundWatch queued (the mill shake,
+   the grave pop) to the pile nodes of the DOM render() has just built.
+   The removal timer matches the lifetimes the old in-watcher stamps
+   used (520 / 650 ms); a later render rebuilds the node anyway. */
+function applyPileFx() {
+  try {
+    if (!pendingPileFx.length || !document.querySelector) return;
+    var fx = pendingPileFx; pendingPileFx = [];
+    fx.forEach(function (f) {
+      var node = document.querySelector('#pile-' + f.idx);
+      if (node && node.classList) { node.classList.add(f.cls); setTimeout(function () { try { node.classList.remove(f.cls); } catch (e) {} }, f.cls === 'milled' ? 520 : 650); }
+    });
+  } catch (e) {}
+}
+/* M272: WHY the duel ended, read off the engine log the match itself
+   wrote. The end screen used to say only "The enemy hero falls." /
+   "Your hero falls" — for a deck-out or a Laboratory Maniac win that
+   sentence is FALSE (the M272 A/B/C drives: heroes stood at 60+ life
+   on both kinds of end) and the actual reason reached the player
+   nowhere outside the battle log. Life finishes keep the falls text;
+   these three log lines carry their own endings. */
+function endReason() {
+  try {
+    if (!G || G.winner === null || !G.log) return null;
+    for (var i = G.log.length - 1; i >= 0; i--) {
+      var line = G.log[i];
+      if (/Hollow Fathomer beholds the empty deep/.test(line)) return { kind: 'maniac', text: '\uD83C\uDF00 Laboratory Maniac: ' + G.players[G.winner].hero.name + ' wins with an empty deck \u2014 the Maniac turns decking out into victory.' };
+      if (/decked out at end of turn/.test(line)) return { kind: 'deckout', text: '\uD83C\uDCC2 ' + G.players[1 - G.winner].hero.name + ' decked out \u2014 their turn ended with an empty deck.' };
+      if (/Thirteenth Hour tolls/.test(line)) return { kind: 'thirteenth', text: '\uD83D\uDD50 The Thirteenth Hour: ' + G.players[1 - G.winner].hero.name + ' ended a turn on exactly 13 life and loses.' };
+    }
+  } catch (e) {}
+  return null;
+}
 function gameOverHtml() {
   if (endStep === 'league' && leagueCrossed) return leagueHtml(); // M132: the celebration interrupts the result, once
+  var er272 = endReason(); // M272: deck-out / Maniac / Thirteenth Hour endings name themselves (see endReason)
   if (reviewField) return '<button class="review-chip" onclick="reviewField=false;render()">🏁 Result</button>';
   var won = G.winner === humanIdx;
   var turnLine = '';
@@ -9535,7 +9569,7 @@ function gameOverHtml() {
     var quoteFallback = stage ? '' : (wl ? '<br><i>\u201c' + esc(wl) + '\u201d \u2014 ' + esc(wp.hero.name) + '</i>' : '');
     var tiles = '<div class="statgrid">' + [['Turns', G.players[humanIdx].ownTurns], ['Nightmares planted', (s.nightmaresPlantedBy ? s.nightmaresPlantedBy[humanIdx] : s.nightmaresPlanted)], ['Life drained', (s.nightmareLifeDrainedBy ? s.nightmareLifeDrainedBy[humanIdx] : s.nightmareLifeDrained)], ['Traps sprung', (s.trapsTriggeredBy ? s.trapsTriggeredBy[humanIdx] : s.trapsTriggered)], ['Cards drawn', s.drawsByPlayer[humanIdx]], ['Countered', (s.cardsCounteredBy ? s.cardsCounteredBy[humanIdx] : s.cardsCountered)]].map(function (t) { return '<div class="stattile"><b>' + t[1] + '</b><span>' + t[0] + '</span></div>'; }).join('') + '</div>';
     var story = (typeof durLine !== 'undefined' && durLine ? durLine : '') + (turnLine || ''); /* M127: the life-race sparkline retired — the turning-point line tells the same story in words */
-    return '<div class="overlay"><div class="box flowin">' + stage + (won ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + (leagueCrossed && !leagueSeen && !climb ? '<button class="big leaguebanner" onclick="showLeague()">✦ New League — ' + leagueCrossed.icon + ' ' + esc(leagueCrossed.name) + ' ✦</button>' : '') + '<p>' + text + quoteFallback + '</p>' + tiles + (story ? '<p style="color:#c4b6e8;font-size:12.5px;margin:2px 0 4px">' + story + '</p>' : '') + buttons + '</div></div>';
+    return '<div class="overlay"><div class="box flowin">' + stage + (won ? '<div class="winburst"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>' : '') + '<div class="ribbon"><span>' + title + '</span></div>' + concedeLine + (er272 ? '<p style="color:#ffd98a;font-size:13.5px">' + er272.text + '</p>' : '') + (leagueCrossed && !leagueSeen && !climb ? '<button class="big leaguebanner" onclick="showLeague()">✦ New League — ' + leagueCrossed.icon + ' ' + esc(leagueCrossed.name) + ' ✦</button>' : '') + '<p>' + text + quoteFallback + '</p>' + tiles + (story ? '<p style="color:#c4b6e8;font-size:12.5px;margin:2px 0 4px">' + story + '</p>' : '') + buttons + '</div></div>';
   }
   if (climb) {
     var r = climb.rung;
@@ -9555,7 +9589,7 @@ function gameOverHtml() {
   }
   var lgNow = leagueOf(record().w);
   var leagueLine = '<span style="color:#c4b6e8;font-size:13px">' + lgNow.icon + ' ' + lgNow.name + ' League · ' + record().w + ' wins' + (lgNow.next ? ' · ' + lgNow.next[1] + ' ' + lgNow.next[2] + ' at ' + lgNow.next[0] : '') + '</span>';
-  return box(won ? '🏆 Victory' : '💀 Defeat', (won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.') + '<br>' + leagueLine,
+  return box(won ? '🏆 Victory' : '💀 Defeat', (er272 ? (won ? 'The enemy hero still stands — but the duel is yours.' : 'Your hero still stands — but the duel is lost.') : (won ? 'The enemy hero falls.' : 'Your hero falls — the dream ends this time.')) + '<br>' + leagueLine, // M272: with a deck-out / Maniac / Thirteenth Hour ending the falls sentence is false — the reason line in box() carries the truth
     '<button class="big" onclick="rematch()">Rematch</button>' +
     '<div class="endrow"><button class="ghost big" onclick="showLog()">📜 Battle recap</button>' +
     '<button class="ghost big" onclick="reviewField=true;render()">👁 Review the field</button></div>' +

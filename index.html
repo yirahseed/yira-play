@@ -10990,9 +10990,21 @@ function clickHand(uid) {
   }
   flushEngineLog(); if (!finishCheck()) render();
 }
+/* M283: the mode a modal resolution should land in, derived from every
+   question still waiting — the play/activation landings' own precedence
+   (draft, upgrade, choice, scry). The four resolvers used to force
+   'main' after answering; when two modals had pended together (an
+   upgrade draft under a card draft, a scry or a Debut choice over one),
+   answering the top one stranded the other invisibly — no overlay, and
+   End Turn would even pass with a draft still waiting (M283 Chromium
+   drives C3/C4/C5, pre-fix). Deriving the landing lets the waiting
+   question resurface instead. */
+function modalLandingMode() {
+  return (G.pendingDraft && G.pendingDraft.player === humanIdx) ? 'draftPick' : (G.pendingUpgradeDraft && G.pendingUpgradeDraft.player === humanIdx) ? 'upgradePick' : (G.pendingChoice && G.pendingChoice.player === humanIdx) ? 'choicePick' : (G.pendingScry && G.pendingScry.player === humanIdx) ? 'scryPick' : 'main';
+}
 function pickDraft(uid) {
   try { G.resolveDraft(humanIdx, uid); sfx('draftpick'); say('Drafted.'); } catch (e) { msg = errMsg(e, uid); }
-  mode = 'main'; flushEngineLog(); if (!finishCheck()) render();
+  mode = modalLandingMode(); // M283: another waiting question resurfaces instead of stranding flushEngineLog(); if (!finishCheck()) render();
 }
 /* M234: the upgrade draft \u2014 three Essence shields offered for a
    creature already standing (the Arkbow's activation). The pick is the
@@ -11008,15 +11020,15 @@ function upgradeDraftHtml() {
 }
 function pickUpgrade(eid) {
   try { G.resolveUpgradeDraft(humanIdx, eid); sfx('choose'); say('Upgrade drafted.'); } catch (e) { msg = errMsg(e, null); } // M229 voice discipline: a modal decision settles with 'choose'
-  mode = 'main'; flushEngineLog(); if (!finishCheck()) render();
+  mode = modalLandingMode(); // M283: another waiting question resurfaces instead of stranding flushEngineLog(); if (!finishCheck()) render();
 }
 function draftHtml() {
   var pd = G.pendingDraft;
   if (!pd) return '';
   // M122: every draft is a pick of 3 — the overlay speaks for its kind.
   var dkind = pd.kind || 'signature';
-  var dtitle = dkind === 'signature' ? 'Draft a signature \u2014 pick one' : dkind === 'trap' ? 'Draft a trap \u2014 pick one' : dkind === 'deck' ? 'Draft from your deck \u2014 pick one' : dkind === 'foeStart' ? 'Draft from their starting deck \u2014 pick one' : dkind === 'legendary' ? 'Draft a legendary \u2014 pick one' : dkind === 'creature' ? 'Draft a creature \u2014 pick one' : 'Draft a spell \u2014 pick one'; // M234: a creature draft (Animal Arrow, patch-final) names itself // M187: a legendary draft (Hero's Call, Survivor's Regalia) names itself \u2014 it fell through to the spell title before // M174: a deck draft (Anticipate) names its source
-  var dsub = dkind === 'signature' ? 'Three signature cards from across every hero\'s set. The other two are gone.' : dkind === 'deck' ? 'The top of your deck, offered up. Choose one to draw. The other two are gone.' : dkind === 'foeStart' ? 'Three cards from your opponent\'s starting deck. Choose one \u2014 a copy joins your hand, and their originals stay put. The other two are gone.' : dkind === 'legendary' ? 'A legendary creature, at the cost printed on it. Choose one \u2014 the other two are gone.' : dkind === 'creature' ? 'Choose one \u2014 it joins your hand carrying a random upgrade. The other two are gone.' : 'Choose one to add to your hand. The other two are gone.'; // M234: the Arrow's pick takes its Essence as it lands
+  var dtitle = dkind === 'signature' ? 'Draft a signature \u2014 pick one' : dkind === 'trap' ? 'Draft a trap \u2014 pick one' : dkind === 'deck' ? 'Draft from your deck \u2014 pick one' : dkind === 'foeStart' ? 'Draft from their starting deck \u2014 pick one' : dkind === 'legendary' ? 'Draft a legendary \u2014 pick one' : dkind === 'graveZombie' ? 'Draft a Zombie \u2014 pick one' : dkind === 'artifact' ? 'Draft an artifact \u2014 pick one' : dkind === 'creature' ? 'Draft a creature \u2014 pick one' : 'Draft a spell \u2014 pick one'; // M234: a creature draft (Animal Arrow, patch-final) names itself // M187: a legendary draft (Hero's Call, Survivor's Regalia) names itself \u2014 it fell through to the spell title before // M174: a deck draft (Anticipate) names its source // M283: the grave draft (Zombify) and the artifact draft (Tinker) fell through to the spell title too \u2014 they name themselves now
+  var dsub = dkind === 'signature' ? 'Three signature cards from across every hero\'s set. The other two are gone.' : dkind === 'deck' ? 'The top of your deck, offered up. Choose one to draw. The other two are gone.' : dkind === 'foeStart' ? 'Three cards from your opponent\'s starting deck. Choose one \u2014 a copy joins your hand, and their originals stay put. The other two are gone.' : dkind === 'legendary' ? (pd.discount ? 'A legendary creature \u2014 and this draft shaves ' + pd.discount + ' off its cost. Choose one \u2014 the other two are gone.' : 'A legendary creature, at the cost printed on it. Choose one \u2014 the other two are gone.') : dkind === 'graveZombie' ? 'A Zombie from your graveyard. Choose one \u2014 it rises onto the field at once. The others stay in the graveyard.' : dkind === 'artifact' ? 'Choose one \u2014 it takes the dock at once, with its printed charges. The other two are gone.' : dkind === 'creature' ? (pd.summon ? 'Choose one \u2014 it takes the field at once' + (pd.grantKeyword ? ', granted ' + pd.grantKeyword.charAt(0).toUpperCase() + pd.grantKeyword.slice(1) : '') + '. The other two are gone.' : pd.upgradePick ? 'Choose one \u2014 it joins your hand carrying a random upgrade. The other two are gone.' : 'Choose one to add to your hand. The other two are gone.') : 'Choose one to add to your hand. The other two are gone.'; // M234: the Arrow's pick takes its Essence as it lands // M283: the creature subtitle was the Arrow's own text worn by every creature draft \u2014 a summon draft's pick takes the field (Unholy Recruitment), the Throne's pick simply joins the hand; the grave and artifact subtitles now say where their picks land, and the legendary line reads the draft's own discount (the Call shaves 2, the Regalia none)
   return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">' + dtitle + '</div>' +
     '<div class="ctext">' + dsub + '</div>' +
     '<div class="draftrow">' + pd.options.map(function (inst, dpi) { var dd = D(inst); var cap = dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : ((dd.cardSchool && SCHOOL_META[dd.cardSchool] ? SCHOOL_META[dd.cardSchool].name + ' ' : '') + dd.type); return '<div class="draftpick" style="animation-delay:' + (dpi * 90) + 'ms">' + cardHtml(inst, humanIdx, { cls: ' clickable', onclick: 'pickDraft(' + inst.uid + ')' }) + '<div class="draftcap">' + cap + '</div></div>'; }).join('') + '</div></div></div>';
@@ -11047,11 +11059,11 @@ function choiceHtml() {
 }
 function pickChoice(keyword) {
   try { G.resolveChoice(humanIdx, keyword); sfx('choose'); say('Chosen.'); } catch (e) { msg = errMsg(e, null); } // M229: a modal decision settles with 'choose', not a cast
-  mode = 'main'; flushEngineLog(); if (!finishCheck()) render();
+  mode = modalLandingMode(); // M283: another waiting question resurfaces instead of stranding flushEngineLog(); if (!finishCheck()) render();
 }
 function resolveScryChoice(toBottom) {
   try { G.resolveScry(humanIdx, toBottom); sfx('choose'); } catch (e) { msg = errMsg(e, null); } // M229: same separation as the choice resolve
-  mode = 'main'; flushEngineLog(); if (!finishCheck()) render();
+  mode = modalLandingMode(); // M283: another waiting question resurfaces instead of stranding flushEngineLog(); if (!finishCheck()) render();
 }
 function targetCreature(uid) {
   var all = G.players[0].board.concat(G.players[1].board);

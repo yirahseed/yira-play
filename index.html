@@ -10767,6 +10767,8 @@ function finishCheck() {
       try { var st = JSON.parse(localStorage.getItem('yira_streak') || '{"c":0,"b":0}'); if (G.winner === humanIdx) { st.c++; if (st.c > st.b) st.b = st.c; } else st.c = 0; localStorage.setItem('yira_streak', JSON.stringify(st)); } catch (e) {}
       if (climb) {
         if (G.winner === humanIdx) {
+          /* M270: a climb-first player has no celebration ledger — the key was born only on standard wins (M267), so their first standard win fell back to the last-two-counts compare and a tier crossed on the ladder was eaten exactly as in M267's F1 (driven proof: six climb wins, base still null, the Silver celebration gone for good). Birth the ledger here, settled through the wins BEFORE this one: earlier climb-carried crosses stay owed, this win's own cross stays silent on the ladder, and a pre-M270 profile settles at its current count — the M267 migration honesty, unchanged. */
+          if (leagueBase() === null) { try { localStorage.setItem('yira_league_base', String(Math.max(0, rec.w - 1))); } catch (e) {} }
           if (climb.rung > climbBest()) { try { localStorage.setItem('yira_climb_best', String(climb.rung)); } catch (e) {} }
           parkClimb(climb.rung >= CLIMB_RUNGS.length ? 0 : climb.rung + 1); // M119: park the next rung (summit clears the park). M213: the summit test reads the ladder — as a literal 5 it cleared the park after a rung-5 win on the 10-rung ladder
         } else parkClimb(climb.rung); // M119: a fall parks the rung that beat you — resume retries it

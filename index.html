@@ -7077,11 +7077,20 @@ function foePayoffWatch() {
     if (!foePaySnap || G.turnCount < foePaySnap.turn) { foePaySnap = snap; return; }
     var prevStorm = snap.storm < foePaySnap.storm ? 0 : foePaySnap.storm;
     var pop = false;
-    if (Math.floor(snap.storm / 3) > Math.floor(prevStorm / 3)) { pop = true; try { sfx('stormpop'); } catch (e) {} }
-    if (snap.mission > foePaySnap.mission) { pop = true; try { sfx('mission'); } catch (e) {} }
-    if (snap.spirit > foePaySnap.spirit) pop = true;
-    if (Math.floor(snap.summons / 5) > Math.floor(foePaySnap.summons / 5)) pop = true;
-    if (Math.floor(snap.traps / 3) > Math.floor(foePaySnap.traps / 3)) pop = true;
+    /* M288: each crossing belongs to ONE named passive — gate it on the
+       foe actually holding that passive, exactly as the human seat's
+       peTrack branches do (emblem render). Ungated, this watch popped
+       Bram's tell for any foe's 5th summon (an organic Wrenna foe popped
+       35 samples on her 5th summon), the Warden's for any foe's 3rd trap
+       arm, and crackled Volric's stormpop for any foe's 3rd spell (foe
+       Umbra, M288 drive 1). The mission/spirit thresholds can only rise
+       for their own heroes, but they take the same gate for symmetry. */
+    var foePassive = foe.hero && foe.hero.passive;
+    if (foePassive === 'stormConduit' && Math.floor(snap.storm / 3) > Math.floor(prevStorm / 3)) { pop = true; try { sfx('stormpop'); } catch (e) {} }
+    if (foePassive === 'freeSpiritMissions' && snap.mission > foePaySnap.mission) { pop = true; try { sfx('mission'); } catch (e) {} }
+    if (foePassive === 'freeSpirit' && snap.spirit > foePaySnap.spirit) pop = true;
+    if (foePassive === 'unbridled' && Math.floor(snap.summons / 5) > Math.floor(foePaySnap.summons / 5)) pop = true;
+    if (foePassive === 'trapDraw' && Math.floor(snap.traps / 3) > Math.floor(foePaySnap.traps / 3)) pop = true;
     foePaySnap = snap;
     if (pop) foePayoffPop();
   } catch (e) {}

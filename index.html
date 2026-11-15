@@ -8723,10 +8723,10 @@ function cardHtml(inst, ownerIdx, opts) {
   if (opts.ml) extraVars += '--ml:' + opts.ml + 'px;';
   if (extraVars) styAttr = styAttr ? styAttr.replace(/"$/, ';' + extraVars + '"') : ' style="' + extraVars + '"';
   var pressAttrs = '';
-  if (opts.onpdc) pressAttrs = ' onpointerdown="' + opts.onpdc + '" oncontextmenu="return false"'; // M299: a press-commit card (the draft pick) commits on the press itself — no trailing click is part of its contract
+  if (opts.onpdc) pressAttrs = ' onpointerdown="' + opts.onpdc + '" oncontextmenu="return false"'; // M299: a press-commit card commits on the press itself - no trailing click is part of its contract. M300: the draft pick moved to the onpd/onpu press path (draftPressStart/draftTapEnd) so a hold can still read first; onpdc remains for any future instant-commit card
   else if (opts.onclick) pressAttrs = ' onclick="' + opts.onclick + '"';
-  if (opts.onpd) pressAttrs += ' onpointerdown="' + opts.onpd + '" onpointerup="' + (opts.onpu || 'mullPressEnd()') + '" onpointerleave="mullPressEnd()" oncontextmenu="return false"';
-  return '<div class="' + cls + (opts.onpdc ? ' presscommit' : '') + '" data-uid="' + inst.uid + '"' + styAttr + pressAttrs + '>' +
+  if (opts.onpd) pressAttrs += ' onpointerdown="' + opts.onpd + '" onpointerup="' + (opts.onpu || 'mullPressEnd()') + '" onpointerleave="' + (opts.onpl || 'mullPressEnd()') + '" oncontextmenu="return false"';
+  return '<div class="' + cls + (opts.onpdc || opts.ownpress ? ' presscommit' : '') + '" data-uid="' + inst.uid + '"' + styAttr + pressAttrs + '>' +
     '<div class="cost' + costCls + '">' + effCost + '</div>' + typeTabHtml(d) + crownHtml(d) + (opts.gap ? '<span class="gapbadge">+' + opts.gap + '</span>' : '') + (opts.ribbon ? '<span class="newribbon">NEW</span>' : '') +
     '<div class="cname' + (d.legendary && d.signatureFor ? ' foil' : '') + '" style="font-size:' + tfs + 'px">' + esc(d.name) + '</div>' + art +
     '<div class="ctyperow"><span class="ctype">' + ((opts && opts.showType) ? d.type : '') + '</span>' + chargePipsHtml(d, inst) + '<span class="cbadges">' + badges(inst, ownerIdx) + '</span></div>' +
@@ -9259,6 +9259,7 @@ function assocHtmlFor(d, selfId) {
 function inspectHtml() {
   var all = [];
   if (G) G.players.forEach(function (p) { all = all.concat(p.board, p.hand, p.traps, p.artifacts, p.graveyard); });
+  if (G && G.pendingDraft && G.pendingDraft.options) all = all.concat(G.pendingDraft.options); // M300: draft options live in no zone until picked - the draft hold-read (draftPressStart) finds its card here
   var inst = all.find(function (c) { return c.uid === inspectUid; });
   if (!inst && inspectCardId && CARDS[inspectCardId]) inst = fakeInst(inspectCardId);
   if (!inst) return '';
@@ -9820,7 +9821,6 @@ function renderBody() {
   if (profileIdx !== null) html += heroProfileHtml();
   if (graveIdx !== null) html += graveHtml();
   if (deckIdx !== null && G) html += deckHtml();
-  if (inspectUid !== null || inspectCardId !== null) html += inspectHtml(); // M292: the inspect mounts above the profile/grave/deck sheets — it used to append BEFORE them, so a deck- or grave-row tap opened it invisibly underneath its own parent sheet (taps read as inert, its Close unreachable)
   if (G.winner !== null) { if (!cineGate()) html += gameOverHtml(); } // M235/M236: a match ending with the human as Umbra plays its cinematic first (win or lose mood); the end screen renders when it ends or is skipped — M292: it appends BEFORE the log/sheet/modals now, not after them: it is the base layer of the end state, and its own Battle recap button opens the log, which the old order buried invisibly beneath the end screen (its Close sat exactly under Change matchup)
   if (logOpen) html += logHtml();
   if (sheetOpen) html += sheetHtml();
@@ -9828,6 +9828,7 @@ function renderBody() {
   if (mode === 'scryPick') html += scryHtml();
   if (mode === 'choicePick') html += choiceHtml(); // M174
   if (mode === 'upgradePick') html += upgradeDraftHtml(); // M234: the Arkbow's question \u2014 three Essence shields
+  if (inspectUid !== null || inspectCardId !== null) html += inspectHtml(); // M292 + M300: the inspect mounts above the profile/grave/deck sheets AND above the picker modals - the draft hold-read (M300) opens it over the draft overlay, so it appends after the pickers now; the sheets still sit below it, as M292 required
   if (glossaryOpen) html += glossaryHtml();
   if (introStep >= 0) html += introHtml(); // M292: the pause sheet's How to play button calls openIntro() mid-match, but only the menu branch ever mounted introHtml — the sheet closed and nothing appeared; the intro now mounts over the match, as the glossary already did
   $app.innerHTML = html;
@@ -12094,6 +12095,19 @@ function pickDraft(uid) {
   try { G.resolveDraft(humanIdx, uid); sfx('draftpick'); say('Drafted.'); } catch (e) { msg = errMsg(e, uid); }
   mode = modalLandingMode(); // M283: another waiting question resurfaces instead of stranding flushEngineLog(); if (!finishCheck()) render();
 }
+/* M300 (cold loop 41, 2026-11-15): the draft pick keeps the M299 press path
+   but takes the mulligan's shape. Pointerdown ARMS the pick and starts the
+   same 320 ms hold clock the mulligan teaches; a release before the clock
+   commits via pickDraft; a hold opens the read (openInspect) and that
+   release commits nothing. M299's pointerdown-fire commit had silently
+   deleted read-before-you-pick: the press that soft-locked before M299 at
+   >=200 ms now picked instantly, so the game's universal hold-to-read
+   gesture spent an irreversible pick. The commit still never rides a DOM
+   click, so the M269 capture-phase swallow cannot return. */
+var draftHoldTimer = null, draftHeld = false;
+function draftPressStart(uid) { draftPressEnd(); draftHeld = false; draftHoldTimer = setTimeout(function () { draftHeld = true; openInspect(null, uid); }, 320); }
+function draftPressEnd() { if (draftHoldTimer) { clearTimeout(draftHoldTimer); draftHoldTimer = null; } }
+function draftTapEnd(uid) { draftPressEnd(); if (draftHeld) { draftHeld = false; return; } pickDraft(uid); }
 /* M234: the upgrade draft \u2014 three Essence shields offered for a
    creature already standing (the Arkbow's activation). The pick is the
    whole interaction: name, glyph, grant. */
@@ -12119,7 +12133,7 @@ function draftHtml() {
   var dsub = dkind === 'signature' ? 'Three signature cards from across every hero\'s set. The other two are gone.' : dkind === 'deck' ? 'The top of your deck, offered up. Choose one to draw. The other two are gone.' : dkind === 'foeStart' ? 'Three cards from your opponent\'s starting deck. Choose one \u2014 a copy joins your hand, and their originals stay put. The other two are gone.' : dkind === 'legendary' ? (pd.discount ? 'A legendary creature \u2014 and this draft shaves ' + pd.discount + ' off its cost. Choose one \u2014 the other two are gone.' : 'A legendary creature, at the cost printed on it. Choose one \u2014 the other two are gone.') : dkind === 'graveZombie' ? 'A Zombie from your graveyard. Choose one \u2014 it rises onto the field at once. The others stay in the graveyard.' : dkind === 'artifact' ? 'Choose one \u2014 it takes the dock at once, with its printed charges. The other two are gone.' : dkind === 'creature' ? (pd.summon ? 'Choose one \u2014 it takes the field at once' + (pd.grantKeyword ? ', granted ' + pd.grantKeyword.charAt(0).toUpperCase() + pd.grantKeyword.slice(1) : '') + '. The other two are gone.' : pd.upgradePick ? 'Choose one \u2014 it joins your hand carrying a random upgrade. The other two are gone.' : 'Choose one to add to your hand. The other two are gone.') : 'Choose one to add to your hand. The other two are gone.'; // M234: the Arrow's pick takes its Essence as it lands // M283: the creature subtitle was the Arrow's own text worn by every creature draft \u2014 a summon draft's pick takes the field (Unholy Recruitment), the Throne's pick simply joins the hand; the grave and artifact subtitles now say where their picks land, and the legendary line reads the draft's own discount (the Call shaves 2, the Regalia none)
   return '<div class="overlay"><div class="bigcard" style="max-width:660px;width:96%"><div class="cname">' + dtitle + '</div>' +
     '<div class="ctext">' + dsub + '</div>' +
-    '<div class="draftrow">' + pd.options.map(function (inst, dpi) { var dd = D(inst); var cap = dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : ((dd.cardSchool && SCHOOL_META[dd.cardSchool] ? SCHOOL_META[dd.cardSchool].name + ' ' : '') + dd.type); return '<div class="draftpick" style="animation-delay:' + (dpi * 90) + 'ms">' + cardHtml(inst, humanIdx, { cls: ' clickable', onpdc: 'pickDraft(' + inst.uid + ')' }) + '<div class="draftcap">' + cap + '</div></div>'; }).join('') + '</div></div></div>';
+    '<div class="draftrow">' + pd.options.map(function (inst, dpi) { var dd = D(inst); var cap = dd.signatureFor && HEROES[dd.signatureFor] ? esc(HEROES[dd.signatureFor].name) + '\'s signature' : ((dd.cardSchool && SCHOOL_META[dd.cardSchool] ? SCHOOL_META[dd.cardSchool].name + ' ' : '') + dd.type); return '<div class="draftpick" style="animation-delay:' + (dpi * 90) + 'ms">' + cardHtml(inst, humanIdx, { cls: ' clickable', onpd: 'draftPressStart(' + inst.uid + ')', onpu: 'draftTapEnd(' + inst.uid + ')', onpl: 'draftPressEnd()', ownpress: true }) + '<div class="draftcap">' + cap + '</div></div>'; }).join('') + '</div></div></div>';
 }
 function scryHtml() {
   var top = G.players[humanIdx].deck[0];
@@ -12865,7 +12879,7 @@ render();
       // collection) get hold-to-read only: a hold expands, the release-click
       // is swallowed so reading never toggles or picks by accident.
       var oc = e.target.closest('.panel .card, .overlay .card');
-      if (oc && !(oc.classList && oc.classList.contains('presscommit'))) { // M299: a press-commit card owns its press — arming the hold-to-read here would swallow the very pick the press just made
+      if (oc && !(oc.classList && oc.classList.contains('presscommit'))) { // M299/M300: a presscommit card owns its press path - its own handlers run its hold-read (the draft pick: draftPressStart, M300); arming the generic hover here would double-read on top of it
         overlayPress = oc; hideHover();
         hoverTimer = setTimeout(function () { showHover(oc); }, 200);
       }

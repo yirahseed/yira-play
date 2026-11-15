@@ -873,6 +873,8 @@
     .hand.fan.mini { height:52px; padding-top:4px; }
     .hand.fan.mini .card { scale:.3; }
     .vs-side .portrait { width:64px; height:64px; }
+    .inspect-veil .bigcard { zoom:.72; } /* M284: the tallest bigcard (Malachar, 511px) could never be seen whole in a 402px landscape frame — the veil scroll showed its name OR its stats, never both at once. A card face is one composed unit (M43 frame law), so in landscape the card itself scales to fit: 511 x .72 = 368 <= the ~370px the overlay leaves. The LINKED CARDS strip below the card stays scroll-reachable — an auxiliary row, not part of the face. Zoom scales fonts and boxes together, so the fit ratios inside the card are unchanged. */
+    .bfig.me { bottom:-58px; } /* M284: my hero figure's 178px img rode 40px past the viewport top in the short landscape stage (the field's top sits ~74px down), so the portrait's face zone mapped to y -22..+13 — bisected by the frame edge, not dissolved by the mask (drive5 stills: Karg headless behind the pause button). Dropping the anchor 44px puts the img top at +4; the extra lower body passes behind the board (z-index 0, pointer-events none) and dissolves by the same radial mask. The foe figure was measured fine and is untouched; portrait is untouched. */
   }
 
   /* --- M43: THE FRAME, FIXED (Jesse's spec, Nov 1) — titles are ONE line
@@ -1605,7 +1607,7 @@
   .fchip.clear { border-color:rgba(255,255,255,.25); color:#cfc4f2; }
   .jumpmeta { display:flex; gap:5px; align-items:center; flex-wrap:nowrap; overflow-x:auto; margin-top:6px; scrollbar-width:none; }
   .jumpmeta::-webkit-scrollbar { display:none; }
-  .jumpmeta button { padding:8px 10px; font-size:12px; white-space:nowrap; flex:none; }
+  .jumpmeta button { padding:8px 10px; font-size:12px; white-space:nowrap; flex:none; min-height:44px; } /* M284: grown 32 -> 44px. The M237 ledger held that these chips keep their 44px hit band via the .hit::after halo, but .jumpmeta's overflow-x:auto forces overflow-y to compute to auto as well, and the container clips the halo vertically — M284 drive5 tap-proved a real tap 5px above the 32px box missed. The box is the target, so the box grows. Cost: +12px of portrait collbar; in landscape the row is display:none (M241), so it costs nothing there. */
   .jumpcap { font-size:11.5px; color:#a793d6; flex:none; }
   @media (orientation: landscape) and (max-height: 540px) { .collbar .jumpmeta { display:none; } } /* M241: landscape — the sticky bar measured 101px of the 402px viewport (25%); the jump row folds away there (groups stay one scroll down, the Filters sheet is untouched) */
   .filtersheet .box { max-width:430px; max-height:88vh; overflow-y:auto; text-align:left; }
@@ -6785,11 +6787,12 @@ function spawnStreams(fromIdx, toIdx, n) {
        into parallel ropes. Everything below keys off the real distance:
        lanes widen, segment counts grow (spacing stays ~constant), the bow
        keeps its proportion, and the underlay fades in only where the
-       flight is long enough to need a body. Short flights are untouched. */
+       flight is long enough to need a body. Short flights are untouched.
+       (M284: the knee itself is retired — see undK below.) */
     var dist = Math.hypot(dst.x - src.x, dst.y - src.y);
     var laneScale = Math.min(1.5, Math.max(1, dist / 540));
     var segScale = Math.min(1.4, Math.max(1, dist / 560));
-    var undK = Math.min(1, Math.max(0, (dist - 430) / 380)) * (calm ? 0.6 : 1);
+    var undK = Math.min(1, dist / 840) * (calm ? 0.6 : 1); // M284: the M199 knee (430/380) starved every landscape flight of its body wash — at 874x402 the plant flight is 419px, under the knee, so landscape streams flew as bare ropes while portrait's 785px flight earned 0.934. M266 ledgered the gap as the formula's letter, not the picture; M284's side-by-side stills (drive3) show the wash IS the picture's body in landscape too, and forcing it cost no frames. A pure ramp keeps M199's spirit (wash grows with flight length): portrait's proven value is preserved (785/840 = 0.935), landscape's 419px earns 0.50 — proportionate, since its 22 segments already overlap at ~19px spacing.
     var dxu = dst.x - src.x, dyu = dst.y - src.y, dlu = Math.hypot(dxu, dyu) || 1; var pxu = -dyu / dlu, pyu = dxu / dlu; // M216 (Q4): the unit perpendicular of the flight — origins fan along it
     var layer = document.createElement('div');
     layer.className = 'fx-vapor fx-nightmare';
@@ -6852,7 +6855,7 @@ function spawnDrainWisps(affIdx, weaverIdx, n) {
     var distD = Math.hypot(dst.x - src.x, dst.y - src.y); // M199: the drain flies the same long diagonal — same distance discipline, drain-tuned caps
     var laneScaleD = Math.min(1.35, Math.max(1, distD / 540));
     var segScaleD = Math.min(1.3, Math.max(1, distD / 560));
-    var undD = Math.min(1, Math.max(0, (distD - 430) / 380)) * (calm ? 0.6 : 1);
+    var undD = Math.min(1, distD / 840) * (calm ? 0.6 : 1); // M284: the same knee retirement as undK — the drain wash follows the plant wash
     var fanPhD = Math.random() * 6.283; // M228: this drain's tear-out fan rotation — the M216 (Q4) unit perpendicular is retired with its 1D lane fan (see the oOff below)
     var layer = document.createElement('div');
     layer.className = 'fx-vapor fx-nightmare';
@@ -9158,7 +9161,7 @@ function fitBadges(el) {
          library grows past 27px (M275 census of all 487 faces), so the
          cap never binds there; under 150% text zoom Malachar's strip
          sat AT the old cap with 7px still clipped. */
-      el.style.height = Math.min(el.scrollHeight, 44) + 'px';
+      el.style.height = Math.min(el.scrollHeight, 60) + 'px'; // M284: the cap rises 44 -> 60. Ball Lightning's three-keyword strip (trample/haste/fleeting — the library's only three-keyword face) needs 48px at 125% text zoom and 56px at 150% and sat clipped at the M275 cap (M284 probe7: the ONLY strip over 44 anywhere in the library at any zoom). At 100% no strip grows past 27px (M275 census), so the standard build is untouched.
       var row = el.closest ? el.closest('.ctyperow') : null;
       if (row) row.style.height = 'auto';
     }
@@ -11911,7 +11914,7 @@ render();
   var lastLand = window.innerWidth > window.innerHeight;
   window.addEventListener('resize', function () {
     var nowLand = window.innerWidth > window.innerHeight;
-    if (nowLand !== lastLand) { lastLand = nowLand; setTimeout(function () { if (typeof G !== 'undefined' && G) render(); }, 80); }
+    if (nowLand !== lastLand) { lastLand = nowLand; setTimeout(function () { try { render(); } catch (e) {} }, 80); } // M284: the old callback gated on a live G — but G is null until the first match starts, so a rotation on the hub / collection / builder (the pre-match surfaces a player actually rotates on) never re-rendered at all, and the text-fit pass never re-ran at the new geometry: rotating the collection landscape->portrait left 161 clipped card names standing until the next unrelated render (M284 probes 8-10, node-identity proven). render() already handles the no-game state — the title screen boots with G null — so the gate is now a plain try/catch.
   });
   /* M38: tapping the field puts the hand away. */
   document.addEventListener('click', function (e) {

@@ -10150,7 +10150,11 @@ function cineStart() {
     // failure leaves st.gl3d null and the flat planes carry the moment
     // exactly as shipped; on success they keep running underneath,
     // hidden by .cine3d-on, as the standing fallback.
-    if (heroId === 'weaver') { try { st.gl3d = cine3dTryMount(st, ov); } catch (e) { st.gl3d = null; } }
+    // M303: the gate widens to the CINE3D_HEROES set — Morvane's WIN
+    // scene joins Umbra's two (his loss stays flat: the loss mood is
+    // Umbra's alone, M236, so a graven loss never reaches this call).
+    // Same fallback law for both heroes.
+    if (CINE3D_HEROES[heroId]) { try { st.gl3d = cine3dTryMount(st, ov); } catch (e) { st.gl3d = null; } }
     var q = function (sel) { return ov.querySelector(sel); };
     var far = q('.cine-far'), mid = q('.cine-mid'), hero = q('.cine-hero'), vig = q('.cine-vig'), bart = q('.cine-bar.top'), barb = q('.cine-bar.bot');
     if (st.accent) { // M237: the winner's palette tints the floor falloff and the vignette heart (win mood — the loss grade is Umbra's alone, and he carries no accent)
@@ -10372,102 +10376,55 @@ function cineFinish(skipped) {
    at t=2600), full opacity — stilled, not erased (the M279 law).
    three.js is vendored by build.js (r149, pinned, byte-identical to the
    jsDelivr file); the ceiling it costs was funded by the round-2 painting
-   recompress (m298-work/recompress-manifest.csv). */
+   recompress (m298-work/recompress-manifest.csv).
+   M303 (2026-11-15): THE SECOND FIGURE — Morvane joins Umbra on the 3D
+   stage. The M302 pilot (m302-work/proto3d-morvane.html) ports in as a
+   second builder behind a dispatch: mount() picks buildUmbra /
+   buildMorvane from opts.hero, the named particle updaters generalise
+   to the builder's updater array, and the shared environment + light
+   rig are parameterised by the builder's accent pair (BUILDERS). The
+   gate in cineStart widens from weaver-only to the CINE3D_HEROES set
+   {weaver, graven}. Morvane integrates WIN-ONLY (the loss mood is
+   Umbra's alone, M236); his CINE_VOICE row, subtitle, tap-skip, Calm
+   frame and end-screen handoff are the shipped ones, untouched. Umbra's
+   builder is the M298 build extracted verbatim — the M303 regression
+   drives re-prove his win + loss before this wave is called done.
+   Bundle cost: zero — three.js was already vendored at M298. */
+/* M303: the heroes with a true-3D cinematic builder in the module
+   below. cineStart attempts the 3D stage for these heroes only; every
+   other hero's cinematic is the flat build, exactly as shipped. */
+var CINE3D_HEROES = { weaver: true, graven: true };
 var Cine3D = (function () {
   function available() {
     try { return typeof THREE !== 'undefined' && !!THREE.WebGLRenderer; } catch (e) { return false; }
   }
-  function mount(container, opts) {
-    var mood = opts.mood || 'win';
-    var lose = mood === 'lose';
-    var MS = opts.ms || 5800;
-    var ACCENT = 0x6d3bd1, ACCENT_DK = 0x45207e; // HERO_ACCENT.weaver core + dark (the pilot's constants)
-    var renderer;
-    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' }); // throws when WebGL is unavailable — the caller catches and falls back
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    var W = container.clientWidth || window.innerWidth, H = container.clientHeight || window.innerHeight;
-    renderer.setSize(W, H);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    container.appendChild(renderer.domElement);
-    container._glRenderer = renderer; // if the scene build throws partway, cine3dTryMount can still reach the renderer and release its context
-    var grade = document.createElement('div'); grade.className = 'cine3d-grade'; container.appendChild(grade);
-    var vig = document.createElement('div'); vig.className = 'cine3d-vig'; container.appendChild(vig);
 
-    var scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x07040e);
-    scene.fog = new THREE.FogExp2(0x0a0616, lose ? 0.034 : 0.024); // M298: the loss fog sits thicker on the same arena
-    var camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 80);
+  /* M303: THE BUILDER DISPATCH. mount() no longer builds Umbra inline:
+     each 3D hero has a builder — buildUmbra / buildMorvane — that takes
+     the shared helpers (H) and returns { group, updaters }. The shared
+     environment (floor, pool, inlay rings, colonnade, backdrop) and the
+     light rig are parameterised per hero by the BUILDERS table below
+     (accent pair, floor grade, stone, fog, sway). Umbra's builder is
+     the M298 build extracted VERBATIM — same profiles, folds, seeds,
+     lights and camera math — so his two scenes behave byte-identically;
+     the M303 regression drives prove it. */
 
-    /* lights — the pilot's rig; the loss cools and dims the key and drops the rim */
-    scene.add(new THREE.HemisphereLight(0x241b38, 0x090612, 0.10));
-    var key = new THREE.SpotLight(lose ? 0xdfe6ff : 0xffdfb4, lose ? 0.38 : 0.6, 30, 0.55, 0.6, 1);
-    key.position.set(2.8, 5.2, 4.4);
-    key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
-    key.shadow.bias = -0.0004;
-    key.target.position.set(0, 1.2, 0);
-    scene.add(key, key.target);
-    var rim = new THREE.DirectionalLight(ACCENT, lose ? 1.05 : 1.7);
-    rim.position.set(-3.6, 3.6, -3.8);
-    scene.add(rim);
-    var rim2 = new THREE.PointLight(ACCENT_DK, 0.5, 20);
-    rim2.position.set(3.4, 1.4, -2.6);
-    scene.add(rim2);
-    var up = new THREE.PointLight(ACCENT, 0.15, 5);
-    up.position.set(0, 0.35, 1.7);
-    scene.add(up);
-    var foldKey = new THREE.DirectionalLight(0x8fa3ff, lose ? 0.18 : 0.28);
-    foldKey.position.set(3.5, 2.2, 3.0);
-    scene.add(foldKey);
-
-    /* helpers — the pilot's, verbatim */
-    function softDiscTexture(inner, outer) {
-      var c = document.createElement('canvas'); c.width = c.height = 128;
-      var g = c.getContext('2d');
-      var gr = g.createRadialGradient(64, 64, 2, 64, 64, 64);
-      gr.addColorStop(0, inner); gr.addColorStop(1, outer);
-      g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
-      return new THREE.CanvasTexture(c);
-    }
-    function rng(seed) {
-      var a = seed >>> 0;
-      return function () {
-        a |= 0; a = (a + 0x6D2B79F5) | 0;
-        var t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-      };
-    }
-    function displaceFolds(geo, folds, ampFn, phase) {
-      var pos = geo.attributes.position;
-      for (var i = 0; i < pos.count; i++) {
-        var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-        var r = Math.hypot(x, z);
-        if (r < 1e-4) continue;
-        var th = Math.atan2(z, x);
-        var a = ampFn(y);
-        var d = Math.sin(th * folds + phase + 1.6 * Math.sin(y * 1.35)) * a
-              + Math.sin(th * (folds + 6) - y * 3.1) * a * 0.35;
-        var s = (r + d) / r;
-        pos.setX(i, x * s); pos.setZ(i, z * s);
-      }
-      geo.computeVertexNormals();
-      return geo;
-    }
+  /* UMBRA — the M297 pilot's procedural figure (total height ≈ 3.49),
+     extracted from the M298 inline build without a single value changed. */
+  function buildUmbra(THREE, scene, H, bopts) {
+    var lose = bopts.lose;
+    var ACCENT = 0x6d3bd1; // HERO_ACCENT.weaver core (the pilot's constant; the rim/ring pair lives in BUILDERS)
     var clothMat = new THREE.MeshStandardMaterial({ color: 0x100b1a, roughness: 0.88, metalness: 0.06 });
     var mantleMat = new THREE.MeshStandardMaterial({ color: 0x0d0817, roughness: 0.8, metalness: 0.08 });
     var hoodMat = new THREE.MeshStandardMaterial({ color: 0x100a1c, roughness: 0.78, metalness: 0.08 });
 
-    /* UMBRA — the pilot's procedural figure (total height ≈ 3.49) */
     var umbra = new THREE.Group();
     var robePts = [
       [0.80, 0.00], [0.79, 0.05], [0.72, 0.26], [0.60, 0.70], [0.50, 1.15],
       [0.445, 1.55], [0.44, 1.90], [0.475, 2.22], [0.52, 2.46], [0.555, 2.57],
       [0.44, 2.70], [0.26, 2.78], [0.20, 2.82]
     ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
-    var robeGeo = displaceFolds(new THREE.LatheGeometry(robePts, 96),
+    var robeGeo = H.displaceFolds(new THREE.LatheGeometry(robePts, 96),
       9, function (y) { return 0.075 - 0.06 * Math.min(1, Math.max(0, (y - 0.1) / 2.3)); }, 0.4);
     (function hemWave(geo) {
       var pos = geo.attributes.position;
@@ -10497,7 +10454,7 @@ var Cine3D = (function () {
       }
       geo.computeVertexNormals();
     })(mantleGeo);
-    displaceFolds(mantleGeo, 7, function () { return 0.032; }, 0.4);
+    H.displaceFolds(mantleGeo, 7, function () { return 0.032; }, 0.4);
     var mantle = new THREE.Mesh(mantleGeo, mantleMat);
     mantle.castShadow = true;
     umbra.add(mantle);
@@ -10506,7 +10463,7 @@ var Cine3D = (function () {
       [0.40, 2.58], [0.46, 2.76], [0.465, 2.96], [0.43, 3.14],
       [0.34, 3.30], [0.20, 3.42], [0.10, 3.465], [0.02, 3.49]
     ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
-    var hoodGeo = displaceFolds(
+    var hoodGeo = H.displaceFolds(
       new THREE.LatheGeometry(hoodPts, 72, HOOD_OPEN, Math.PI * 2 - HOOD_OPEN * 2),
       6, function () { return 0.024; }, 1.1);
     (function tipPeak(geo) {
@@ -10559,7 +10516,7 @@ var Cine3D = (function () {
       grp.rotation.z = -0.10 * side;
       grp.rotation.x = -0.06;
       grp.rotation.y = 0.35 * side;
-      var sGeo = displaceFolds(new THREE.CylinderGeometry(0.10, 0.19, 1.50, 20, 6),
+      var sGeo = H.displaceFolds(new THREE.CylinderGeometry(0.10, 0.19, 1.50, 20, 6),
         5, function () { return 0.014; }, side);
       var sleeve = new THREE.Mesh(sGeo, clothMat);
       sleeve.position.y = -0.75;
@@ -10582,7 +10539,650 @@ var Cine3D = (function () {
     if (lose) umbra.position.y = -0.05; // M298: the loss posture — the same figure, sunk slightly on its rings. (A forward bow was tried first and struck: pitched, the hood's lathe axis meets the camera and its banded interior reads as a tunnel through the void — bisected + photographed in m298-work. A sink keeps the posture without aligning the hood.)
     scene.add(umbra);
 
-    /* particles — the pilot's shared shader system */
+    /* Umbra's particles — the pilot's systems, seeds unchanged */
+    var SMOKE_N = 150;
+    var smoke = H.pointsSystem(SMOKE_N, H.smokeTex, THREE.NormalBlending);
+    scene.add(smoke);
+    var smokeSeeds = [];
+    (function () { var r = H.rng(1337); for (var i = 0; i < SMOKE_N; i++) smokeSeeds.push([r(), r(), r(), r()]); })();
+    var SMOKE_DARK = new THREE.Color(0x07040c), SMOKE_GREY = new THREE.Color(0x413358);
+    var tmpC = new THREE.Color();
+    function updateSmoke(t) {
+      for (var i = 0; i < SMOKE_N; i++) {
+        var s = smokeSeeds[i];
+        var life = 3.4 + s[3] * 2.4;
+        var ph = ((t / life) + s[0] * 7.0) % 1;
+        var ang = s[1] * Math.PI * 2 + t * (0.25 + s[2] * 0.2) * (s[3] > 0.5 ? 1 : -1);
+        var grow = 0.35 + ph * 0.85;
+        // The smoke lives in the shell between the void ball (front ≈ z 0.17)
+        // and the hood rim (z ≈ 0.37) — behind the ball it would be culled.
+        var x = Math.cos(ang) * 0.115 * grow * (0.6 + s[2] * 0.5);
+        var z = 0.21 + Math.sin(ang) * 0.07 * grow;
+        var y = 3.03 + Math.sin(ph * Math.PI * 2 + s[0] * 9.0) * 0.085;
+        if (s[3] > 0.58 && ph > 0.5) {
+          var k = (ph - 0.5) * 2;
+          y -= k * 0.95; z += k * 0.42; x *= (1 + k * 0.7);
+        }
+        var alpha = Math.pow(Math.sin(ph * Math.PI), 0.75) * 0.65;
+        tmpC.copy(s[2] > 0.45 ? SMOKE_GREY : SMOKE_DARK);
+        H.setP(smoke, i, x, y, z, 55 + ph * 75 + s[1] * 25, alpha, tmpC);
+      }
+      H.markDirty(smoke);
+    }
+    var SPARK_N = 26;
+    var sparks = H.pointsSystem(SPARK_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(sparks);
+    var sparkSeeds = [];
+    (function () { var r = H.rng(777); for (var i = 0; i < SPARK_N; i++) sparkSeeds.push([r(), r(), r(), r()]); })();
+    var SPARK_C = new THREE.Color(0x9a6ae0);
+    function updateSparks(t) {
+      for (var i = 0; i < SPARK_N; i++) {
+        var s = sparkSeeds[i];
+        var x = (s[0] - 0.5) * 0.20, y = 3.03 + (s[1] - 0.5) * 0.26, z = 0.21 + (s[2] - 0.5) * 0.08;
+        var tw = Math.pow(Math.max(0, Math.sin(t * 2.1 + s[3] * 43.0)), 6);
+        H.setP(sparks, i, x, y, z, 3.0, tw * 0.85, SPARK_C);
+      }
+      H.markDirty(sparks);
+    }
+    var MIST_N = 26;
+    var mist = H.pointsSystem(MIST_N, H.smokeTex, THREE.NormalBlending);
+    scene.add(mist);
+    var mistSeeds = [];
+    (function () { var r = H.rng(4242); for (var i = 0; i < MIST_N; i++) mistSeeds.push([r(), r(), r(), r()]); })();
+    var MIST_C = new THREE.Color(0x0b0616), MIST_V = new THREE.Color(0x241a3d);
+    function updateMist(t) {
+      for (var i = 0; i < MIST_N; i++) {
+        var s = mistSeeds[i];
+        var ang = s[0] * Math.PI * 2 + t * 0.05 * (s[3] > 0.5 ? 1 : -1);
+        var rad = 0.95 + s[1] * 1.5;
+        H.setP(mist, i, Math.cos(ang) * rad, 0.12 + s[2] * 0.4, Math.sin(ang) * rad,
+          190 + s[1] * 150, 0.10 + s[3] * 0.05, s[2] > 0.6 ? MIST_V : MIST_C);
+      }
+      H.markDirty(mist);
+    }
+    var MOTE_N = 170;
+    var motes = H.pointsSystem(MOTE_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(motes);
+    var moteSeeds = [];
+    (function () { var r = H.rng(99); for (var i = 0; i < MOTE_N; i++) moteSeeds.push([r(), r(), r(), r()]); })();
+    var MOTE_V = new THREE.Color(0x8a6ae0), MOTE_A = new THREE.Color(0xd8a860);
+    function updateMotes(t) {
+      for (var i = 0; i < MOTE_N; i++) {
+        var s = moteSeeds[i];
+        var x = (s[0] - 0.5) * 13 + Math.sin(t * 0.11 + s[3] * 20) * 0.4;
+        var y = 0.2 + ((s[1] + t * 0.008 * (0.5 + s[3])) % 1) * 5.2;
+        var z = (s[2] - 0.5) * 13 + Math.cos(t * 0.09 + s[0] * 20) * 0.4;
+        var tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.7 + s[3] * 31));
+        H.setP(motes, i, x, y, z, 2.2 + s[3] * 2.4, 0.16 * tw, s[1] > 0.78 ? MOTE_A : MOTE_V);
+      }
+      H.markDirty(motes);
+    }
+    return { group: umbra, updaters: [updateSmoke, updateSparks, updateMist, updateMotes] };
+  }
+
+  /* MORVANE — the M302 pilot's procedural figure (total height ≈ 3.44;
+     the crystal staff's lantern rides to ≈ 3.98), ported faithfully from
+     m302-work/proto3d-morvane.html: grey layered vestments, the raised
+     deep cowl with its still shadowed face (no smoke — his dark is
+     patient), hair falls, the programme's first gripping hand, and the
+     held crystal staff with its breathing point light. Win scene only —
+     the loss mood is Umbra's alone (M236), so bopts.lose never arrives
+     true for this builder; the gate keeps it that way. */
+  function buildMorvane(THREE, scene, H, bopts) {
+    var CRYSTAL = 0x9a6ae0; // the portrait's lantern violet
+    function hemWave(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var y = pos.getY(i);
+        if (y < 0.06) {
+          var th = Math.atan2(pos.getZ(i), pos.getX(i));
+          pos.setY(i, y + (0.06 - y) / 0.06 * 0.028 * (0.5 + 0.5 * Math.sin(th * 8 + 0.4)));
+        }
+      }
+      geo.computeVertexNormals();
+    }
+    /* Morvane's cloth is GREY (the portrait's vestments), not Umbra's violet-black. */
+    var clothMat  = new THREE.MeshStandardMaterial({ color: 0x23202a, roughness: 0.92, metalness: 0.04 });
+    var mantleMat = new THREE.MeshStandardMaterial({ color: 0x1b1822, roughness: 0.86, metalness: 0.05 });
+    var panelMat  = new THREE.MeshStandardMaterial({ color: 0x302b3c, roughness: 0.9,  metalness: 0.03 });
+    var hoodMat   = new THREE.MeshStandardMaterial({ color: 0x221f29, roughness: 0.84, metalness: 0.05 });
+    var boneMat   = new THREE.MeshStandardMaterial({ color: 0xcfc4a4, roughness: 0.55, metalness: 0.15 });
+    var brassMat  = new THREE.MeshStandardMaterial({ color: 0x8a7a52, roughness: 0.42, metalness: 0.75 });
+    var woodMat   = new THREE.MeshStandardMaterial({ color: 0x2a1d13, roughness: 0.9,  metalness: 0.02 });
+    var ironMat   = new THREE.MeshStandardMaterial({ color: 0x3a3a42, roughness: 0.5,  metalness: 0.6 });
+    var skinMat   = new THREE.MeshStandardMaterial({ color: 0xb9b0a0, roughness: 0.7,  metalness: 0.0 });
+    var hairMat   = new THREE.MeshStandardMaterial({ color: 0x26222c, roughness: 0.95, metalness: 0.02 });
+    var silverMat = new THREE.MeshStandardMaterial({ color: 0x9a97a8, roughness: 0.8,  metalness: 0.05 });
+
+    /* Everything (staff included) rides in one group so the idle sway
+       never breaks the hand's grip. */
+    var morvane = new THREE.Group();
+
+    // — Robe: lathe profile, hem → neck. Folds deepen toward the hem.
+    var robePts = [
+      [0.68, 0.00], [0.67, 0.05], [0.61, 0.26], [0.51, 0.70], [0.425, 1.15],
+      [0.385, 1.55], [0.385, 1.90], [0.42, 2.22], [0.47, 2.46], [0.50, 2.57],
+      [0.40, 2.70], [0.235, 2.78], [0.18, 2.82]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var robeGeo = H.displaceFolds(new THREE.LatheGeometry(robePts, 96),
+      8, function (y) { return 0.06 - 0.048 * Math.min(1, Math.max(0, (y - 0.1) / 2.3)); }, 0.4);
+    hemWave(robeGeo);
+    var robe = new THREE.Mesh(robeGeo, clothMat);
+    robe.castShadow = true; robe.receiveShadow = true;
+    morvane.add(robe);
+
+    // — Vestment front panel: the portrait's layered front — a lighter partial
+    // lathe riding just off the robe's front, neck to near-hem.
+    var panelPts = [
+      [0.635, 0.35], [0.545, 0.70], [0.46, 1.15], [0.42, 1.55],
+      [0.42, 1.90], [0.455, 2.22], [0.50, 2.46], [0.475, 2.60]
+    ].map(function (p) { return new THREE.Vector2(p[0] + 0.014, p[1]); });
+    var panel = new THREE.Mesh(new THREE.LatheGeometry(panelPts, 32, -0.52, 1.04), panelMat);
+    panel.castShadow = true;
+    morvane.add(panel);
+    // Bone frog clasps down the panel (the portrait's pale front fastenings).
+    [[2.32, 0.502], [1.98, 0.434], [1.64, 0.434]].forEach(function (c) {
+      var clasp = new THREE.Mesh(new THREE.OctahedronGeometry(0.034), boneMat);
+      clasp.scale.set(1, 1.5, 0.6);
+      clasp.position.set(0, c[0], c[1] + 0.02);
+      morvane.add(clasp);
+    });
+
+    // — Mantle / cowl: heavier band over the shoulders, dipped at the chest,
+    // with the portrait's pale stitched edge as bone tubes down its front.
+    var mantlePts = [
+      [0.52, 2.28], [0.56, 2.42], [0.52, 2.58], [0.40, 2.70], [0.27, 2.76]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var mantleGeo = new THREE.LatheGeometry(mantlePts, 96);
+    (function dipChest(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), z = pos.getZ(i);
+        var r = Math.hypot(x, z); if (r < 1e-4) continue;
+        var facing = z / r;
+        if (facing > 0) pos.setY(i, pos.getY(i) - 0.10 * facing * facing);
+      }
+      geo.computeVertexNormals();
+    })(mantleGeo);
+    H.displaceFolds(mantleGeo, 7, function () { return 0.034; }, 0.4);
+    var mantle = new THREE.Mesh(mantleGeo, mantleMat);
+    mantle.castShadow = true;
+    morvane.add(mantle);
+    [-0.52, 0.52].forEach(function (phi) {   // stitched edges down the front opening
+      var pts = [];
+      [[0.475, 2.60], [0.50, 2.46], [0.455, 2.22], [0.42, 1.90], [0.42, 1.70]].forEach(function (pr) {
+        pts.push(new THREE.Vector3((pr[0] + 0.016) * Math.sin(phi), pr[1], (pr[0] + 0.016) * Math.cos(phi)));
+      });
+      var stitch = new THREE.Mesh(
+        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.008, 6), boneMat);
+      morvane.add(stitch);
+    });
+
+    // — Hood: a DEEP cowl (the cinematic raises it; the face is lost in still
+    // shadow). Brow ledge shears forward over the opening so the key light
+    // cannot reach the face; crown tips forward less than Umbra's peak.
+    var HOOD_OPEN = 0.52;
+    var hoodPts = [
+      [0.37, 2.55], [0.435, 2.74], [0.45, 2.95], [0.425, 3.13],
+      [0.345, 3.27], [0.22, 3.37], [0.11, 3.415], [0.02, 3.44]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var hoodGeo = H.displaceFolds(
+      new THREE.LatheGeometry(hoodPts, 72, HOOD_OPEN, Math.PI * 2 - HOOD_OPEN * 2),
+      6, function () { return 0.022; }, 1.1);
+    (function browAndCrown(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var y = pos.getY(i), z = pos.getZ(i);
+        if (y > 2.95 && z > 0) pos.setZ(i, z + (y - 2.95) * 0.30);   // the brow ledge
+        if (y > 3.10) pos.setZ(i, pos.getZ(i) + (y - 3.10) * 0.22); // the crown tip
+      }
+      geo.computeVertexNormals();
+    })(hoodGeo);
+    var hood = new THREE.Mesh(hoodGeo, hoodMat);
+    hood.castShadow = true;
+    morvane.add(hood);
+    var hoodLiner = new THREE.Mesh(hoodGeo,
+      new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide }));
+    hoodLiner.scale.set(0.965, 1.0, 0.965);
+    hoodLiner.position.y = 0.004;
+    morvane.add(hoodLiner);
+
+    // — The shadowed face: a pure-black volume recessed DEEPER than Umbra's
+    // void — no smoke, no features; still darkness.
+    var shadowHead = new THREE.Mesh(
+      new THREE.SphereGeometry(0.175, 24, 18),
+      new THREE.MeshBasicMaterial({ color: 0x000000 }));
+    shadowHead.position.set(0, 2.99, -0.06);
+    shadowHead.scale.set(0.92, 1.18, 0.98);
+    morvane.add(shadowHead);
+
+    // — Hair: long locks spill from under the hood's front edges onto the
+    // chest (the portrait's grey-streaked fall), each with one silver strand.
+    [-1, 1].forEach(function (side) {
+      var grp = new THREE.Group();
+      grp.position.set(0.185 * side, 2.54, 0.42);
+      grp.rotation.x = -0.26;                 // tips the fall forward onto the chest
+      grp.rotation.z = 0.06 * side;
+      var lockGeo = H.displaceFolds(new THREE.CylinderGeometry(0.055, 0.02, 0.82, 8, 4),
+        3, function () { return 0.006; }, side * 2.0);
+      var lock = new THREE.Mesh(lockGeo, hairMat);
+      lock.scale.set(1.7, 1, 0.5);   // a sheet of hair, not a cord
+      lock.position.y = -0.41;
+      lock.castShadow = true;
+      grp.add(lock);
+      var strand = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.005, 0.66, 5), silverMat);
+      strand.position.set(0.032 * side, -0.40, 0.022);
+      grp.add(strand);
+      morvane.add(grp);
+    });
+
+    // — Left sleeve (+X, his left): hangs closed, hand hidden, as Umbra's do.
+    (function leftSleeve() {
+      var grp = new THREE.Group();
+      grp.position.set(0.47, 2.50, 0.02);
+      grp.rotation.z = -0.10;
+      grp.rotation.x = -0.06;
+      grp.rotation.y = 0.35;
+      var sGeo = H.displaceFolds(new THREE.CylinderGeometry(0.09, 0.165, 1.42, 20, 6),
+        5, function () { return 0.013; }, 1);
+      var sleeve = new THREE.Mesh(sGeo, clothMat);
+      sleeve.position.y = -0.71;
+      sleeve.castShadow = true;
+      grp.add(sleeve);
+      var cuff = new THREE.Mesh(new THREE.TorusGeometry(0.158, 0.026, 8, 24), mantleMat);
+      cuff.position.y = -1.39;
+      cuff.rotation.x = Math.PI / 2;
+      grp.add(cuff);
+      morvane.add(grp);
+    })();
+
+    // — Right sleeve (−X, his right): reaches in and forward to the staff grip.
+    (function rightSleeve() {
+      var grp = new THREE.Group();
+      grp.position.set(-0.47, 2.50, 0.02);
+      grp.rotation.z = -0.13;                 // bottom tips toward −X (the staff)
+      grp.rotation.x = -0.20;                 // and forward
+      var sGeo = H.displaceFolds(new THREE.CylinderGeometry(0.09, 0.15, 1.15, 20, 6),
+        5, function () { return 0.013; }, -1);
+      var sleeve = new THREE.Mesh(sGeo, clothMat);
+      sleeve.position.y = -0.575;
+      sleeve.castShadow = true;
+      grp.add(sleeve);
+      var cuff = new THREE.Mesh(new THREE.TorusGeometry(0.143, 0.024, 8, 24), mantleMat);
+      cuff.position.y = -1.10;
+      cuff.rotation.x = Math.PI / 2;
+      grp.add(cuff);
+      morvane.add(grp);
+    })();
+
+    // — The gripping hand: gaunt and pale, wrapped on the shaft at the grip
+    // point the right sleeve reaches. Palm mass + three finger capsules + thumb.
+    (function hand() {
+      var grp = new THREE.Group();
+      grp.position.set(-0.60, 1.56, 0.22);    // = the staff's grip point
+      var palm = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 10), skinMat);
+      palm.scale.set(0.95, 1.6, 0.95);
+      grp.add(palm);
+      for (var i = 0; i < 3; i++) {
+        var f = new THREE.Mesh(new THREE.CapsuleGeometry(0.016, 0.075, 3, 8), skinMat);
+        f.position.set(0.045, 0.045 - i * 0.048, 0.028);
+        f.rotation.z = Math.PI / 2 - 0.25;    // curled across the shaft's front
+        f.rotation.y = 0.35;
+        grp.add(f);
+      }
+      var thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.017, 0.06, 3, 8), skinMat);
+      thumb.position.set(-0.05, -0.01, 0.045);
+      thumb.rotation.z = 0.9;
+      thumb.rotation.x = 0.4;
+      grp.add(thumb);
+      morvane.add(grp);
+    })();
+
+    // — Cincture.
+    var belt = new THREE.Mesh(new THREE.TorusGeometry(0.405, 0.028, 8, 56),
+      new THREE.MeshStandardMaterial({ color: 0x171310, roughness: 0.55, metalness: 0.2 }));
+    belt.rotation.x = Math.PI / 2; belt.position.y = 1.58;
+    morvane.add(belt);
+
+    /* — THE CRYSTAL STAFF — planted at his right, HELD (the title keyart's
+       famous unheld staff, finally in his hand). The lantern head rides above
+       his crown, as the portrait has it. */
+    var staff = new THREE.Group();
+    staff.position.set(-0.60, 0, 0.22);
+    staff.rotation.z = 0.03;                  // the top leans a breath outward
+    staff.rotation.x = -0.02;
+    var shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.042, 3.30, 10), woodMat);
+    shaft.position.y = 1.65;
+    shaft.castShadow = true;
+    staff.add(shaft);
+    [0.8, 1.9, 2.6].forEach(function (y) {    // knots in the twisted wood
+      var knot = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 6), woodMat);
+      knot.scale.set(1, 0.7, 1);
+      knot.position.set(0.018, y, 0.012);
+      staff.add(knot);
+    });
+    var spike = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.14, 10), ironMat);
+    spike.rotation.x = Math.PI; spike.position.y = -0.04;
+    staff.add(spike);
+    var collar = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.02, 8, 20), brassMat);
+    collar.rotation.x = Math.PI / 2; collar.position.y = 3.06;
+    staff.add(collar);
+    var flare = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.045, 0.12, 12), brassMat);
+    flare.position.y = 3.13;
+    staff.add(flare);
+    // The cage: four ribs bulging around the crystal + two rings, bone-brass.
+    var ribPts = [
+      new THREE.Vector3(0, 3.20, 0), new THREE.Vector3(0.10, 3.32, 0),
+      new THREE.Vector3(0.135, 3.48, 0), new THREE.Vector3(0.10, 3.64, 0),
+      new THREE.Vector3(0, 3.76, 0)
+    ];
+    for (var ri = 0; ri < 4; ri++) {
+      var rib = new THREE.Mesh(
+        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ribPts), 24, 0.014, 6), brassMat);
+      rib.rotation.y = ri * Math.PI / 2 + Math.PI / 4;
+      staff.add(rib);
+    }
+    [3.34, 3.62].forEach(function (y) {
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(0.125, 0.010, 6, 28), brassMat);
+      ring.rotation.x = Math.PI / 2; ring.position.y = y;
+      staff.add(ring);
+    });
+    var finial = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.16, 10), brassMat);
+    finial.position.y = 3.83;
+    staff.add(finial);
+    var hangRing = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.009, 6, 20), brassMat);
+    hangRing.position.y = 3.96; hangRing.rotation.y = 0.5;
+    staff.add(hangRing);
+    var dropFinial = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.12, 10), brassMat);
+    dropFinial.rotation.x = Math.PI; dropFinial.position.y = 3.16;
+    staff.add(dropFinial);
+    // The crystal: a faceted violet gem with a bright heart, breathing slowly.
+    var crystalMat = new THREE.MeshStandardMaterial({
+      color: 0x2a1450, emissive: CRYSTAL, emissiveIntensity: 1.5, roughness: 0.15, metalness: 0.1
+    });
+    var crystal = new THREE.Mesh(new THREE.OctahedronGeometry(0.105), crystalMat);
+    crystal.scale.set(0.82, 1.55, 0.82);
+    crystal.position.y = 3.48;
+    staff.add(crystal);
+    var crystalCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.055),
+      new THREE.MeshBasicMaterial({ color: 0xe6dcff }));
+    crystalCore.scale.set(0.82, 1.55, 0.82);
+    crystalCore.position.y = 3.48;
+    staff.add(crystalCore);
+    var crystalLight = new THREE.PointLight(CRYSTAL, 0.85, 10, 1);
+    crystalLight.position.y = 3.48;
+    staff.add(crystalLight);
+    morvane.add(staff);
+    scene.add(morvane);
+
+    /* — Crystal wisps: tiny lights swirling INSIDE the gem (the portrait shows
+       wisp shapes in the crystal). Child of the staff: they ride its sway. */
+    var WISP_N = 8;
+    var wisps = H.pointsSystem(WISP_N, H.smokeTex, THREE.AdditiveBlending);
+    staff.add(wisps);
+    var wispSeeds = [];
+    (function () { var r = H.rng(31); for (var i = 0; i < WISP_N; i++) wispSeeds.push([r(), r(), r(), r()]); })();
+    var WISP_C = new THREE.Color(0xd9c8ff);
+    function updateWisps(t) {
+      for (var i = 0; i < WISP_N; i++) {
+        var s = wispSeeds[i];
+        var ang = s[0] * Math.PI * 2 + t * (0.7 + s[2] * 0.5) * (s[3] > 0.5 ? 1 : -1);
+        var y = 3.48 + Math.sin(t * 0.9 + s[1] * 8.0) * 0.09;
+        H.setP(wisps, i, Math.cos(ang) * 0.045, y, Math.sin(ang) * 0.045,
+          2.6 + s[1] * 1.4, 0.5 + 0.4 * Math.sin(t * 1.7 + s[0] * 20.0), WISP_C);
+      }
+      H.markDirty(wisps);
+    }
+
+    /* — Hood motes: the dark in his hood is not empty — a few ultra-dim grave
+       motes drift in the shadow. Deliberately near-invisible; stillness, not
+       Umbra's churn. Child of the figure. */
+    var HOODMOTE_N = 7;
+    var hoodMotes = H.pointsSystem(HOODMOTE_N, H.smokeTex, THREE.AdditiveBlending);
+    morvane.add(hoodMotes);
+    var hmSeeds = [];
+    (function () { var r = H.rng(97); for (var i = 0; i < HOODMOTE_N; i++) hmSeeds.push([r(), r(), r(), r()]); })();
+    var HM_C = new THREE.Color(0x8a9a5b);
+    function updateHoodMotes(t) {
+      for (var i = 0; i < HOODMOTE_N; i++) {
+        var s = hmSeeds[i];
+        var x = (s[0] - 0.5) * 0.17 + Math.sin(t * 0.22 + s[3] * 15.0) * 0.02;
+        var y = 2.99 + (s[1] - 0.5) * 0.24 + Math.sin(t * 0.16 + s[0] * 11.0) * 0.02;
+        var z = 0.16 + (s[2] - 0.5) * 0.07;
+        H.setP(hoodMotes, i, x, y, z, 1.6 + s[3] * 1.0, 0.02 + 0.03 * Math.abs(Math.sin(t * 0.4 + s[1] * 25.0)), HM_C);
+      }
+      H.markDirty(hoodMotes);
+    }
+
+    /* — THE MOTHS — the portrait's signature life. Twelve pale moths as ONE
+       merged geometry (2 wing-quads each, vertices recomputed per frame from
+       seeds — pure f(t), one draw call). They cluster on the crystal light,
+       with a few around his shoulders and hem. */
+    var MOTH_N = 12;
+    var mothGeo = new THREE.BufferGeometry();
+    var mothPos = new Float32Array(MOTH_N * 4 * 3 * 3);   // 4 tris per moth
+    mothGeo.setAttribute('position', new THREE.BufferAttribute(mothPos, 3));
+    var moths = new THREE.Mesh(mothGeo, new THREE.MeshBasicMaterial({
+      color: 0xe8e0cc, transparent: true, opacity: 0.72, side: THREE.DoubleSide, depthWrite: false
+    }));
+    moths.frustumCulled = false;
+    morvane.add(moths);
+    var mothSeeds = [];
+    (function () { var r = H.rng(2024); for (var i = 0; i < MOTH_N; i++) mothSeeds.push([r(), r(), r(), r(), r(), r()]); })();
+    var mothAnchors = [];
+    (function () {
+      // anchors are in FIGURE space: crystal cluster (staff top), shoulders, hem
+      var r = H.rng(555);
+      for (var i = 0; i < MOTH_N; i++) {
+        if (i < 7) mothAnchors.push([-0.60 + (r() - 0.5) * 0.7, 3.30 + r() * 0.55, 0.22 + (r() - 0.5) * 0.7]);
+        else if (i < 10) mothAnchors.push([(r() - 0.5) * 1.5, 2.30 + r() * 0.30, 0.55 + (r() - 0.5) * 0.3]);
+        else mothAnchors.push([(r() - 0.5) * 1.6, 1.10 + r() * 0.7, 0.45 + (r() - 0.5) * 0.6]);
+      }
+    })();
+    function updateMoths(t) {
+      var o = 0;
+      for (var i = 0; i < MOTH_N; i++) {
+        var s = mothSeeds[i], a = mothAnchors[i];
+        var px = a[0] + Math.sin(t * (0.31 + s[0] * 0.22) + s[3] * 20.0) * (0.13 + s[1] * 0.13);
+        var py = a[1] + Math.sin(t * (0.53 + s[1] * 0.3) + s[4] * 20.0) * 0.085;
+        var pz = a[2] + Math.cos(t * (0.27 + s[2] * 0.2) + s[5] * 20.0) * (0.13 + s[0] * 0.12);
+        var heading = Math.atan2(
+          Math.cos(t * (0.31 + s[0] * 0.22) + s[3] * 20.0),
+          -Math.sin(t * (0.27 + s[2] * 0.2) + s[5] * 20.0)) + Math.PI / 2;
+        var flap = Math.sin(t * (9.0 + s[2] * 4.0) + s[3] * 40.0) * 0.85;
+        var span = 0.048 + s[4] * 0.024;
+        var ch = Math.cos(heading), sh = Math.sin(heading);
+        var cf = Math.cos(flap), sf = Math.sin(flap);
+        // local wing corners (forewing + hindwing per side), rotated by flap
+        // around the body's forward axis, then by heading around Y.
+        for (var side = -1; side <= 1; side += 2) {
+          var corners = [
+            [0, 0, 0.030], [side * span, 0, 0.042], [side * span * 0.94, 0, -0.030],
+            [0, 0, 0.030], [side * span * 0.94, 0, -0.030], [0, 0, -0.026]
+          ];
+          for (var v = 0; v < 6; v++) {
+            var lx = corners[v][0] * cf, ly = Math.abs(corners[v][0]) * sf, lz = corners[v][2];
+            mothPos[o++] = px + lx * ch + lz * sh;
+            mothPos[o++] = py + ly;
+            mothPos[o++] = pz - lx * sh + lz * ch;
+          }
+        }
+      }
+      mothGeo.attributes.position.needsUpdate = true;
+    }
+
+    /* — Ground mist: the pilot's slow swirl, grave-tinted. */
+    var MIST_N = 26;
+    var mist = H.pointsSystem(MIST_N, H.smokeTex, THREE.NormalBlending);
+    scene.add(mist);
+    var mistSeeds = [];
+    (function () { var r = H.rng(4242); for (var i = 0; i < MIST_N; i++) mistSeeds.push([r(), r(), r(), r()]); })();
+    var MIST_C = new THREE.Color(0x0a0d0a), MIST_V = new THREE.Color(0x1c2620);
+    function updateMist(t) {
+      for (var i = 0; i < MIST_N; i++) {
+        var s = mistSeeds[i];
+        var ang = s[0] * Math.PI * 2 + t * 0.05 * (s[3] > 0.5 ? 1 : -1);
+        var rad = 0.95 + s[1] * 1.5;
+        H.setP(mist, i, Math.cos(ang) * rad, 0.12 + s[2] * 0.4, Math.sin(ang) * rad,
+          190 + s[1] * 150, 0.10 + s[3] * 0.05, s[2] > 0.6 ? MIST_V : MIST_C);
+      }
+      H.markDirty(mist);
+    }
+
+    /* — Grave motes: dust SETTLING (Morvane's air falls, Umbra's rises) —
+       bone, moss and a little violet. */
+    var MOTE_N = 150;
+    var motes = H.pointsSystem(MOTE_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(motes);
+    var moteSeeds = [];
+    (function () { var r = H.rng(99); for (var i = 0; i < MOTE_N; i++) moteSeeds.push([r(), r(), r(), r()]); })();
+    var MOTE_B = new THREE.Color(0xd8cfb8), MOTE_G = new THREE.Color(0x8a9a5b), MOTE_V = new THREE.Color(0xa678e8);
+    function updateMotes(t) {
+      for (var i = 0; i < MOTE_N; i++) {
+        var s = moteSeeds[i];
+        var x = (s[0] - 0.5) * 13 + Math.sin(t * 0.10 + s[3] * 20) * 0.4;
+        var y = 5.4 - ((s[1] + t * 0.008 * (0.5 + s[3])) % 1) * 5.2;
+        var z = (s[2] - 0.5) * 13 + Math.cos(t * 0.08 + s[0] * 20) * 0.4;
+        var tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.6 + s[3] * 31));
+        H.setP(motes, i, x, y, z, 2.2 + s[3] * 2.4, 0.13 * tw, s[1] > 0.82 ? MOTE_V : (s[1] > 0.45 ? MOTE_B : MOTE_G));
+      }
+      H.markDirty(motes);
+    }
+
+    /* — The crystal pulse: the gem and its light breathe together — a pure
+       function of scene time (the pilot folded this into its render loop;
+       here it rides the updater array like everything else). */
+    function updateCrystalPulse(t) {
+      var pulse = Math.sin(t * 0.8 + 1.0);
+      crystalMat.emissiveIntensity = 1.5 + 0.4 * pulse;
+      crystalLight.intensity = 0.85 + 0.25 * pulse;
+    }
+    return { group: morvane, updaters: [updateWisps, updateHoodMotes, updateMoths, updateMist, updateMotes, updateCrystalPulse] };
+  }
+
+  /* M303: per-hero scene parameters for the shared rig + environment.
+     The lose columns are Umbra's alone (keyLose / rimLoseI / foldLoseI);
+     a null lose value means the win value stands in both moods. The
+     grade override is Morvane's: his DOM grade carries HERO_ACCENT.graven
+     (the M302 pilot's #grade) instead of the stylesheet's Umbra violet —
+     Umbra's entry stays null, so his grade div is byte-identical to the
+     M298 build (stylesheet-governed, untouched). */
+  var BUILDERS = {
+    weaver: {
+      build: buildUmbra,
+      bg: 0x07040e, fog: 0x0a0616,
+      hemi: [0x241b38, 0x090612, 0.10],
+      key: [0xffdfb4, 0.6], keyLose: [0xdfe6ff, 0.38],
+      rim: 0x6d3bd1, rimI: 1.7, rimLoseI: 1.05,
+      rim2: [0x45207e, 0.5, 20], up: [0x6d3bd1, 0.15, 5],
+      fold: [0x8fa3ff, 0.28], foldLoseI: 0.18,
+      accent: 0x6d3bd1, ringOp: [0.15, 0.09],
+      floorStops: ['#150e26', '#0c0718', '#040208'],
+      floorRing: 'rgba(160,130,220,0.10)', floorSpoke: 'rgba(160,130,220,0.07)',
+      stone: [0x130d20, 0x0f0a18], crush: 0x191325, tombstones: false,
+      sway: [0.045, 0.006], grade: null
+    },
+    graven: {
+      build: buildMorvane,
+      bg: 0x05070a, fog: 0x07090a,
+      hemi: [0x1e2a24, 0x070806, 0.10],
+      key: [0xdfe8ff, 0.55], keyLose: null,
+      rim: 0xa678e8, rimI: 1.0, rimLoseI: null,
+      rim2: [0x2c4a41, 0.6, 20], up: [0x3e6b5e, 0.18, 5],
+      fold: [0x9fb4c8, 0.26], foldLoseI: null,
+      accent: 0x3e6b5e, ringOp: [0.17, 0.10],
+      floorStops: ['#12140f', '#0a0c09', '#030403'],
+      floorRing: 'rgba(150,170,130,0.09)', floorSpoke: 'rgba(150,170,130,0.06)',
+      stone: [0x100e16, 0x0c0a10], crush: 0x141a16, tombstones: true,
+      sway: [0.04, 0.005],
+      grade: { background: 'linear-gradient(160deg, rgba(216,207,184,.85), rgba(62,107,94,.8) 55%, rgba(44,74,65,.9))', opacity: '0.30' }
+    }
+  };
+
+  function mount(container, opts) {
+    opts = opts || {};
+    var mood = opts.mood || 'win';
+    var lose = mood === 'lose';
+    var MS = opts.ms || 5800;
+    var B = BUILDERS[opts.hero] || BUILDERS.weaver; // no hero named (the M298 pose drives) = Umbra, as shipped
+    var renderer;
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' }); // throws when WebGL is unavailable — the caller catches and falls back
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    var W = container.clientWidth || window.innerWidth, H = container.clientHeight || window.innerHeight;
+    renderer.setSize(W, H);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    container.appendChild(renderer.domElement);
+    container._glRenderer = renderer; // if the scene build throws partway, cine3dTryMount can still reach the renderer and release its context
+    var grade = document.createElement('div'); grade.className = 'cine3d-grade'; container.appendChild(grade);
+    if (B.grade) { grade.style.background = B.grade.background; grade.style.opacity = B.grade.opacity; } // M303: a builder may carry its own DOM grade (Morvane); Umbra's stays the stylesheet's
+    var vig = document.createElement('div'); vig.className = 'cine3d-vig'; container.appendChild(vig);
+
+    var scene = new THREE.Scene();
+    scene.background = new THREE.Color(B.bg);
+    scene.fog = new THREE.FogExp2(B.fog, lose ? 0.034 : 0.024); // M298: the loss fog sits thicker on the same arena
+    var camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 80);
+
+    /* lights — the shared rig, dressed per hero from the BUILDERS table;
+       the loss cools and dims the key and drops the rim where the table
+       carries lose values (Umbra's row; Morvane never loses) */
+    scene.add(new THREE.HemisphereLight(B.hemi[0], B.hemi[1], B.hemi[2]));
+    var key = new THREE.SpotLight(lose && B.keyLose ? B.keyLose[0] : B.key[0], lose && B.keyLose ? B.keyLose[1] : B.key[1], 30, 0.55, 0.6, 1);
+    key.position.set(2.8, 5.2, 4.4);
+    key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
+    key.shadow.bias = -0.0004;
+    key.target.position.set(0, 1.2, 0);
+    scene.add(key, key.target);
+    var rim = new THREE.DirectionalLight(B.rim, lose && B.rimLoseI !== null ? B.rimLoseI : B.rimI);
+    rim.position.set(-3.6, 3.6, -3.8);
+    scene.add(rim);
+    var rim2 = new THREE.PointLight(B.rim2[0], B.rim2[1], B.rim2[2]);
+    rim2.position.set(3.4, 1.4, -2.6);
+    scene.add(rim2);
+    var up = new THREE.PointLight(B.up[0], B.up[1], B.up[2]);
+    up.position.set(0, 0.35, 1.7);
+    scene.add(up);
+    var foldKey = new THREE.DirectionalLight(B.fold[0], lose && B.foldLoseI !== null ? B.foldLoseI : B.fold[1]);
+    foldKey.position.set(3.5, 2.2, 3.0);
+    scene.add(foldKey);
+
+    /* helpers — the pilots', verbatim; shared by both builders via H */
+    function softDiscTexture(inner, outer) {
+      var c = document.createElement('canvas'); c.width = c.height = 128;
+      var g = c.getContext('2d');
+      var gr = g.createRadialGradient(64, 64, 2, 64, 64, 64);
+      gr.addColorStop(0, inner); gr.addColorStop(1, outer);
+      g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    }
+    function rng(seed) {
+      var a = seed >>> 0;
+      return function () {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        var t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    function displaceFolds(geo, folds, ampFn, phase) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+        var r = Math.hypot(x, z);
+        if (r < 1e-4) continue;
+        var th = Math.atan2(z, x);
+        var a = ampFn(y);
+        var d = Math.sin(th * folds + phase + 1.6 * Math.sin(y * 1.35)) * a
+              + Math.sin(th * (folds + 6) - y * 3.1) * a * 0.35;
+        var s = (r + d) / r;
+        pos.setX(i, x * s); pos.setZ(i, z * s);
+      }
+      geo.computeVertexNormals();
+      return geo;
+    }
+    /* particles — the pilots' shared shader system */
     function pointsSystem(count, tex, blending) {
       var geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
@@ -10610,7 +11210,6 @@ var Cine3D = (function () {
       pts.frustumCulled = false;
       return pts;
     }
-    var smokeTex = softDiscTexture('rgba(255,255,255,1)', 'rgba(255,255,255,0)');
     function setP(sys, i, x, y, z, size, alpha, col) {
       var p = sys.geometry.attributes;
       p.position.setXYZ(i, x, y, z);
@@ -10623,96 +11222,26 @@ var Cine3D = (function () {
       p.position.needsUpdate = true; p.aSize.needsUpdate = true;
       p.aAlpha.needsUpdate = true; p.aTint.needsUpdate = true;
     }
-    var SMOKE_N = 150;
-    var smoke = pointsSystem(SMOKE_N, smokeTex, THREE.NormalBlending);
-    scene.add(smoke);
-    var smokeSeeds = [];
-    (function () { var r = rng(1337); for (var i = 0; i < SMOKE_N; i++) smokeSeeds.push([r(), r(), r(), r()]); })();
-    var SMOKE_DARK = new THREE.Color(0x07040c), SMOKE_GREY = new THREE.Color(0x413358);
-    var tmpC = new THREE.Color();
-    function updateSmoke(t) {
-      for (var i = 0; i < SMOKE_N; i++) {
-        var s = smokeSeeds[i];
-        var life = 3.4 + s[3] * 2.4;
-        var ph = ((t / life) + s[0] * 7.0) % 1;
-        var ang = s[1] * Math.PI * 2 + t * (0.25 + s[2] * 0.2) * (s[3] > 0.5 ? 1 : -1);
-        var grow = 0.35 + ph * 0.85;
-        // The smoke lives in the shell between the void ball (front ≈ z 0.17)
-        // and the hood rim (z ≈ 0.37) — behind the ball it would be culled.
-        var x = Math.cos(ang) * 0.115 * grow * (0.6 + s[2] * 0.5);
-        var z = 0.21 + Math.sin(ang) * 0.07 * grow;
-        var y = 3.03 + Math.sin(ph * Math.PI * 2 + s[0] * 9.0) * 0.085;
-        if (s[3] > 0.58 && ph > 0.5) {
-          var k = (ph - 0.5) * 2;
-          y -= k * 0.95; z += k * 0.42; x *= (1 + k * 0.7);
-        }
-        var alpha = Math.pow(Math.sin(ph * Math.PI), 0.75) * 0.65;
-        tmpC.copy(s[2] > 0.45 ? SMOKE_GREY : SMOKE_DARK);
-        setP(smoke, i, x, y, z, 55 + ph * 75 + s[1] * 25, alpha, tmpC);
-      }
-      markDirty(smoke);
-    }
-    var SPARK_N = 26;
-    var sparks = pointsSystem(SPARK_N, smokeTex, THREE.AdditiveBlending);
-    scene.add(sparks);
-    var sparkSeeds = [];
-    (function () { var r = rng(777); for (var i = 0; i < SPARK_N; i++) sparkSeeds.push([r(), r(), r(), r()]); })();
-    var SPARK_C = new THREE.Color(0x9a6ae0);
-    function updateSparks(t) {
-      for (var i = 0; i < SPARK_N; i++) {
-        var s = sparkSeeds[i];
-        var x = (s[0] - 0.5) * 0.20, y = 3.03 + (s[1] - 0.5) * 0.26, z = 0.21 + (s[2] - 0.5) * 0.08;
-        var tw = Math.pow(Math.max(0, Math.sin(t * 2.1 + s[3] * 43.0)), 6);
-        setP(sparks, i, x, y, z, 3.0, tw * 0.85, SPARK_C);
-      }
-      markDirty(sparks);
-    }
-    var MIST_N = 26;
-    var mist = pointsSystem(MIST_N, smokeTex, THREE.NormalBlending);
-    scene.add(mist);
-    var mistSeeds = [];
-    (function () { var r = rng(4242); for (var i = 0; i < MIST_N; i++) mistSeeds.push([r(), r(), r(), r()]); })();
-    var MIST_C = new THREE.Color(0x0b0616), MIST_V = new THREE.Color(0x241a3d);
-    function updateMist(t) {
-      for (var i = 0; i < MIST_N; i++) {
-        var s = mistSeeds[i];
-        var ang = s[0] * Math.PI * 2 + t * 0.05 * (s[3] > 0.5 ? 1 : -1);
-        var rad = 0.95 + s[1] * 1.5;
-        setP(mist, i, Math.cos(ang) * rad, 0.12 + s[2] * 0.4, Math.sin(ang) * rad,
-          190 + s[1] * 150, 0.10 + s[3] * 0.05, s[2] > 0.6 ? MIST_V : MIST_C);
-      }
-      markDirty(mist);
-    }
-    var MOTE_N = 170;
-    var motes = pointsSystem(MOTE_N, smokeTex, THREE.AdditiveBlending);
-    scene.add(motes);
-    var moteSeeds = [];
-    (function () { var r = rng(99); for (var i = 0; i < MOTE_N; i++) moteSeeds.push([r(), r(), r(), r()]); })();
-    var MOTE_V = new THREE.Color(0x8a6ae0), MOTE_A = new THREE.Color(0xd8a860);
-    function updateMotes(t) {
-      for (var i = 0; i < MOTE_N; i++) {
-        var s = moteSeeds[i];
-        var x = (s[0] - 0.5) * 13 + Math.sin(t * 0.11 + s[3] * 20) * 0.4;
-        var y = 0.2 + ((s[1] + t * 0.008 * (0.5 + s[3])) % 1) * 5.2;
-        var z = (s[2] - 0.5) * 13 + Math.cos(t * 0.09 + s[0] * 20) * 0.4;
-        var tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.7 + s[3] * 31));
-        setP(motes, i, x, y, z, 2.2 + s[3] * 2.4, 0.16 * tw, s[1] > 0.78 ? MOTE_A : MOTE_V);
-      }
-      markDirty(motes);
-    }
+    var smokeTex = softDiscTexture('rgba(255,255,255,1)', 'rgba(255,255,255,0)');
+    var H = { softDiscTexture: softDiscTexture, rng: rng, displaceFolds: displaceFolds, pointsSystem: pointsSystem, setP: setP, markDirty: markDirty, smokeTex: smokeTex };
 
-    /* environment — the pilot's geometry */
+    /* the figure — built by the hero's builder (figure + its particle
+       systems join the scene inside the builder) */
+    var built = B.build(THREE, scene, H, { lose: lose });
+    var figure = built.group;
+
+    /* environment — the shared coliseum, dressed per hero */
     (function floor() {
       var c = document.createElement('canvas'); c.width = c.height = 512;
       var g = c.getContext('2d');
       var gr = g.createRadialGradient(256, 256, 20, 256, 256, 256);
-      gr.addColorStop(0, '#150e26'); gr.addColorStop(0.45, '#0c0718'); gr.addColorStop(1, '#040208');
+      gr.addColorStop(0, B.floorStops[0]); gr.addColorStop(0.45, B.floorStops[1]); gr.addColorStop(1, B.floorStops[2]);
       g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
-      g.strokeStyle = 'rgba(160,130,220,0.10)'; g.lineWidth = 2;
+      g.strokeStyle = B.floorRing; g.lineWidth = 2;
       [70, 120, 175, 225].forEach(function (r) {
         g.beginPath(); g.arc(256, 256, r, 0, Math.PI * 2); g.stroke();
       });
-      g.strokeStyle = 'rgba(160,130,220,0.07)';
+      g.strokeStyle = B.floorSpoke;
       for (var a = 0; a < 16; a++) {
         g.beginPath();
         g.moveTo(256 + Math.cos(a / 16 * Math.PI * 2) * 66, 256 + Math.sin(a / 16 * Math.PI * 2) * 66);
@@ -10733,15 +11262,33 @@ var Cine3D = (function () {
       m.rotation.x = -Math.PI / 2; m.position.y = 0.012;
       scene.add(m);
     })();
-    [[1.58, 1.64, 0.15], [1.12, 1.145, 0.09]].forEach(function (r) {
+    [[1.58, 1.64, B.ringOp[0]], [1.12, 1.145, B.ringOp[1]]].forEach(function (r) {
       var m = new THREE.Mesh(new THREE.RingGeometry(r[0], r[1], 72),
-        new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: r[2], side: THREE.DoubleSide }));
+        new THREE.MeshBasicMaterial({ color: B.accent, transparent: true, opacity: r[2], side: THREE.DoubleSide }));
       m.rotation.x = -Math.PI / 2; m.position.y = 0.006;
       scene.add(m);
     });
+    if (B.tombstones) { // M303: Morvane's risen ground — four tilted slabs sunk in the mist (the M302 dressing)
+      var tStone = new THREE.MeshStandardMaterial({ color: 0x17141f, roughness: 1 });
+      [[2.3, -1.2, 0.4, 0.06, 0.0], [-2.6, -0.6, -0.3, -0.09, 0.0],
+       [1.6, 1.9, 2.6, 0.12, -0.15], [-2.5, 2.7, 2.9, -0.05, -0.20]].forEach(function (s) {
+        var grp = new THREE.Group();
+        var slab = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.78, 0.09), tStone);
+        slab.position.y = 0.30;
+        var capTop = new THREE.Mesh(new THREE.CylinderGeometry(0.275, 0.275, 0.09, 14, 1, false, 0, Math.PI), tStone);
+        capTop.rotation.z = Math.PI / 2;
+        capTop.rotation.y = Math.PI / 2;
+        capTop.position.y = 0.69;
+        grp.add(slab, capTop);
+        grp.position.set(s[0], s[4], s[1]);
+        grp.rotation.y = s[2];
+        grp.rotation.z = s[3];
+        scene.add(grp);
+      });
+    }
     (function colonnade() {
-      var stone = new THREE.MeshStandardMaterial({ color: 0x130d20, roughness: 1 });
-      var stone2 = new THREE.MeshStandardMaterial({ color: 0x0f0a18, roughness: 1 });
+      var stone = new THREE.MeshStandardMaterial({ color: B.stone[0], roughness: 1 });
+      var stone2 = new THREE.MeshStandardMaterial({ color: B.stone[1], roughness: 1 });
       for (var i = 0; i < 9; i++) {
         var a = (i / 9) * Math.PI * 2 + 0.35;
         var grp = new THREE.Group();
@@ -10764,7 +11311,7 @@ var Cine3D = (function () {
         btex.wrapS = THREE.RepeatWrapping; btex.repeat.set(2, 1);
         btex.encoding = THREE.sRGBEncoding;
         var bm = new THREE.Mesh(new THREE.CylinderGeometry(16, 16, 11, 48, 1, true),
-          new THREE.MeshBasicMaterial({ map: btex, color: 0x191325, side: THREE.BackSide, fog: true }));
+          new THREE.MeshBasicMaterial({ map: btex, color: B.crush, side: THREE.BackSide, fog: true }));
         bm.position.y = 3.4;
         bm.rotation.y = 2.2;
         scene.add(bm);
@@ -10806,11 +11353,12 @@ var Cine3D = (function () {
     var raf = 0, startNow = 0, disposed = false;
     function render(t, view) {
       if (disposed) return;
-      updateSmoke(t / 1000); updateSparks(t / 1000); updateMist(t / 1000); updateMotes(t / 1000);
+      var tSec = t / 1000;
+      for (var ui2 = 0; ui2 < built.updaters.length; ui2++) built.updaters[ui2](tSec); // M303: the builder's updater array (Umbra: smoke/sparks/mist/motes; Morvane: wisps/hood motes/moths/mist/motes/crystal pulse)
       var sway = lose ? 0.4 : 1; // M298: the loss stills the idle life down with everything else
-      umbra.rotation.y = 0.045 * sway * Math.sin(t * 0.00021);
-      umbra.rotation.z = 0.006 * sway * Math.sin(t * 0.0005);
-      umbra.scale.y = 1 + 0.004 * Math.sin(t * 0.0009);
+      figure.rotation.y = B.sway[0] * sway * Math.sin(t * 0.00021);
+      figure.rotation.z = B.sway[1] * sway * Math.sin(t * 0.0005);
+      figure.scale.y = 1 + 0.004 * Math.sin(t * 0.0009);
       if (view) placeCameraView(view);
       else placeCamera(t);
       renderer.render(scene, camera);
@@ -10894,6 +11442,7 @@ function cine3dTryMount(st, ov) {
   var handle = null;
   try {
     handle = Cine3D.mount(box, {
+      hero: st.heroId, // M303: the builder dispatch key (weaver | graven)
       mood: st.mood, ms: st.ms,
       backdrop: (typeof PORTRAITS !== 'undefined' ? (PORTRAITS['coliseum-cine'] || PORTRAITS.arena || '') : '')
     });

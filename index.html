@@ -9018,6 +9018,24 @@ function fitCardText(el) {
     if (fitTextEl(el, 6.0)) return;
     el.style.lineHeight = '1.08';
     fitTextEl(el, 6.0);
+    /* M275: a spill-gated last stage for OS/browser text zoom (125-150%).
+       The stages above always settle at 1.08 (fitTextEl returns nothing;
+       that uniform end state is the shipped, census-proven look), so this
+       stage measures the spill itself and fires ONLY when text still
+       overflows after them. The M275 census: at 100% no face in the
+       library reaches it (every face fits by the 1.08 stage), so the
+       standard build is untouched; at 150% zoom the longest text
+       (Malachar) was still 7px over — tighter leading, then a half-pixel
+       below the floor, only while still spilling. */
+    if (el.clientWidth && el.scrollHeight > el.clientHeight + 1) {
+      el.style.lineHeight = '1.02';
+      fitTextEl(el, 6.0);
+      if (el.scrollHeight > el.clientHeight + 1) fitTextEl(el, 5.5);
+      /* M275 (closing stage): still spilling at 5.5px under 150% zoom,
+         Malachar's face kept a last 2px — reclaim the text box's own
+         bottom padding for the text. Same gate: unreachable at 100%. */
+      if (el.scrollHeight > el.clientHeight + 1) { el.style.paddingBottom = '0px'; fitTextEl(el, 5.5); }
+    }
   } catch (e) {}
 }
 /* M253: names get the staged honesty M252 gave rules text. fitTextEl
@@ -9072,8 +9090,12 @@ function fitCardName(el, floorPx) {
    fit sweep owns the proof). */
 function fitBadges(el) {
   try {
-    if (el.scrollHeight > el.clientHeight + 1) {
-      el.style.height = Math.min(el.scrollHeight, 31) + 'px';
+    if (el.scrollHeight > el.clientHeight) { /* M275: the trigger drops the +1 tolerance — at 100% no strip in the library sits in the 1px band (M275 census: max sh-ch = 0 across 487 faces), so nothing changes there; at 125% text zoom three strips spilled exactly 1px and the old tolerance let the slice stand. */
+      /* M275: the growth cap rises 31 -> 44. At 100% no strip in the
+         library grows past 27px (M275 census of all 487 faces), so the
+         cap never binds there; under 150% text zoom Malachar's strip
+         sat AT the old cap with 7px still clipped. */
+      el.style.height = Math.min(el.scrollHeight, 44) + 'px';
       var row = el.closest ? el.closest('.ctyperow') : null;
       if (row) row.style.height = 'auto';
     }
@@ -9094,6 +9116,16 @@ function fitAllText() {
     document.querySelectorAll('.draftrow .cname').forEach(function (el) { fitTextEl(el, 7); });
     document.querySelectorAll('.draftrow .ctext').forEach(function (el) { fitCardText(el); });
     document.querySelectorAll('.card .cbadges').forEach(function (el) { fitBadges(el); }); // M253: a wrapped badge strip grows to show its second line
+    /* M275: badge growth takes its height from the text column (the
+       typerow grows, the flex ctext shrinks), so a text fitted against
+       the pre-growth column can spill once its strip has grown — at
+       150% text zoom Malachar's face measured 7px over in the settled
+       DOM for exactly this reason, past every fit stage. A closing
+       sweep re-fits any card text that NOW spills; the gate is the
+       same spill test the fit itself uses, and at 100% no face in the
+       library spills in the settled pass (M275 full-487 census), so
+       the standard build's fitted states are untouched. */
+    document.querySelectorAll('.card .ctext').forEach(function (el) { if (el.clientWidth && el.scrollHeight > el.clientHeight + 1) fitCardText(el); });
   } catch (e) {}
 }
 var __m81Game = null, __m81Decks = [99, 99], __m81LogLen = 0;

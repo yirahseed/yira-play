@@ -1009,6 +1009,13 @@
   body.calm #turnbanner, body.calm .marquee, body.calm .play-reveal { animation:none !important; opacity:1 !important; }
   body.calm .trap-reveal { animation:none !important; opacity:1 !important; transform:translate(-50%,-50%); }
   body.calm .floatnum, body.calm .fx-herofloat { animation:none !important; opacity:1 !important; }
+  /* M280: the death puff and the summon landing ring join the holds —
+     both are fade-OUT ceremonies (deathPuff ends at opacity 0, landRing
+     at opacity 0), so the crush erased them exactly as it erased the
+     banner family. Held static at their peak opacity; the JS removal
+     timers (780ms / 620ms) supply the brief hold's end. */
+  body.calm .fx-death { animation:none !important; opacity:.95 !important; }
+  body.calm .fx-landring { animation:none !important; opacity:.95 !important; }
   body.calm .hcluster.thinking .portrait { animation:none !important; box-shadow:0 0 0 3px rgba(177,140,255,.55), 0 0 10px rgba(177,140,255,.4); }
   body.calm .hcluster.lowlife .portrait { animation:none !important; box-shadow:0 0 0 3px rgba(255,70,70,.55), 0 0 12px rgba(255,40,40,.4); }
   body.calm .emblem.open-hit { animation:none !important; }
@@ -7338,7 +7345,7 @@ function applyArrivals() {
             var dd2 = D(inst2);
             if (dd2.legendary || (dd2.cost || 0) >= 8) tierCls = 'summon-epic';
             else if ((dd2.cost || 0) >= 5) tierCls = 'summon-heavy';
-            if (tierCls !== 'summon-in' && !calm && el.getBoundingClientRect) {
+            if ((tierCls !== 'summon-in' || calm) && el.getBoundingClientRect) { // M280: standard keeps the ring for heavy/epic arrivals only; under Calm EVERY arrival stamps it — the vapor and the settle are motion, Calm has neither, so the stilled ring is the landing tell at every weight
               var rr = el.getBoundingClientRect();
               if (rr.width || rr.height) spawnLandRing(rr.left + rr.width / 2, rr.top + rr.height - 4, (dd2.cardSchools && dd2.cardSchools[0]) || dd2.cardSchool);
             }
@@ -11296,7 +11303,7 @@ function spawnBoardFloat(x, y, text, cls) {
 /* The landing ring heavy/epic summons stamp on the arena floor. */
 function spawnLandRing(x, y, school) {
   try {
-    if (calm || !document.body || !document.createElement) return;
+    if (!document.body || !document.createElement) return; // M280: Calm no longer skips the ring — the body.calm hold (template.html) stills it into a static ring at full opacity for its 620ms life, the M279 pattern, so a Calm summon lands with a tell
     var n = document.createElement('div');
     n.className = 'fx-landring' + (school ? ' tint-' + school : '');
     n.style.left = x + 'px'; n.style.top = y + 'px';

@@ -1691,6 +1691,11 @@
   .bnote { font-size:11.5px; color:#a793d6; padding:1px 4px 7px 46px; }
   /* Title -> hub settle (entry only) + the How-to-Play sheet's frame. */
   .introsheet { border:1px solid rgba(238,194,94,.45); box-shadow:0 0 0 1px rgba(20,12,38,.9), 0 0 34px rgba(124,80,220,.35), inset 0 1px 0 rgba(255,240,210,.14); }
+  /* M309: landscape two-column wrappers for the intro + hero profile sheets.
+     Outside the landscape block the wrappers are display:contents, so the
+     stacked portrait sheets render exactly as before; the landscape block
+     below gives the wrappers real boxes. */
+  .introside, .intromain, .introbtns, .profside, .profmain { display:contents; }
   .intromedal { width:76px; height:76px; margin:2px auto 8px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:38px; background:radial-gradient(circle at 35% 30%, #3a2a63, #1d1332 72%); border:2px solid #c9a86a; box-shadow:inset 0 0 0 3px rgba(16,8,36,.75), inset 0 0 0 5px rgba(233,201,138,.30), 0 4px 14px rgba(0,0,0,.5); }
   /* The victory flourish is gold vapor (spawnVictoryFlourish). */
   .wisp.gold { filter:sepia(.55) saturate(2.4) hue-rotate(-16deg) brightness(1.18) blur(1.6px); }
@@ -1930,6 +1935,56 @@
     .endbox .endbtns button.big { margin-top:8px; padding:9px 6px; font-size:14px; }
     .leaguebox .league-trophy { font-size:42px; margin:2px 0 0; }
     .collschools .colllegend { display:none; }
+    /* M309: the intro sheet, two columns — the stacked sheet ran 410-478px
+       tall here and its Skip button sat below the fold on steps 0/2/3
+       (entirely off-screen on step 3), unreachable. */
+    .overlay .box.introsheet { display:flex; align-items:center; gap:18px; max-width:min(680px, 94vw) !important; padding:16px 20px; }
+    .introside { display:block; flex:0 0 168px; text-align:center; }
+    .intromain { display:block; flex:1; min-width:0; text-align:left; }
+    .intromain .introbtns { display:flex; gap:10px; }
+    .intromain .introbtns button.big { flex:1; margin-top:4px; }
+    /* M309: the settings sheet — with Calm on, its long Motion label wrapped
+       the button to three lines and pushed the box 27px past the fold,
+       clipping Done. Widen + compact, the sheetbox treatment. */
+    .overlay .box.setbox { width:min(520px, 94vw); max-width:520px !important; padding:14px 20px; }
+    .setbox .setcol button.big { padding:9px 6px; font-size:13.5px; }
+    .overlay .box.setbox > button.big { margin-top:10px; }
+    /* M309: the hero profile sheet, two columns — the stacked sheet ran
+       606px (foe) / 648px (mine) tall here, unscrollable, with the blurb
+       tail, zone rows and both buttons below the fold. */
+    .overlay .box.profbox { display:flex; align-items:center; gap:16px; width:min(740px, 94vw); max-width:740px; padding:12px 18px; }
+    .profside { display:block; flex:0 0 172px; text-align:center; }
+    .profmain { display:block; flex:1; min-width:0; text-align:left; }
+    .profbox .sigminis { justify-content:flex-start; margin:2px 0 8px; }
+    .profbox .sigminis .card { width:62px; height:92px; font-size:8px; }
+    .profbox .sigminis .card .cart { height:28px; }
+    .profbox .profile-blurb { font-size:12.5px; line-height:1.4; margin:5px 0; }
+    .profbox .profile-rows { font-size:12.5px; line-height:1.4; }
+    .profbox .profmain button.big { margin-top:8px; padding:10px; }
+    /* M309: the first-run deck step starved its deck region to a 25px
+       window at this height — the Fight button clipped to a sliver, its
+       centre covered by the Build button below. Taller cap + compact
+       chrome hands the region real room. */
+    .frdeckstep { max-height:96vh !important; padding:14px 18px; }
+    .frdeckstep p { font-size:12.5px !important; line-height:1.35 !important; }
+    .frdeckstep .scrollregion { min-height:84px; }
+    .frdeckstep .frdeck { padding:8px 10px; }
+  }
+  /* M309: small-portrait compaction — at 360x740 the pause sheet ran 816px
+     tall (its footer line wholly below the fold; with Calm on, the Abandon
+     button too) and the end box ran 822px, losing Change matchup outright.
+     The 402x874 cell keeps the roomy metrics; this block is width-gated. */
+  @media (max-width:380px) {
+    .overlay .box.sheetbox { padding:16px; }
+    .sheetbox .sheetgrid > button.big { padding:9px 6px; font-size:14.5px; margin-top:8px; }
+    .sheetbox .volrow { min-height:36px !important; }
+    .sheetbox .sheetgrid > p { font-size:11px; line-height:1.35; margin-top:6px; }
+    .overlay .box.endbox { padding:16px; }
+    .endbox .endstage { height:104px; margin:-16px -16px 8px; }
+    .endbox .statgrid { gap:4px; margin:4px 0; }
+    .endbox .stat { padding:5px 2px; }
+    .endbox button.big { margin-top:8px; padding:10px 6px; }
+    .endbox .endrow > button.big { margin-top:8px; }
   }
 </style>
 </head>
@@ -7432,10 +7487,10 @@ function heroProfileHtml() {
   var mineP = profileIdx === humanIdx; // M96 (Jesse): you should NOT learn the foe's class from their portrait — schools, stance and the deck peek are mine-only
   var st = (typeof STANCES !== 'undefined' && STANCES[p.stance]) || { name: 'Open Stance', icon: '🧘' };
   var schools = ((typeof HERO_SCHOOLS !== 'undefined' && HERO_SCHOOLS[p.heroId]) || []).map(function (s) { return SCHOOL_META[s].icon + ' ' + SCHOOL_META[s].name; }).join(' · ');
-  return '<div class="overlay" onclick="closeProfile()"><div class="box' + pi() + '">' +
-    '<div class="profile-portrait">' + heroPortrait(p.heroId) + '</div>' +
+  return '<div class="overlay" onclick="closeProfile()"><div class="box profbox' + pi() + '">' +
+    '<div class="profside"><div class="profile-portrait">' + heroPortrait(p.heroId) + '</div>' +
     '<h2>' + (SIGILS[p.heroId] || '') + ' ' + esc(p.hero.name) + '</h2>' +
-    '<div class="profile-life">❤️ ' + p.life + ' / ' + p.hero.life + ' life · 💎 ' + Math.max(0, G.availableMana(p)) + '/' + p.maxMana + ' mana</div>' +
+    '<div class="profile-life">❤️ ' + p.life + ' / ' + p.hero.life + ' life · 💎 ' + Math.max(0, G.availableMana(p)) + '/' + p.maxMana + ' mana</div></div>' + '<div class="profmain">' +
     (function () { var sigs = Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }); return sigs.length ? '<div class="sigminis">' + sigs.map(function (id) { return cardHtml(fakeInst(id), p.idx, {}); }).join('') + '</div>' : ''; })() +
     (function () { var sigs = Object.keys(CARDS).filter(function (id) { return CARDS[id].signatureFor === p.heroId; }); return '<div style="font-size:12.5px;color:#c4b6e8;margin-top:2px">◆ Signatures: ' + (sigs.length ? sigs.map(function (id) { return esc(CARDS[id].name); }).join(' · ') : 'none \u2014 no signature cards in the recovered library') + '</div>'; })() + // M268: a hero with no signatures (Korvash) names the zero instead of wearing a dangling empty label
     '<p class="profile-blurb">' + esc(p.hero.blurb) + '</p>' +
@@ -7443,7 +7498,7 @@ function heroProfileHtml() {
     '<div>🂠 ' + p.deck.length + ' in deck · ✋ ' + p.hand.length + ' in hand · 🪦 ' + p.graveyard.length + ' in graveyard · ⚔️ ' + p.board.length + ' on the field</div>' +
     (function () { var nm = (typeof nightmaresIn === 'function') ? nightmaresIn(p.deck) : 0; var bits = []; if (nm) bits.push('<div>🌑 ' + nm + ' Nightmare' + (nm === 1 ? '' : 's') + ' buried in this deck</div>'); if (p.traps && p.traps.length) bits.push('<div>❓ ' + p.traps.length + ' trap' + (p.traps.length === 1 ? '' : 's') + ' armed</div>'); return bits.join(''); })() + '</div>' +
     '<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button class="ghost" onclick="event.stopPropagation();closeProfile();showGraveyard(' + p.idx + ')">🪦 Graveyard</button>' + (mineP ? '<button class="ghost" onclick="event.stopPropagation();closeProfile();showDeck(' + p.idx + ')">🂠 Deck</button>' : '') + '</div>' +
-    '<button class="big" onclick="closeProfile()">Close</button></div></div>';
+    '<button class="big" onclick="closeProfile()">Close</button></div></div></div>';
 }
 var graveSort = 'recent';
 function toggleGraveSort() { try { sfx('click'); } catch (e) {} graveSort = graveSort === 'recent' ? 'cost' : 'recent'; render(); }
@@ -9201,7 +9256,7 @@ function firstRunHtml() {
     var v = loadVault(); var decks = vaultDecksFor(v, setup.me); var actId = v.active[setup.me] || null;
     var houseName = (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[setup.me]) || 'Default deck';
     function deckRow(id, name, sub) { return '<button class="big frdeck" onclick="firstRunUseDeck(' + (id ? '\'' + id + '\'' : 'null') + ')"><b>\u2694\uFE0F Fight with: ' + esc(name) + '</b><br><span style="font-size:12.5px;font-weight:400;color:#e6dcff">' + sub + '</span></button>'; }
-    return '<div class="overlay"><div class="box flowin" style="max-width:430px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden"><h2>\uD83C\uDCCF Choose your deck</h2>' +
+    return '<div class="overlay"><div class="box flowin frdeckstep" style="max-width:430px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden"><h2>\uD83C\uDCCF Choose your deck</h2>' +
       '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">' + (SIGILS[setup.me] || '') + ' <b>' + esc(HEROES[setup.me].name) + '</b> fights with the deck you pick \u2014 the tuned default, or one of your own from the vault.</p>' +
       '<div class="scrollregion">' +
       deckRow(null, houseName + ' (default)', actId ? 'The house build.' : 'The house build \u2014 in use now.') +
@@ -9224,11 +9279,11 @@ function introHtml() {
   ];
   var st = steps[introStep];
   return '<div class="overlay"><div class="box introsheet flowin" style="text-align:center;max-width:430px">' +
-    '<div class="intromedal"><span>' + st[0] + '</span></div><h2>' + st[1] + '</h2>' +
-    '<p style="color:#d9ccff;font-size:14.5px;line-height:1.55">' + st[2] + '</p>' +
+    '<div class="introside"><div class="intromedal"><span>' + st[0] + '</span></div><h2>' + st[1] + '</h2></div>' +
+    '<div class="intromain"><p style="color:#d9ccff;font-size:14.5px;line-height:1.55">' + st[2] + '</p>' +
     '<div style="margin:10px 0;font-size:12px;color:#a793d6">' + steps.map(function (_, i) { return i === introStep ? '●' : '○'; }).join(' ') + '</div>' +
-    (introStep < steps.length - 1 ? '<button class="big" onclick="introStep++;render()">Next →</button>' : '<button class="big" onclick="closeIntro()">⚔️ Enter the Coliseum</button>') +
-    '<button class="ghost big" onclick="closeIntro()">Skip</button></div></div>';
+    '<div class="introbtns">' + (introStep < steps.length - 1 ? '<button class="big" onclick="introStep++;render()">Next →</button>' : '<button class="big" onclick="closeIntro()">⚔️ Enter the Coliseum</button>') +
+    '<button class="ghost big" onclick="closeIntro()">Skip</button></div></div></div></div>';
 }
 /* M37 (LoR's associated cards): what a card is chained to — the other
    stages of its school chain, the sister signatures of its hero, and any

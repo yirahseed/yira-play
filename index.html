@@ -8954,7 +8954,7 @@ function firstRunSkip() { firstRunStage = null; render(); }
 function firstRunHtml() {
   if (firstRunStage === 'hero') {
     return '<div class="overlay"><div class="box flowin" style="max-width:430px;max-height:88vh;overflow-y:auto"><h2>\u2694\uFE0F Choose your hero</h2>' +
-      '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">Every duel starts before the first card. Your hero\u2019s passive is always on \u2014 pick the one whose plan fits you. You can change heroes any time from the hub.</p>' +
+      '<p style="color:#d9ccff;font-size:13.5px;line-height:1.5">Every duel starts before the first card. Every hero\u2019s passive shapes the duel \u2014 pick the one whose plan fits you. You can change heroes any time from the hub.</p>' +
       '<button class="ghost big" style="margin:0 0 6px" onclick="firstRunSkip()">Look around the hub first \u2192</button>' +
       Object.keys(HEROES).filter(function (id) { return !HEROES[id].held; }).map(function (id, hi) {
         /* M220 (2026-11-11): the row thumb now reads the hero's PORTRAIT_POS focal like every other consumer — the bare centered crop showed Volric's and Zareth's torsos, their faces sitting above the middle band. */
@@ -8978,7 +8978,7 @@ function firstRunHtml() {
 }
 function introHtml() {
   var steps = [
-    ['⚔️', 'First: a hero and a deck', 'Every duel starts before the first card is drawn. When the intro ends you will choose your hero — their passive is always on — and then the deck they fight with: the tuned default, or one of your own, built and named in the deck builder.'],
+    ['⚔️', 'First: a hero and a deck', 'Every duel starts before the first card is drawn. When the intro ends you will choose your hero — their passive shapes every duel — and then the deck they fight with: the tuned default, or one of your own, built and named in the deck builder.'],
     ['🃏', 'Your hand lives at the bottom', 'Your hand rests fanned at the bottom of the field — <b>tap it</b> to bring it up, and tap the field to rest it again. <b>Hold</b> any card to read it big, and <b>drag</b> it onto the field to play it. Dragging is the only way to play.'],
     ['⚔️', 'Combat, the Coliseum way', 'Play creatures, then attack when you are ready. The <b>defender chooses the blockers</b>, one for one — and damage is <b>permanent</b>: a wounded creature stays wounded. Attackers never tap, so your creatures can attack and still block next turn.'],
     ['🪤', 'Traps, mana, and falling', 'Mana grows and refills every turn. <b>Traps</b> are armed face-down on your turn and fire themselves when their moment comes; their mana stays reserved while they wait \u2014 and an unfired trap stands down at the start of your next turn, freeing its mana. A hero falls at 0 life — or by ending their own turn with an empty deck.'],

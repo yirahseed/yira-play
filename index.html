@@ -5818,6 +5818,14 @@ function flushEngineLog() {
   if (!G) return;
   while (lastEngineLog < G.log.length) {
     var entry = G.log[lastEngineLog++];
+    /* M274: the engine's axeBuff line carries the card's original
+       Spellslingers name ('Axe of the Pyre'); the shipped face name is
+       'Axe of Vengeance', and a log line naming a card that is nowhere
+       on the field reads as a different artifact. The battle log is a
+       presentation surface, so the correction rides the flush (the
+       M272 endReason precedent); the engine string itself is filed in
+       SPRINT M274 for a future engine wave. */
+    if (entry.indexOf('Axe of the Pyre') >= 0) entry = entry.split('Axe of the Pyre').join('Axe of Vengeance');
     say(entry, entry.indexOf('Nightmare') === 0 ? 'drain' : '');
   }
 }
@@ -11426,6 +11434,32 @@ function aiSummary(before) {
     if (parts.length) say('Enemy ' + parts.join('; ') + '.', 'bad');
   } catch (e) {}
 }
+function aiActivations(before) {
+  /* M274: the foe's artifact activations get a named tell at the same
+     seam aiSummary reads. The summary covers plays, casts and trap
+     arms, but an activation could change the game with nothing naming
+     the artifact: six kinds resolve with no engine log line at all
+     (Millstone, Rod of Ruin, Searing Chains, Weapon Rack, Spirit Vial,
+     Elixir of Vitality) and the draft kinds log only the pick, never
+     the source. The evidence is the engine's own stamp: usedThisTurn
+     is reset at the foe's startTurn and set only by a resolved
+     activation. An artifact that spent its LAST charge leaves the
+     dock in the same pass, so a one-charge artifact missing from the
+     before-snapshot also counts — unless a Tinker resolved this phase
+     (its sacrifice removes a docked artifact without activating it). */
+  try {
+    var foe = G.players[aiIdx];
+    var names = [], seen = {};
+    foe.artifacts.forEach(function (a) {
+      if (a.usedThisTurn && !seen[a.cardId]) { seen[a.cardId] = 1; var d = CARDS[a.cardId]; if (d) names.push(d.name); }
+    });
+    var tinkered = (G.playEvents || []).slice(before.playEv || 0).some(function (ev) { var d = CARDS[ev.cardId]; return d && d.effect && d.effect.kind === 'sacrificeDraftArtifact'; });
+    if (!tinkered) (before.arts || []).forEach(function (rec) {
+      if (rec[2] === 1 && !seen[rec[1]] && !foe.artifacts.some(function (a) { return a.uid === rec[0]; })) { seen[rec[1]] = 1; var d2 = CARDS[rec[1]]; if (d2) names.push(d2.name); }
+    });
+    if (names.length) say('Enemy activates ' + names.join(', ') + '.', 'bad');
+  } catch (e) {}
+}
 async function runAiTurn() {
   var gen = matchGen; // M269: this loop belongs to ONE match — a restart or abandon replaces matchGen and every checkpoint below bails, so an orphaned loop can never act inside another match or drag the player back into one
   /* M269: the foe's sleeps are sheet-aware — the pause sheet promises "The foe
@@ -11436,8 +11470,8 @@ async function runAiTurn() {
   if (!(await aiSleep(650))) return;
   if (G.winner !== null) return finishCheck();
   var foe = G.players[aiIdx];
-  var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0) };
-  aiStartAndMain(G, aiIdx); flushEngineLog(); aiSummary(before);
+  var before = { boardUids: new Set(foe.board.map(function (c) { return c.uid; })), graveCount: foe.graveyard.length, trapCount: foe.traps.length, playEv: (G.playEvents ? G.playEvents.length : 0), arts: foe.artifacts.map(function (a) { return [a.uid, a.cardId, a.charges]; }) };
+  aiStartAndMain(G, aiIdx); flushEngineLog(); aiSummary(before); aiActivations(before); // M274: activations ride the main-phase seam (aiPostCombat never activates)
   render(); if (!(await aiSleep(1000))) return;
   if (finishCheck()) return;
   var attackers = aiPickAttackers(G, aiIdx);

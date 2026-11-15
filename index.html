@@ -5856,7 +5856,7 @@ function flushEngineLog() {
   }
 }
 function nightmaresIn(deck) { return deck.reduce(function (s, c) { return s + c.nightmares; }, 0); }
-function record() { try { return JSON.parse(localStorage.getItem('yira_record') || '{"w":0,"l":0}'); } catch (e) { return { w: 0, l: 0 }; } }
+function record() { try { var r = JSON.parse(localStorage.getItem('yira_record') || '{"w":0,"l":0}'); if (!r || typeof r !== 'object' || Array.isArray(r)) return { w: 0, l: 0 }; r.w = (isFinite(+r.w) && +r.w > 0) ? Math.floor(+r.w) : 0; r.l = (isFinite(+r.l) && +r.l > 0) ? Math.floor(+r.l) : 0; return r; } catch (e) { return { w: 0, l: 0 }; } } // M282: the parse was returned UNVALIDATED — a stored 'null' (valid JSON) came back as null and hubHtml's rec.w threw, freezing the game on its title; string/negative/Infinity counts likewise displayed raw ('undefined wins', a 10%-for-5-of-7 win rate). A count is now coerced to a finite non-negative integer (numeric strings heal); healthy records pass through untouched
 
 /* ---------- skins ---------- */
 var SIGILS = { weaver: '🌑', controller: '👁️', bruiser: '🔥', keeper: '🌿', torchbearer: '☄️', banneret: '⚔️', graven: '🪦', unchained: '👻', unbridled: '🐗', sibilance: '🐍', hammer: '⚒️', tidemother: '🐙' , stormconduit: '⚡', skydancer: '🕊️', palelord: '🦇', wildhuntress: '🏹', hallchampion: '🐆', veilwarden: '🌙' };
@@ -5869,7 +5869,7 @@ applyTheme();
 
 /* ---------- sound: synthesized WebAudio SFX, no audio files ---------- */
 var muted = false; try { muted = localStorage.getItem('yira_muted') === '1'; } catch (e) {}
-var volume = 16; try { volume = parseInt(localStorage.getItem('yira_vol') || '16', 10); if (isNaN(volume)) volume = 16; } catch (e) {}
+var volume = 16; try { volume = parseInt(localStorage.getItem('yira_vol') || '16', 10); if (isNaN(volume)) volume = 16; volume = Math.max(0, Math.min(100, volume)); } catch (e) {} // M282: the boot read never clamped (setVolume does) — a stored '99999' booted the master gain to ~1000x and '-50' to -0.5; the clamp changes nothing for any value the game's own writer can produce (0-100)
 function setVolume(v) { volume = Math.max(0, Math.min(100, +v || 0)); try { localStorage.setItem('yira_vol', String(volume)); } catch (e) {} if (masterGain) masterGain.gain.value = volume / 100; }
 function volTick() { try { sfx('click'); } catch (e) {} }
 var calm = false; try { calm = localStorage.getItem('yira_calm') === '1'; } catch (e) {}
@@ -10584,8 +10584,10 @@ function builderSetStance(v) { try { sfx('click'); } catch (e) {} try { localSto
 /* M9.2: the default decks changed materially in M9 — retire custom decks
    saved against the old defaults once, so the new default is what plays. */
 try {
-  if (localStorage.getItem('yira_deckver') !== 'm16') {
-    Object.keys(localStorage).filter(function (k) { return k.indexOf('yira_custom_') === 0 || k.indexOf('yira_school_') === 0; }).forEach(function (k) { localStorage.removeItem(k); });
+  var m282dv = localStorage.getItem('yira_deckver');
+  if (m282dv !== 'm16') {
+    var m282old = (m282dv === null) || (/^m\d+$/.test(m282dv || '') && parseInt((m282dv || '').slice(1), 10) < 16); // M282: retire ONLY for a plausible old profile — stamp absent (a genuine pre-m16 store) or an older m-stamp. A blank/garbage/newer stamp on a current profile used to trigger the same wipe and take every yira_custom_* mirror and yira_school_* pick with it; those values now just re-stamp, and the sanitised vault migration decides what any legacy deck is worth
+    if (m282old) Object.keys(localStorage).filter(function (k) { return k.indexOf('yira_custom_') === 0 || k.indexOf('yira_school_') === 0; }).forEach(function (k) { localStorage.removeItem(k); });
     localStorage.setItem('yira_deckver', 'm16');
   }
 } catch (e) {}
@@ -10915,7 +10917,7 @@ function finishCheck() {
       var rec = record(); if (G.winner === humanIdx) rec.w++; else rec.l++;
       if (G.winner === humanIdx && !climb) { var cel = leagueCelebration(leagueBase(), rec.w); if (cel) leagueCrossed = { name: cel.name, icon: cel.icon }; try { localStorage.setItem('yira_league_base', String(rec.w)); } catch (e) {} } // M132: a tier crossed upward earns its own screen // M267: settled through the celebration ledger, so a climb-carried cross is celebrated on the next standard win instead of being eaten
       try { localStorage.setItem('yira_record', JSON.stringify(rec)); } catch (e) {}
-      try { var st = JSON.parse(localStorage.getItem('yira_streak') || '{"c":0,"b":0}'); if (G.winner === humanIdx) { st.c++; if (st.c > st.b) st.b = st.c; } else st.c = 0; localStorage.setItem('yira_streak', JSON.stringify(st)); } catch (e) {}
+      try { var st = JSON.parse(localStorage.getItem('yira_streak') || '{"c":0,"b":0}'); if (!st || typeof st !== 'object' || Array.isArray(st)) st = { c: 0, b: 0 }; st.c = (isFinite(+st.c) && +st.c > 0) ? Math.floor(+st.c) : 0; st.b = (isFinite(+st.b) && +st.b > 0) ? Math.floor(+st.b) : 0; if (G.winner === humanIdx) { st.c++; if (st.c > st.b) st.b = st.c; } else st.c = 0; localStorage.setItem('yira_streak', JSON.stringify(st)); } catch (e) {} // M282: a stored 'null'/non-object made st.c++ throw inside this try at every finish — the streak silently never updated again; a non-object now resets and numeric fields coerce, so the value heals on the next finish (healthy values pass through exact)
       if (climb) {
         if (G.winner === humanIdx) {
           /* M270: a climb-first player has no celebration ledger — the key was born only on standard wins (M267), so their first standard win fell back to the last-two-counts compare and a tier crossed on the ladder was eaten exactly as in M267's F1 (driven proof: six climb wins, base still null, the Silver celebration gone for good). Birth the ledger here, settled through the wins BEFORE this one: earlier climb-carried crosses stay owed, this win's own cross stays silent on the ladder, and a pre-M270 profile settles at its current count — the M267 migration honesty, unchanged. */

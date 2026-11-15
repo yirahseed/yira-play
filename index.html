@@ -7427,7 +7427,7 @@ function emblemIcons(inst, ownerIdx, forBoard) {
   /* M67: no ◆ here — a signature is carried by its two-school border (M64 law). */
   if (inst.starterOwner !== ownerIdx) out += '<span class="eicon" title="Generated — this card did not start in a deck">✦</span>';
   (d.keywords || []).concat(inst.gainedKeywords || []).concat(inst.tempKeywords || []).forEach(function (k) { if (forBoard && (k === 'flying' || k === 'ward' || k === 'sneak')) return; out += '<span class="eicon" title="' + esc(k) + '">' + (KW_ICONS[k] || '•') + '</span>'; }); // M185: on board emblems, Flying / Ward / Sneak wear the big treatments (emblemHtml) — no tiny glyphs for the three
-  if (((d.keywords || []).indexOf('armor') >= 0 || inst.armorGranted) && !inst.armorBroken) out += '<span class="eicon" title="armor — blocks the next damage this takes, then breaks">\u26E8</span>';
+  if (inst.armorGranted && (d.keywords || []).indexOf('armor') < 0 && !inst.armorBroken) out += '<span class="eicon" title="armor — blocks the next damage this takes, then breaks">\u26E8</span>'; // M271: granted armor only — printed armor already wears the keyword loop's icon above (inspect showed two shields)
   if (d.moonlight) out += '<span class="eicon' + ((typeof G !== 'undefined' && G && G.active === ownerIdx && G.availableMana(G.players[ownerIdx]) === 2) ? ' moonready' : '') + '" title="moonlight — flips if you end your turn with exactly 2 mana available">🌙</span>';
   if (d.afterFlip) out += '<span class="eicon" title="the flipped face">🌙</span>';
   return out;
@@ -8014,7 +8014,8 @@ function heroPortrait(heroId) {
 function effectText(d) {
   var parts = [];
   var kw = (d.keywords || []).join(', ');
-  if (kw) parts.push(kw.charAt(0).toUpperCase() + kw.slice(1) + '.');
+  var kwHeader = kw ? kw.charAt(0).toUpperCase() + kw.slice(1) + '.' : '';
+  if (kwHeader) parts.push(kwHeader);
   /* M185 (Jesse's Vesskar report): the composer must never print a label
      with an empty body. When a segment's kind composes to nothing, the
      segment is dropped and the card's own printed text speaks for it at
@@ -8027,18 +8028,18 @@ function effectText(d) {
       case 'generate': return 'Add ' + e.count + ' generated card' + (e.count > 1 ? 's' : '') + ' to your hand.';
       case 'stealFromDeck': return 'Take a random card from the enemy deck into your hand.' + (e.discount ? ' It costs ' + e.discount + ' less.' : '');
       case 'draw': return 'Draw ' + e.count + ' card' + (e.count > 1 ? 's' : '') + '.';
-      case 'millOpponent': return 'Mill ' + e.count + ' cards from the enemy deck.';
-      case 'damageAny': return e.amountFrom === 'strongestFriendly' ? 'Deal damage to an enemy creature equal to the power of your strongest creature.' : ('Deal ' + e.amount + ' damage to a creature or the enemy hero.' + (e.heroBonus ? ' Deals ' + (e.amount + e.heroBonus) + ' to the enemy hero instead.' : ''));
+      case 'millOpponent': return 'Mill ' + e.count + ' card' + (e.count === 1 ? '' : 's') + ' from the enemy deck.';
+      case 'damageAny': return e.amountFrom === 'strongestFriendly' ? 'Deal damage to an enemy creature equal to the power of your strongest creature.' : e.creatureOnly ? 'Deal ' + e.amount + ' damage to an enemy creature.' : ('Deal ' + e.amount + ' damage to a creature or the enemy hero.' + (e.heroBonus ? ' Deals ' + (e.amount + e.heroBonus) + ' to the enemy hero instead.' : ''));
       case 'damageAllCreatures': return 'Deal ' + e.amount + ' damage to each creature.';
       case 'pathExile': return 'Destroy an enemy creature. Your opponent gets an empty mana gem.';
       case 'pacify': return "Give an enemy creature can't attack.";
       case 'stealCreature': return 'Gain control of an enemy creature.';
       case 'millDrawBoth': return 'Each player mills a card, then draws a card.';
-      case 'millCreaturesToGrave': return 'Add ' + (e.count || 2) + ' random creatures from your deck to your graveyard.';
+      case 'millCreaturesToGrave': return e.foeDeck ? 'Mill ' + (e.count || 2) + ' random creature' + ((e.count || 2) === 1 ? '' : 's') + ' from your opponent\'s deck.' : 'Add ' + (e.count || 2) + ' random creature' + ((e.count || 2) === 1 ? '' : 's') + ' from your deck to your graveyard.';
       case 'discardHandDraw': return 'Discard your hand, then draw ' + (e.draw || 3) + ' cards.';
       case 'copyLastSpell': return 'Add a temporary copy of the last spell you played this turn to your hand. Change its cost to 1.';
       case 'healSelf': return 'Heal yourself for ' + e.amount + '.';
-      case 'damageHero': return 'Deal ' + e.amount + ' damage to the enemy hero.';
+      case 'damageHero': return e.who === 'self' ? 'Deal ' + e.amount + ' damage to yourself.' : 'Deal ' + e.amount + ' damage to the enemy hero.';
       case 'healHero': return 'Gain ' + e.amount + ' life.';
       case 'healFromWounds': return 'Gain life equal to the damage you were dealt last turn (max ' + (e.cap || 7) + ').';
       case 'drawHealByCost': return 'Draw a card. Heal yourself equal to its cost.';
@@ -8061,7 +8062,6 @@ function effectText(d) {
       case 'shuffleSecondSun': return 'Shuffle The Second Sun (10 mana: deal 10 to the enemy hero and each enemy creature) into your deck.';
       case 'healCreatureAll': return 'Heal all your creatures for ' + e.amount + '.';
       case 'draftTrap': return 'Draft a Trap \u2014 pick 1 of 3 to add to your hand.';
-      case 'discountGenerated': return 'Each card currently in your hand that did not start in your deck costs 1 less.';
       case 'nextTrapDiscount': return 'The next Trap you arm costs ' + e.amount + ' less.';
       case 'drainCreature': return 'Drain ' + e.amount + ' from an enemy creature.';
       case 'stunOrDestroyArtifact': return 'Stun an enemy creature or destroy an enemy artifact.';
@@ -8071,7 +8071,6 @@ function effectText(d) {
       case 'stunCreatures': return 'Stun up to ' + e.count + ' enemy creatures.';
       case 'stunPermanent': return 'Stun an enemy creature for the rest of the game.';
       case 'millPerZombieGrave': return 'Mill your opponent for 1 for each Zombie in your graveyard. Max ' + (e.max || 10) + '.';
-      case 'destroyCreature': return 'Destroy a creature.';
       case 'addCard': return 'Add ' + CARDS[e.cardId].name + ' to your hand.';
       case 'addCards': return 'Add ' + e.creates.map(function (cid, ix, arr) { return (arr.length > 1 && ix === arr.length - 1 ? 'and ' : '') + 'a ' + (CARDS[cid] ? CARDS[cid].name : cid); }).join(', ') + ' to your hand.'; // M227: Drum Up Support's three named adds, composed in the face's own list shape
       case 'discountSpell': return 'A random spell in your hand costs ' + e.amount + ' less.';
@@ -8088,13 +8087,13 @@ function effectText(d) {
       case 'sacrificeDestroy': return 'Destroy another friendly creature to destroy an enemy creature.';
       case 'fightPair': return 'Give a friendly creature +' + (e.power || 0) + '/+' + (e.health || 0) + ', then choose an enemy creature. They fight!';
       case 'addChargeArtifact': return 'Add a charge to a friendly artifact.';
-      case 'conditionalSelf': return 'If its condition is met, it rises.';
+      case 'conditionalSelf': { var cc = { creatureDied: 'a creature died this turn', bigInHand: 'you have a creature in your hand with power 5 or greater', foeDamaged: 'your opponent was dealt damage this turn' }[e.condition] || 'its condition is met'; return 'Gets +' + (e.power || 0) + '/+' + (e.health || 0) + (e.keyword ? ' and ' + (KW_LABELS[e.keyword] || e.keyword).replace(/[^a-zA-Z' ]/g, '').trim() : '') + ' if ' + cc + '.'; }
       case 'setHealth': return "Set an enemy creature's health to " + e.health + '.';
       case 'halveStats': return "Halve an enemy creature's power and health, rounded down.";
-      case 'destroyIfPower': return 'Destroy an enemy creature with power ' + e.minPower + ' or greater.';
+      case 'destroyIfPower': return e.maxPower != null ? 'Destroy an enemy creature with power ' + e.maxPower + ' or less.' : 'Destroy an enemy creature with power ' + e.minPower + ' or greater.';
       case 'grimEchoes': return 'Destroy a friendly creature. Summon base copies of it until your side is full.';
       case 'buffOtherCreatures': return 'Give your other creatures +' + e.power + '/+' + e.health + '.';
-      case 'gainMana': return 'Gain ' + e.amount + ' mana this turn.';
+      case 'gainMana': return e.carry ? 'Get ' + e.amount + ' mana until your next turn.' : 'Gain ' + e.amount + ' mana this turn.';
       case 'debuffAll': return e.foesOnly ? 'Give each enemy creature ' + e.power + '/' + e.health + '.' : 'Give all creatures ' + e.power + '/' + e.health + '.';
       case 'generateSpells': return 'Add ' + e.count + ' random spells to your hand.';
       case 'draftSpell': return e.maxCost != null ? 'Draft a spell that costs ' + e.maxCost + ' or less \u2014 pick 1 of 3 to add to your hand.' : 'Draft a spell \u2014 pick 1 of 3 to add to your hand.';
@@ -8110,7 +8109,7 @@ function effectText(d) {
       case 'drainCreatureOrDamage': return 'Deal ' + e.amount + ' damage to an enemy creature. If you control a ' + e.subtype + ', instead Drain ' + e.amount + ' from it.';
       case 'transformCreature': return 'Transform an enemy creature into a ' + (CARDS[e.into] ? CARDS[e.into].name : 'token') + '.';
       case 'summonToken': return 'Summon a ' + (CARDS[e.cardId] ? CARDS[e.cardId].name : 'token') + '.';
-      case 'summonTokens': return 'Summon ' + (e.count || 1) + ' ' + (CARDS[e.token] ? CARDS[e.token].name : 'token') + 's.';
+      case 'summonTokens': { var tnm = CARDS[e.token] ? CARDS[e.token].name : 'token'; var tc = e.count || 1; return 'Summon ' + tc + ' ' + (tc === 1 ? tnm : (/lf$/i.test(tnm) ? tnm.replace(/lf$/i, 'lves') : (/(s|x|z|ch|sh)$/i.test(tnm) ? tnm + 'es' : tnm + 's'))) + '.'; }
       case 'tempBuffAll': return 'Give all friendly creatures +' + (e.power || 0) + '/+' + (e.health || 0) + ' this turn.';
       case 'destroyAllExceptSubtype': return 'Destroy all creatures except ' + e.subtype + 's.';
       case 'selfGrowth': return 'Gets +' + (e.power !== undefined ? e.power : 1) + '/+' + (e.health !== undefined ? e.health : 1) + '.';
@@ -8147,7 +8146,7 @@ function effectText(d) {
       case 'grantAttackEffect': return '\'Attack: ' + eff(e.attackEffect) + '\'';
       case 'doubleDeckPower': return 'Double the power of each creature in your deck.';
       case 'attackHeroHalf': return 'Deal damage to your opponent equal to half their health, rounded up.';
-      case 'markedCopy': return 'While in hand, marks a random spell in your graveyard (a new mark each turn). Debut: Add a temporary copy of the marked spell to your hand (it dissolves at end of turn).';
+      case 'markedCopy': return 'Add a temporary copy of the marked spell to your hand (it dissolves at end of turn). While in hand, this marks a random spell in your graveyard (a new mark each turn).';
       case 'refillMana': return 'Refill your mana gems.';
       case 'buffAndDoom': return 'Give another friendly creature +' + e.power + '/+' + e.health + ' and destroy it at the end of the turn.';
       case 'summonPerCount': return e.count === 'foeCreatures' ? 'Summon a 1/1 Vampire Thrall for each enemy creature.' : 'Summon a 1/1 Vampire Thrall for each of your Vampires.';
@@ -8180,7 +8179,7 @@ function effectText(d) {
       case 'scryTop': return 'Look at the top card of your deck. You may place it on the bottom of your deck.';
       case 'nextDrawArmor': return 'The next creature you draw gains Armor.';
       case 'healLock': return 'Your opponent cannot heal until your next turn.';
-      case 'rays': return 'On attack, a random ray: gain a random Ember or Tides card and deal 3 to the enemy hero; bounce their strongest creature; cheapen a card in your hand and tax one in theirs; or steal 1 power from each enemy creature with power.'; // M252: tightened wording, same four rays — the Gaze Tyrant carried the library's longest composed text
+      case 'rays': return 'A random ray: gain a random Ember or Tides card and deal 3 to the enemy hero; bounce their strongest creature; cheapen a card in your hand and tax one in theirs; or steal 1 power from each enemy creature with power.'; // M252: tightened wording, same four rays — the Gaze Tyrant carried the library's longest composed text
       case 'smiteByBoard': return 'Deal damage to an enemy creature equal to the number of creatures you control.';
       case 'rageStrongest': return 'Deal damage to a random enemy creature equal to your strongest creature\'s power.';
       case 'wither': return e.amount ? ('Give an enemy creature -' + e.amount + '/-' + e.amount + '.') : 'Give an enemy creature -3/-3 (-5/-5 instead if one of your creatures died this turn).';
@@ -8201,6 +8200,7 @@ function effectText(d) {
   if (d.healOnDealtDamage) parts.push('After this deals damage, heal yourself for that much.');
   if (d.phoenixReturn) parts.push('At end of turn, if this is in your graveyard, put it into your deck.');
   if (d.deathHeal) parts.push('Whenever a creature dies, gain ' + d.deathHeal + ' life.');
+  if (d.doubleDamage) parts.push('This deals double damage.'); // M271: the Hellhound's only rule never composed — its card read blank
   if (d.healFlatOnDamage) parts.push('Whenever this deals damage, gain ' + d.healFlatOnDamage + ' life.');
   if (d.drawOnDamage) parts.push('Whenever this deals damage, draw a card.');
   if (d.unblockableIfFoeHealthier) parts.push('Cannot be blocked while the enemy hero has more life than you.');
@@ -8227,11 +8227,11 @@ function effectText(d) {
   if (d.manaOnHit) parts.push('When this damages the enemy hero, gain mana equal to its power for this turn.');
   if (d.returnsFromGrave) parts.push('If 4 or more creatures entered your graveyard in a single turn, this returns from your graveyard to the field.');
   if (d.attackEffect) seg('On attack: ', d.attackEffect);
-  if (d.endTurn) seg('At the end of your turn: ', d.endTurn);
+  if (d.endTurn) { if (d.endTurn.kind === 'healCreatureFull') parts.push('At the end of your turn, fully heal this.'); else seg('At the end of your turn: ', d.endTurn); }
   if (d.guardian) parts.push('Guardian: damage that would hit your hero hits this creature instead.');
   if (d.regen) parts.push('At the start of your turn, heal ' + d.regen + ' damage from this.');
   if (d.selfDecay) parts.push('At the start of your turn, this loses ' + d.selfDecay + ' health.');
-  if (d.debut) seg('Debut: ', d.debut);
+  if (d.debut) { if (d.debut.kind === 'pacify') parts.push("Debut: Give a friendly creature can't attack."); else seg('Debut: ', d.debut); }
   if (d.finale) seg('Finale: ', d.finale);
   if (d.effect && d.type !== 'trap' && !(d.type === 'artifact' && d.charges)) { var eb = eff(d.effect); if (eb) parts.push(eb); else textFallback = true; }
   if (d.type === 'trap' && d.trigger) {
@@ -8251,11 +8251,16 @@ function effectText(d) {
     if (parts.length === trapBefore) { if (d.text) { parts.push('Trap: ' + d.text); textFallback = false; } else if (d.effect) parts.push('Trap: ' + eff(d.effect)); } // M121: triggers without a written line speak in the card's own recorded words
   }
   if (d.type === 'artifact' && d.charges) { var ae2 = eff(d.effect); if (ae2) parts.push('Artifact, ' + d.charges + ' charges. Activate once per turn: ' + ae2); else { parts.push('Artifact, ' + d.charges + ' charges.'); textFallback = true; } }
+  if (d.paincast) parts.push('Paincast ' + d.paincast + '.'); // M271: Mana Surge's printed Paincast never composed — after the mana line, as the face prints it
+  if (d.missionReturn) parts.push('After you complete a mission, return this to your hand from your graveyard.'); // M271: Cut Down's second sentence never composed
   // M121 (Jesse's screenshots: Drain Blood and Step Over inspected BLANK): if the
   // assembled mechanics say nothing beyond keywords, the card's own recorded
   // text speaks — many face-read defs carry their rules in d.text alone.
   var mechParts = parts.length - (kw ? 1 : 0);
-  if ((mechParts <= 0 || textFallback) && d.text) parts.push(d.text); // M185: textFallback joins the M121 rule — any segment the composer could not speak sends the card back to its own printed words
+  if ((mechParts <= 0 || textFallback) && d.text) { // M185 + M271: the card's own words speak — and when those words restate every keyword it carries, the raw keyword header steps aside instead of printing the keywords twice (Daggerclaw Imp read 'Flying, cantBlock. Flying. Can't block.')
+    var kwCovered = (d.keywords || []).length > 0 && (d.keywords || []).every(function (k) { var t = d.text.toLowerCase(); var probes = { cantBlock: ['can\'t block', 'cantblock'], cantAttack: ['can\'t attack', 'cantattack'], cantStun: ['can\'t be stunned', 'cantstun'] }[k] || [k.toLowerCase()]; return probes.some(function (p) { return t.indexOf(p) >= 0; }); });
+    if (kwCovered && kwHeader && parts[0] === kwHeader) parts.shift();
+    parts.push(d.text); }
   // M121: no sentence ever prints twice (a keyword stated in the header and
   // again in the card's own text is the common case).
   var sents = parts.join(' ').split('. '), seenS = {}, keptS = [];
@@ -8897,15 +8902,17 @@ function introHtml() {
 function assocCards(d, selfId) {
   var out = [], seen = {};
   function add(id) { if (id && CARDS[id] && id !== selfId && !seen[id]) { seen[id] = 1; out.push(id); } }
-  [d.effect, d.debut, d.finale, d.activate].forEach(function (e) {
+  [d.effect, d.debut, d.finale, d.activate, d.attackEffect, d.endTurn, d.miracle].forEach(function (e) { // M271: attackEffect/endTurn/miracle creations linked too (the Captain's Soldier)
     if (!e) return;
-    ['card', 'cardId', 'summon', 'token', 'creates'].forEach(function (k) {
+    ['card', 'cardId', 'cardIds', 'summon', 'token', 'creates', 'into'].forEach(function (k) { // M271: cardIds (Oswald's pair) and into (Shell Game's turtle)
       var v = e[k];
       if (typeof v === 'string') add(v);
       else if (Array.isArray(v)) v.forEach(function (x) { if (typeof x === 'string') add(x); });
     });
+    if (e.kind === 'summonSoldier') add('soldier');
   });
-  if (d.school && d.stage) Object.keys(CARDS).forEach(function (id) { var c = CARDS[id]; if (c.school === d.school && c.stage && c.stage !== d.stage) add(id); });
+  if (d.afterSpellSummon) add(d.afterSpellSummon); // M271: the Pyromancer's Emberling
+  if (d.school && d.schoolStage) Object.keys(CARDS).forEach(function (id) { var c = CARDS[id]; if (c.school === d.school && c.schoolStage && c.schoolStage !== d.schoolStage) add(id); }); // M271: defs carry schoolStage, never stage — the chain sisters never linked
   if (d.signatureFor) Object.keys(CARDS).forEach(function (id) { if (CARDS[id].signatureFor === d.signatureFor) add(id); });
   return out;
 }
@@ -9242,7 +9249,7 @@ function renderBody() {
   applyCalm();
   clearTargetLine();
   if (mode === 'menu') { crowdStop(); if (!titleDismissed) { renderTitle(); return; } renderMenu(); if (profileOpen) $app.innerHTML += profileHtml(); if (deckPickOpen) $app.innerHTML += deckPickHtml(); if (pvpOpen) $app.innerHTML += pvpHtml(); if (glossaryOpen) $app.innerHTML += glossaryHtml(); if (settingsOpen) $app.innerHTML += settingsHtml(); if (introStep === -2) { introStep = introSeen() ? -1 : 0; if (introStep === 0) firstRunPending = true; } if (introStep >= 0) $app.innerHTML += introHtml(); if (firstRunStage) $app.innerHTML += firstRunHtml(); return; }
-  if (mode === 'collection') { renderCollection(); if (inspectCardId !== null) $app.innerHTML += inspectHtml(); return; }
+  if (mode === 'collection') { var yc = (typeof document !== 'undefined' && document.getElementById && document.getElementById('collGroups')) ? captureScroll() : 0; renderCollection(); if (inspectCardId !== null) $app.innerHTML += inspectHtml(); if (yc) { restoreScroll(yc); if (typeof requestAnimationFrame === 'function') requestAnimationFrame(function () { restoreScroll(yc); }); } return; } // M271: the builder branch's capture/restore discipline — opening inspect mid-scroll no longer throws the player back to the top of the grid (restore lands AFTER the inspect overlay append: innerHTML += reparses the tree and would discard an earlier restore)
   if (mode === 'builder') { var y = captureScroll(); renderBuilder(); restoreScroll(y); if (deckCodeOpen) $app.innerHTML += deckCodeHtml(); return; }
   if (mode === 'mulligan') { var mm = G.players[humanIdx], mf = G.players[aiIdx];
     $app.innerHTML = '<div class="shell stage mullstage">' + heroBarHtml(mf, false) + '<div class="field">' + heroFigure(mf.heroId, 'foe') + heroFigure(mm.heroId, 'me') + '</div><div class="mybar-wrap">' + heroBarHtml(mm, true) + '</div><div class="mull-overlay">' + renderMulligan() + '</div></div>' + (introUntil && Date.now() < introUntil && G.winner === null ? matchIntroHtml() : ''); return; }

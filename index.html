@@ -13799,7 +13799,7 @@ function renderMenu() {
        Every control in the panel is the shipped one, unmoved. */
     html = pageHead('The Climb', climbBest() ? 'Best: ' + climbBest() + ' / ' + CLIMB_RUNGS.length : '') +
       '<div class="panel" id="panel-climb"><h2>🧗 The Climb</h2>' +
-      '<p class="climbline pmdrop">Ten rungs · you lead every rung · each guardian starts stronger than the last · Umbra waits at the summit · the ladder remembers where you left off</p>' +
+      '<p class="climbline pmdrop">Twenty rungs · you lead every rung · each guardian starts stronger than the last · Umbra waits at the summit · the ladder remembers where you left off</p>' +
       '<div class="ladder">' + CLIMB_RUNGS.map(function (r, i) { var done = climbBest() > i; return '<span class="rung' + (done ? ' done' : '') + '">' + (done ? '✓ ' : '') + (i + 1) + ' · ' + (SIGILS[r.hero] || '') + ' ' + esc(HEROES[r.hero].name) + (r.bonus ? ' +' + r.bonus + '♥' : '') + '</span>'; }).join('') + '</div>' +
       (function () { var nb = climbBest(); if (nb >= CLIMB_RUNGS.length) return ''; var nx = CLIMB_RUNGS[nb]; return '<p style="color:#c4b6e8;font-size:12.5px;text-align:center;margin:6px 0 0">Next guardian: ' + esc(HEROES[nx.hero].name) + ' — ' + esc(HEROES[nx.hero].blurb || '') + (typeof DECK_NAMES !== 'undefined' && DECK_NAMES[nx.hero] ? ' Running \u201C' + esc(DECK_NAMES[nx.hero]) + '.\u201D' : '') + '</p>'; })() +
       (climbBest() ? '<div class="record pmdrop">Best height on this device: ' + climbBest() + ' of ' + CLIMB_RUNGS.length + ' rungs cleared' + (climbBest() >= CLIMB_RUNGS.length ? ' — SUMMITED 🏔️' : '') + '</div>' : '') +
@@ -13897,13 +13897,21 @@ function mullPressEnd() { if (mullHoldTimer) { clearTimeout(mullHoldTimer); mull
 function mullTapEnd(uid) { mullPressEnd(); if (mullHeld) { mullHeld = false; return; } toggleRedraw(uid); }
 function toggleRedraw(uid) { if (Date.now() - mullHoldAt < 700) return; try { sfx('click'); } catch (e) {} redrawSet.has(uid) ? redrawSet.delete(uid) : redrawSet.add(uid); render(); }
 
-/* ---------- The Climb: 10-rung gauntlet, escalating enemy bonus life ---------- */
+/* ---------- The Climb: 20-rung gauntlet, escalating enemy bonus life ---------- */
 /* M209 (Jesse, 2026-11-10): the 5-rung ladder fell "far too easily" — the
    ladder doubles to ten rungs on the existing levers only. Rungs 1-4 keep
    the old opening exactly; the old summit (+12) becomes the MIDPOINT
    (Morvane at rung 5), and the back half climbs past it in +3 steps to
    Umbra at +27 (49 life) on the summit. No hero guards more than twice;
    Karg still guards the base and Umbra still waits at the top. */
+/* M318 (Jesse, 2026-11-16): THE FULL MOUNTAIN — Jesse summited the ten
+   and ruled the ladder extend to TWENTY rungs, "harder". Rungs 1-10 stand
+   exactly as shipped at M209; rungs 11-20 continue the same +3 step with
+   the ten heroes the ladder had never fielded, and Umbra moves from the
+   old summit to the true one at +57 (79 life). No hero guards more than
+   twice on the twenty either (Karg, the Keeper, the Warden and Umbra
+   twice each; everyone else once). Every count, copy line and branch
+   reads CLIMB_RUNGS.length, so the extension is this table alone. */
 var CLIMB_RUNGS = [
   { hero: 'bruiser', bonus: 0 },
   { hero: 'keeper', bonus: 3 },
@@ -13915,6 +13923,16 @@ var CLIMB_RUNGS = [
   { hero: 'unchained', bonus: 21 },
   { hero: 'controller', bonus: 24 },
   { hero: 'weaver', bonus: 27 },
+  { hero: 'stormconduit', bonus: 30 },
+  { hero: 'palelord', bonus: 33 },
+  { hero: 'wildhuntress', bonus: 36 },
+  { hero: 'sibilance', bonus: 39 },
+  { hero: 'hallchampion', bonus: 42 },
+  { hero: 'veilwarden', bonus: 45 },
+  { hero: 'hammer', bonus: 48 },
+  { hero: 'skydancer', bonus: 51 },
+  { hero: 'keeper', bonus: 54 },
+  { hero: 'weaver', bonus: 57 },
 ];
 var climb = null; // { rung: 1..CLIMB_RUNGS.length } while a climb is live
 function climbBest() { try { var n = parseInt(localStorage.getItem('yira_climb_best') || '0', 10) || 0; return Math.max(0, Math.min(CLIMB_RUNGS.length, n)); } catch (e) { return 0; } } // M205: clamp the stored value to the ladder — a corrupt negative ('-5') passed parseInt untouched and crashed the hub render at CLIMB_RUNGS[nb].hero; climbParked has always range-checked its own key the same way

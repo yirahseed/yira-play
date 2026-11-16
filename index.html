@@ -10213,6 +10213,8 @@ function cineStart() {
     // controller loss likewise never reaches this call).
     // M311: Veyla's WIN scene joins the set the same way (a
     // veilwarden loss likewise never reaches this call).
+    // M315: Ser Aldric's WIN scene joins the set the same way (a
+    // banneret loss likewise never reaches this call).
     if (CINE3D_HEROES[heroId]) { try { st.gl3d = cine3dTryMount(st, ov); } catch (e) { st.gl3d = null; } }
     var q = function (sel) { return ov.querySelector(sel); };
     var far = q('.cine-far'), mid = q('.cine-mid'), hero = q('.cine-hero'), vig = q('.cine-vig'), bart = q('.cine-bar.top'), barb = q('.cine-bar.bot');
@@ -10481,20 +10483,41 @@ function cineFinish(skipped) {
    carried by the shipped plumbing. Umbra's, Morvane's and the
    Warden's builders are not modified by this wave; the M311
    regression drives re-prove all four heroes' scenes.
+   Bundle cost: zero — three.js was already vendored at M298.
+   M315 (2026-11-15): THE FIFTH FIGURE — Ser Aldric joins the stage.
+   The M314 pilot (m314-work/proto3d-aldric.html) ports in as
+   buildAldric behind the same dispatch: polished plate with gold
+   trim, stacked pauldron bells, the white surcoat, the red cloak,
+   both gauntlets on the point-down longsword, the sun banner, and
+   the Dawnwash — his outward-travelling crest of light. The gate
+   widens to CINE3D_HEROES = {weaver, graven, controller,
+   veilwarden, banneret}. WIN-only, like Morvane, the Warden and
+   Veyla — the loss mood stays Umbra's alone (M236); his
+   CINE_VOICE row, subtitle ("The charge prevails."), tap-skip,
+   Calm frame and end-screen handoff are the shipped ones,
+   untouched. His row is the standard grammar (ms 5800 /
+   lineAt 2900, M237): no retime. His portrait face is bare — the
+   M314 §9 filing refutes the old closed-helm note — and Jesse
+   ruled (a), integrate as-is: the pilot's holding read (shaded
+   ovoid, brown almond eyes, the beard as a jaw volume) ships
+   unchanged. Umbra's, Morvane's, the Warden's and Veyla's builders
+   are not modified by this wave; the M315 regression drives
+   re-prove all five heroes' scenes.
    Bundle cost: zero — three.js was already vendored at M298. */
 /* M303: the heroes with a true-3D cinematic builder in the module
    below. cineStart attempts the 3D stage for these heroes only; every
    other hero's cinematic is the flat build, exactly as shipped.
    M305: the Warden (controller) joins the set — win scene only.
-   M311: Veyla (veilwarden) joins the set — win scene only. */
-var CINE3D_HEROES = { weaver: true, graven: true, controller: true, veilwarden: true };
+   M311: Veyla (veilwarden) joins the set — win scene only.
+   M315: Ser Aldric (banneret) joins the set — win scene only. */
+var CINE3D_HEROES = { weaver: true, graven: true, controller: true, veilwarden: true, banneret: true };
 var Cine3D = (function () {
   function available() {
     try { return typeof THREE !== 'undefined' && !!THREE.WebGLRenderer; } catch (e) { return false; }
   }
 
   /* M303: THE BUILDER DISPATCH. mount() no longer builds Umbra inline:
-     each 3D hero has a builder — buildUmbra / buildMorvane / buildWarden / buildVeyla — that takes
+     each 3D hero has a builder — buildUmbra / buildMorvane / buildWarden / buildVeyla / buildAldric — that takes
      the shared helpers (H) and returns { group, updaters }. The shared
      environment (floor, pool, inlay rings, colonnade, backdrop) and the
      light rig are parameterised per hero by the BUILDERS table below
@@ -12265,6 +12288,680 @@ var Cine3D = (function () {
     return { group: veyla, updaters: [updateSpirits, updateCurls, updateMist, updateMotes, updateClaspGlow] };
   }
 
+  /* SER ALDRIC — the M314 pilot's procedural figure (hem → hair
+     crown ≈ 3.43; the banner finial at 4.33 is dressing, the Keeper's
+     antler convention), ported faithfully from
+     m314-work/proto3d-aldric.html: polished plate with gold trim,
+     stacked pauldron bells, the white surcoat with its gold centre
+     band, the red cloak, both gauntlets resting on the point-down
+     longsword, and the tall banner bearing the golden sun — plus
+     the Dawnwash, his outward-travelling crest of light. His portrait
+     face is BARE (the M314 §9 filing refutes the old closed-helm
+     note): what is built is the pilot's honest holding read — a
+     shaded ovoid, layered almond eyes with plain brown irises, and
+     the beard as a jaw volume, which the pilot's diagnostics judged
+     a genuine asset. Jesse ruled (a) — integrate as-is
+     (2026-11-15). Win scene only — the loss mood is Umbra's alone
+     (M236), so bopts.lose never arrives true for this builder; the
+     gate keeps it that way. His scene dressing that the shared
+     environment cannot parameterise — the four dawn shafts, his
+     face light and the banner sun's glow — rides here and in his
+     BUILDERS row (the Warden's candle precedent). His CINE_VOICE row
+     is the standard grammar (ms 5800 / lineAt 2900): no retime. */
+  function buildAldric(THREE, scene, H, bopts) {
+    var PALE      = 0xf2e2a4;  // HERO_ACCENT.banneret bright stop
+    var STEELBLU  = 0x7d8ca3;  // HERO_ACCENT.banneret mid stop
+    var GOLD      = 0xc9a227;  // HERO_ACCENT.banneret gold stop — also his Dawn school
+    var ACCENT_DK = 0x4c5a6e;  // HERO_ACCENT.banneret dark
+    var EMBER     = 0xff8a4d;  // his Ember school
+    /* His two lights ride inside the builder (the pilot's rig
+       additions; the shared rig in mount() dresses the rest): the
+       face's modelling light, dawn-warm and frontal, and the banner
+       sun's own glow, which breathes on the updater array. */
+    var faceFill = new THREE.DirectionalLight(0xffe9c4, 0.26);
+    faceFill.position.set(0.7, 3.4, 5.0);
+    scene.add(faceFill);
+    var sunGlow = new THREE.PointLight(0xffc46a, 0.30, 5, 1);
+    sunGlow.position.set(-0.66, 3.5, -0.05);
+    scene.add(sunGlow);
+    function hemWave(geo) {
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var y = pos.getY(i);
+        if (y < 0.06) {
+          var th = Math.atan2(pos.getZ(i), pos.getX(i));
+          pos.setY(i, y + (0.06 - y) / 0.06 * 0.028 * (0.5 + 0.5 * Math.sin(th * 8 + 0.4)));
+        }
+      }
+      geo.computeVertexNormals();
+    }
+    /* A limb between two points — cylinder oriented along the span. */
+    function limbBetween(p1, p2, rBottom, rTop, mat, seg) {
+      var a = new THREE.Vector3(p1[0], p1[1], p1[2]);
+      var b = new THREE.Vector3(p2[0], p2[1], p2[2]);
+      var dir = b.clone().sub(a);
+      var len = dir.length();
+      var m = new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBottom, len, seg || 12), mat);
+      m.position.copy(a).addScaledVector(dir, 0.5);
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      m.castShadow = true;
+      return m;
+    }
+    /* A tube along a curve, tapered by a per-sample factor and optionally
+       ring-flattened against its own curve points — the M308 technique,
+       generalised at M310. */
+    function taperedTube(pts, radius, taperFn, mat, flatX, flatZ, seg) {
+      var curve = new THREE.CatmullRomCurve3(pts.map(function (p) { return new THREE.Vector3(p[0], p[1], p[2]); }));
+      var N = seg || 24;
+      var geo = new THREE.TubeGeometry(curve, N, radius, 7, false);
+      var samples = [];
+      for (var s = 0; s <= N; s++) samples.push(curve.getPoint(s / N));
+      var pos = geo.attributes.position;
+      for (var i = 0; i < pos.count; i++) {
+        var v = new THREE.Vector3(pos.getX(i), pos.getY(i), pos.getZ(i));
+        var best = 0, bd = 1e9;
+        for (var k = 0; k < samples.length; k++) {
+          var d = v.distanceToSquared(samples[k]);
+          if (d < bd) { bd = d; best = k; }
+        }
+        var c = samples[best];
+        var tp = taperFn(best / N);
+        pos.setX(i, c.x + (v.x - c.x) * tp * (flatX || 1));
+        pos.setY(i, c.y + (v.y - c.y) * tp);
+        pos.setZ(i, c.z + (v.z - c.z) * tp * (flatZ || 1));
+      }
+      geo.computeVertexNormals();
+      var m = new THREE.Mesh(geo, mat);
+      m.castShadow = true;
+      return m;
+    }
+    /* His materials — polished steel and gold, white surcoat cloth, crimson
+       cloak, warm skin, brown hair; values set a step deep against
+       SwiftShader lift, as the family does. */
+    var steelMat   = new THREE.MeshStandardMaterial({ color: 0x7e8894, roughness: 0.38, metalness: 0.55 });
+    var steelDk    = new THREE.MeshStandardMaterial({ color: 0x5b646e, roughness: 0.46, metalness: 0.50 });
+    var goldMat    = new THREE.MeshStandardMaterial({ color: 0xc9a227, roughness: 0.32, metalness: 0.85 });
+    var surcoatMat = new THREE.MeshStandardMaterial({ color: 0xbfb49e, roughness: 0.88, metalness: 0.0, side: THREE.DoubleSide });
+    var cloakMat   = new THREE.MeshStandardMaterial({ color: 0x671220, roughness: 0.78, metalness: 0.03, side: THREE.DoubleSide });
+    var clothDk    = new THREE.MeshStandardMaterial({ color: 0x232830, roughness: 0.90, metalness: 0.04 });
+    var leatherMat = new THREE.MeshStandardMaterial({ color: 0x2a1d14, roughness: 0.80, metalness: 0.02 });
+    var woodMat    = new THREE.MeshStandardMaterial({ color: 0x2e2119, roughness: 0.85, metalness: 0.0 });
+    var skinMat    = new THREE.MeshStandardMaterial({ color: 0x8a6a44, roughness: 0.90, metalness: 0.0 });
+    var hairMat    = new THREE.MeshStandardMaterial({ color: 0x20140d, roughness: 0.78, metalness: 0.04 });
+    var socketMat  = new THREE.MeshStandardMaterial({ color: 0x1a120c, roughness: 0.90, metalness: 0.0 });
+    var irisMat    = new THREE.MeshStandardMaterial({ color: 0x2e1c10, roughness: 0.30, metalness: 0.0 });
+    var sunMat     = new THREE.MeshStandardMaterial({ color: 0xd9a41f, roughness: 0.35, metalness: 0.70,
+                       emissive: 0xd9a41f, emissiveIntensity: 0.35 });
+
+    /* ============ SER ALDRIC — procedural figure ============
+       Hem at y 0; hair crown ≈ 3.44 (the family scale, hem → crown
+       3.44–3.49); the banner tops at ≈ 4.32 behind his right shoulder —
+       his, like the Keeper's antlers, and named in the TECH-NOTE. A
+       knight's build — plate over cloth: faulds and cuirass in steel,
+       the white surcoat over the front, the red cloak over his left
+       shoulder and back, both gauntlets resting on a point-down sword,
+       the sun banner planted behind him. Everything rides in one group
+       so the sway never breaks the hands' rest on the pommel. */
+    var aldric = new THREE.Group();
+
+    // — Under-robe: dark cloth beneath the armour, hem → waist.
+    var robePts = [
+      [0.70, 0.00], [0.69, 0.05], [0.63, 0.26], [0.54, 0.70], [0.47, 1.15], [0.44, 1.50]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var robeGeo = H.displaceFolds(new THREE.LatheGeometry(robePts, 96),
+      8, function (y) { return 0.055 - 0.035 * Math.min(1, y / 1.5); }, 0.5);
+    hemWave(robeGeo);
+    var robe = new THREE.Mesh(robeGeo, clothDk);
+    robe.castShadow = true; robe.receiveShadow = true;
+    aldric.add(robe);
+
+    // — Legs: dark wrapped limbs, steel greave shells on the shins, plate boots.
+    [1, -1].forEach(function (side) {
+      var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.125, 0.105, 0.85, 12), clothDk);
+      leg.position.set(0.24 * side, 0.48, 0.0);
+      leg.castShadow = true;
+      aldric.add(leg);
+      var greave = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.150, 0.165, 0.60, 14, 1, true, -1.25, 2.5), steelDk);
+      greave.material = steelDk;
+      greave.position.set(0.24 * side, 0.44, 0.005);
+      greave.castShadow = true;
+      aldric.add(greave);
+      var boot = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.11, 0.31), steelDk);
+      boot.position.set(0.24 * side, 0.055, 0.05);
+      boot.castShadow = true;
+      aldric.add(boot);
+    });
+
+    // — Faulds: the armoured skirt, steel bands with gold trim rings.
+    var fauldPts = [
+      [0.62, 0.52], [0.565, 0.78], [0.53, 1.05], [0.485, 1.30], [0.47, 1.46]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var faulds = new THREE.Mesh(H.displaceFolds(new THREE.LatheGeometry(fauldPts, 96),
+      10, function () { return 0.010; }, 0.2), steelMat);
+    faulds.castShadow = true; faulds.receiveShadow = true;
+    aldric.add(faulds);
+    [[0.568, 0.80], [0.480, 1.28]].forEach(function (b) {
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(b[0], 0.011, 8, 64), goldMat);
+      ring.position.set(0, b[1], 0);
+      ring.rotation.x = Math.PI / 2;
+      aldric.add(ring);
+    });
+
+    // — Cuirass: the breastplate lathe, polished steel, a whisper of ripple.
+    var cuirPts = [
+      [0.445, 1.42], [0.435, 1.70], [0.465, 2.02], [0.475, 2.26],
+      [0.43, 2.50], [0.31, 2.66], [0.215, 2.76], [0.185, 2.84]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var cuirass = new THREE.Mesh(H.displaceFolds(new THREE.LatheGeometry(cuirPts, 96),
+      8, function () { return 0.007; }, 0.9), steelMat);
+    cuirass.castShadow = true; cuirass.receiveShadow = true;
+    aldric.add(cuirass);
+    // Gold neck trim where the cuirass meets the throat.
+    var neckTrim = new THREE.Mesh(new THREE.TorusGeometry(0.196, 0.010, 8, 40), goldMat);
+    neckTrim.position.set(0, 2.795, 0);
+    neckTrim.rotation.x = Math.PI / 2;
+    aldric.add(neckTrim);
+
+    /* — THE SURCOAT — the portrait's white tabard over the cuirass's front:
+       a partial lathe (front ±80°) riding a breath proud of the plate,
+       with the gold centre band embroidered down its front, gold down both
+       side edges and along its hem. Cloth, not plate: gentler folds. */
+    (function surcoat() {
+      var pts = [
+        [0.575, 0.80], [0.565, 1.05], [0.525, 1.32], [0.495, 1.60], [0.470, 1.90],
+        [0.495, 2.20], [0.460, 2.48], [0.340, 2.64], [0.232, 2.74]
+      ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+      var PHI = -1.13, PLEN = 2.26;
+      var geo = H.displaceFolds(new THREE.LatheGeometry(pts, 64, PHI, PLEN),
+        6, function () { return 0.010; }, 0.4);
+      var panel = new THREE.Mesh(geo, surcoatMat);
+      panel.castShadow = true; panel.receiveShadow = true;
+      aldric.add(panel);
+      // The gold centre band: a flattened tube down the front's middle,
+      // hand-laid on the panel's surface (radius at each height + a breath).
+      var band = [
+        [0, 2.62, 0.355], [0, 2.30, 0.497], [0, 1.95, 0.484], [0, 1.55, 0.512],
+        [0, 1.15, 0.562], [0, 0.86, 0.585]
+      ];
+      aldric.add(taperedTube(band, 0.016, function () { return 1; }, goldMat, 1.6, 0.45, 36));
+      // Gold down both side edges, following the profile at φ = ±1.13.
+      [1, -1].forEach(function (side) {
+        var ph = side * 1.13;
+        var ep = pts.map(function (p) {
+          return [Math.sin(ph) * (p.x + 0.004), p.y, Math.cos(ph) * (p.x + 0.004)];
+        });
+        aldric.add(taperedTube(ep, 0.009, function () { return 1; }, goldMat, 1, 1, 36));
+      });
+      // Gold along the hem: an arc at y 0.815 across the panel's span.
+      var hem = [];
+      for (var k = 0; k <= 12; k++) {
+        var ph2 = PHI + (k / 12) * PLEN;
+        hem.push([Math.sin(ph2) * 0.579, 0.815, Math.cos(ph2) * 0.579]);
+      }
+      aldric.add(taperedTube(hem, 0.009, function () { return 1; }, goldMat, 1, 1, 40));
+    })();
+
+    /* — THE CLOAK — crimson over his LEFT shoulder (+X, the portrait's
+       drape): a partial lathe band from the front-left edge around the
+       back to the back-right, riding proud of cuirass and faulds, plus a
+       cape shell over the left pauldron and a gold clasp at its front. */
+    (function cloak() {
+      var pts = [
+        [0.545, 2.58], [0.565, 2.30], [0.545, 1.95], [0.560, 1.55],
+        [0.595, 1.10], [0.660, 0.70], [0.700, 0.48]
+      ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+      var geo = H.displaceFolds(new THREE.LatheGeometry(pts, 64, 1.00, 2.50),
+        5, function () { return 0.020; }, 1.3);
+      var band = new THREE.Mesh(geo, cloakMat);
+      band.castShadow = true; band.receiveShadow = true;
+      aldric.add(band);
+      // The shoulder cape: a flattened shell over the left pauldron's top.
+      var cape = new THREE.Mesh(new THREE.SphereGeometry(0.27, 20, 12), cloakMat);
+      cape.scale.set(1.05, 0.38, 1.05);
+      cape.position.set(0.44, 2.60, -0.10);
+      cape.castShadow = true;
+      aldric.add(cape);
+      // The clasp: a gold disc where the cloak fastens at the front-left chest.
+      var clasp = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.014, 20), goldMat);
+      clasp.position.set(0.355, 2.52, 0.335);
+      clasp.rotation.x = Math.PI / 2 - 0.25;
+      clasp.rotation.z = -0.35;
+      aldric.add(clasp);
+    })();
+
+    /* — PAULDRONS — the Warden's bell, in steel, twice-stacked; his RIGHT
+       (−X, the portrait's great pauldron) a size step larger. Gold rim on
+       the lowest bell of each. */
+    [1, -1].forEach(function (side) {
+      var big = side < 0 ? 1.07 : 1.0;
+      [[0.26, 0.0, 1.0], [0.205, 0.058, 0.80]].forEach(function (b, i) {
+        var prof = [
+          [b[0], -0.150], [b[0] + 0.010, -0.060], [b[0] - 0.020, 0.040],
+          [b[0] - 0.090, 0.120], [0.020, 0.175]
+        ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+        var bell = new THREE.Mesh(new THREE.LatheGeometry(prof, 40), i === 1 ? steelDk : steelMat);
+        bell.position.set(0.50 * side * big, 2.54 + b[1], 0.01);
+        bell.scale.setScalar(big);
+        bell.castShadow = true;
+        aldric.add(bell);
+        if (i === 0) {
+          var rimT = new THREE.Mesh(new THREE.TorusGeometry(b[0] + 0.002, 0.012, 8, 40), goldMat);
+          rimT.position.set(0.50 * side * big, 2.54 - 0.148 * big, 0.01);
+          rimT.rotation.x = Math.PI / 2;
+          rimT.scale.setScalar(big);
+          aldric.add(rimT);
+          // A lame band around the bell's waist — articulation, so the
+          // dome reads as stacked plate and not as a cloche.
+          var lame = new THREE.Mesh(new THREE.TorusGeometry(b[0] + 0.012, 0.009, 8, 40), steelDk);
+          lame.position.set(0.50 * side * big, 2.54 - 0.055 * big, 0.01);
+          lame.rotation.x = Math.PI / 2;
+          lame.scale.setScalar(big);
+          aldric.add(lame);
+        }
+      });
+    });
+
+    /* — ARMS — plate harness: steel upper arms, elbow cops, forearms of
+       three articulated lame segments, gold cuffs, gauntlets. Both arms
+       angle down-forward so the hands come to rest stacked on the sword's
+       pommel before him — his RIGHT (−X) on top, the portrait's pose.
+       The hands are gauntlet masses with curled finger capsules: the rest
+       is SUGGESTED, not shown (the family precedent, named in §9). */
+    function gauntlet(x, y, z, topHand) {
+      var grp = new THREE.Group();
+      grp.position.set(x, y, z);
+      var palm = new THREE.Mesh(new THREE.SphereGeometry(0.058, 12, 10), steelMat);
+      palm.scale.set(0.90, 1.05, 1.05);
+      palm.castShadow = true;
+      grp.add(palm);
+      // Three fingers curled over the pommel/grip, one thumb at the side.
+      [-0.032, 0.0, 0.032].forEach(function (fx, i) {
+        var f = new THREE.Mesh(new THREE.CapsuleGeometry(0.0135, 0.045, 3, 8), steelDk);
+        f.position.set(fx, -0.028 - (i === 1 ? 0.006 : 0), 0.038);
+        f.rotation.x = 1.95;
+        f.rotation.z = fx * 2.2;
+        f.castShadow = true;
+        grp.add(f);
+      });
+      var thumb = new THREE.Mesh(new THREE.CapsuleGeometry(0.013, 0.038, 3, 8), steelDk);
+      thumb.position.set(topHand ? 0.052 : -0.052, -0.012, 0.030);
+      thumb.rotation.z = topHand ? -0.9 : 0.9;
+      thumb.rotation.x = 0.7;
+      grp.add(thumb);
+      return grp;
+    }
+    function arm(side, wrist) {
+      var shoulder = [0.47 * side, 2.50, 0.01];
+      var elbow = [0.60 * side, 2.06, 0.10];
+      aldric.add(limbBetween(shoulder, elbow, 0.105, 0.085, steelMat, 14));
+      var cop = new THREE.Mesh(new THREE.SphereGeometry(0.086, 14, 10), steelDk);
+      cop.position.set(elbow[0], elbow[1], elbow[2]);
+      cop.castShadow = true;
+      aldric.add(cop);
+      // The forearm in three lame segments, alternating steel values.
+      var mats = [steelMat, steelDk, steelMat];
+      for (var k = 0; k < 3; k++) {
+        var t0 = k / 3, t1 = (k + 1) / 3;
+        var pA = [elbow[0] + (wrist[0] - elbow[0]) * t0, elbow[1] + (wrist[1] - elbow[1]) * t0, elbow[2] + (wrist[2] - elbow[2]) * t0];
+        var pB = [elbow[0] + (wrist[0] - elbow[0]) * t1, elbow[1] + (wrist[1] - elbow[1]) * t1, elbow[2] + (wrist[2] - elbow[2]) * t1];
+        aldric.add(limbBetween(pA, pB, 0.078 - k * 0.007, 0.071 - k * 0.007, mats[k], 12));
+      }
+      var cuff = new THREE.Mesh(new THREE.TorusGeometry(0.058, 0.011, 8, 24), goldMat);
+      cuff.position.set(wrist[0], wrist[1] + 0.012, wrist[2]);
+      cuff.rotation.x = 1.15;
+      cuff.rotation.z = side * 0.35;
+      aldric.add(cuff);
+    }
+    arm(-1, [-0.05, 1.99, 0.585]);   // right arm → the top hand
+    arm(1, [0.06, 1.89, 0.585]);     // left arm → the under hand
+    aldric.add(gauntlet(-0.03, 1.955, 0.615, true));
+    aldric.add(gauntlet(0.035, 1.855, 0.615, false));
+
+    /* — THE SWORD — point-down before him, the portrait's rest: gold ball
+       pommel, leather grip with gold wire rings, gold crossguard, and a
+       bright blade whose point stops above the floor. */
+    (function sword() {
+      var grp = new THREE.Group();
+      grp.position.set(0, 0, 0.615);
+      var pommel = new THREE.Mesh(new THREE.SphereGeometry(0.048, 16, 12), goldMat);
+      pommel.position.y = 1.905;
+      pommel.castShadow = true;
+      grp.add(pommel);
+      var grip = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.185, 12), leatherMat);
+      grip.position.y = 1.79;
+      grp.add(grip);
+      [1.735, 1.79, 1.845].forEach(function (y) {
+        var w = new THREE.Mesh(new THREE.TorusGeometry(0.0275, 0.004, 6, 20), goldMat);
+        w.position.y = y;
+        w.rotation.x = Math.PI / 2;
+        grp.add(w);
+      });
+      var guard = new THREE.Mesh(new THREE.BoxGeometry(0.54, 0.034, 0.05), goldMat);
+      guard.position.y = 1.685;
+      guard.castShadow = true;
+      grp.add(guard);
+      [1, -1].forEach(function (side) {
+        var cap = new THREE.Mesh(new THREE.OctahedronGeometry(0.024), goldMat);
+        cap.position.set(0.275 * side, 1.685, 0);
+        grp.add(cap);
+      });
+      var bladeMat = new THREE.MeshStandardMaterial({ color: 0xa8b2bc, roughness: 0.30, metalness: 0.60 });
+      var blade = new THREE.Mesh(new THREE.BoxGeometry(0.088, 1.32, 0.016), bladeMat);
+      blade.position.y = 0.99;
+      blade.castShadow = true;
+      grp.add(blade);
+      var ridge = new THREE.Mesh(new THREE.BoxGeometry(0.030, 1.32, 0.030), bladeMat);
+      ridge.position.y = 0.99;
+      ridge.rotation.y = Math.PI / 4;
+      grp.add(ridge);
+      var tip = new THREE.Mesh(new THREE.CylinderGeometry(0.001, 0.045, 0.17, 4), bladeMat);
+      tip.position.y = 0.245;
+      tip.rotation.y = Math.PI / 4;
+      tip.scale.set(1, 1, 0.38);
+      grp.add(tip);
+      aldric.add(grp);
+    })();
+
+    /* — THE BANNER — planted behind his right shoulder (−X): a tall pole
+       with a crossbar, a white cloth bearing the golden sun. THE CLOTH
+       CALL: waved, not rigid — a gentle two-axis ripple baked into the
+       plane, growing toward the free bottom edge, because a rigid board
+       reads as a sign and a banner is cloth; the wave is a held breath of
+       wind, frozen, so every still is honest and the scene-time law is
+       untouched. The sun rides the cloth's upper centre, where the wave
+       is smallest. */
+    (function banner() {
+      var grp = new THREE.Group();
+      grp.position.set(-0.66, 0, -0.46);
+      grp.rotation.z = 0.03;
+      grp.rotation.x = -0.02;
+      var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.030, 4.18, 10), woodMat);
+      pole.position.y = 2.19;
+      pole.castShadow = true;
+      grp.add(pole);
+      var finial = new THREE.Mesh(new THREE.SphereGeometry(0.045, 14, 10), goldMat);
+      finial.position.y = 4.33;
+      grp.add(finial);
+      var bar = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.00, 10), woodMat);
+      bar.rotation.z = Math.PI / 2;
+      bar.position.y = 4.06;
+      grp.add(bar);
+      [1, -1].forEach(function (side) {
+        var cap = new THREE.Mesh(new THREE.SphereGeometry(0.026, 10, 8), goldMat);
+        cap.position.set(0.50 * side, 4.06, 0);
+        grp.add(cap);
+      });
+      // The cloth, waved.
+      function waveZ(u, v) {
+        // M315 parent fix: clamp free at 0 — float dust past v=1 made Math.pow(negative, 1.2) NaN in the cloth's top row.
+        var free = Math.max(0, 1 - v);
+        return Math.sin(u * Math.PI * 1.6 + 0.4) * 0.058 * Math.pow(free, 1.2)
+             + Math.sin(v * Math.PI * 2.2) * 0.026 * free;
+      }
+      var clothGeo = new THREE.PlaneGeometry(0.92, 1.24, 24, 28);
+      var cp = clothGeo.attributes.position;
+      for (var i = 0; i < cp.count; i++) {
+        var u = cp.getX(i) / 0.92 + 0.5;
+        var v = cp.getY(i) / 1.24 + 0.5;
+        cp.setZ(i, waveZ(u, v));
+      }
+      clothGeo.computeVertexNormals();
+      var bannerMat = new THREE.MeshStandardMaterial({ color: 0xcabfa5, roughness: 0.90, metalness: 0.0, side: THREE.DoubleSide });
+      var cloth = new THREE.Mesh(clothGeo, bannerMat);
+      cloth.position.set(0, 3.42, 0.02);
+      cloth.castShadow = true;
+      grp.add(cloth);
+      // Gold fringe along the waved bottom edge.
+      var fringe = [];
+      for (var k = 0; k <= 12; k++) {
+        var fu = k / 12;
+        fringe.push([-0.46 + fu * 0.92, 2.795, 0.02 + waveZ(fu, 0)]);
+      }
+      grp.add(taperedTube(fringe, 0.010, function () { return 1; }, goldMat, 1, 1, 40));
+      // THE GOLDEN SUN — disc, ring and twelve rays on the cloth's face.
+      var sun = new THREE.Group();
+      sun.position.set(0, 3.52, 0.048);
+      var disc = new THREE.Mesh(new THREE.CylinderGeometry(0.155, 0.155, 0.012, 28), sunMat);
+      disc.rotation.x = Math.PI / 2;
+      sun.add(disc);
+      var sring = new THREE.Mesh(new THREE.TorusGeometry(0.098, 0.009, 8, 32), sunMat);
+      sring.position.z = 0.008;
+      sun.add(sring);
+      var dot = new THREE.Mesh(new THREE.SphereGeometry(0.034, 12, 10), sunMat);
+      dot.scale.set(1, 1, 0.45);
+      dot.position.z = 0.008;
+      sun.add(dot);
+      for (var r2 = 0; r2 < 12; r2++) {
+        var a = (r2 / 12) * Math.PI * 2;
+        var len = r2 % 2 === 0 ? 0.17 : 0.115;
+        var ray = new THREE.Mesh(new THREE.ConeGeometry(0.030, len, 4), sunMat);
+        var d = 0.155 + len / 2 - 0.012;
+        ray.position.set(Math.cos(a) * d, Math.sin(a) * d, 0);
+        ray.rotation.z = a - Math.PI / 2;
+        ray.scale.set(1, 1, 0.25);
+        sun.add(ray);
+      }
+      grp.add(sun);
+      aldric.add(grp);
+    })();
+
+    // — Neck: skin, mostly lost between cuirass and jaw.
+    var neck = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.084, 0.24, 12), skinMat);
+    neck.position.set(0, 2.88, 0);
+    aldric.add(neck);
+
+    /* — THE HEAD — decided going in (TECH-NOTE §9): his portrait face is
+       BARE and central, the class the method cannot sculpt. What is built:
+       a shaded ovoid; a SHORT hair cap on the skull's own curvature (his
+       hair is close-cropped — no falls); the eyes as the family's layered
+       almonds with PLAIN BROWN irises (his eyes do not glow); small human
+       ears; and THE BEARD attempted as a jaw volume — a sphere-segment
+       shell wrapping chin and jaw under the face's midline. A beard is a
+       volume, more tractable than an expression; the diagnostic stills
+       judge whether it reads as a beard or as a muzzle, and the verdict
+       is filed either way. What is NOT here: a likeness, a nose, lips,
+       the resolute expression. */
+    var head = new THREE.Group();
+    head.position.set(0, 2.96, 0);
+    var face = new THREE.Mesh(new THREE.SphereGeometry(0.163, 28, 20), skinMat);
+    face.scale.set(0.96, 1.10, 0.98);
+    face.position.set(0, 0.10, 0.02);
+    face.castShadow = true;
+    head.add(face);
+    // The hairline: a shell ON the face's own ellipsoid, as Cassian's —
+    // it can neither float nor occlude.
+    (function hairline() {
+      var shell = new THREE.Mesh(new THREE.SphereGeometry(0.170, 28, 14, 0, Math.PI * 2, 0, 0.92), hairMat);
+      shell.scale.set(0.96, 1.10, 0.98);
+      shell.position.set(0, 0.10, 0.02);
+      head.add(shell);
+    })();
+    // THE EYES — layered almonds, brown and unlit; a resolute set
+    // (rotZ −0.05·side — gentler than Cassian's severity).
+    [1, -1].forEach(function (side) {
+      var socket = new THREE.Mesh(new THREE.SphereGeometry(0.026, 14, 10), socketMat);
+      socket.scale.set(1.6, 0.55, 0.50);
+      socket.position.set(0.057 * side, 0.140, 0.150);
+      socket.rotation.y = -0.12 * side;
+      socket.rotation.z = -0.05 * side;
+      head.add(socket);
+      var iris = new THREE.Mesh(new THREE.SphereGeometry(0.0175, 12, 8), irisMat);
+      iris.scale.set(1.30, 0.60, 0.45);
+      iris.position.set(0.057 * side, 0.140, 0.1615);
+      iris.rotation.y = -0.12 * side;
+      iris.rotation.z = -0.05 * side;
+      head.add(iris);
+      var lid = new THREE.Mesh(new THREE.TorusGeometry(0.031, 0.0045, 6, 14, 1.9), hairMat);
+      lid.position.set(0.057 * side, 0.151, 0.154);
+      lid.rotation.x = -0.55;
+      lid.rotation.z = Math.PI / 2 - 0.95 - 0.05 * side;
+      head.add(lid);
+    });
+    // THE BEARD — a sphere-segment shell wrapping the jaw: theta from
+    // 1.80 (mid-cheek) to 2.65 (under the chin), a breath proud of the
+    // face's own ellipsoid, in the hair's brown.
+    (function beard() {
+      var shell = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1675, 28, 12, 0, Math.PI * 2, 1.92, 0.78), hairMat);
+      shell.scale.set(0.958, 1.105, 0.978);
+      shell.position.set(0, 0.10, 0.02);
+      shell.castShadow = true;
+      head.add(shell);
+    })();
+    // Hair cap: a lathe shell over the back and crown, open at the face —
+    // his hair is SHORT: the cap hugs the skull and ends high.
+    var capPts = [
+      [0.174, -0.08], [0.185, 0.05], [0.176, 0.19], [0.147, 0.30], [0.128, 0.345], [0.080, 0.372], [0.014, 0.385]
+    ].map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+    var cap = new THREE.Mesh(new THREE.LatheGeometry(capPts, 48, 0.72, Math.PI * 2 - 1.44), hairMat);
+    cap.position.set(0, 0.095, -0.042);
+    cap.scale.set(0.96, 0.98, 0.96);
+    cap.castShadow = true;
+    head.add(cap);
+    var capLiner = new THREE.Mesh(cap.geometry,
+      new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide }));
+    capLiner.scale.set(0.922, 0.98, 0.922);
+    capLiner.position.copy(cap.position);
+    head.add(capLiner);
+    // Two SHORT side panels — close-cropped hair ending above the jaw,
+    // not falls (his haircut, from the portrait).
+    function sidePanel(x, z, len, r0) {
+      var grp = new THREE.Group();
+      grp.position.set(x, 0.16, z);
+      grp.rotation.x = -0.05;
+      grp.rotation.z = (x > 0 ? -1 : 1) * 0.05;
+      var g = H.displaceFolds(new THREE.CylinderGeometry(r0, r0 * 0.42, len, 8, 3),
+        3, function () { return 0.004; }, x * 20);
+      var fall = new THREE.Mesh(g, hairMat);
+      fall.scale.set(1.20, 1, 0.46);
+      fall.position.y = -len / 2;
+      fall.castShadow = true;
+      grp.add(fall);
+      return grp;
+    }
+    head.add(sidePanel(-0.140, -0.06, 0.15, 0.038));
+    head.add(sidePanel(0.140, -0.06, 0.15, 0.038));
+    // THE EARS — human, small, half out of the hair: flattened skin shells.
+    [1, -1].forEach(function (side) {
+      var ear = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 10), skinMat);
+      ear.scale.set(0.35, 0.62, 0.50);
+      ear.position.set(0.156 * side, 0.10, -0.005);
+      ear.castShadow = true;
+      head.add(ear);
+    });
+    aldric.add(head);
+
+    scene.add(aldric);
+    function sstep(x) { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
+
+    /* — THE DAWNWASH — his signature system (120 points, additive).
+       Golden motes suspended in a disc of air around him, barely drifting.
+       They do not rise, fall, orbit or feed: their BRIGHTNESS travels —
+       a crest of light that starts at him and washes outward across the
+       whole field, again and again (phase = t·0.55 − radius·1.35), the
+       way dawn crosses a field and the way Ascension's heal crosses his
+       line: from him, outward, over everyone. Behaviourally distinct from
+       Umbra's churn, Morvane's moths, the Warden's clockwork, Vesper's
+       rising vortex, Veyla's gather, the Keeper's rise-and-blink,
+       Cassian's feeding spiral and falling ash, Sibilance's curtain dust:
+       his is the only system whose motion is a WAVE. */
+    var WASH_N = 120;
+    var wash = H.pointsSystem(WASH_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(wash);
+    var washSeeds = [];
+    (function () { var r = H.rng(3141); for (var i = 0; i < WASH_N; i++) washSeeds.push([r(), r(), r(), r()]); })();
+    var WASH_G = new THREE.Color(0xffc46a), WASH_P = new THREE.Color(0xf2e2a4), WASH_E = new THREE.Color(0xff9a4d);
+    function updateWash(t) {
+      for (var i = 0; i < WASH_N; i++) {
+        var s = washSeeds[i];
+        var rad = 0.5 + s[1] * 2.9;
+        var ang = s[0] * Math.PI * 2 + t * 0.012 * (s[3] > 0.5 ? 1 : -1);
+        var x = Math.cos(ang) * rad;
+        var z = Math.sin(ang) * rad;
+        var y = 0.15 + s[2] * 3.7 + Math.sin(t * 0.3 + s[0] * 40.0) * 0.08;
+        var crest = Math.pow(0.5 + 0.5 * Math.sin(t * 0.55 - rad * 1.35 + s[0] * 0.6), 3);
+        var col = s[2] > 0.9 ? WASH_E : (s[3] > 0.45 ? WASH_G : WASH_P);
+        H.setP(wash, i, x, y, z, 4 + s[1] * 4 + 8 * crest, 0.04 + 0.50 * crest, col);
+      }
+      H.markDirty(wash);
+    }
+
+    /* — Ambient motes: fine dust on the dawn air, gold, pale and steel. */
+    var MOTE_N = 90;
+    var motes = H.pointsSystem(MOTE_N, H.smokeTex, THREE.AdditiveBlending);
+    scene.add(motes);
+    var moteSeeds = [];
+    (function () { var r = H.rng(207); for (var i = 0; i < MOTE_N; i++) moteSeeds.push([r(), r(), r(), r()]); })();
+    var MOTE_S = new THREE.Color(0x9aa4ae), MOTE_G = new THREE.Color(GOLD), MOTE_P = new THREE.Color(PALE);
+    function updateMotes(t) {
+      for (var i = 0; i < MOTE_N; i++) {
+        var s = moteSeeds[i];
+        var x = (s[0] - 0.5) * 13 + Math.sin(t * 0.10 + s[3] * 20) * 0.4;
+        var y = 0.2 + ((s[1] + t * 0.008 * (0.5 + s[3])) % 1) * 5.2;
+        var z = (s[2] - 0.5) * 13 + Math.cos(t * 0.08 + s[0] * 20) * 0.4;
+        var tw = 0.35 + 0.65 * Math.abs(Math.sin(t * 0.5 + s[3] * 31));
+        H.setP(motes, i, x, y, z, 2.0 + s[3] * 2.2, 0.09 * tw, s[1] > 0.85 ? MOTE_S : (s[1] > 0.45 ? MOTE_G : MOTE_P));
+      }
+      H.markDirty(motes);
+    }
+
+    /* — Ground mist: the family's slow swirl, warm grey for his dawn. */
+    var MIST_N = 26;
+    var mist = H.pointsSystem(MIST_N, H.smokeTex, THREE.NormalBlending);
+    scene.add(mist);
+    var mistSeeds = [];
+    (function () { var r = H.rng(555); for (var i = 0; i < MIST_N; i++) mistSeeds.push([r(), r(), r(), r()]); })();
+    var MIST_C = new THREE.Color(0x191410), MIST_V = new THREE.Color(0x241c14);
+    function updateMist(t) {
+      for (var i = 0; i < MIST_N; i++) {
+        var s = mistSeeds[i];
+        var ang = s[0] * Math.PI * 2 + t * 0.05 * (s[3] > 0.5 ? 1 : -1);
+        var rad = 0.95 + s[1] * 1.5;
+        H.setP(mist, i, Math.cos(ang) * rad, 0.12 + s[2] * 0.4, Math.sin(ang) * rad,
+          190 + s[1] * 150, 0.10 + s[3] * 0.05, s[2] > 0.6 ? MIST_V : MIST_C);
+      }
+      H.markDirty(mist);
+    }
+    /* — THE DAWN SHAFTS — the portrait's breaking light, as dressing:
+       four broad additive planes slanting down behind him from the
+       upper right, soft-edged gold gradients, static. They are flat and
+       distant, like the backdrop — the figure and everything near him is
+       geometry; the light he stands in is allowed to be a painting. */
+    (function shafts() {
+      var c = document.createElement('canvas'); c.width = 128; c.height = 128;
+      var g = c.getContext('2d');
+      var gr = g.createLinearGradient(0, 0, 128, 0);
+      gr.addColorStop(0, 'rgba(255,255,255,0)');
+      gr.addColorStop(0.5, 'rgba(255,255,255,0.9)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+      g.globalCompositeOperation = 'destination-in';
+      var gv = g.createLinearGradient(0, 0, 0, 128);
+      gv.addColorStop(0, 'rgba(255,255,255,1)');
+      gv.addColorStop(1, 'rgba(255,255,255,0.15)');
+      g.fillStyle = gv; g.fillRect(0, 0, 128, 128);
+      var tex = new THREE.CanvasTexture(c);
+      [[-2.2, 3.6, -3.4, 1.3, 0.055], [0.4, 3.8, -3.8, 2.2, 0.070],
+       [2.6, 3.5, -3.3, 1.1, 0.050], [-0.9, 3.7, -4.2, 1.5, 0.060]].forEach(function (s) {
+        var m = new THREE.Mesh(new THREE.PlaneGeometry(s[3], 7.5),
+          new THREE.MeshBasicMaterial({ map: tex, color: 0xffc46a, transparent: true, opacity: s[4],
+            blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+        m.position.set(s[0], s[1], s[2]);
+        m.rotation.z = 0.42;
+        m.rotation.y = -0.15;
+        scene.add(m);
+      });
+    })();
+    /* — The sun-glow breath: the pilot folded this into its render
+       loop; here it rides the updater array like everything else
+       (the Morvane crystal-pulse precedent). */
+    function updateSunGlow(t) {
+      sunGlow.intensity = 0.30 + 0.05 * Math.sin(t * 0.8);
+    }
+    return { group: aldric, updaters: [updateWash, updateMotes, updateMist, updateSunGlow] };
+  }
+
   /* M303: per-hero scene parameters for the shared rig + environment.
      The lose columns are Umbra's alone (keyLose / rimLoseI / foldLoseI);
      a null lose value means the win value stands in both moods. The
@@ -12351,6 +13048,37 @@ var Cine3D = (function () {
       stone: [0x140e24, 0x0f0a1c], crush: 0x150f24, tombstones: false,
       sway: [0.04, 0.005],
       grade: { background: 'linear-gradient(160deg, rgba(242,226,164,.85), rgba(75,53,102,.8) 55%, rgba(201,162,39,.85))', opacity: '0.30' }
+    },
+    /* M315: Aldric's dawn dressing (the M314 pilot's rig, read into
+       the shared table — the M305 transcription standard): dawn
+       key, gold rim, steel-blue fill, warm dawn fog, his
+       HERO_ACCENT grade, and the heartRing — his pilot's third
+       inlay ring, gold at the heart of the circle, drawn by mount()
+       only for rows that carry one. The dawn shafts, his face light
+       and the banner sun's glow ride inside buildAldric. Two
+       transcription notes, flagged plainly: the pilot's middle
+       inlay ring is EMBER where the shared grammar draws both rings
+       in the row's accent — it reads gold here (the M311
+       middle-ring precedent; his outer and heart rings are gold in
+       the pilot, so the circle stays one metal, as his accent
+       concurs), and the pilot's pool plane is 3.2 across where the
+       shared environment's is 3.0 — the shared grammar governs,
+       as for every hero. */
+    banneret: {
+      build: buildAldric,
+      bg: 0x070503, fog: 0x0c0805,
+      hemi: [0x9a8a70, 0x181008, 0.15],
+      key: [0xffd9a0, 0.75], keyLose: null,
+      rim: 0xe8b34a, rimI: 1.45, rimLoseI: null,
+      rim2: [0x7d8ca3, 0.45, 20], up: [0xc9a227, 0.12, 5],
+      fold: [0xaab6c4, 0.22], foldLoseI: null,
+      accent: 0xc9a227, ringOp: [0.13, 0.10],
+      heartRing: [0.62, 0.645, 0xc9a227, 0.10],
+      floorStops: ['#181008', '#0b0704', '#020202'],
+      floorRing: 'rgba(255,205,140,0.06)', floorSpoke: 'rgba(255,205,140,0.04)',
+      stone: [0x1d1712, 0x161009], crush: 0x1c130a, tombstones: false,
+      sway: [0.04, 0.005],
+      grade: { background: 'linear-gradient(160deg, rgba(242,226,164,.85), rgba(125,140,163,.8) 55%, rgba(201,162,39,.85))', opacity: '0.30' }
     }
   };
 
@@ -12615,7 +13343,7 @@ var Cine3D = (function () {
     function render(t, view) {
       if (disposed) return;
       var tSec = t / 1000;
-      for (var ui2 = 0; ui2 < built.updaters.length; ui2++) built.updaters[ui2](tSec); // M303: the builder's updater array (Umbra: smoke/sparks/mist/motes; Morvane: wisps/hood motes/moths/mist/motes/crystal pulse; Warden, M305: orbit motes/hood motes/mist/motes/candle flames/eye pulse; Veyla, M311: spirits/curls/mist/motes/clasp-glow breath)
+      for (var ui2 = 0; ui2 < built.updaters.length; ui2++) built.updaters[ui2](tSec); // M303: the builder's updater array (Umbra: smoke/sparks/mist/motes; Morvane: wisps/hood motes/moths/mist/motes/crystal pulse; Warden, M305: orbit motes/hood motes/mist/motes/candle flames/eye pulse; Veyla, M311: spirits/curls/mist/motes/clasp-glow breath; Aldric, M315: dawnwash/motes/mist/sun-glow breath)
       var sway = lose ? 0.4 : 1; // M298: the loss stills the idle life down with everything else
       figure.rotation.y = B.sway[0] * sway * Math.sin(t * 0.00021);
       figure.rotation.z = B.sway[1] * sway * Math.sin(t * 0.0005);
@@ -12703,7 +13431,7 @@ function cine3dTryMount(st, ov) {
   var handle = null;
   try {
     handle = Cine3D.mount(box, {
-      hero: st.heroId, // M303: the builder dispatch key (weaver | graven | controller since M305 | veilwarden since M311)
+      hero: st.heroId, // M303: the builder dispatch key (weaver | graven | controller since M305 | veilwarden since M311 | banneret since M315)
       mood: st.mood, ms: st.ms,
       backdrop: (typeof PORTRAITS !== 'undefined' ? (PORTRAITS['coliseum-cine'] || PORTRAITS.arena || '') : '')
     });

@@ -8916,7 +8916,12 @@ function heroBarHtml(p, isMe) {
   for (var gk = 0; gk < Math.min(p.maxMana, 12); gk++) gpips = '<i class="' + (gk < heldN ? 'held' : (gk < p.maxMana - avail ? 'off' : '')) + '"></i>' + gpips;
   if (isMe && p.maxMana < 12 && G.winner === null) gpips = '<i class="nextpip"></i>' + gpips;
   var held = (isMe && p.fragileGem) ? '<span class="fragile-gem" title="Fragile gem — +1 mana this turn; it is spent the first turn you use mana">\uD83D\uDC8E</span>' : '';
-  if (isMe && p.traps && p.traps.length) { var res = p.traps.reduce(function (a2, t) { return a2 + (D(t).cost || 0); }, 0); for (var ri = 0; ri < res; ri++) held += '<span class="respip" title="Mana held in reserve by your armed traps">◆</span>'; }
+  /* M317: reserved mana is told ONCE — as the gauge's own held pips
+     (the first heldN gems above). The ◆ respip row that also rode
+     here double-counted it: with one Negate armed in a 5-pool the
+     column showed 5 pips + a nextpip + 2 diamonds = 8 glyphs around
+     a "2/5" read (Jesse's screenshot, 2026-11-16). Removed; the
+     gauge's held pips and its title tooltip carry the reserve now. */
   var ghost = '';
   try {
     // M31 repair: keyed on the real state (attackSet / aiAttackers /
@@ -15274,6 +15279,7 @@ render();
   var ghostTilt = 0, ghostLastX = 0; // M239
   var lastDragEnd = 0, suppressClickUntil = 0;
   var activePid = null; // M269: the pointer that owns the current gesture — every other finger is a bystander whose input is ignored until the owner lifts
+  var ownerActiveAt = 0; // M317: the last sign of life from the owning pointer (its press, its moves) — the watchdog's evidence that the gesture is still real
   var hoverTimer = null, hoverBox = null, hovering = false;
   function hideHover() {
     if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
@@ -15321,6 +15327,27 @@ render();
     if (zr.left < 6) zdx = 6 - zr.left; else if (zr.right > vw - 6) zdx = (vw - 6) - zr.right;
     if (zr.top < 54) zdy = 54 - zr.top; else if (zr.bottom > vh - 8) zdy = (vh - 8) - zr.bottom;
     if (zdx || zdy) { hoverBox.style.left = ((parseFloat(hoverBox.style.left) || 0) + zdx) + 'px'; hoverBox.style.top = (zr.top + zdy) + 'px'; hoverBox.style.bottom = 'auto'; }
+  }
+  /* M317: THE one release path for a gesture that dies without its
+     pointerup — a cancel, a capture loss, a displacing fresh press, or
+     the watchdog. It only ever CANCELS: the hover read closes, a flying
+     drag is torn down without dropping, every latch flag clears, and
+     the ownership claim is surrendered. It can never play a card,
+     confirm a block, or spend a press, so calling it on suspicion is
+     always safe — the worst outcome is a dropped drag the player
+     simply starts again. (Jesse's dead-drag lock, 2026-11-16: a
+     swallowed pointerup left activePid claimed forever, and with it
+     every drag, tap-inspect and fan stroke in the game — only
+     click-path buttons like End Turn still answered.) */
+  function releaseGesture() {
+    if (hoverTimer) { clearTimeout(hoverTimer); hoverTimer = null; }
+    hideHover(); endDrag();
+    pressEl = null; overlayPress = null; scrolled = false; dirLock = null;
+    scrubbing = false; scrubCenters = null; handTouch = false; liftClear();
+    if (emblemHold) { clearTimeout(emblemHold); emblemHold = null; }
+    blockDrag = null;
+    document.querySelectorAll('.hand.fan.engaged').forEach(function (n) { n.classList.remove('engaged'); });
+    activePid = null; ownerActiveAt = 0;
   }
   function clearDrop() { if (dropEl) { dropEl.classList.remove('drop-hover'); dropEl = null; } }
   function endDrag() {
@@ -15385,9 +15412,9 @@ render();
   }
   document.addEventListener('pointerdown', function (e) {
     if (!e.target.closest) return;
-    if (activePid !== null && e.pointerId !== activePid) return; // M269: a second finger never starts a gesture mid-gesture
+    if (activePid !== null && e.pointerId !== activePid) releaseGesture(); // M317: a fresh press while a previous gesture still owns the screen means that gesture's release was never delivered (iOS drops a pointerup entirely when the implicitly captured element is re-rendered away mid-gesture — the M317 lock) — the old gesture is a zombie, so cancel it and let this press take ownership instead of gating every later gesture forever. A live second finger is the cost: its press cancels the first finger's in-flight drag, which is a dropped drag, never a wrong play. The M269 bystander protection survives where it matters: moves, lifts and clicks from other pointers are still gated below and in the move/up/click handlers — only a fresh PRESS may displace a claim, and a press is the one event a zombie can never produce again.
     if (dragging) { endDrag(); pressEl = null; handTouch = false; liftClear(); return; } // M269: the OWNING pointer pressing again while its drag is still armed means the drag's release was lost (a mouse released outside the window) — cancel the stale drag and spend this press on the cancellation, never on completing the drop somewhere unintended
-    activePid = e.pointerId;
+    activePid = e.pointerId; ownerActiveAt = Date.now(); // M317: stamp the owner's liveness for the watchdog
     /* M43 (Jesse): the resting hand would not engage from taps on his
        phone — the card-level hit test alone was too easy to miss among
        scaled, overlapping minis. ANY touch on the resting fan opens it. */
@@ -15441,6 +15468,7 @@ render();
   var scrubbing = false, scrubEl = null, handTouch = false, fanTopY = 0, scrubCenters = null, scrubFrozen = false;
   document.addEventListener('pointermove', function (e) {
     if (activePid !== null && e.pointerId !== activePid) return; // M269: bystander fingers don't steer the owner's drag
+    if (e.pointerId === activePid) ownerActiveAt = Date.now(); // M317: owner liveness for the watchdog
     if (!pressEl && !handTouch) return;
     /* M71 hand v3 (the LoR model): any slide inside the hand band scrubs —
        the nearest card lifts in place under your finger; pushing up out
@@ -15529,7 +15557,26 @@ render();
     }
     pressEl = null;
   }, true);
-  document.addEventListener('pointercancel', function (e) { if (activePid !== null && e.pointerId !== activePid) return; hideHover(); endDrag(); pressEl = null; overlayPress = null; scrolled = false; dirLock = null; scrubbing = false; scrubCenters = null; handTouch = false; liftClear(); document.querySelectorAll('.hand.fan.engaged').forEach(function (n) { n.classList.remove('engaged'); }); }, true);
+  document.addEventListener('pointercancel', function (e) { if (activePid !== null && e.pointerId !== activePid) return; releaseGesture(); }, true); // M317: the cancel teardown IS releaseGesture — one release path for every way a gesture can die
+  /* M317: capture loss is a release too. When the browser takes the
+     pointer back (a system gesture, the captured element discarded by
+     a re-render), the gesture is over whether or not a pointerup ever
+     arrives — before this listener, a delivered lostpointercapture
+     changed nothing and the claim latched anyway. */
+  document.addEventListener('lostpointercapture', function (e) { if (activePid !== null && e.pointerId === activePid) releaseGesture(); }, true);
+  /* M317 watchdog: an owning pointer that has gone silent AND lost
+     every on-screen anchor — the pressed card re-rendered away, no
+     lifted card, no drag ghost flying — is a zombie even when no new
+     press has arrived to displace it. A live gesture always keeps an
+     anchor: the pressed or lifted card stays in the DOM, and any
+     movement refreshes the stamp, so a player holding a card still
+     to read it is never disturbed. */
+  setInterval(function () {
+    if (activePid === null || !ownerActiveAt) return;
+    if (Date.now() - ownerActiveAt < 1500) return;
+    var anchored = (pressEl && pressEl.isConnected) || (scrubEl && scrubEl.isConnected) || (ghost && ghost.isConnected);
+    if (!anchored) releaseGesture();
+  }, 1000);
   /* Desktop: merely hovering the fan engages it, the way a finger does. */
   document.addEventListener('pointerover', function (e) {
     if (e.pointerType !== 'mouse' || !e.target.closest) return;

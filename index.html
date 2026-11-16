@@ -9700,7 +9700,7 @@ function renderBody() {
      WHOLE stage: hero clusters, boards and the floating hand all live on
      the field; there are no separate sections anymore. */
   var shellStyle = (typeof PORTRAITS !== 'undefined' && PORTRAITS.arena) ? ' style="background-image:radial-gradient(ellipse 92% 55% at 50% 24%, ' + foeTint + ', rgba(0,0,0,0) 70%), linear-gradient(rgba(15,9,27,.20), rgba(15,9,27,.38)), url(' + PORTRAITS.arena + ')"' : '';
-  if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life]); }
+  if (G.turnNumber !== lastSeriesTurn) { lastSeriesTurn = G.turnNumber; lifeSeries.push([me.life, foe.life, me.ownTurns, foe.ownTurns]); } // M316: snapshots also carry each seat's ownTurns so the end-sheet turning point can speak in the winner's own turns (the Turns tile's unit)
   var html = '<div class="shell stage' + (me.life <= 5 && G.winner === null ? ' peril' : '') + (handOpen ? ' handopen' : '') + ((me.artifacts.length || foe.artifacts.length) ? ' hasdock' : '') + (G.winner !== null ? (G.winner === humanIdx ? ' won' : ' lost') : '') + '"' + shellStyle + '><div class="scrollzone">' + (sweepPending ? '<div class="turnsweep' + (G.active === aiIdx ? ' foe' : '') + '"></div>' : '');
   html += '<button class="pause-btn" aria-label="Pause menu" onclick="showSheet()" title="Pause — log, concede, menu">☰</button>';
   sweepPending = false;
@@ -9981,7 +9981,7 @@ function gameOverHtml() {
   if (reviewField) return '<button class="review-chip" onclick="reviewField=false;render()">🏁 Result</button>';
   var won = G.winner === humanIdx;
   var turnLine = '';
-  if (lifeSeries.length > 2) { var wi = G.winner === humanIdx ? 0 : 1; var lastNotAhead = -1; lifeSeries.forEach(function (s2, i2) { if (!(s2[wi] > s2[1 - wi])) lastNotAhead = i2; }); turnLine = '<br>' + (lastNotAhead < 0 ? '🏁 Wire to wire: the winner led from the very first turn.' : lastNotAhead >= lifeSeries.length - 1 ? '🏁 Decided at the death — the lead changed hands on the final turn.' : '🏁 Turning point: turn ' + (lastNotAhead + 2) + ' — from there, the winner never trailed again.'); }
+  if (lifeSeries.length > 2) { var wi = G.winner === humanIdx ? 0 : 1; var lastNotAhead = -1; lifeSeries.forEach(function (s2, i2) { if (!(s2[wi] > s2[1 - wi])) lastNotAhead = i2; }); turnLine = '<br>' + (lastNotAhead < 0 ? '🏁 Wire to wire: the winner led from the very first turn.' : lastNotAhead >= lifeSeries.length - 1 ? '🏁 Decided at the death — the lead changed hands on the final turn.' : '🏁 Turning point: turn ' + Math.max(1, (lifeSeries[lastNotAhead + 1] || [])[2 + wi] || 1) + ' — from there, the winner never trailed again.'); }
   var durLine = matchStartedAt ? '<br>⏱ Match length: ' + Math.floor((Date.now() - matchStartedAt) / 60000) + ':' + ('0' + Math.floor(((Date.now() - matchStartedAt) % 60000) / 1000)).slice(-2) : '';
   var concedeLine = window.__conceded ? '<p style="color:#e8a0b4;font-size:13px">You yielded the match.</p>' : ''; // M237: read, NOT consumed — concede() renders inside finishCheck and again itself in the same task, and the second render used to eat this line before any player saw it (the stub pin caught what the eye couldn't); the flag now clears where a match starts, beside concedeArmed
   var s = G.stats;

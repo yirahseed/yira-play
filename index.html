@@ -1932,6 +1932,13 @@
     .endbox .statgrid { grid-column:2; grid-row:1; margin:0; align-content:start; }
     .endbox .endbtns { grid-column:2; grid-row:2 / span 6; align-content:start; }
     .endbox .endbtns button.big { margin-top:8px; padding:9px 6px; font-size:14px; }
+    /* M320: the result box outgrew the 402px landscape frame — its
+       bottom edge sat 5px (win) to 16px (loss) past the glass and the
+       overlay's overflow:hidden simply cut the box's foot (measured
+       on the M319 build, m320-work/probe-land.js). The box now caps
+       at the frame and scrolls internally — the M213 sheet pattern;
+       on any frame tall enough, nothing changes. */
+    .overlay .box.endbox { max-height:calc(100dvh - 32px); overflow-y:auto; }
     .leaguebox .league-trophy { font-size:42px; margin:2px 0 0; }
     .collschools .colllegend { display:none; }
     /* M309: the intro sheet, two columns — the stacked sheet ran 410-478px

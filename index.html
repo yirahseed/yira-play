@@ -1231,7 +1231,18 @@
   .stage.won .herobar.me .portrait { box-shadow:0 0 22px 4px rgba(255,209,102,.65); }
   .stage.lost .herobar.me .portrait { filter:grayscale(.75) brightness(.75); }
   .stage.lost .herobar.foe .portrait { box-shadow:0 0 22px 4px rgba(255,209,102,.5); }
-  .mullstage { position:relative; min-height:100dvh; }
+  /* M325 (D9): the mulligan stage sizes by .shell's flex:1 like the
+     battle stage it stands in for — a min-height:100dvh here double-
+     counted the frame (#app's 8px+10px padding), pushing the shell
+     8px past the glass and the hero figure's fade 22px past it: the
+     opening screen could scroll. And the stage clips like the main
+     stage's scrollzone: the me-figure's designed bottom:-14px bleed
+     otherwise still reaches 4px past the frame in this state (the
+     field runs to the shell's bottom edge here; in the main stage
+     it stops short). The clipped rows are the fade's transparent
+     tail, behind the blurred mulligan overlay. Proven by m325
+     probe-fit2 (896 -> 878 -> 874 across the two steps). */
+  .mullstage { position:relative; overflow:hidden; }
   .mull-overlay { position:absolute; inset:0; z-index:20; background:rgba(7,4,15,.58); backdrop-filter:blur(2.5px); overflow:hidden; display:flex; align-items:flex-start; justify-content:center; padding:18px 10px 30px; }
   .mullpage { width:100%; max-width:560px; }
   .mullpage .panel { background:rgba(19,13,34,.92); }

@@ -15250,8 +15250,16 @@ async function runAiTurn() {
   /* M269: the foe's sleeps are sheet-aware — the pause sheet promises "The foe
      waits. Nothing moves while you are here.", so while the sheet is open the
      foe's clock simply does not run (the sheet's own doors still work: concede
-     resolves through the winner checks, restart/abandon through the gen gate). */
-  async function aiSleep(ms) { var t = 0; while (t < ms) { if (gen !== matchGen) return false; if (sheetOpen) { await sleep(120); continue; } var step = Math.min(120, ms - t); await sleep(step); t += step; } return gen === matchGen; }
+     resolves through the winner checks, restart/abandon through the gen gate).
+     M323 (D8): the sheet's own sub-sheets broke that promise — the Battle log,
+     How to play and Glossary doors all clear sheetOpen before opening
+     (sheetOpen=false; showLog()/openIntro()/openGlossary()), so the foe's
+     clock resumed while the player read: probe-pause.js froze the sheet
+     window solid for 15s, then watched two full turn cycles run inside the
+     log window. The wait now honours the whole pause family — the sheet,
+     the log, the glossary and the intro sheet — so "the foe waits" holds
+     on every surface the pause sheet can open. */
+  async function aiSleep(ms) { var t = 0; while (t < ms) { if (gen !== matchGen) return false; if (sheetOpen || logOpen || glossaryOpen || introStep >= 0) { await sleep(120); continue; } var step = Math.min(120, ms - t); await sleep(step); t += step; } return gen === matchGen; }
   if (!(await aiSleep(650))) return;
   if (G.winner !== null) return finishCheck();
   var foe = G.players[aiIdx];

@@ -15674,6 +15674,26 @@ render();
     if (!e.target.closest) return;
     var el = e.target.closest('.board .emblem');
     if (!el) return;
+    /* M329 (D10, Jesse's phone report 2026-11-18): in targeting mode a
+       LIVE target's press belongs to the pick at ANY duration. The
+       hold armed on live targets too, so a deliberate press (330ms+)
+       on the creature he meant to buff opened its read instead — the
+       read's suppressClickUntil swallowed the release click that
+       carries targetCreature (or the click landed on the fresh veil
+       and closed it), and the cast never happened: Sturdy Shield and
+       Sharp Sword both "would not work" on his Shell Game turtle.
+       Reproduced in Chromium with real touches (m329-work/drive.js):
+       drags and quick taps land on every victim state and on a
+       never-transformed control; a 550ms press never lands, on the
+       turtle or the control. A live target is read off the emblem's
+       own rendered pick — the same truth the render painted.
+       Non-target emblems still arm the read, so the board can still
+       be read mid-aim; attackSelect and blocking keep the M32/M319
+       behaviour untouched. This is not the D5 envelope (no saturated
+       thread is needed — the press simply outlasts the clock), and
+       the cure is not the D5 deferral: the read simply never arms
+       where the tap already has a job. */
+    if (mode === 'targeting') { var oc329 = el.getAttribute('onclick'); if (oc329 && oc329.indexOf('targetCreature(') >= 0) return; }
     var uid = Number(el.getAttribute('data-uid'));
     emblemHoldX = e.clientX; emblemHoldY = e.clientY; emblemHoldPid = e.pointerId;
     emblemHold = setTimeout(function () {

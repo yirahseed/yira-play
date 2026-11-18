@@ -15410,8 +15410,22 @@ render();
     // targeting mode; a drop target then completes the targeting.
     clickHand(uid);
     if (typeof mode !== 'undefined' && mode === 'targeting') {
-      if (boardCard) targetCreature(Number(boardCard.getAttribute('data-uid')));
-      else if (heroBar) targetHero();
+      /* M330 (D11): only a board element whose data-uid names a live
+         board instance completes the targeting. An empty slot's ghost
+         emblem carries no data-uid — a release over it names no target
+         and must fall to the arming branch, never route
+         targetCreature(Number(null)) into a fizzle that eats the card
+         and its mana and surfaces a raw engine error (proven in
+         m330-work/drive-prefix3.js, rep O1). The ghosts are
+         pointer-events:none today, so the shipped hit-test never
+         names one; this guard keeps the route dead even if a uid-less
+         board element ever becomes hittable. A board element that
+         names no creature also outranks the hero fallback: the
+         release was aimed at the board, so it arms. */
+      var bcUid = boardCard ? Number(boardCard.getAttribute('data-uid')) : NaN;
+      var bcLive = !!boardCard && isFinite(bcUid) && typeof G !== 'undefined' && !!G && !!G.players && G.players.some(function (p) { return p.board.some(function (c) { return c.uid === bcUid; }); });
+      if (bcLive) targetCreature(bcUid);
+      else if (!boardCard && heroBar) targetHero();
       else if (typeof say === 'function') say('Now tap the target.');
     }
   }
